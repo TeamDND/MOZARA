@@ -33,7 +33,6 @@ public class UserService {
                     .email(user.getEmail())
                     .nickname(user.getNickname())
                     .role(user.getRole())
-
                     .build();
             userDTOs.add(userDTO);
         }
@@ -48,6 +47,8 @@ public class UserService {
         return UserDTO.builder()
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .gender(user.getGender())
+                .age(user.getAge())
                 .nickname(user.getNickname())
                 .role(user.getRole())
                 .build();
@@ -64,6 +65,8 @@ public class UserService {
                 .username(userDTO.getUsername())
                 .email(userDTO.getEmail())
                 .createdAt(LocalDate.now())
+                .gender(userDTO.getGender())
+                .age(userDTO.getAge())
                 .nickname(userDTO.getNickname())
                 .role("ROLE_USER")
                 .password(passwordEncoder.encode(userDTO.getPassword()))

@@ -43,7 +43,7 @@ public class ReissueController {
         if(!category.equals("refresh")){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("refresh token invalid");
         }
-        String username = this.jwtUtil.getUsername(refreshToken);
+        String username = this.jwtUtil.getUserName(refreshToken);
         String role  = this.jwtUtil.getRole(refreshToken);
         String access = this.jwtUtil.createToken("access",username,role,10*1000L);
         response.addHeader("Authorization", "Bearer " + access);

@@ -37,4 +37,9 @@ public class UserEntity {
     @Column(name = "nickname", nullable = false, length = 50)
     private String nickname;
 
+    @Column(name = "gender",nullable = false,length = 50)
+    private String gender;
+
+    @Column(name = "age",nullable = false)
+    private Integer age;
 }

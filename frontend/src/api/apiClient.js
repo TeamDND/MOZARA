@@ -4,7 +4,7 @@ import { setToken } from '../store/tokenSlice';
 import { store } from '../store/store';
 
 const apiClient = axios.create({
-    baseURL: 'http://localhost:8080',
+    baseURL: 'http://localhost:8080/api',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -16,10 +16,10 @@ apiClient.interceptors.request.use(
         if(config.data && config.data instanceof URLSearchParams){
             config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
     }
-    // const jwtToken = store.getState().token.jwtToken;
-    // if(jwtToken){
-    //     config.headers['authorization'] = jwtToken;
-    // }
+    const jwtToken = store.getState().token.jwtToken;
+    if(jwtToken){
+        config.headers['authorization'] = jwtToken;
+    }
     return config;
 },
 (error) => {

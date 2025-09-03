@@ -1,9 +1,11 @@
 package com.example.springboot.config;
 
-import com.example.springboot.data.dao.UserDAO;
+import com.example.springboot.component.CustomAccessDeniedHandler;
+import com.example.springboot.component.CustomAuthEntryPoint;
 import com.example.springboot.jwt.JwtFilter;
 import com.example.springboot.jwt.JwtLoginFilter;
 import com.example.springboot.jwt.JwtUtil;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +14,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,15 +22,15 @@ import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
 
-@EnableWebSecurity
 @Configuration
+@EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final UserDAO userDAO;
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final CustomAuthEntryPoint customAuthEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final JwtUtil jwtUtil;
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -37,38 +38,62 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-                .formLogin(formLogin -> formLogin.disable())
+        http
+                .csrf(csrf -> csrf.disable())
+                .formLogin(form -> form.disable())
+                .httpBasic(basic -> basic.disable())
                 .logout(logout -> logout.disable())
-                .httpBasic(httpBasicAuth -> httpBasicAuth.disable())
-                .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/", "/api/login", "/api/logout", "/api/join", "/api/reissue",  "/images/**","/api/userinfo/*").permitAll();
-                    auth.requestMatchers("/api/**").hasAnyRole("USER", "ADMIN");
-                    auth.anyRequest().authenticated();
-                })
+
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/",
+                                "/uploads/**", // 이미지 경로 허용
+                                "/api/join",
+                                "/api/login",
+                                "/api/reissue",
+                                "/api/naver",
+                                "/api/kakao",
+                                "/api/google",
+                                "/api/login/oauth2/code/*",
+                                "/oauth2/success",
+                                "/oauth2/fail",
+                                "/api/**"
+                        ).permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/user/**").hasAnyRole("USER","ADMIN")
+                        .anyRequest().authenticated()
+                )
+
                 .cors(cors -> cors.configurationSource(request -> {
-                    CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    config.setAllowedHeaders(List.of("*"));
-                    config.setAllowCredentials(true);
-                    config.setAllowedOrigins(List.of("http://localhost:3000"));
-                    config.setExposedHeaders(List.of("Authorization"));
-                    return config;
+                    CorsConfiguration corsConfiguration = new CorsConfiguration();
+                    corsConfiguration.setAllowCredentials(true);
+                    corsConfiguration.addAllowedHeader("*");
+                    corsConfiguration.setExposedHeaders(List.of("Authorization"));
+                    corsConfiguration.addAllowedOrigin("http://localhost:3000");
+                    corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+                    return corsConfiguration;
                 }))
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterAt(new JwtLoginFilter(this.authenticationManager(this.authenticationConfiguration), this.jwtUtil),
+
+
+
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+
+                .addFilterBefore(new JwtFilter(jwtUtil), JwtLoginFilter.class)
+                .addFilterAt(new JwtLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
                         UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new JwtFilter(this.jwtUtil), JwtLoginFilter.class)
 
+                .exceptionHandling(ex -> {
+                    ex.authenticationEntryPoint(customAuthEntryPoint);
+                    ex.accessDeniedHandler(customAccessDeniedHandler);
+                })
         ;
-        return http.build();
 
+        return http.build();
     }
 }

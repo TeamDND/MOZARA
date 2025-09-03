@@ -1,5 +1,6 @@
 package com.example.springboot.jwt;
 
+
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,37 +16,47 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
 
-    public void doFilterInternal(
-            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException{
-        String header = request.getHeader("Authorization");
-        if (header == null || !header.startsWith("Bearer ")) {
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String token = request.getHeader("Authorization");
+        if (token == null || !token.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
-        String token = header.substring(7);
+        token = token.split(" ")[1];
 
         try{
-            jwtUtil.isExpired(token);
-        }catch (ExpiredJwtException e){
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED,"Malformed JWT");
+            this.jwtUtil.isExpired(token);
+        }catch(ExpiredJwtException e){
+            response.getWriter().write("access token expired");
+            response.setStatus(456);
+            response.setCharacterEncoding("UTF-8");
             return;
         }
 
-        if(!"access".equals(jwtUtil.getCategory(token))){
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED,"token is invalid");
+        String category = this.jwtUtil.getCategory(token);
+        if(!category.equals("access")){
+            response.getWriter().write("invalid access token");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setCharacterEncoding("UTF-8");
             return;
         }
-        String username = this.jwtUtil.getUsername(token);
+
+        String username = this.jwtUtil.getUserName(token);
         String role = this.jwtUtil.getRole(token);
-        List<GrantedAuthority> auths = List.of(new SimpleGrantedAuthority(role));
-        Authentication auth = new UsernamePasswordAuthenticationToken(new User(username,"",auths), null, auths);
+
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(role));
+
+        User user = new User(username, "", authorities);
+        Authentication auth = new UsernamePasswordAuthenticationToken(user, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(auth);
         filterChain.doFilter(request, response);
     }

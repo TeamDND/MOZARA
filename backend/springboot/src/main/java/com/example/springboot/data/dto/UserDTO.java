@@ -19,4 +19,6 @@ public class UserDTO {
     private LocalDate createdAt;
     private String role;
     private String nickname;
+    private String gender;
+    private Integer age;
 }
