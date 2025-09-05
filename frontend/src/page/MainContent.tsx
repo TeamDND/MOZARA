@@ -1,4 +1,8 @@
+import { useNavigate } from 'react-router-dom';
+
 export default function Home() {
+  const navigate = useNavigate();
+  
   const aiTools = [
     { name: "GPT-5", icon: "🤖", badge: "무료일 무료" },
     { name: "AI 힙", icon: "⚡", badge: null },
@@ -101,15 +105,18 @@ export default function Home() {
 
             {/* Content Cards */}
             <div className="grid grid-cols-2 gap-6">
-              {/* AI Animation Card */}
-              <div className="bg-gradient-to-r from-blue-100 to-blue-200 rounded-2xl p-6 relative overflow-hidden">
+              {/* BASP 탈모 진단 Card */}
+              <div 
+                className="bg-gradient-to-r from-blue-100 to-blue-200 rounded-2xl p-6 relative overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => navigate('/basp-check')}
+              >
                 <div className="relative z-10">
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">AI 및 필터</h3>
-                  <h4 className="text-lg font-semibold text-gray-700 mb-2">감성 애니메이션</h4>
-                  <p className="text-sm text-gray-600">AI 최고 유형, 설정하는 감성</p>
+                  <h3 className="text-xl font-bold text-gray-800 mb-2">BASP 탈모 진단</h3>
+                  <h4 className="text-lg font-semibold text-gray-700 mb-2">자가진단 도구</h4>
+                  <p className="text-sm text-gray-600">간단한 질문으로 현재 모발 상태를 확인해요</p>
                 </div>
                 <div className="absolute right-4 top-4 w-24 h-24 bg-gray-800 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-2xl">?</span>
+                  <span className="text-white text-2xl">🔍</span>
                 </div>
               </div>
 
