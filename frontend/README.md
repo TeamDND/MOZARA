@@ -1,70 +1,148 @@
-# Getting Started with Create React App
+# MOZARA Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+이 프로젝트는 TypeScript와 Tailwind CSS를 사용한 React 기반 프론트엔드 애플리케이션입니다.
 
-## Available Scripts
+## 🚀 기술 스택
 
-In the project directory, you can run:
+- **TypeScript**: 타입 안전성을 제공하는 JavaScript의 상위 집합
+- **React 19**: 사용자 인터페이스 구축을 위한 JavaScript 라이브러리
+- **Tailwind CSS**: 유틸리티 우선 CSS 프레임워크
+- **Redux Toolkit**: 상태 관리 라이브러리
+- **React Router**: 클라이언트 사이드 라우팅
+- **Axios**: HTTP 클라이언트
 
-### `npm start`
+## 📦 설치 및 실행
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 필수 요구사항
+- Node.js 16.0.0 이상
+- npm 또는 yarn
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 설치
+```bash
+npm install
+```
 
-### `npm test`
+### 개발 서버 실행
+```bash
+npm start
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 빌드
+```bash
+npm run build
+```
 
-### `npm run build`
+### 테스트
+```bash
+npm test
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🏗️ 프로젝트 구조
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```
+src/
+├── api/           # API 클라이언트 및 통신 관련
+├── components/    # 재사용 가능한 UI 컴포넌트
+├── page/          # 페이지 레이아웃 컴포넌트
+├── store/         # Redux 상태 관리
+├── style/         # 스타일 관련 파일들
+├── user/          # 사용자 관련 컴포넌트
+└── service/       # 비즈니스 로직 서비스
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 🎨 TypeScript 주요 특징
 
-### `npm run eject`
+### 타입 정의
+- 모든 컴포넌트에 `React.FC` 타입 적용
+- 이벤트 핸들러에 적절한 이벤트 타입 지정
+- 상태 관리에 제네릭 타입 사용
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 예시
+```typescript
+// 컴포넌트 타입 정의
+const Login: React.FC = () => {
+  // 상태 타입 정의
+  const [id, setId] = useState<string>('');
+  
+  // 이벤트 핸들러 타입 정의
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    // ...
+  };
+};
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🎨 Tailwind CSS 주요 특징
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 유틸리티 클래스
+- 반응형 디자인을 위한 브레이크포인트 클래스
+- 색상, 간격, 타이포그래피 등의 유틸리티 클래스
+- 커스텀 색상 및 테마 설정
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 예시
+```jsx
+// 반응형 컨테이너
+<div className="container mx-auto px-4 py-8">
 
-## Learn More
+// 반응형 텍스트
+<h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+// 색상 및 간격
+<button className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90">
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🔧 개발 가이드
 
-### Code Splitting
+### 새로운 컴포넌트 생성
+1. `.tsx` 확장자 사용
+2. `React.FC` 타입 지정
+3. Tailwind CSS 클래스 활용
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 상태 관리
+- Redux Toolkit 사용
+- TypeScript 인터페이스로 상태 타입 정의
+- 액션 페이로드 타입 지정
 
-### Analyzing the Bundle Size
+### API 통신
+- Axios 인터셉터 활용
+- 타입 안전한 요청/응답 처리
+- 에러 핸들링
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 📝 주요 변경사항
 
-### Making a Progressive Web App
+### TypeScript 마이그레이션
+- 모든 `.js` 파일을 `.tsx`로 변환
+- 타입 정의 및 인터페이스 추가
+- 이벤트 핸들러 타입 지정
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Tailwind CSS 적용
+- 기존 CSS 파일을 Tailwind 유틸리티 클래스로 대체
+- 반응형 디자인 구현
+- 커스텀 색상 테마 설정
 
-### Advanced Configuration
+## 🤝 팀원들을 위한 가이드
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### TypeScript 학습 포인트
+1. **타입 정의**: 변수, 함수, 컴포넌트의 타입을 명시적으로 정의
+2. **인터페이스**: 객체의 구조를 정의하여 타입 안전성 확보
+3. **제네릭**: 재사용 가능한 타입을 만드는 방법
 
-### Deployment
+### Tailwind CSS 학습 포인트
+1. **유틸리티 클래스**: HTML 클래스로 스타일을 직접 적용
+2. **반응형 디자인**: `sm:`, `md:`, `lg:` 등의 브레이크포인트 활용
+3. **커스텀 설정**: `tailwind.config.js`에서 테마 커스터마이징
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## 🐛 문제 해결
 
-### `npm run build` fails to minify
+### TypeScript 오류
+- 타입 정의 확인
+- `tsconfig.json` 설정 검토
+- 필요한 타입 패키지 설치
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Tailwind CSS 스타일 미적용
+- `tailwind.config.js` 설정 확인
+- 클래스명 철자 확인
+- PostCSS 설정 검토
+
+## 📄 라이선스
+
+이 프로젝트는 MIT 라이선스 하에 배포됩니다.
