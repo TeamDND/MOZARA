@@ -6,8 +6,8 @@ import pinecone
 from dotenv import load_dotenv
 import random
 
-# .env 파일 로드
-load_dotenv()
+# .env 파일 로드 (상위 디렉토리에서 찾기)
+load_dotenv("../.env")
 
 def create_index_and_import_data():
     """인덱스 생성 및 데이터 입력"""
@@ -82,4 +82,3 @@ def create_index_and_import_data():
 
 if __name__ == "__main__":
     create_index_and_import_data()
-
