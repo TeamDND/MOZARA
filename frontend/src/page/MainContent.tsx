@@ -1,6 +1,11 @@
+import { useState } from 'react';
+import HairDamageAnalysis from './HairDamageAnalysis';
+
 export default function Home() {
+  const [currentView, setCurrentView] = useState<'home' | 'hair-analysis'>('home');
+
   const aiTools = [
-    { name: "GPT-5", icon: "🤖", badge: "무료일 무료" },
+    { name: "모발 손상 분석", icon: "🔍", badge: "NEW", action: () => setCurrentView('hair-analysis') },
     { name: "AI 힙", icon: "⚡", badge: null },
     { name: "이미지 생성", icon: "🎨", badge: null },
     { name: "챗봇요약", icon: "💬", badge: null },
@@ -9,6 +14,10 @@ export default function Home() {
     { name: "고민 상담", icon: "💭", badge: null },
     { name: "생성형 도구", icon: "✏️", badge: null },
   ]
+
+  if (currentView === 'hair-analysis') {
+    return <HairDamageAnalysis />;
+  }
 
   const trendingSearches = [
     "APEC 정상회의 준비 상황",
@@ -89,7 +98,10 @@ export default function Home() {
                       <span className="px-2 py-1 text-xs text-white bg-blue-600 rounded-full">{tool.badge}</span>
                     </div>
                   )}
-                  <div className="bg-white p-6 rounded-2xl border border-gray-200 hover:shadow-md transition-shadow cursor-pointer">
+                  <div 
+                    className="bg-white p-6 rounded-2xl border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={tool.action}
+                  >
                     <div className="text-center">
                       <div className="text-3xl mb-3">{tool.icon}</div>
                       <div className="text-sm font-medium text-gray-800">{tool.name}</div>

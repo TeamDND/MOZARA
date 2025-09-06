@@ -63,6 +63,7 @@ public class SecurityConfig {
                                 "/api/login/oauth2/code/*",
                                 "/oauth2/success",
                                 "/oauth2/fail",
+                                "/api/hair-damage/**", // 모발 손상 분석 경로 허용
                                 "/api/**"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
