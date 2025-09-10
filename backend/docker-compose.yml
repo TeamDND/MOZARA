@@ -1,0 +1,73 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: mozara
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend-net
+
+  spring-backend:
+    build: ./springboot
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mozara?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1234
+    networks:
+      - backend-net
+
+  python-backend:
+    build: ./python
+    ports:
+      - "5000:5000"
+    depends_on:
+      weaviate:
+        condition: service_healthy
+    networks:
+      - backend-net
+    volumes:
+      - C:/Users/301/Desktop/hair_damage:/app/hair_damage # Changed mount
+    mem_limit: 8g
+
+  weaviate:
+    image: semitechnologies/weaviate:1.23.7
+    ports:
+      - "8081:8080"
+    environment:
+      QUERY_DEFAULTS_LIMIT: 20
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      AUTHENTICATION_APIKEY_ENABLED: 'false' # API 키 인증 비활성화
+      PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
+      DEFAULT_VECTORIZER_MODULE: "none"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/v1/meta"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    networks:
+      - backend-net
+
+volumes:
+  mysql_data:
+  weaviate_data:
+
+networks:
+  backend-net:

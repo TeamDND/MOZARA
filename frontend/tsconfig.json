@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    // TypeScript 컴파일러 옵션들
+    "target": "es5", // ES5로 컴파일 (구형 브라우저 지원)
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es6"
+    ], // 사용할 라이브러리들
+    "allowJs": true, // JavaScript 파일 허용 (점진적 마이그레이션)
+    "skipLibCheck": true, // 라이브러리 타입 체크 건너뛰기
+    "esModuleInterop": true, // ES 모듈 호환성
+    "allowSyntheticDefaultImports": true, // 기본 import 허용
+    "strict": true, // 엄격한 타입 체크
+    "forceConsistentCasingInFileNames": true, // 파일명 대소문자 일관성
+    "noFallthroughCasesInSwitch": true, // switch문 fallthrough 방지
+    "module": "esnext", // ES 모듈 사용
+    "moduleResolution": "node", // Node.js 모듈 해석 방식
+    "resolveJsonModule": true, // JSON 모듈 해석 허용
+    "isolatedModules": true, // 각 파일을 독립적으로 컴파일
+    "noEmit": true, // 파일 생성하지 않음 (Babel이 처리)
+    "jsx": "react-jsx" // React JSX 지원
+  },
+  "include": [
+    "src" // src 폴더 내 모든 파일 포함
+  ]
+}
+
