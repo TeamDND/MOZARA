@@ -1,6 +1,7 @@
-export type HairlineType = 'L' | 'M' | 'C' | 'U';  // CSV에 맞게 수정
-export type VertexLevel = 0 | 1 | 2 | 3;   // V0~V3
-export type DensityLevel = 0 | 1 | 2 | 3;  // F0~F3
+export type HairlineType = 'L' | 'M' | 'C' | 'U';  // 기본 패턴
+export type HairlineSubType = 0 | 1 | 2 | 3;       // M0~M3, C0~C3, U1~U3
+export type VertexLevel = 0 | 1 | 2 | 3;           // V0~V3
+export type DensityLevel = 0 | 1 | 2 | 3;          // F0~F3
 
 export interface LifestyleAnswers {
   shedding6m: boolean;              // 6개월간 탈락모 증가 느낌
@@ -12,6 +13,7 @@ export interface LifestyleAnswers {
 
 export interface SelfCheckAnswers {
   hairline: HairlineType | null;
+  hairlineSubType: HairlineSubType | null;  // M0~M3, C0~C3, U1~U3
   vertex: VertexLevel | null;
   density: DensityLevel | null;
   lifestyle: LifestyleAnswers;

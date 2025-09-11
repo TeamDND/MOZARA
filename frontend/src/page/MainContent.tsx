@@ -1,6 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
-import Footer from './Footer';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -10,12 +8,10 @@ export default function Home() {
     { name: "머리스타일 변경", icon: "💇", badge: "NEW" },
     { name: "탈모 PT", icon: "🏃", badge: "NEW" },
     { name: "YouTube 영상", icon: "📺", badge: "NEW" },
-    { name: "이미지 생성", icon: "🎨", badge: null },
-    { name: "챗봇요약", icon: "💬", badge: null },
     { name: "상가찾기", icon: "🏪", badge: null },
     { name: "BASP 탈모 진단", icon: "🔍", badge: "자가진단" },
     { name: "고민 상담", icon: "💭", badge: null },
-    { name: "생성형 도구", icon: "✏️", badge: null },
+    { name: "탈모 OX 퀴즈", icon: "⭕❌", badge: null },
   ]
 
   const trendingSearches = [
@@ -28,7 +24,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto pt-16">
@@ -141,7 +136,6 @@ export default function Home() {
         </main>
       </div>
 
-      <Footer />
     </div>
   )
 }
