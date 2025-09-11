@@ -1,24 +1,34 @@
+version: '3.8'
+
 services:
   mysql:
     image: mysql:8.0
-    container_name: mysql
+    container_name: mozara-mysql
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: mozara
+      TZ: Asia/Seoul
     ports:
-      - "3308:3306"
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./springboot/db/mozara.sql:/docker-entrypoint-initdb.d/mozara.sql:ro
+      - ./springboot/db/mysql.cnf:/etc/mysql/conf.d/mysql.cnf:ro
+    command: --default-authentication-plugin=mysql_native_password
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p1234"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
     networks:
-      - backend-net
+      - mozara-network
 
   spring-backend:
     build: ./springboot
+    container_name: mozara-spring
+    restart: unless-stopped
     ports:
       - "8080:8080"
     depends_on:
@@ -28,46 +38,44 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mozara?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING_PROFILES_ACTIVE: dev
     networks:
-      - backend-net
+      - mozara-network
 
   python-backend:
     build: ./python
+    container_name: mozara-python
+    restart: unless-stopped
     ports:
       - "5000:5000"
-    depends_on:
-      weaviate:
-        condition: service_healthy
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      PINECONE_API_KEY: ${PINECONE_API_KEY}
+      PINECONE_INDEX_HOST: ${PINECONE_INDEX_HOST}
     networks:
-      - backend-net
+      - mozara-network
     volumes:
-      - C:/Users/301/Desktop/hair_damage:/app/hair_damage # Changed mount
+      - ./hair_damage:/app/hair_damage
     mem_limit: 8g
 
-  weaviate:
-    image: semitechnologies/weaviate:1.23.7
+  frontend:
+    build: ../frontend
+    container_name: mozara-frontend
+    restart: unless-stopped
     ports:
-      - "8081:8080"
-    environment:
-      QUERY_DEFAULTS_LIMIT: 20
-      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
-      AUTHENTICATION_APIKEY_ENABLED: 'false' # API 키 인증 비활성화
-      PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
-      DEFAULT_VECTORIZER_MODULE: "none"
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/v1/meta"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 60s
-    volumes:
-      - weaviate_data:/var/lib/weaviate
+      - "80:80"
+    depends_on:
+      - spring-backend
+      - python-backend
     networks:
-      - backend-net
+      - mozara-network
+
 
 volumes:
   mysql_data:
-  weaviate_data:
+    driver: local
 
 networks:
-  backend-net:
+  mozara-network:
+    driver: bridge
+    name: mozara-network
