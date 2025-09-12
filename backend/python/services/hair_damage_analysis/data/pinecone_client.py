@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 from pinecone import Pinecone
 import traceback
 
-# .env 파일 로드 (상위 디렉토리에서 찾기)
-load_dotenv("../../.env")
+# .env 파일 로드 (상위 디렉토리의 .env 파일 사용)
+load_dotenv("../../../.env")
 
 class PineconeClient:
     def __init__(self):

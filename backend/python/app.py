@@ -6,6 +6,11 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pydantic import BaseModel
 from typing import Optional
+from dotenv import load_dotenv
+import os
+
+# .env 파일 로드 (상위 디렉토리의 .env 파일 사용)
+load_dotenv("../../.env")
 
 # MOZARA Hair Change 모듈
 try:
@@ -87,6 +92,86 @@ def read_root():
 def health_check():
     """헬스 체크 엔드포인트"""
     return {"status": "healthy", "service": "python-backend-integrated"}
+
+# --- YouTube API 프록시 (조건부) ---
+@app.get("/api/youtube/search")
+async def search_youtube_videos(q: str, order: str = "viewCount", max_results: int = 12):
+    """YouTube API 프록시 - API 키를 백엔드에서 관리"""
+    # URL 디코딩 처리
+    import urllib.parse
+    original_q = q
+    q = urllib.parse.unquote(q)
+    print(f"🔍 YouTube 검색 요청 - 원본: {original_q}, 디코딩: {q}, 정렬: {order}, 최대결과: {max_results}")
+    
+    try:
+        import requests
+        print("✅ requests 모듈 로드 성공")
+    except ImportError:
+        print("❌ requests 모듈 로드 실패")
+        raise HTTPException(status_code=500, detail="requests 모듈이 설치되지 않았습니다. pip install requests를 실행하세요.")
+    
+    youtube_api_key = os.getenv("YOUTUBE_API_KEY")
+    print(f"🔑 YouTube API 키 상태: {'설정됨' if youtube_api_key and youtube_api_key != 'your_youtube_api_key_here' else '설정되지 않음'}")
+    
+    # 임시로 더미 데이터 사용 (API 키 문제 해결 전까지)
+    # print("📺 임시로 더미 데이터 사용")
+    # if True:  # 강제로 더미 데이터 사용
+    #     # API 키가 없거나 기본값인 경우 더미 데이터 반환
+    #     print("📺 더미 데이터 반환")
+    #     return {
+    #         "items": [
+    #             {
+    #                 "id": {"videoId": "dummy_video_id_1"},
+    #                 "snippet": {
+    #                     "title": f"더미 영상 1: {q}",
+    #                     "channelTitle": "더미 채널",
+    #                     "thumbnails": {
+    #                         "high": {"url": "https://placehold.co/300x168/E8E8E8/424242?text=더미+영상"}
+    #                     }
+    #                 }
+    #             },
+    #             {
+    #                 "id": {"videoId": "dummy_video_id_2"},
+    #                 "snippet": {
+    #                     "title": f"더미 영상 2: {q}",
+    #                     "channelTitle": "더미 채널",
+    #                     "thumbnails": {
+    #                         "high": {"url": "https://placehold.co/300x168/E8E8E8/424242?text=더미+영상"}
+    #                     }
+    #                 }
+    #             }
+    #         ]
+    #     }
+    
+    try:
+        api_url = f"https://www.googleapis.com/youtube/v3/search"
+        params = {
+            "part": "snippet",
+            "q": q,
+            "order": order,
+            "type": "video",
+            "maxResults": max_results,
+            "key": youtube_api_key
+        }
+        
+        print(f"🌐 YouTube API 호출: {api_url}")
+        print(f"📋 파라미터: {params}")
+        
+        response = requests.get(api_url, params=params)
+        print(f"📡 응답 상태: {response.status_code}")
+        
+        response.raise_for_status()
+        
+        result = response.json()
+        print(f"✅ YouTube API 응답 성공: {len(result.get('items', []))}개 영상")
+        return result
+        
+    except requests.exceptions.RequestException as e:
+        print(f"❌ YouTube API 호출 실패: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"YouTube API 호출 실패: {str(e)}")
+    except Exception as e:
+        print(f"❌ 예상치 못한 오류: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"예상치 못한 오류: {str(e)}")
 
 
 # --- Hair Change API (조건부) ---
