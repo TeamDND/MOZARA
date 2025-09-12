@@ -8,6 +8,7 @@ import uvicorn
 from pydantic import BaseModel
 from typing import Optional
 from dotenv import load_dotenv
+from datetime import datetime
 import os
 
 # .env 파일 로드 (상위 디렉토리의 .env 파일 사용)
@@ -91,37 +92,6 @@ from services.hair_loss_products import (
     build_stage_response,
 )
 
-class SearchQuery(BaseModel):
-    question: str
-    max_results: Optional[int] = 5
-
-class PaperCard(BaseModel):
-    id: str
-    title: str
-    source: str
-    summary_preview: str
-
-class PaperDetail(BaseModel):
-    id: str
-    title: str
-    source: str
-    full_summary: str
-
-class PaperAnalysis(BaseModel):
-    id: str
-    title: str
-    source: str
-    main_topics: List[str]
-    key_conclusions: str
-    section_summaries: List[dict]
-
-class QnaQuery(BaseModel):
-    paper_id: str
-    question: str
-
-class QnaResponse(BaseModel):
-    answer: str
-
 # API 엔드포인트 정의
 @app.get("/")
 def read_root():
@@ -191,37 +161,7 @@ async def search_youtube_videos(q: str, order: str = "viewCount", max_results: i
         print(f"❌ 예상치 못한 오류: {str(e)}")
         raise HTTPException(status_code=500, detail=f"예상치 못한 오류: {str(e)}")
 
-@app.post("/search", response_model=List[PaperCard])
-async def search_papers(query: SearchQuery):
-    if not index:
-        raise HTTPException(status_code=503, detail="Thesis search service is not available")
-    
-    if not openai_client:
-        raise HTTPException(status_code=503, detail="OpenAI service is not available")
-    
-    try:
-        response = openai_client.embeddings.create(
-            model="text-embedding-3-small",
-            input=query.question
-        )
-        query_embedding = response.data[0].embedding
-        
-        results = index.query(
-            vector=query_embedding,
-            top_k=query.max_results,
-            include_metadata=True
-        )
-        
-        best_match_by_file = {}
-        for match in results['matches']:
-            metadata = match.get('metadata', {}) or {}
-            file_path = metadata.get('file_path') or metadata.get('source') or metadata.get('title')
-            if not file_path:
-                file_path = match.get('id')
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"예상치 못한 오류: {str(e)}")
-    return [PaperCard(**match) for match in best_match_by_file.values()]
+
     
 
 
@@ -308,7 +248,7 @@ async def get_hair_loss_products(
         # 서비스 계층에서 결과 구성
         result = build_stage_response(stage)
         
-        print(f"성공: {stage}단계 제품 {len(products)}개 반환")
+        print(f"성공: {stage}단계 제품 {result.get('totalCount', 0)}개 반환")
         return result
         
     except HTTPException:
@@ -317,10 +257,7 @@ async def get_hair_loss_products(
         print(f"탈모 단계별 제품 조회 중 오류: {e}")
         import traceback
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500, 
-            detail="제품 조회 중 오류가 발생했습니다."
-        )
+        raise HTTPException(status_code=500, detail=f"제품 조회 중 오류가 발생했습니다: {str(e)}")
 
 @app.get("/api/products/health")
 async def products_health_check():
