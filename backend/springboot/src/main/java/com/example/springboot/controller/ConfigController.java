@@ -30,3 +30,5 @@ public class ConfigController {
         return ResponseEntity.ok(config);
     }
 }
+
+
