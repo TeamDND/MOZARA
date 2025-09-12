@@ -13,6 +13,7 @@ import HairPT from './components/HairPT';
 import AiToolList from './page/AiToolList';
 import MainContent from './page/MainContent';
 import YouTubeVideos from './page/YouTubeVideos';
+import HairEncyclopediaMain from './features/hairEncyclopedia/HairEncyclopediaMain';
 import HairDiagnosis from './components/HairDiagnosis';
 import HairQuiz from './components/HairQuiz';
 
@@ -31,6 +32,7 @@ const App: React.FC = () => {
           <Route path="youtube-videos" element={<YouTubeVideos />} />
           <Route path="basp-check" element={<BaspSelfCheck />} />
           <Route path="ai-tools" element={<AiToolList />} />
+          <Route path="hair-encyclopedia/*" element={<HairEncyclopediaMain />} />
           <Route path="hair-diagnosis" element={<HairDiagnosis />} />
           <Route path="hair-quiz" element={<HairQuiz />} />
         </Route>
