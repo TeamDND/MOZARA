@@ -66,13 +66,10 @@ export const hairProductApi = {
     try {
       console.log(`탈모 ${stage}단계 제품 조회 시작`);
       
-      // 환경변수에서 API Base URL 가져오기
-      const apiBaseUrl = await configApi.getApiBaseUrl();
-      
+      // Spring Boot를 통해 Python API 호출
       const response = await apiClient.get<HairProductResponse>('/products', {
         params: { stage },
         timeout: 10000, // 10초 타임아웃
-        baseURL: apiBaseUrl, // 동적으로 설정된 Base URL 사용
       });
 
       console.log(`탈모 ${stage}단계 제품 ${response.data.products.length}개 조회 완료`);
@@ -105,10 +102,8 @@ export const hairProductApi = {
    */
   async healthCheck(): Promise<HairProductHealthResponse> {
     try {
-      const apiBaseUrl = await configApi.getApiBaseUrl();
       const response = await apiClient.get<HairProductHealthResponse>('/products/health', {
         timeout: 5000,
-        baseURL: apiBaseUrl,
       });
       return response.data;
     } catch (error: any) {
@@ -124,10 +119,8 @@ export const hairProductApi = {
    */
   async getProductDetail(productId: string): Promise<HairProduct> {
     try {
-      const apiBaseUrl = await configApi.getApiBaseUrl();
       const response = await apiClient.get<HairProduct>(`/products/${productId}`, {
         timeout: 10000,
-        baseURL: apiBaseUrl,
       });
       return response.data;
     } catch (error: any) {

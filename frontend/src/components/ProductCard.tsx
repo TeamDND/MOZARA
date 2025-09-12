@@ -79,7 +79,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
-            target.src = 'https://via.placeholder.com/300x200?text=제품+이미지';
+            target.src = 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=200&fit=crop&crop=center';
           }}
         />
         
