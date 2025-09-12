@@ -98,3 +98,6 @@ Desktop.ini
 .directory
 .Trash-*
 .nfs*
+/backend/python/nul
+/backend/python/services/nul
+/frontend/src/nul
