@@ -11,7 +11,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/encyclopedia")
+@RequestMapping("/api/ai/encyclopedia")
 @CrossOrigin(origins = "*")
 public class HairEncyclopediaController {
     

@@ -67,7 +67,7 @@ export const hairProductApi = {
       console.log(`탈모 ${stage}단계 제품 조회 시작`);
       
       // Spring Boot를 통해 Python API 호출
-      const response = await apiClient.get<HairProductResponse>('/products', {
+      const response = await apiClient.get<HairProductResponse>('/ai/products', {
         params: { stage },
         timeout: 10000, // 10초 타임아웃
       });

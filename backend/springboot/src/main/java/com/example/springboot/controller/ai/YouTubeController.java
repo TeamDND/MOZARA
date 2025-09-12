@@ -10,7 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/youtube")
+@RequestMapping("/api/ai/youtube")
 @CrossOrigin(origins = "*")
 public class YouTubeController {
     
