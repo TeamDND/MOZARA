@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { configApi } from '../api/configApi';
 import Header from './Header';
-import Footer from './Footer';
+import apiClient from '../api/apiClient';
 
 interface Video {
   videoId: string;
@@ -29,30 +30,14 @@ export default function YouTubeVideos() {
   const [feedTitle, setFeedTitle] = useState('⭐ 인기 급상승 영상');
   const [selectedStage, setSelectedStage] = useState('stage0');
 
-  // YouTube API 키는 환경변수에서 가져옴 (따옴표 제거)
-  const YOUTUBE_API_KEY = (process.env.REACT_APP_YOUTUBE_API_KEY || '').replace(/['"]/g, '');
-
   const fetchVideosFromYouTube = useCallback(async (query: string, order: string = 'viewCount') => {
-    if (!YOUTUBE_API_KEY) {
-      setError('YouTube API 키가 설정되지 않았습니다.');
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
     try {
-      const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&order=${order}&type=video&maxResults=12&key=${YOUTUBE_API_KEY}`;
-      
-      console.log('API URL:', apiUrl);
-      console.log('API Key:', YOUTUBE_API_KEY ? 'Set' : 'Not set');
-      
-      const response = await fetch(apiUrl);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error?.message || `HTTP ${response.status} Error`);
-      }
+      // Spring Boot를 통해 YouTube 데이터 가져오기
+      const response = await apiClient.get(`/ai/youtube/search?q=${encodeURIComponent(query)}&order=${order}&max_results=12`);
+      const data = response.data;
 
       if (data.items.length === 0) {
         throw new Error('검색 결과에 해당하는 영상이 없습니다.');
@@ -72,7 +57,7 @@ export default function YouTubeVideos() {
     } finally {
       setLoading(false);
     }
-  }, [YOUTUBE_API_KEY]);
+  }, []);
 
   const handleSearch = useCallback((query: string) => {
     if (query.trim()) {
@@ -108,7 +93,6 @@ export default function YouTubeVideos() {
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: "#f9f9f9" }}>
-      <Header />
 
       {/* 배경 효과 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">

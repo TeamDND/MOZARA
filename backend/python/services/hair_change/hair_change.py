@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 from fastapi import HTTPException
 from typing import Optional
 
-# 환경변수 로드
-load_dotenv()
+# 환경변수 로드 (상위 디렉토리의 .env 파일 사용)
+load_dotenv("../../../../.env")
 
 # Gemini API 설정
 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
