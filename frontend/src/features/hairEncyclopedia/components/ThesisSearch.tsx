@@ -30,7 +30,7 @@ const ThesisSearch = () => {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:8000/papers/count')
+    fetch('http://localhost:8080/api/encyclopedia/papers/count')
       .then(res => res.json())
       .then(data => setPaperCount(data.count))
       .catch(err => console.error('Failed to fetch paper count:', err));
@@ -45,7 +45,7 @@ const ThesisSearch = () => {
     setShowModal(false);
     
     try {
-      const response = await fetch('http://localhost:8000/search', {
+      const response = await fetch('http://localhost:8080/api/encyclopedia/search', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ const ThesisSearch = () => {
   const handlePaperClick = async (paperId: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8000/paper/${paperId}/analysis`);
+      const response = await fetch(`http://localhost:8080/api/encyclopedia/paper/${paperId}/analysis`);
 
       if (!response.ok) {
         const errTxt = await response.text();
