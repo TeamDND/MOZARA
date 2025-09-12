@@ -1,4 +1,5 @@
 import { SelfCheckAnswers, BaselineResult } from '../features/selfcheck/types';
+import { getBaspResult } from '../features/selfcheck/baspData';
 
 const API_BASE_URL = 'http://localhost:8080/api/basp';
 
@@ -63,11 +64,17 @@ export const baspApi = {
       const data: BaspApiResponse = await response.json();
       console.log('API 응답 데이터:', data);
       
+      // baspBasic과 baspSpecific을 합쳐서 baspCode 생성
+      const baspCode = `${data.baspBasic}${data.baspSpecific}`;
+      
+      // baspData.ts에서 stageNumber 조회
+      const baspData = getBaspResult(baspCode);
+      
       return {
-        baspCode: data.baspCode,
+        baspCode: baspCode,
         baspBasic: data.baspBasic as any,
         baspSpecific: data.baspSpecific,
-        stageNumber: data.stageNumber,
+        stageNumber: baspData.stageNumber,
         stageLabel: data.stageLabel as any,
         summaryText: data.summaryText,
         recommendations: data.recommendations,

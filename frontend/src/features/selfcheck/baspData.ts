@@ -96,7 +96,43 @@ export const BASP_DATA: Record<string, {
   'U1F2V3': { baspCode: 'U1F2V3', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U1) + 상부 전반 확산 (F2) + 정수리 희박 (V3)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
   'U1F3V1': { baspCode: 'U1F3V1', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U1) + 상부 전반 확산 (F3) + 정수리 희박 (V1)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
   'U1F3V2': { baspCode: 'U1F3V2', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U1) + 상부 전반 확산 (F3) + 정수리 희박 (V2)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
-  'U1F3V3': { baspCode: 'U1F3V3', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U1) + 상부 전반 확산 (F3) + 정수리 희박 (V3)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' }
+  'U1F3V3': { baspCode: 'U1F3V3', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U1) + 상부 전반 확산 (F3) + 정수리 희박 (V3)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+
+  // U2 시리즈 (말굽형 전반 후퇴 U2)
+  'U2': { baspCode: 'U2', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U2)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U2F1': { baspCode: 'U2F1', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U2) + 상부 전반 확산 (F1)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U2F2': { baspCode: 'U2F2', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U2) + 상부 전반 확산 (F2)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U2F3': { baspCode: 'U2F3', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U2) + 상부 전반 확산 (F3)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U2V1': { baspCode: 'U2V1', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U2) + 정수리 희박 (V1)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U2V2': { baspCode: 'U2V2', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U2) + 정수리 희박 (V2)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U2V3': { baspCode: 'U2V3', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U2) + 정수리 희박 (V3)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U2F1V1': { baspCode: 'U2F1V1', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U2) + 상부 전반 확산 (F1) + 정수리 희박 (V1)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U2F1V2': { baspCode: 'U2F1V2', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U2) + 상부 전반 확산 (F1) + 정수리 희박 (V2)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U2F1V3': { baspCode: 'U2F1V3', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U2) + 상부 전반 확산 (F1) + 정수리 희박 (V3)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U2F2V1': { baspCode: 'U2F2V1', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U2) + 상부 전반 확산 (F2) + 정수리 희박 (V1)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U2F2V2': { baspCode: 'U2F2V2', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U2) + 상부 전반 확산 (F2) + 정수리 희박 (V2)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U2F2V3': { baspCode: 'U2F2V3', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U2) + 상부 전반 확산 (F2) + 정수리 희박 (V3)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U2F3V1': { baspCode: 'U2F3V1', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U2) + 상부 전반 확산 (F3) + 정수리 희박 (V1)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U2F3V2': { baspCode: 'U2F3V2', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U2) + 상부 전반 확산 (F3) + 정수리 희박 (V2)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U2F3V3': { baspCode: 'U2F3V3', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U2) + 상부 전반 확산 (F3) + 정수리 희박 (V3)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+
+  // U3 시리즈 (말굽형 전반 후퇴 U3)
+  'U3': { baspCode: 'U3', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U3)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U3F1': { baspCode: 'U3F1', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U3) + 상부 전반 확산 (F1)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U3F2': { baspCode: 'U3F2', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U3) + 상부 전반 확산 (F2)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U3F3': { baspCode: 'U3F3', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U3) + 상부 전반 확산 (F3)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U3V1': { baspCode: 'U3V1', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U3) + 정수리 희박 (V1)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U3V2': { baspCode: 'U3V2', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U3) + 정수리 희박 (V2)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U3V3': { baspCode: 'U3V3', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U3) + 정수리 희박 (V3)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U3F1V1': { baspCode: 'U3F1V1', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U3) + 상부 전반 확산 (F1) + 정수리 희박 (V1)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U3F1V2': { baspCode: 'U3F1V2', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U3) + 상부 전반 확산 (F1) + 정수리 희박 (V2)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U3F1V3': { baspCode: 'U3F1V3', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U3) + 상부 전반 확산 (F1) + 정수리 희박 (V3)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U3F2V1': { baspCode: 'U3F2V1', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U3) + 상부 전반 확산 (F2) + 정수리 희박 (V1)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U3F2V2': { baspCode: 'U3F2V2', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U3) + 상부 전반 확산 (F2) + 정수리 희박 (V2)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U3F2V3': { baspCode: 'U3F2V3', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U3) + 상부 전반 확산 (F2) + 정수리 희박 (V3)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U3F3V1': { baspCode: 'U3F3V1', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U3) + 상부 전반 확산 (F3) + 정수리 희박 (V1)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U3F3V2': { baspCode: 'U3F3V2', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U3) + 상부 전반 확산 (F3) + 정수리 희박 (V2)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' },
+  'U3F3V3': { baspCode: 'U3F3V3', stageNumber: 3, stageLabel: '심화', summaryText: '말굽형 전반 후퇴 (U3) + 상부 전반 확산 (F3) + 정수리 희박 (V3)', recommendation: '집중 관리: 2주 이하 간격 기록 + 전문가 상담 권유(진단 아님)' }
 };
 
 // BASP 코드 생성 함수 (basp_new.md 규칙에 따라)
@@ -116,7 +152,9 @@ export function generateBaspCode(
   } else if (hairline === 'C') {
     baseCode = `C${hairlineSubType || 0}`; // C0~C3
   } else if (hairline === 'U') {
-    baseCode = `U${hairlineSubType || 1}`; // U1~U3 (U0은 없음)
+    // U 타입은 반드시 숫자가 필요 (U1, U2, U3)
+    const uSubType = hairlineSubType !== null ? hairlineSubType : 1;
+    baseCode = `U${uSubType}`;
   }
   
   // SP 코드 생성 (Specific Type) - V와 F는 1~3단계만 존재 (0단계는 코드에 포함되지 않음)
@@ -128,10 +166,15 @@ export function generateBaspCode(
 
 // BASP 결과 조회 함수
 export function getBaspResult(baspCode: string) {
-  const stageNumber = BASP_DATA[baspCode].stageNumber;
-  return BASP_DATA[baspCode] || {
+  const data = BASP_DATA[baspCode];
+  if (data) {
+    return data;
+  }
+  
+  // 기본값 반환 (baspCode가 존재하지 않는 경우)
+  return {
     baspCode: baspCode,
-    stageNumber: stageNumber,
+    stageNumber: 0,
     stageLabel: '정상' as const,
     summaryText: '기본 상태',
     recommendation: '정기적인 모니터링을 권장합니다.'

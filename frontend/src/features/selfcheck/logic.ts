@@ -1,5 +1,5 @@
 import { SelfCheckAnswers, BaselineResult } from './types';
-import { generateBaspCode, getBaspResult } from './baspData';
+import { generateBaspCode, getBaspResult, BASP_DATA } from './baspData';
 
 // 헤어라인 설명 생성
 export function getHairlineDescription(hairline: string): string {
@@ -54,19 +54,10 @@ export function computeResult(answers: SelfCheckAnswers): BaselineResult {
     answers.vertex
   );
   
-  // SP 부분만 추출 (BA 부분 제거)
-  let spPart = '';
-  if (answers.hairline === 'L') {
-    spPart = baspCode.substring(1); // 'L' 제거
-  } else {
-    // M, C, U의 경우 숫자까지 포함해서 제거
-    const baPattern = new RegExp(`^${answers.hairline}\\d*`);
-    spPart = baspCode.replace(baPattern, '');
-  }
+  console.log('생성된 BASP 코드:', baspCode);
+  console.log('BASP_DATA에 존재하는지 확인:', BASP_DATA[baspCode] ? '존재' : '존재하지 않음');
   
-  // baspBasic + baspSpecific 조합으로 최종 코드 생성
-  const finalBaspCode = `${answers.hairline}${spPart}`;
-  const baspResult = getBaspResult(finalBaspCode);
+  const baspResult = getBaspResult(baspCode);
   
   const recommendations = getRecommendations(baspResult.stageLabel, answers.lifestyle);
   
@@ -76,9 +67,9 @@ export function computeResult(answers: SelfCheckAnswers): BaselineResult {
   ];
   
   return {
-    baspCode: finalBaspCode, // baspBasic + baspSpecific 조합
+    baspCode: baspCode, // generateBaspCode로 생성된 코드
     baspBasic: answers.hairline,
-    baspSpecific: spPart, // SP 부분만
+    baspSpecific: baspCode.substring(answers.hairline.length), // SP 부분만
     stageNumber: baspResult.stageNumber,
     stageLabel: baspResult.stageLabel,
     summaryText: baspResult.summaryText,
