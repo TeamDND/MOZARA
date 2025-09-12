@@ -1,7 +1,7 @@
 import { SelfCheckAnswers, BaselineResult } from '../features/selfcheck/types';
 import { getBaspResult } from '../features/selfcheck/baspData';
 
-const API_BASE_URL = 'http://localhost:8080/api/basp';
+const API_BASE_URL = 'http://localhost:8080/api/ai/basp';
 
 export interface BaspApiRequest {
   hairline: string;

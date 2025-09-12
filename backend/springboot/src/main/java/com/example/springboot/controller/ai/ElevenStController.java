@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/11st")
+@RequestMapping("/api/ai/11st")
 @RequiredArgsConstructor
 public class ElevenStController {
 

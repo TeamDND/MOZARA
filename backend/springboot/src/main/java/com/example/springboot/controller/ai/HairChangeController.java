@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/hair-change")
+@RequestMapping("/api/ai/hair-change")
 @CrossOrigin(origins = "*")
 public class HairChangeController {
 
