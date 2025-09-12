@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { configApi } from '../api/configApi';
 import Header from './Header';
-import Footer from './Footer';
 
 interface Video {
   videoId: string;
@@ -30,10 +30,25 @@ export default function YouTubeVideos() {
   const [selectedStage, setSelectedStage] = useState('stage0');
 
   // YouTube API 키는 환경변수에서 가져옴 (따옴표 제거)
-  const YOUTUBE_API_KEY = (process.env.REACT_APP_YOUTUBE_API_KEY || '').replace(/['"]/g, '');
+  const [youtubeApiKey, setYoutubeApiKey] = useState<string>('');
+
+  // YouTube API 키 로드
+  useEffect(() => {
+    const loadYouTubeApiKey = async () => {
+      try {
+        const apiKey = await configApi.getYouTubeApiKey();
+        setYoutubeApiKey(apiKey || '');
+      } catch (error) {
+        console.error('YouTube API 키 로드 실패:', error);
+        setYoutubeApiKey('');
+      }
+    };
+    
+    loadYouTubeApiKey();
+  }, []);
 
   const fetchVideosFromYouTube = useCallback(async (query: string, order: string = 'viewCount') => {
-    if (!YOUTUBE_API_KEY) {
+    if (!youtubeApiKey) {
       setError('YouTube API 키가 설정되지 않았습니다.');
       return;
     }
@@ -42,10 +57,10 @@ export default function YouTubeVideos() {
     setError(null);
 
     try {
-      const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&order=${order}&type=video&maxResults=12&key=${YOUTUBE_API_KEY}`;
+      const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&order=${order}&type=video&maxResults=12&key=${youtubeApiKey}`;
       
       console.log('API URL:', apiUrl);
-      console.log('API Key:', YOUTUBE_API_KEY ? 'Set' : 'Not set');
+      console.log('API Key:', youtubeApiKey ? 'Set' : 'Not set');
       
       const response = await fetch(apiUrl);
       const data = await response.json();
@@ -72,7 +87,7 @@ export default function YouTubeVideos() {
     } finally {
       setLoading(false);
     }
-  }, [YOUTUBE_API_KEY]);
+  }, [youtubeApiKey]);
 
   const handleSearch = useCallback((query: string) => {
     if (query.trim()) {

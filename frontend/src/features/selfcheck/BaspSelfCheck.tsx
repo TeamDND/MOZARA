@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { SelfCheckAnswers, BaselineResult } from './types';
 import { computeResult } from './logic';
 import { baspApi } from '../../api/baspApi';
+import { setBaspResult } from '../../store/hairProductSlice';
 import HairlineSelector from './components/HairlineSelector';
 import VertexSelector from './components/VertexSelector';
 import DensitySelector from './components/DensitySelector';
@@ -10,6 +13,8 @@ import Header from '../../page/Header';
 import Footer from '../../page/Footer';
 
 const BaspSelfCheck: React.FC = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<SelfCheckAnswers>({
     hairline: null,
@@ -95,10 +100,28 @@ const BaspSelfCheck: React.FC = () => {
           console.log('API 결과:', apiResult);
           console.log('RAG 가이드:', apiResult?.ragGuide);
           setResult(apiResult);
+          
+          // Redux store에 BASP 결과 저장
+          dispatch(setBaspResult({
+            stageNumber: apiResult.stageNumber,
+            stageLabel: apiResult.stageLabel,
+            baspCode: apiResult.baspCode,
+            summaryText: apiResult.summaryText,
+            recommendations: apiResult.recommendations,
+          }));
         } catch (apiError) {
           console.warn('API 호출 실패, 로컬 계산으로 폴백:', apiError);
           const localResult = computeResult(answers);
           setResult(localResult);
+          
+          // Redux store에 BASP 결과 저장 (로컬 계산 결과)
+          dispatch(setBaspResult({
+            stageNumber: localResult.stageNumber,
+            stageLabel: localResult.stageLabel,
+            baspCode: localResult.baspCode,
+            summaryText: localResult.summaryText,
+            recommendations: localResult.recommendations,
+          }));
         }
       } catch (error) {
         console.error('결과 계산 중 오류:', error);
@@ -434,7 +457,10 @@ const BaspSelfCheck: React.FC = () => {
                           <span>영양제 추천</span>
                         </div>
                       </div>
-                      <button className="w-full px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors">
+                      <button 
+                        onClick={() => navigate(`/hair-loss-products?stage=${result.stageNumber}`)}
+                        className="w-full px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors"
+                      >
                         추천 제품 보기
                       </button>
                     </div>

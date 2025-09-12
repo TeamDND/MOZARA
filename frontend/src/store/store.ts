@@ -4,18 +4,20 @@ import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import tokenReducer from './tokenSlice';
 import userReducer from './userSlice';
+import hairProductReducer from './hairProductSlice';
 
 // TypeScript: 루트 리듀서 타입 정의
 const rootReducer = combineReducers({
   token: tokenReducer,
   user: userReducer,
+  hairProduct: hairProductReducer,
 });
 
 // TypeScript: Redux Persist 설정
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['token', 'user'], // 저장할 상태들
+  whitelist: ['token', 'user', 'hairProduct'], // 저장할 상태들
 };
 
 // TypeScript: 지속화된 리듀서 생성
