@@ -1,4 +1,5 @@
 import { SelfCheckAnswers, BaselineResult } from '../features/selfcheck/types';
+import { getBaspResult } from '../features/selfcheck/baspData';
 
 const API_BASE_URL = 'http://localhost:8080/api/basp';
 
@@ -26,17 +27,6 @@ export interface BaspApiResponse {
   disclaimers: string[];
   rawScore: number;
   lifestyleRisk: number;
-  ragGuide?: {
-    answers: string[];
-    citations: {
-      n: number;
-      title: string;
-      publisher: string;
-      year?: number;
-      url?: string;
-      snippet?: string;
-    }[];
-  };
 }
 
 export const baspApi = {
@@ -73,18 +63,22 @@ export const baspApi = {
 
       const data: BaspApiResponse = await response.json();
       console.log('API 응답 데이터:', data);
-      console.log('RAG 가이드 데이터:', data.ragGuide);
+      
+      // baspBasic과 baspSpecific을 합쳐서 baspCode 생성
+      const baspCode = `${data.baspBasic}${data.baspSpecific}`;
+      
+      // baspData.ts에서 stageNumber 조회
+      const baspData = getBaspResult(baspCode);
       
       return {
-        baspCode: data.baspCode,
+        baspCode: baspCode,
         baspBasic: data.baspBasic as any,
         baspSpecific: data.baspSpecific,
-        stageNumber: data.stageNumber,
+        stageNumber: baspData.stageNumber,
         stageLabel: data.stageLabel as any,
         summaryText: data.summaryText,
         recommendations: data.recommendations,
         disclaimers: data.disclaimers,
-        ragGuide: data.ragGuide
       };
     } catch (error) {
       console.error('BASP API 호출 중 오류:', error);
