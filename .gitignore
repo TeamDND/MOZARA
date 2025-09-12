@@ -1,0 +1,11 @@
+# 루트 .gitignore
+*.env
+*.log
+
+# backend/.gitignore
+__pycache__/
+.env
+
+# frontend/.gitignore
+node_modules/
+.env.local
