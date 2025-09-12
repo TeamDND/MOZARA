@@ -52,7 +52,7 @@ export const configApi = {
       return response.data;
     } catch (error) {
       console.error('환경변수 설정 조회 중 오류:', error);
-      // 기본값 반환
+      // 기본값 반환 - Spring Boot 포트 사용
       return {
         apiBaseUrl: 'http://localhost:8080/api',
         youtubeApiKey: null,

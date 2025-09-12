@@ -8,3 +8,5 @@
 2025-09-12 10:41:10,045 - INFO - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
 2025-09-12 10:41:19,728 - INFO - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
 2025-09-12 10:41:49,644 - INFO - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+2025-09-12 14:34:26,522 - INFO - Hair Encyclopedia PubMed 자동 수집 스케줄러 시작 - 일주일에 한 번 실행
+2025-09-12 14:34:26,526 - INFO - Hair Encyclopedia PubMed 자동 수집 백그라운드 스레드 시작됨
