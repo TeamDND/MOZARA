@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { configApi } from '../api/configApi';
 import Header from './Header';
-import Footer from './Footer';
 
 interface Video {
   videoId: string;

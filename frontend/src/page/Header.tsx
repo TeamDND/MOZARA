@@ -110,9 +110,15 @@ export default function Header() {
                   <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-xl">🛠️</div>
                   <span className="text-sm font-medium">도구</span>
                 </div>
-                <div className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-800 cursor-pointer">
-                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-xl">🎯</div>
-                  <span className="text-sm font-medium">해커</span>
+                <div 
+                  className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-800 cursor-pointer"
+                  onClick={() => {
+                    handleCloseSidebar();
+                    navigate('/hair-loss-products');
+                  }}
+                >
+                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-xl">🛍️</div>
+                  <span className="text-sm font-medium">제품추천</span>
                 </div>
                 <div className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-800 cursor-pointer">
                   <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-xl">📚</div>
