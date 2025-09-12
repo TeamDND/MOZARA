@@ -16,7 +16,7 @@ graph LR
     B --> G[Response]
     G --> A
 ```
-
+#
 ### 🔄 요청 처리 흐름
 
 #### 1️⃣ **AI 기능 요청 시**
@@ -153,6 +153,17 @@ project/
   - 생활습관 기반 위험도 분석
   - RAG 기반 개인화된 가이드 제공
 
+### 🆕 탈모 제품 추천 기능
+- **단계별 제품 추천**: BASP 진단 결과 기반 맞춤형 제품 추천
+  - 1-6단계 탈모별 특화 제품 데이터베이스
+  - 각 단계별 3-4개 전문 제품 추천
+  - 제품 상세 정보 (가격, 평점, 성분, 적합 단계)
+- **사용자 경험 개선**:
+  - 즐겨찾기 제품 저장 (Redux Persist)
+  - 최근 조회 제품 히스토리
+  - 제품 조회 패턴 분석
+  - BASP 진단과 연동된 자동 추천
+
 ### 사용자 기능
 - **사용자 인증**: JWT 기반 로그인/회원가입
 - **데이터 관리**: 사용자 정보 CRUD
@@ -194,8 +205,23 @@ docker-compose up -d
 
 ## 🔐 환경 변수
 
-### `.env` (Python)
+### Backend 환경 변수 (`.env`)
 ```env
+# API Keys
+ELEVEN_ST_API_KEY=your_eleven_st_api_key_here
+YOUTUBE_API_KEY=your_youtube_api_key_here
+
+# API Configuration
+API_BASE_URL=http://localhost:8080/api
+
+# Server Configuration
+HOST=0.0.0.0
+PORT=8000
+
+# CORS Configuration
+CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001
+
+# AI Service Keys (if using AI features)
 PINECONE_API_KEY=your_pinecone_key
 GEMINI_API_KEY=your_gemini_key
 ```
@@ -204,6 +230,45 @@ GEMINI_API_KEY=your_gemini_key
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/mozara
 jwt.secret=your_jwt_secret
+```
+
+## 📡 API 엔드포인트
+
+### 탈모 제품 추천 API
+- **GET** `/api/products?stage={1-6}` - 탈모 단계별 제품 조회
+- **GET** `/api/config` - 환경변수 설정 조회
+- **GET** `/health` - 서버 상태 확인
+
+### 응답 예시
+```json
+{
+  "products": [
+    {
+      "productId": "product_001",
+      "productName": "탈모 예방 샴푸",
+      "productPrice": 25000,
+      "productRating": 4.5,
+      "productReviewCount": 1200,
+      "productImage": "https://example.com/image.jpg",
+      "productUrl": "https://example.com/product",
+      "mallName": "11번가",
+      "maker": "제조사",
+      "brand": "브랜드명",
+      "category1": "헤어케어",
+      "category2": "샴푸",
+      "category3": "탈모예방",
+      "category4": "두피케어",
+      "description": "탈모 예방에 특화된 샴푸",
+      "ingredients": ["케토코나졸", "비오틴", "아연"],
+      "suitableStages": [1, 2]
+    }
+  ],
+  "totalCount": 3,
+  "stage": 1,
+  "stageDescription": "초기 탈모 (예방 중심)",
+  "recommendation": "1단계 탈모에 적합한 3개 제품을 추천합니다.",
+  "disclaimer": "본 추천은 참고용이며, 정확한 진단과 치료는 전문의 상담이 필요합니다."
+}
 ```
 
 ## 👥 팀 정보

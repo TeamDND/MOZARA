@@ -185,11 +185,11 @@ export default function HairCheck() {
                     </div>
                   </div>
                   <button
-                    className="w-full py-4 px-6 text-white font-semibold rounded-xl transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => navigate('/hair-diagnosis')}
+                    className="w-full py-4 px-6 text-white font-semibold rounded-xl transition-all hover:opacity-90"
                     style={{ backgroundColor: "rgb(0,115,255)" }}
-                    disabled
                   >
-                    준비 중입니다
+                    AI 진단 시작하기
                   </button>
                 </div>
               </div>

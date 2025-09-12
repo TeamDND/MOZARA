@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 from pinecone import Pinecone
 import traceback
 
-# .env 파일 로드 (상위 디렉토리에서 찾기)
-load_dotenv("../../.env")
+# .env 파일 로드 (상위 디렉토리의 .env 파일 사용)
+load_dotenv("../../../../../.env")
 
 class PineconeClient:
     def __init__(self):
@@ -61,9 +61,8 @@ class PineconeClient:
         
         metadata = {
             "image_url": analysis_result.get("processed_image_s3_url", "/path/to/placeholder.jpg"),
-            "diagnosis": analysis_result["analysis"]["diagnosis"],
-            "gender": "남성",
-            "stage": analysis_result["analysis"]["stage"],
+            "has_damage": analysis_result["analysis"]["has_damage"],
+            "gender": analysis_result["analysis"]["gender"],
             "confidence": analysis_result["analysis"]["confidence"]
         }
         
@@ -122,7 +121,7 @@ class PineconeClient:
                 self.score = 0.85
         
         return [
-            MockObject("dummy_1", {"diagnosis": "mild", "gender": "남성", "stage": 1, "confidence": 0.95}),
-            MockObject("dummy_2", {"diagnosis": "moderate", "gender": "남성", "stage": 2, "confidence": 0.88}),
-            MockObject("dummy_3", {"diagnosis": "severe", "gender": "남성", "stage": 3, "confidence": 0.92})
+            MockObject("dummy_1", {"has_damage": False, "gender": "남성", "confidence": 0.95}),  # 정상 남성 모발
+            MockObject("dummy_2", {"has_damage": True, "gender": "남성", "confidence": 0.88}),   # 손상된 남성 모발
+            MockObject("dummy_3", {"has_damage": True, "gender": "여성", "confidence": 0.92})    # 손상된 여성 모발
         ]
