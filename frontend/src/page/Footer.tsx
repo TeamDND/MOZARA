@@ -33,10 +33,10 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-gray-800 mb-4">고객지원</h3>
             <ul className="space-y-2 text-sm text-gray-600">
-              <li><a href="#" className="hover:text-blue-600 transition-colors">자주 묻는 질문</a></li>
-              <li><a href="#" className="hover:text-blue-600 transition-colors">문의하기</a></li>
-              <li><a href="#" className="hover:text-blue-600 transition-colors">이용약관</a></li>
-              <li><a href="#" className="hover:text-blue-600 transition-colors">개인정보처리방침</a></li>
+              <li><button className="hover:text-blue-600 transition-colors text-left">자주 묻는 질문</button></li>
+              <li><button className="hover:text-blue-600 transition-colors text-left">문의하기</button></li>
+              <li><button className="hover:text-blue-600 transition-colors text-left">이용약관</button></li>
+              <li><button className="hover:text-blue-600 transition-colors text-left">개인정보처리방침</button></li>
             </ul>
           </div>
         </div>
