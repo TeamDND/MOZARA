@@ -39,6 +39,12 @@ const StoreIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const BookIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+  </svg>
+);
+
 const HeartIcon = ({ className }: { className?: string }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -120,6 +126,14 @@ export default function AiToolList() {
       description: "다양한 콘텐츠를 생성하는 도구들입니다.",
       category: "creative"
     },
+    { 
+      id: "hair-encyclopedia", 
+      name: "탈모 백과", 
+      icon: BookIcon, 
+      color: "bg-emerald-500",
+      description: "탈모 관련 정보와 논문을 검색할 수 있습니다.",
+      category: "knowledge"
+    },
   ];
 
   const filteredTools = aiTools; // 필터링 기능은 나중에 추가 가능
@@ -157,6 +171,8 @@ export default function AiToolList() {
                         navigate('/hair-change');
                       } else if (tool.id === "basp-check") {
                         navigate('/basp-check');
+                      } else if (tool.id === "hair-encyclopedia") {
+                        navigate('/hair-encyclopedia');
                       }
                     }}
                   >
