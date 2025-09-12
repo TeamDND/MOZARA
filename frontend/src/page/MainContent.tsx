@@ -11,6 +11,7 @@ export default function Home() {
     { name: "탈모 PT", icon: "🏃", badge: "NEW" },
     { name: "YouTube 영상", icon: "📺", badge: "NEW" },
     { name: "제품추천", icon: "🛍️", badge: "NEW" },
+    { name: "탈모 OX 퀴즈", icon: "💡", badge: "NEW" },
     { name: "이미지 생성", icon: "🎨", badge: null },
     { name: "챗봇요약", icon: "💬", badge: null },
     { name: "상가찾기", icon: "🏪", badge: null },
@@ -90,6 +91,8 @@ export default function Home() {
                         navigate('/youtube-videos');
                       } else if (tool.name === "제품추천") {
                         navigate('/product-search');
+                      } else if (tool.name === "탈모 OX 퀴즈") {
+                        navigate('/hair-quiz');
                       } else if (tool.name === "BASP 탈모 진단") {
                         navigate('/basp-check');
                       }
