@@ -100,7 +100,6 @@ export default function YouTubeVideos() {
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: "#f9f9f9" }}>
-      <Header />
 
       {/* 배경 효과 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
