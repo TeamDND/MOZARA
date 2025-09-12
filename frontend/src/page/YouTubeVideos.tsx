@@ -29,44 +29,21 @@ export default function YouTubeVideos() {
   const [feedTitle, setFeedTitle] = useState('⭐ 인기 급상승 영상');
   const [selectedStage, setSelectedStage] = useState('stage0');
 
-  // YouTube API 키는 환경변수에서 가져옴 (따옴표 제거)
-  const [youtubeApiKey, setYoutubeApiKey] = useState<string>('');
-
-  // YouTube API 키 로드
-  useEffect(() => {
-    const loadYouTubeApiKey = async () => {
-      try {
-        const apiKey = await configApi.getYouTubeApiKey();
-        setYoutubeApiKey(apiKey || '');
-      } catch (error) {
-        console.error('YouTube API 키 로드 실패:', error);
-        setYoutubeApiKey('');
-      }
-    };
-    
-    loadYouTubeApiKey();
-  }, []);
-
   const fetchVideosFromYouTube = useCallback(async (query: string, order: string = 'viewCount') => {
-    if (!youtubeApiKey) {
-      setError('YouTube API 키가 설정되지 않았습니다.');
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
     try {
-      const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&order=${order}&type=video&maxResults=12&key=${youtubeApiKey}`;
+      // Spring Boot를 통해 YouTube 데이터 가져오기
+      const apiUrl = `http://localhost:8080/api/youtube/search?q=${encodeURIComponent(query)}&order=${order}&max_results=12`;
       
-      console.log('API URL:', apiUrl);
-      console.log('API Key:', youtubeApiKey ? 'Set' : 'Not set');
+      console.log('Backend API URL:', apiUrl);
       
       const response = await fetch(apiUrl);
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error?.message || `HTTP ${response.status} Error`);
+        throw new Error(data.detail || `HTTP ${response.status} Error`);
       }
 
       if (data.items.length === 0) {
@@ -87,7 +64,7 @@ export default function YouTubeVideos() {
     } finally {
       setLoading(false);
     }
-  }, [youtubeApiKey]);
+  }, []);
 
   const handleSearch = useCallback((query: string) => {
     if (query.trim()) {

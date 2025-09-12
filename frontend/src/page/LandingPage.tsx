@@ -590,7 +590,7 @@ export default function HomePage() {
                 size="lg"
                 className="text-base px-8 text-white hover:opacity-90"
                 style={{ backgroundColor: "rgb(0,115,255)" }}
-                onClick={() => navigate('/hair-check')}
+                onClick={() => navigate('/hair-diagnosis')}
               >
                 <Camera className="h-4 w-4 mr-2" />
                 무료 진단 시작하기
@@ -720,6 +720,7 @@ export default function HomePage() {
                       <Button
                         className="mt-4 text-white hover:opacity-90 shadow-md px-8 py-3 text-base"
                         style={{ backgroundColor: "rgb(0,115,255)" }}
+                        onClick={() => navigate('/hair-quiz')}
                       >
                         체크하기
                       </Button>
@@ -823,7 +824,7 @@ export default function HomePage() {
               size="lg"
               className="text-base px-12 text-white hover:opacity-90"
               style={{ backgroundColor: "rgb(0,115,255)" }}
-              onClick={() => navigate('/hair-check')}
+              onClick={() => navigate('/hair-diagnosis')}
             >
               무료로 진단받기
             </Button>
