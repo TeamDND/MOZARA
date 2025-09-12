@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import apiClient from '../../../api/apiClient';
 
 interface PaperCard {
   id: string;
@@ -30,9 +31,8 @@ const ThesisSearch = () => {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/encyclopedia/papers/count')
-      .then(res => res.json())
-      .then(data => setPaperCount(data.count))
+    apiClient.get('/ai/encyclopedia/papers/count')
+      .then(res => setPaperCount(res.data.count))
       .catch(err => console.error('Failed to fetch paper count:', err));
   }, []);
 
@@ -45,18 +45,12 @@ const ThesisSearch = () => {
     setShowModal(false);
     
     try {
-      const response = await fetch('http://localhost:8080/api/encyclopedia/search', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          question: query,
-          max_results: 5
-        })
+      const response = await apiClient.post('/ai/encyclopedia/search', {
+        question: query,
+        max_results: 5
       });
       
-      const data: PaperCard[] = await response.json();
+      const data: PaperCard[] = response.data;
       const uniqueByTitle: PaperCard[] = Array.from(new Map<string, PaperCard>(data.map((p) => [p.title, p])).values());
       setPapers(uniqueByTitle);
     } catch (error) {
@@ -70,14 +64,8 @@ const ThesisSearch = () => {
   const handlePaperClick = async (paperId: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8080/api/encyclopedia/paper/${paperId}/analysis`);
-
-      if (!response.ok) {
-        const errTxt = await response.text();
-        throw new Error(`요약 API 오류: ${response.status} ${errTxt}`);
-      }
-
-      const paperAnalysis: PaperAnalysis = await response.json();
+      const response = await apiClient.get(`/ai/encyclopedia/paper/${paperId}/analysis`);
+      const paperAnalysis: PaperAnalysis = response.data;
       setSelectedPaper(paperAnalysis);
       setShowModal(true);
     } catch (error) {
