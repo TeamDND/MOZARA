@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/basp")
+@RequestMapping("/api/ai/basp")
 @CrossOrigin(origins = "http://localhost:3000")
 public class BaspController {
     
