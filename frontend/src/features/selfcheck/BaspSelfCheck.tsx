@@ -130,7 +130,6 @@ const BaspSelfCheck: React.FC = () => {
         try {
           const apiResult = await baspApi.evaluate(answers);
           console.log('API 결과:', apiResult);
-          console.log('RAG 가이드:', apiResult?.ragGuide);
           setResult(apiResult);
         } catch (apiError) {
           console.warn('API 호출 실패, 로컬 계산으로 폴백:', apiError);
@@ -244,7 +243,7 @@ const BaspSelfCheck: React.FC = () => {
                         result.stageLabel === '초기' ? 'text-yellow-600' :
                           result.stageLabel === '중기' ? 'text-orange-600' : 'text-red-600'
                       }`}>
-                      {result.stageLabel}
+                      {result.stageNumber}단계
                     </div>
                     <div className="text-lg text-gray-600 font-medium">4단계 분류</div>
                     <div className="text-sm text-gray-500 mt-1">정상/초기/중기/심화</div>
@@ -312,31 +311,6 @@ const BaspSelfCheck: React.FC = () => {
                   </div>
                 </div>
               </div>
-
-              {/* 진행률 바 */}
-              <div className="mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-gray-600">추정 탈모 진행률</span>
-                  <span className="text-sm font-semibold">{result.stageNumber * 25}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div
-                    className={`h-3 rounded-full transition-all duration-500 ${result.stageLabel === '정상' ? 'bg-green-500' :
-                        result.stageLabel === '초기' ? 'bg-yellow-500' :
-                          result.stageLabel === '중기' ? 'bg-orange-500' : 'bg-red-500'
-                      }`}
-                    style={{ width: `${result.stageNumber * 25}%` }}
-                  />
-                </div>
-                <div className="text-center mt-2">
-                  <span className="text-xs text-gray-500">※ 추정치이며, 실제와 다를 수 있습니다</span>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg p-4">
-                <h4 className="font-semibold text-gray-800 mb-2">진단 요약</h4>
-                <p className="text-gray-700">{result.summaryText}</p>
-              </div>
             </div>
 
             {/* 권장사항 */}
@@ -350,33 +324,6 @@ const BaspSelfCheck: React.FC = () => {
                   </li>
                 ))}
               </ul>
-            </div>
-
-            {/* 디스클레이머 */}
-            <div className="bg-red-50 border-2 border-red-200 rounded-xl p-6 mb-8">
-              <h4 className="font-bold text-red-800 mb-3 text-lg">⚠️ 중요 안내사항</h4>
-              <div className="space-y-2">
-                <div className="bg-white rounded-lg p-3 border border-red-200">
-                  <p className="text-red-700 font-semibold text-sm">
-                    🚨 본 진단은 어디까지나 추정 결과입니다
-                  </p>
-                  <p className="text-red-600 text-sm mt-1">
-                    • 의료진의 실제 진단을 대체할 수 없습니다<br />
-                    • 정확한 진단은 피부과 전문의 상담이 필수입니다<br />
-                    • 결과에 따라 불안감을 느끼지 마시고 전문의와 상담하세요
-                  </p>
-                </div>
-                <div className="bg-white rounded-lg p-3 border border-red-200">
-                  <p className="text-red-700 font-semibold text-sm">
-                    📋 BASP 기준표란?
-                  </p>
-                  <p className="text-red-600 text-sm mt-1">
-                    • Basic and Specific Classification System의 약자<br />
-                    • 탈모의 진행 정도를 체계적으로 분류하는 국제 기준<br />
-                    • 총 192가지 세부 분류로 정확한 상태 파악 가능
-                  </p>
-                </div>
-              </div>
             </div>
 
             {/* 맞춤 서비스 영역 */}

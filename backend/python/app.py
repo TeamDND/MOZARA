@@ -30,8 +30,7 @@ except ImportError as e:
 # BASP Hair Loss Diagnosis 모듈
 try:
     from services.basp_selfcheck import (
-        BaspRequest, BaspResponse, BaspDiagnosisEngine,
-        RagRequest, RagResponse, rag_engine, LifestyleData
+        BaspRequest, BaspResponse, BaspDiagnosisEngine, LifestyleData
     )
     BASP_AVAILABLE = True
     print("✅ BASP Hair Loss Diagnosis 모듈 로드 성공")
@@ -142,23 +141,6 @@ if BASP_AVAILABLE:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"진단 중 오류가 발생했습니다: {str(e)}")
 
-    @app.post("/api/rag/answer", response_model=RagResponse)
-    def rag_answer(request: RagRequest):
-        """RAG 기반 진단 가이드 API"""
-        try:
-            print("=== RAG API 요청 받음 ===")
-            print(f"BASP Basic: {request.baspBasic}")
-            print(f"BASP Specific: {request.baspSpecific}")
-            print(f"Stage Label: {request.stageLabel}")
-            print(f"Risk Score: {request.riskScore}")
-
-            result = rag_engine.answer(request)
-            print(f"RAG 결과: {result}")
-
-            return result
-        except Exception as e:
-            print(f"RAG API 오류: {e}")
-            raise HTTPException(status_code=500, detail=f"RAG 답변 생성 중 오류가 발생했습니다: {str(e)}")
 
 
 if __name__ == "__main__":

@@ -128,9 +128,10 @@ export function generateBaspCode(
 
 // BASP 결과 조회 함수
 export function getBaspResult(baspCode: string) {
+  const stageNumber = BASP_DATA[baspCode].stageNumber;
   return BASP_DATA[baspCode] || {
-    baspCode,
-    stageNumber: 0,
+    baspCode: baspCode,
+    stageNumber: stageNumber,
     stageLabel: '정상' as const,
     summaryText: '기본 상태',
     recommendation: '정기적인 모니터링을 권장합니다.'

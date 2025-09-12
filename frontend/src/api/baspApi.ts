@@ -26,17 +26,6 @@ export interface BaspApiResponse {
   disclaimers: string[];
   rawScore: number;
   lifestyleRisk: number;
-  ragGuide?: {
-    answers: string[];
-    citations: {
-      n: number;
-      title: string;
-      publisher: string;
-      year?: number;
-      url?: string;
-      snippet?: string;
-    }[];
-  };
 }
 
 export const baspApi = {
@@ -73,7 +62,6 @@ export const baspApi = {
 
       const data: BaspApiResponse = await response.json();
       console.log('API 응답 데이터:', data);
-      console.log('RAG 가이드 데이터:', data.ragGuide);
       
       return {
         baspCode: data.baspCode,
@@ -84,7 +72,6 @@ export const baspApi = {
         summaryText: data.summaryText,
         recommendations: data.recommendations,
         disclaimers: data.disclaimers,
-        ragGuide: data.ragGuide
       };
     } catch (error) {
       console.error('BASP API 호출 중 오류:', error);

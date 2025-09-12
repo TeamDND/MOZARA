@@ -53,7 +53,20 @@ export function computeResult(answers: SelfCheckAnswers): BaselineResult {
     answers.density, 
     answers.vertex
   );
-  const baspResult = getBaspResult(baspCode);
+  
+  // SP 부분만 추출 (BA 부분 제거)
+  let spPart = '';
+  if (answers.hairline === 'L') {
+    spPart = baspCode.substring(1); // 'L' 제거
+  } else {
+    // M, C, U의 경우 숫자까지 포함해서 제거
+    const baPattern = new RegExp(`^${answers.hairline}\\d*`);
+    spPart = baspCode.replace(baPattern, '');
+  }
+  
+  // baspBasic + baspSpecific 조합으로 최종 코드 생성
+  const finalBaspCode = `${answers.hairline}${spPart}`;
+  const baspResult = getBaspResult(finalBaspCode);
   
   const recommendations = getRecommendations(baspResult.stageLabel, answers.lifestyle);
   
@@ -63,9 +76,9 @@ export function computeResult(answers: SelfCheckAnswers): BaselineResult {
   ];
   
   return {
-    baspCode: `${answers.hairline}${baspCode.replace(answers.hairline, '')}`, // baspBasic + baspSpecific 조합
+    baspCode: finalBaspCode, // baspBasic + baspSpecific 조합
     baspBasic: answers.hairline,
-    baspSpecific: baspCode.replace(answers.hairline, ''), // BA 부분 제거한 SP 부분만
+    baspSpecific: spPart, // SP 부분만
     stageNumber: baspResult.stageNumber,
     stageLabel: baspResult.stageLabel,
     summaryText: baspResult.summaryText,

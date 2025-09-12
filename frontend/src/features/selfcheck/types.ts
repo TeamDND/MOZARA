@@ -19,19 +19,6 @@ export interface SelfCheckAnswers {
   lifestyle: LifestyleAnswers;
 }
 
-export interface Citation {
-  n: number;
-  title: string;
-  publisher: string;
-  year?: number;
-  url?: string;
-  snippet?: string;
-}
-
-export interface RagGuide {
-  answers: string[];
-  citations: Citation[];
-}
 
 export interface BaselineResult {
   baspCode: string;                 // 예: LF1V2, M0F3V1 등
@@ -42,7 +29,6 @@ export interface BaselineResult {
   summaryText: string;
   recommendations: string[];
   disclaimers: string[];
-  ragGuide?: RagGuide;              // RAG 기반 가이드 (선택적)
 }
 
 export interface SelfCheckStep {
