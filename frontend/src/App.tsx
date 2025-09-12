@@ -14,6 +14,8 @@ import AiToolList from './page/AiToolList';
 import MainContent from './page/MainContent';
 import YouTubeVideos from './page/YouTubeVideos';
 import HairEncyclopediaMain from './features/hairEncyclopedia/HairEncyclopediaMain';
+import HairDiagnosis from './components/HairDiagnosis';
+import HairQuiz from './components/HairQuiz';
 
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
@@ -31,6 +33,8 @@ const App: React.FC = () => {
           <Route path="basp-check" element={<BaspSelfCheck />} />
           <Route path="ai-tools" element={<AiToolList />} />
           <Route path="hair-encyclopedia/*" element={<HairEncyclopediaMain />} />
+          <Route path="hair-diagnosis" element={<HairDiagnosis />} />
+          <Route path="hair-quiz" element={<HairQuiz />} />
         </Route>
         
         <Route path="/signup" element={<SignUp />} />

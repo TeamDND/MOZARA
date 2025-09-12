@@ -10,6 +10,10 @@ from typing import Optional, Dict, Any
 import os
 import google.generativeai as genai
 import traceback
+from dotenv import load_dotenv
+
+# .env 파일 로드 (상위 디렉토리의 .env 파일 사용)
+load_dotenv("../../../../../.env")
 
 from ..data.pinecone_client import PineconeClient
 from ..models.hair_analysis_result import HairAnalysisResult

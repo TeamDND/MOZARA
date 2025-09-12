@@ -9,8 +9,8 @@ from transformers import CLIPProcessor, CLIPModel
 import torch
 from pathlib import Path
 
-# .env 파일 로드 (상위 디렉토리에서 찾기)
-load_dotenv("../../.env")
+# .env 파일 로드 (상위 디렉토리의 .env 파일 사용)
+load_dotenv("../../../../.env")
 
 def load_clip_model():
     """CLIP 모델 로드"""
