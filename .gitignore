@@ -1,0 +1,125 @@
+# Environment variables
+.env
+*.env
+.env.local
+.env.development
+.env.production
+
+# Docker
+docker-compose.override.yml
+.docker/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Build outputs
+build/
+dist/
+target/
+*.jar
+*.war
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# API Keys and secrets
+secrets/
+keys/
+*.pem
+*.key
+
+# Hair damage data (if contains sensitive info)
+hair_damage/
+*.jpg
+*.png
+*.jpeg
+
+# Python specific
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Spring Boot specific
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Frontend specific
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/.next/
+frontend/out/
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+/backend/python/nul
+/backend/python/services/nul
+/frontend/src/nul
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST

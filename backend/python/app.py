@@ -1,11 +1,18 @@
+
 """
 MOZARA Python Backend 통합 애플리케이션
 """
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pydantic import BaseModel
 from typing import Optional
+from dotenv import load_dotenv
+from datetime import datetime
+import os
+
+# .env 파일 로드 (상위 디렉토리의 .env 파일 사용)
+load_dotenv("../../.env")
 
 # MOZARA Hair Change 모듈
 try:
@@ -66,7 +73,23 @@ if HAIR_ANALYSIS_AVAILABLE and hair_analysis_app:
     app.mount("/api/hair-damage", hair_analysis_app)
     print("✅ Hair Damage Analysis 라우터 마운트 완료")
 else:
+    index = None
     print("⚠️ Hair Damage Analysis 라우터 마운트 건너뜀")
+
+# OpenAI setup
+openai_api_key = os.getenv("OPENAI_API_KEY")
+if openai_api_key:
+    openai_client = OpenAI(api_key=openai_api_key)
+    print("OpenAI 클라이언트 초기화 완료")
+else:
+    openai_client = None
+    print("Warning: OPENAI_API_KEY가 설정되지 않았습니다. 일부 기능이 제한될 수 있습니다.")
+
+from services.hair_loss_products import (
+    HAIR_LOSS_STAGE_PRODUCTS,
+    STAGE_DESCRIPTIONS,
+    build_stage_response,
+)
 
 # API 엔드포인트 정의
 @app.get("/")
@@ -86,6 +109,59 @@ def read_root():
 def health_check():
     """헬스 체크 엔드포인트"""
     return {"status": "healthy", "service": "python-backend-integrated"}
+
+# --- YouTube API 프록시 (조건부) ---
+@app.get("/api/youtube/search")
+async def search_youtube_videos(q: str, order: str = "viewCount", max_results: int = 12):
+    """YouTube API 프록시 - API 키를 백엔드에서 관리"""
+    # URL 디코딩 처리
+    import urllib.parse
+    original_q = q
+    q = urllib.parse.unquote(q)
+    print(f"🔍 YouTube 검색 요청 - 원본: {original_q}, 디코딩: {q}, 정렬: {order}, 최대결과: {max_results}")
+    
+    try:
+        import requests
+        print("✅ requests 모듈 로드 성공")
+    except ImportError:
+        print("❌ requests 모듈 로드 실패")
+        raise HTTPException(status_code=500, detail="requests 모듈이 설치되지 않았습니다. pip install requests를 실행하세요.")
+    
+    youtube_api_key = os.getenv("YOUTUBE_API_KEY")
+    print(f"🔑 YouTube API 키 상태: {'설정됨' if youtube_api_key and youtube_api_key != 'your_youtube_api_key_here' else '설정되지 않음'}")
+    
+    try:
+        api_url = f"https://www.googleapis.com/youtube/v3/search"
+        params = {
+            "part": "snippet",
+            "q": q,
+            "order": order,
+            "type": "video",
+            "maxResults": max_results,
+            "key": youtube_api_key
+        }
+        
+        print(f"🌐 YouTube API 호출: {api_url}")
+        print(f"📋 파라미터: {params}")
+        
+        response = requests.get(api_url, params=params)
+        print(f"📡 응답 상태: {response.status_code}")
+        
+        response.raise_for_status()
+        
+        result = response.json()
+        print(f"✅ YouTube API 응답 성공: {len(result.get('items', []))}개 영상")
+        return result
+        
+    except requests.exceptions.RequestException as e:
+        print(f"❌ YouTube API 호출 실패: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"YouTube API 호출 실패: {str(e)}")
+    except Exception as e:
+        print(f"❌ 예상치 못한 오류: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"예상치 못한 오류: {str(e)}")
+
+
+    
 
 
 # --- Hair Change API (조건부) ---
@@ -142,6 +218,37 @@ if BASP_AVAILABLE:
             raise HTTPException(status_code=500, detail=f"진단 중 오류가 발생했습니다: {str(e)}")
 
 
+
+@app.get("/api/products")
+async def get_hair_loss_products(
+    stage: int = Query(..., description="탈모 단계 (1-6)", ge=1, le=6)
+):
+    """탈모 단계별 제품 추천 API"""
+    try:
+        print(f"탈모 단계별 제품 요청: stage={stage}")
+        
+        # 서비스 계층에서 결과 구성
+        result = build_stage_response(stage)
+        
+        print(f"성공: {stage}단계 제품 {result.get('totalCount', 0)}개 반환")
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"탈모 단계별 제품 조회 중 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"제품 조회 중 오류가 발생했습니다: {str(e)}")
+
+@app.get("/api/products/health")
+async def products_health_check():
+    """제품 추천 서비스 헬스체크"""
+    return {
+        "status": "healthy",
+        "service": "hair-products-recommendation",
+        "timestamp": datetime.now().isoformat()
+    }
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
