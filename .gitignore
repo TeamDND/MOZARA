@@ -9,3 +9,6 @@ __pycache__/
 # frontend/.gitignore
 node_modules/
 .env.local
+/backend/python/nul
+/backend/python/services/nul
+/frontend/src/nul
