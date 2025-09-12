@@ -113,36 +113,6 @@ async def search_youtube_videos(q: str, order: str = "viewCount", max_results: i
     youtube_api_key = os.getenv("YOUTUBE_API_KEY")
     print(f"🔑 YouTube API 키 상태: {'설정됨' if youtube_api_key and youtube_api_key != 'your_youtube_api_key_here' else '설정되지 않음'}")
     
-    # 임시로 더미 데이터 사용 (API 키 문제 해결 전까지)
-    # print("📺 임시로 더미 데이터 사용")
-    # if True:  # 강제로 더미 데이터 사용
-    #     # API 키가 없거나 기본값인 경우 더미 데이터 반환
-    #     print("📺 더미 데이터 반환")
-    #     return {
-    #         "items": [
-    #             {
-    #                 "id": {"videoId": "dummy_video_id_1"},
-    #                 "snippet": {
-    #                     "title": f"더미 영상 1: {q}",
-    #                     "channelTitle": "더미 채널",
-    #                     "thumbnails": {
-    #                         "high": {"url": "https://placehold.co/300x168/E8E8E8/424242?text=더미+영상"}
-    #                     }
-    #                 }
-    #             },
-    #             {
-    #                 "id": {"videoId": "dummy_video_id_2"},
-    #                 "snippet": {
-    #                     "title": f"더미 영상 2: {q}",
-    #                     "channelTitle": "더미 채널",
-    #                     "thumbnails": {
-    #                         "high": {"url": "https://placehold.co/300x168/E8E8E8/424242?text=더미+영상"}
-    #                     }
-    #                 }
-    #             }
-    #         ]
-    #     }
-    
     try:
         api_url = f"https://www.googleapis.com/youtube/v3/search"
         params = {
