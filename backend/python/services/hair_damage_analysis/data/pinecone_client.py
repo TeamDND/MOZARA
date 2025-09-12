@@ -8,7 +8,7 @@ from pinecone import Pinecone
 import traceback
 
 # .env 파일 로드 (상위 디렉토리의 .env 파일 사용)
-load_dotenv("../../../.env")
+load_dotenv("../../../../../.env")
 
 class PineconeClient:
     def __init__(self):
