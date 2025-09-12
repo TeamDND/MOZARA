@@ -5,12 +5,12 @@ import { store } from '../store/store';
 
 // TypeScript: API 클라이언트 인스턴스 생성
 const apiClient = axios.create({
-    baseURL: 'http://localhost:8080/api',
+    baseURL: 'http://localhost:8080/api', // 기본값, 동적으로 변경 가능
     headers: {
         'Content-Type': 'application/json',
     },
     withCredentials: true,
-    timeout: 5000,
+    timeout: 120000,
 });
 
 // TypeScript: 요청 인터셉터 - 요청 전에 실행되는 함수

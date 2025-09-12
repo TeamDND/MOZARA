@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 interface Counters {
   water: number;
@@ -85,7 +85,7 @@ const HairPT: React.FC = () => {
     lastPlayDate: new Date().toDateString(),
     plantStage: 'seed'
   });
-  const [statusMessage, setStatusMessage] = useState('오늘의 건강한 습관을 실천하고 새싹을 키워보세요!');
+  const [statusMessage] = useState('오늘의 건강한 습관을 실천하고 새싹을 키워보세요!');
   const [showAchievement, setShowAchievement] = useState(false);
   const [achievementData, setAchievementData] = useState({ icon: '', title: '', description: '' });
   const [showSidebar, setShowSidebar] = useState(false);
@@ -130,7 +130,7 @@ const HairPT: React.FC = () => {
   };
 
   // 일일 리셋 함수
-  const resetDailyMissions = () => {
+  const resetDailyMissions = useCallback(() => {
     const today = new Date().toDateString();
     if (lastResetDate !== today) {
       setCounters({ water: 0, effector: 0 });
@@ -161,13 +161,13 @@ const HairPT: React.FC = () => {
       });
       setLastResetDate(today);
     }
-  };
+  }, [lastResetDate]);
 
   // 컴포넌트 마운트 시 리셋 확인
   useEffect(() => {
     resetDailyMissions();
     loadGameState();
-  }, []);
+  }, [resetDailyMissions]);
 
   // 오늘 날짜를 기준으로 7일간의 날짜 데이터 생성
   const generateDateData = () => {
@@ -338,8 +338,6 @@ const HairPT: React.FC = () => {
   const showContent = (tabId: string) => {
     setActiveTab(tabId);
   };
-
-  const tabs = ['routine', 'nutrition', 'clean', 'weekly'];
 
   return (
     <div className="bg-gray-100 min-h-screen p-2 md:p-4">

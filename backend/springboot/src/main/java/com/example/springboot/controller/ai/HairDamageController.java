@@ -11,7 +11,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/hair-damage")
+@RequestMapping("/api/ai/hair-damage")
 @CrossOrigin(origins = "*")
 public class HairDamageController {
     
