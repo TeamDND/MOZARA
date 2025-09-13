@@ -14,7 +14,7 @@ class PubMedSchedulerService:
     def setup_logging(self):
         log_file = os.path.join(os.path.dirname(__file__), "scheduler.log")
         logging.basicConfig(
-            level=logging.INFO,
+            level=logging.WARNING,
             format='%(asctime)s - %(levelname)s - %(message)s',
             handlers=[
                 logging.FileHandler(log_file, encoding='utf-8'),
