@@ -487,6 +487,53 @@ const BaspSelfCheck: React.FC = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* 탈모 지식 백과 */}
+                <div className="bg-white rounded-xl p-8 shadow-lg border border-orange-200">
+                  <div className="flex items-start gap-6">
+                    <div className="w-20 h-20 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <span className="text-orange-600 text-3xl">📚</span>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-xl font-bold text-gray-800 mb-3">맞춤 탈모 지식 백과</h4>
+                      <p className="text-gray-600 mb-4 leading-relaxed">
+                        진단 결과에 맞는 맞춤형 탈모 지식과
+                        전문 정보를 제공해드립니다.
+                      </p>
+                      <div className="space-y-2 mb-6">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                          <span>탈모의 원인</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                          <span>탈모의 예방</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                          <span>탈모의 치료</span>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => {
+                          // 단계별 맞춤 백과사전 링크
+                          const encyclopediaLinks = {
+                            0: '/hair-encyclopedia/category/prevention', // 정상: 예방 및 관리법
+                            1: '/hair-encyclopedia/category/causes', // 초기: 원인 개요
+                            2: '/hair-encyclopedia/category/treatment', // 중기: 치료법 개요
+                            3: '/hair-encyclopedia/category/research' // 심화: 연구 동향
+                          };
+                          const targetLink = encyclopediaLinks[result.stageNumber as keyof typeof encyclopediaLinks] || '/hair-encyclopedia';
+                          navigate(targetLink);
+                          window.scrollTo(0, 0); // 페이지 맨 위로 스크롤
+                        }}
+                        className="w-full px-6 py-3 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 transition-colors"
+                      >
+                        맞춤 지식 보기
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
