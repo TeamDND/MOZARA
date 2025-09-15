@@ -29,6 +29,8 @@ export default function YouTubeVideos() {
   const [searchQuery, setSearchQuery] = useState('탈모');
   const [feedTitle, setFeedTitle] = useState('⭐ 인기 급상승 영상');
   const [selectedStage, setSelectedStage] = useState('stage0');
+  const [likedVideos, setLikedVideos] = useState<Set<string>>(new Set());
+  const [username, setUsername] = useState('testuser'); // 임시 사용자명
 
   const fetchVideosFromYouTube = useCallback(async (query: string, order: string = 'viewCount') => {
     setLoading(true);
@@ -77,6 +79,41 @@ export default function YouTubeVideos() {
     }
   }, [selectedStage, fetchVideosFromYouTube]);
 
+  // 찜 토글 기능
+  const toggleLike = useCallback(async (videoId: string) => {
+    try {
+      await apiClient.post('/api/userlog/youtube/like', null, {
+        params: {
+          username: username,
+          videoId: videoId
+        }
+      });
+      
+      setLikedVideos(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(videoId)) {
+          newSet.delete(videoId);
+        } else {
+          newSet.add(videoId);
+        }
+        return newSet;
+      });
+    } catch (error) {
+      console.error('찜 토글 실패:', error);
+    }
+  }, [username]);
+
+  // 사용자의 찜한 영상 목록 불러오기
+  const fetchLikedVideos = useCallback(async () => {
+    try {
+      const response = await apiClient.get(`/api/userlog/youtube/likes/${username}`);
+      const likedVideoIds = response.data.split(',').filter((id: string) => id.trim() !== '');
+      setLikedVideos(new Set(likedVideoIds));
+    } catch (error) {
+      console.error('찜한 영상 목록 불러오기 실패:', error);
+    }
+  }, [username]);
+
   // 검색 입력 debounce
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -89,7 +126,8 @@ export default function YouTubeVideos() {
   // 초기 로드
   useEffect(() => {
     fetchVideosFromYouTube('탈모', 'viewCount');
-  }, [fetchVideosFromYouTube]);
+    fetchLikedVideos();
+  }, [fetchVideosFromYouTube, fetchLikedVideos]);
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: "#f9f9f9" }}>
@@ -217,24 +255,44 @@ export default function YouTubeVideos() {
                   {!loading && !error && videos.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {videos.map((video) => (
-                        <a
+                        <div
                           key={video.videoId}
-                          href={`https://www.youtube.com/watch?v=${video.videoId}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="group block bg-white rounded-xl border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
+                          className="group bg-white rounded-xl border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
                         >
                           <div className="relative">
-                            <img
-                              src={video.thumbnailUrl}
-                              alt={video.title}
-                              className="w-full aspect-video object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = 'https://placehold.co/300x168/E8E8E8/424242?text=Image+Error';
+                            <a
+                              href={`https://www.youtube.com/watch?v=${video.videoId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block"
+                            >
+                              <img
+                                src={video.thumbnailUrl}
+                                alt={video.title}
+                                className="w-full aspect-video object-cover"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = 'https://placehold.co/300x168/E8E8E8/424242?text=Image+Error';
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
+                            </a>
+                            {/* 찜 버튼 */}
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleLike(video.videoId);
                               }}
-                            />
-                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
+                              className="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-all duration-200 shadow-lg hover:shadow-xl"
+                              title={likedVideos.has(video.videoId) ? "찜 취소" : "찜하기"}
+                            >
+                              <span className={`text-xl transition-colors duration-200 ${
+                                likedVideos.has(video.videoId) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
+                              }`}>
+                                {likedVideos.has(video.videoId) ? '❤️' : '🤍'}
+                              </span>
+                            </button>
                           </div>
                           <div className="p-4">
                             <div className="flex items-start gap-3">
@@ -242,14 +300,21 @@ export default function YouTubeVideos() {
                                 <span className="text-gray-600 text-sm">📺</span>
                               </div>
                               <div className="flex-1 min-w-0">
-                                <h4 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors text-sm leading-tight">
-                                  {video.title}
-                                </h4>
+                                <a
+                                  href={`https://www.youtube.com/watch?v=${video.videoId}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="block"
+                                >
+                                  <h4 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors text-sm leading-tight">
+                                    {video.title}
+                                  </h4>
+                                </a>
                                 <p className="text-xs text-gray-600 mt-2">{video.channelName}</p>
                               </div>
                             </div>
                           </div>
-                        </a>
+                        </div>
                       ))}
                     </div>
                   )}

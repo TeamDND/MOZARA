@@ -1,4 +1,4 @@
-package com.example.springboot.service;
+package com.example.springboot.service.user;
 
 import com.example.springboot.data.dao.UserDAO;
 import com.example.springboot.data.entity.UserEntity;
@@ -23,12 +23,8 @@ public class CustomUserDetailService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // userDAO를 사용하여 데이터베이스에서 사용자 정보를 조회합니다.
-        UserEntity user = userDAO.findByUsername(username);
-
-        if (user == null) {
-            // 사용자가 존재하지 않으면 예외를 던집니다.
-            throw new UsernameNotFoundException("해당 사용자를 찾을 수 없습니다: " + username);
-        }
+        UserEntity user = userDAO.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("해당 사용자를 찾을 수 없습니다: " + username));
         // --- 추가된 로그 코드 ---
         String userRole = user.getRole();
         System.out.println("User found. Role from database: " + userRole);
