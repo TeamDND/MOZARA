@@ -1,6 +1,6 @@
 package com.example.springboot.controller.ai;
 
-import com.example.springboot.service.HairEncyclopediaService;
+import com.example.springboot.service.ai.HairEncyclopediaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

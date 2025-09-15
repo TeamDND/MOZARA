@@ -1,6 +1,6 @@
 package com.example.springboot.controller.ai;
 
-import com.example.springboot.service.HairChangeService;
+import com.example.springboot.service.ai.HairChangeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

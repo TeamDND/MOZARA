@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 interface Counters {
   water: number;
@@ -92,6 +92,10 @@ const HairPT: React.FC = () => {
     plantStage: 'seed'
   });
   const [statusMessage] = useState('오늘의 건강한 습관을 실천하고 새싹을 키워보세요!');
+  const [plantTitle, setPlantTitle] = useState<string>('새싹 키우기');
+  const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
+  const titleInputRef = useRef<HTMLInputElement | null>(null);
+  const [toast, setToast] = useState<{ visible: boolean; message: string }>({ visible: false, message: '' });
   const [showAchievement, setShowAchievement] = useState(false);
   const [achievementData, setAchievementData] = useState({ icon: '', title: '', description: '' });
   const [showSidebar, setShowSidebar] = useState(false);
@@ -176,25 +180,42 @@ const HairPT: React.FC = () => {
   useEffect(() => {
     resetDailyMissions();
     loadGameState();
+    const savedTitle = localStorage.getItem('plantTitle');
+    if (savedTitle) setPlantTitle(savedTitle);
   }, [resetDailyMissions]);
 
-  // 오늘 날짜를 기준으로 7일간의 날짜 데이터 생성
+  const startEditTitle = () => {
+    setIsEditingTitle(true);
+    setTimeout(() => titleInputRef.current?.focus(), 0);
+  };
+
+  const saveTitle = () => {
+    localStorage.setItem('plantTitle', plantTitle);
+    setIsEditingTitle(false);
+    setToast({ visible: true, message: '제목이 저장되었습니다.' });
+    setTimeout(() => setToast({ visible: false, message: '' }), 1800);
+  };
+
+  // 이번 주(일요일~토요일) 날짜 데이터 생성
   const generateDateData = () => {
     const today = new Date();
-    const dates = [];
-    
-    for (let i = -3; i <= 3; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      
+    const dates: any[] = [];
+    const startOfWeek = new Date(today);
+    // 일요일부터 시작 (0: 일요일)
+    startOfWeek.setDate(today.getDate() - today.getDay());
+
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + i);
+
       dates.push({
         date: date.getDate(),
         day: date.toLocaleDateString('ko-KR', { weekday: 'short' }),
         fullDate: date,
-        isToday: i === 0
+        isToday: date.toDateString() === today.toDateString()
       });
     }
-    
+
     return dates;
   };
 
@@ -415,13 +436,6 @@ const HairPT: React.FC = () => {
           >
             <i className="fas fa-magnifying-glass text-blue-400 text-xs md:text-sm"></i>
             <span className="hidden sm:inline">청결</span>
-          </div>
-          <div 
-            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-2 md:px-3 py-2 rounded-lg transition-colors ${activeTab === 'weekly' ? 'text-blue-500 bg-blue-50' : 'text-gray-600 hover:bg-gray-50'}`}
-            onClick={() => showContent('weekly')}
-          >
-            <i className="fas fa-fire text-orange-500 text-xs md:text-sm"></i>
-            <span className="hidden sm:inline">주간</span>
           </div>
         </div>
 
@@ -715,6 +729,35 @@ const HairPT: React.FC = () => {
                 <button {...getMissionButtonProps('dryHair')} />
               </div>
 
+              {/* Task Card: Massage (moved from routine) */}
+              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-pink-100 rounded-lg">
+                      <i className="fas fa-hand-holding-medical text-pink-500 text-lg md:text-xl"></i>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base md:text-lg font-semibold">백회혈/사신총혈 마사지</h3>
+                    <p className="text-xs md:text-sm text-gray-500">상열감 감소로 탈모 예방</p>
+                  </div>
+                </div>
+                <button 
+                  className={`w-full py-3 md:py-4 rounded-full font-bold transition-colors ${
+                    missionState.massage 
+                      ? 'bg-green-500 text-white cursor-not-allowed' 
+                      : 'bg-blue-500 hover:bg-blue-600 text-white'
+                  }`}
+                  onClick={() => {
+                    if (!missionState.massage) {
+                      setShowVideoModal(true);
+                      toggleMission('massage');
+                    }
+                  }}
+                  disabled={missionState.massage}
+                >
+                  {missionState.massage ? '완료됨' : '시작하기'}
+                </button>
+              </div>
+
               {/* Task Card: Brush hair before shampoo */}
               <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
                 <div className="flex items-center space-x-4 mb-4">
@@ -728,60 +771,8 @@ const HairPT: React.FC = () => {
                 </div>
                 <button {...getMissionButtonProps('brushHair')} />
               </div>
-            </>
-          )}
 
-          {/* Weekly Content */}
-          {activeTab === 'weekly' && (
-            <>
-              {/* Task Card: Photo Recording */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-purple-100 rounded-lg">
-                    <i className="fas fa-camera text-purple-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">사진 기록하기</h3>
-                    <p className="text-xs md:text-sm text-gray-500">두피 상태 기록하기</p>
-                  </div>
-                </div>
-                <button 
-                  className="w-full py-3 md:py-4 rounded-full font-bold transition-colors bg-purple-500 hover:bg-purple-600 text-white"
-                  onClick={takeScalpPhoto}
-                >
-                  사진 촬영하기
-                </button>
-              </div>
-
-              {/* Task Card: Scalp Scrub */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-blue-100 rounded-lg">
-                    <i className="fas fa-spa text-blue-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">두피 스크럽</h3>
-                    <p className="text-xs md:text-sm text-gray-500">각질 제거 및 모공 청결</p>
-                  </div>
-                </div>
-                <button {...getMissionButtonProps('scalpScrub', '스크럽하기')} />
-              </div>
-
-              {/* Task Card: Sleep before 11 */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-indigo-100 rounded-lg">
-                    <i className="fas fa-moon text-indigo-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">11시 전에 잠자기</h3>
-                    <p className="text-xs md:text-sm text-gray-500">충분한 수면으로 모발 건강</p>
-                  </div>
-                </div>
-                <button {...getMissionButtonProps('earlySleep', '잠자기')} />
-              </div>
-
-              {/* Task Card: Scalp Nutrition Pack */}
+              {/* Task Card: Scalp Nutrition Pack (moved from weekly) */}
               <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
                 <div className="flex items-center space-x-4 mb-4">
                   <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-green-100 rounded-lg">
@@ -796,6 +787,7 @@ const HairPT: React.FC = () => {
               </div>
             </>
           )}
+          
           </div>
         </main>
 
@@ -865,7 +857,39 @@ const HairPT: React.FC = () => {
           {/* Plant Game Header */}
           <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4">
             <div className="flex justify-between items-center mb-3">
-              <h2 className="text-lg font-bold">🌱 새싹 키우기</h2>
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold">🌱</span>
+                {isEditingTitle ? (
+                  <input
+                    value={plantTitle}
+                    onChange={(e) => setPlantTitle(e.target.value)}
+                    onBlur={saveTitle}
+                    className="px-2 py-1 rounded-md text-gray-800"
+                    ref={titleInputRef}
+                    autoFocus
+                  />
+                ) : (
+                  <h2 className="text-lg font-bold" onDoubleClick={startEditTitle}>{plantTitle}</h2>
+                )}
+                {!isEditingTitle ? (
+                  <button
+                    title="제목 편집"
+                    onClick={startEditTitle}
+                    className="ml-1 p-1 rounded-md bg-white/20 hover:bg-white/30"
+                  >
+                    <i className="fas fa-pen"></i>
+                  </button>
+                ) : (
+                  <button
+                    title="저장"
+                    onMouseDown={(e) => { e.preventDefault(); }}
+                    onClick={saveTitle}
+                    className="ml-1 px-2 py-1 rounded-md bg-white text-indigo-600 font-semibold hover:bg-gray-100"
+                  >
+                    저장
+                  </button>
+                )}
+              </div>
               <button
                 onClick={() => setShowSidebar(false)}
                 className="lg:hidden p-1 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
@@ -930,6 +954,15 @@ const HairPT: React.FC = () => {
             {gameState.level}
           </div>
         </button>
+
+        {/* Toast */}
+        {toast.visible && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+            <div className="px-4 py-2 bg-gray-900 text-white rounded-full shadow-lg text-sm">
+              {toast.message}
+            </div>
+          </div>
+        )}
 
       </div>
     </div>
