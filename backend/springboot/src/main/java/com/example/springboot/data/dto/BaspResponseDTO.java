@@ -20,5 +20,4 @@ public class BaspResponseDTO {
     private List<String> disclaimers;     // 디스클레이머
     private Integer rawScore;          // 원시 점수
     private Integer lifestyleRisk;     // 생활습관 리스크 점수
-    private RagGuideDTO ragGuide;      // RAG 기반 가이드 (선택적)
 }

@@ -29,7 +29,7 @@ const ArticlePage = () => {
       <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-8">
         <Link to="/" className="hover:text-gray-900">홈</Link>
         <ChevronRight className="w-4 h-4" />
-        <Link to={`/category/${article.category.id}`} className="hover:text-gray-900">
+        <Link to={`/hair-encyclopedia/category/${article.category.id}`} className="hover:text-gray-900">
           {article.category.name}
         </Link>
         <ChevronRight className="w-4 h-4" />
@@ -143,11 +143,6 @@ const ArticlePage = () => {
       </article>
 
       <aside className="mt-12 pt-8 border-t border-gray-200">
-        <h3 className="flex items-center text-xl font-bold text-gray-900 mb-6">
-          <BookOpen className="w-5 h-5 mr-2" />
-          관련 아티클
-        </h3>
-        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {relatedArticles.map((relatedArticle) => (
             <Link

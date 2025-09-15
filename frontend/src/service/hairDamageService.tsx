@@ -30,7 +30,7 @@ export interface HairAnalysisResponse {
 
 
 class HairDamageService {
-  private readonly baseUrl = '/api/hair-damage';
+  private readonly baseUrl = '/ai/hair-damage';
   
   /**
    * Header와 Footer를 포함한 레이아웃 컴포넌트
@@ -62,15 +62,12 @@ class HairDamageService {
         formData.append('textQuery', request.textQuery);
       }
 
-      const response = await fetch(`http://localhost:8080${this.baseUrl}/analyze`, {
-        method: 'POST',
-        body: formData,
+      const response = await apiClient.post(`${this.baseUrl}/analyze`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.error('모발 손상 분석 오류:', error);
       throw new Error('모발 손상 분석 중 오류가 발생했습니다.');
