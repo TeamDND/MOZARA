@@ -1,7 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
-import Footer from './Footer';
 
 // 아이콘 컴포넌트들
 const Camera = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
@@ -106,7 +104,6 @@ export default function HairCheck() {
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: "#f9f9f9" }}>
-      <Header />
 
       {/* 배경 효과 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -236,7 +233,7 @@ export default function HairCheck() {
               </div>
             </div>
 
-            {/* 추가 정보 섹션 */}
+            {/* 추가 정보 섹션
             <div className="bg-white/50 backdrop-blur rounded-2xl p-8 border border-gray-200">
               <div className="text-center">
                 <h3 className="text-xl font-bold text-gray-900 mb-4">서비스 특징</h3>
@@ -273,12 +270,11 @@ export default function HairCheck() {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
 
-      <Footer />
     </div>
   );
 }

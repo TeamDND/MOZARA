@@ -23,12 +23,12 @@ class PineconeClient:
         """
         Initializes the Pinecone client and connects to the index using host.
         """
-        print("🔍 Pinecone 초기화 및 연결 시작...")
+        print("Pinecone 초기화 및 연결 시작...")
         api_key = os.getenv("PINECONE_API_KEY")
         index_host = os.getenv("PINECONE_INDEX_HOST")
 
         if not api_key or not index_host:
-            print("❌ PINECONE_API_KEY 또는 PINECONE_INDEX_HOST 환경변수가 설정되지 않았습니다.")
+            print("PINECONE_API_KEY 또는 PINECONE_INDEX_HOST 환경변수가 설정되지 않았습니다.")
             self.index = None
             return
 
@@ -41,11 +41,11 @@ class PineconeClient:
 
             # Verify connection
             stats = self.index.describe_index_stats()
-            print("✅ Pinecone 인덱스 연결 완료!")
+            print("Pinecone 인덱스 연결 완료!")
             print(f"📊 현재 인덱스 통계: {stats}")
 
         except Exception as e:
-            print(f"❌ Pinecone 초기화 또는 연결 실패: {str(e)}")
+            print(f"Pinecone 초기화 또는 연결 실패: {str(e)}")
             self.index = None
 
     def insert_analysis_data(self, analysis_result: Dict[str, Any]) -> str:
@@ -53,7 +53,7 @@ class PineconeClient:
         분석 결과를 Pinecone에 저장
         """
         if not self.index:
-            print("❌ Pinecone 인덱스가 연결되지 않아 데이터 삽입을 건너뜁니다.")
+            print("Pinecone 인덱스가 연결되지 않아 데이터 삽입을 건너뜁니다.")
             return "dummy_id_not_inserted"
 
         vector_id = f"hair_loss_{len(analysis_result.get('image_vector', []))}_{hash(str(analysis_result))}"
@@ -97,7 +97,7 @@ class PineconeClient:
                 include_metadata=True
             )
         except Exception as e:
-            print(f"❌ Pinecone 검색 오류: {e}")
+            print(f"Pinecone 검색 오류: {e}")
             traceback.print_exc() # 이 부분은 계속 유지
             # 오류 메시지를 포함한 더미 결과 반환
             return {"error": f"Pinecone search failed: {str(e)}", "results": self._get_dummy_results()}

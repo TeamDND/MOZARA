@@ -23,7 +23,7 @@ export interface Hairstyle {
 }
 
 class HairChangeService {
-  private baseUrl = 'hair-change';
+  private baseUrl = 'ai/hair-change';
   
   /**
    * Header와 Footer를 포함한 레이아웃 컴포넌트

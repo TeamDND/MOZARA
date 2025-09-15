@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { configApi } from '../api/configApi';
 import Header from './Header';
+import apiClient from '../api/apiClient';
 
 interface Video {
   videoId: string;
@@ -35,16 +36,8 @@ export default function YouTubeVideos() {
 
     try {
       // Spring Boot를 통해 YouTube 데이터 가져오기
-      const apiUrl = `http://localhost:8080/api/youtube/search?q=${encodeURIComponent(query)}&order=${order}&max_results=12`;
-      
-      console.log('Backend API URL:', apiUrl);
-      
-      const response = await fetch(apiUrl);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || `HTTP ${response.status} Error`);
-      }
+      const response = await apiClient.get(`/ai/youtube/search?q=${encodeURIComponent(query)}&order=${order}&max_results=12`);
+      const data = response.data;
 
       if (data.items.length === 0) {
         throw new Error('검색 결과에 해당하는 영상이 없습니다.');
@@ -100,7 +93,6 @@ export default function YouTubeVideos() {
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: "#f9f9f9" }}>
-      <Header />
 
       {/* 배경 효과 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">

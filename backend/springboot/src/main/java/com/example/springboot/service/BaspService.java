@@ -2,8 +2,6 @@ package com.example.springboot.service;
 
 import com.example.springboot.data.dto.BaspRequestDTO;
 import com.example.springboot.data.dto.BaspResponseDTO;
-import com.example.springboot.data.dto.RagGuideDTO;
-import com.example.springboot.data.dto.CitationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -17,7 +15,6 @@ public class BaspService {
     private RestTemplate restTemplate;
     
     private static final String PYTHON_API_URL = "http://localhost:8000/api/basp/evaluate";
-    private static final String PYTHON_RAG_URL = "http://localhost:8000/api/rag/answer";
     
     public BaspResponseDTO evaluateBasp(BaspRequestDTO request) {
         try {
@@ -30,17 +27,6 @@ public class BaspService {
             );
             
             if (response != null) {
-                // RAG 가이드 추가 시도
-                try {
-                    RagGuideDTO ragGuide = getRagGuide(response);
-                    System.out.println("RAG 가이드 생성 완료: " + ragGuide);
-                    response.setRagGuide(ragGuide);
-                    System.out.println("응답에 RAG 가이드 설정 완료: " + response.getRagGuide());
-                } catch (Exception ragError) {
-                    System.err.println("RAG 가이드 생성 중 오류 발생: " + ragError.getMessage());
-                    ragError.printStackTrace();
-                    // RAG 실패해도 기본 응답은 반환
-                }
                 return response;
             }
         } catch (Exception e) {
@@ -93,14 +79,6 @@ public class BaspService {
                 .lifestyleRisk(lifestyleRisk)
                 .build();
         
-        // 로컬 계산에서도 RAG 가이드 추가 시도
-        try {
-            RagGuideDTO ragGuide = getRagGuide(response);
-            System.out.println("로컬 계산 RAG 가이드 생성 완료: " + ragGuide);
-            response.setRagGuide(ragGuide);
-        } catch (Exception ragError) {
-            System.err.println("로컬 계산 RAG 가이드 생성 중 오류: " + ragError.getMessage());
-        }
         
         return response;
     }
@@ -172,72 +150,4 @@ public class BaspService {
         return recommendations;
     }
     
-    private RagGuideDTO getRagGuide(BaspResponseDTO response) {
-        try {
-            System.out.println("=== RAG 가이드 요청 시작 ===");
-            System.out.println("BASP Basic: " + response.getBaspBasic());
-            System.out.println("BASP Specific: " + response.getBaspSpecific());
-            System.out.println("Stage Label: " + response.getStageLabel());
-            System.out.println("Risk Score: " + response.getLifestyleRisk());
-            
-            // RAG 요청 생성
-            Map<String, Object> ragRequest = new HashMap<>();
-            ragRequest.put("baspBasic", response.getBaspBasic());
-            ragRequest.put("baspSpecific", response.getBaspSpecific());
-            ragRequest.put("stageLabel", response.getStageLabel());
-            ragRequest.put("riskScore", response.getLifestyleRisk());
-            
-            System.out.println("RAG 요청 데이터: " + ragRequest);
-            System.out.println("RAG API URL: " + PYTHON_RAG_URL);
-            
-            // RAG API 호출
-            Map<String, Object> ragResponse = restTemplate.postForObject(
-                PYTHON_RAG_URL,
-                ragRequest,
-                Map.class
-            );
-            
-            System.out.println("RAG 응답 받음: " + ragResponse);
-            
-            if (ragResponse != null) {
-                @SuppressWarnings("unchecked")
-                List<String> answers = (List<String>) ragResponse.get("answer");
-                @SuppressWarnings("unchecked")
-                List<Map<String, Object>> citationsData = (List<Map<String, Object>>) ragResponse.get("citations");
-                
-                System.out.println("Answers: " + answers);
-                System.out.println("Citations: " + citationsData);
-                
-                List<CitationDTO> citations = new ArrayList<>();
-                if (citationsData != null) {
-                    for (Map<String, Object> citationData : citationsData) {
-                        CitationDTO citation = CitationDTO.builder()
-                            .n(citationData.get("n") != null ? ((Number) citationData.get("n")).intValue() : 0)
-                            .title(citationData.get("title") != null ? citationData.get("title").toString() : "")
-                            .publisher(citationData.get("publisher") != null ? citationData.get("publisher").toString() : "")
-                            .year(citationData.get("year") != null ? ((Number) citationData.get("year")).intValue() : null)
-                            .url(citationData.get("url") != null ? citationData.get("url").toString() : null)
-                            .snippet(citationData.get("snippet") != null ? citationData.get("snippet").toString() : null)
-                            .build();
-                        citations.add(citation);
-                    }
-                }
-                
-                RagGuideDTO result = RagGuideDTO.builder()
-                    .answers(answers != null ? answers : new ArrayList<>())
-                    .citations(citations)
-                    .build();
-                
-                System.out.println("최종 RAG 가이드: " + result);
-                return result;
-            } else {
-                System.out.println("RAG 응답이 null입니다.");
-            }
-            
-        } catch (Exception e) {
-            System.err.println("RAG 가이드 생성 중 오류: " + e.getMessage());
-        }
-        
-        return null;
-    }
 }
