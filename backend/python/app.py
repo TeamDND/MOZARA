@@ -108,14 +108,20 @@ else:
     print("OPENAI_API_KEY가 설정되지 않았습니다. 일부 기능이 제한될 수 있습니다.")
 
 # Google Gemini setup
+gemini_api_key = os.getenv("GEMINI_API_KEY")
 google_api_key = os.getenv("GOOGLE_API_KEY")
-if google_api_key:
+
+if gemini_api_key:
+    import google.generativeai as genai
+    genai.configure(api_key=gemini_api_key)
+    print("Google Gemini 클라이언트 초기화 완료 (GEMINI_API_KEY 사용)")
+elif google_api_key:
     import google.generativeai as genai
     genai.configure(api_key=google_api_key)
-    print("Google Gemini 클라이언트 초기화 완료")
+    print("Google Gemini 클라이언트 초기화 완료 (GOOGLE_API_KEY 사용)")
 else:
     genai = None
-    print("GOOGLE_API_KEY가 설정되지 않았습니다. Gemini 기능이 제한될 수 있습니다.")
+    print("GEMINI_API_KEY 또는 GOOGLE_API_KEY가 설정되지 않았습니다. Gemini 기능이 제한될 수 있습니다.")
 
 # Hair Encyclopedia Pydantic Models
 class SearchQuery(BaseModel):
