@@ -15,6 +15,7 @@ import os
 
 # .env 파일 로드 (프로젝트 루트의 .env 파일 사용)
 load_dotenv("../../.env")
+load_dotenv(".env")  # 현재 디렉토리도 확인
 
 # MOZARA Hair Change 모듈
 try:
@@ -106,6 +107,16 @@ else:
     openai_client = None
     print("OPENAI_API_KEY가 설정되지 않았습니다. 일부 기능이 제한될 수 있습니다.")
 
+# Google Gemini setup
+google_api_key = os.getenv("GOOGLE_API_KEY")
+if google_api_key:
+    import google.generativeai as genai
+    genai.configure(api_key=google_api_key)
+    print("Google Gemini 클라이언트 초기화 완료")
+else:
+    genai = None
+    print("GOOGLE_API_KEY가 설정되지 않았습니다. Gemini 기능이 제한될 수 있습니다.")
+
 # Hair Encyclopedia Pydantic Models
 class SearchQuery(BaseModel):
     question: str
@@ -138,6 +149,16 @@ class QnaQuery(BaseModel):
 class QnaResponse(BaseModel):
     answer: str
 
+# Gemini Hair Analysis Models
+class HairAnalysisRequest(BaseModel):
+    image_base64: str
+
+class HairAnalysisResponse(BaseModel):
+    stage: int
+    title: str
+    description: str
+    advice: List[str]
+
 from services.hair_loss_products import (
     HAIR_LOSS_STAGE_PRODUCTS,
     STAGE_DESCRIPTIONS,
@@ -155,11 +176,13 @@ def read_root():
             "hair_damage_analysis": "/api/hair-damage" if HAIR_ANALYSIS_AVAILABLE else "unavailable",
             "hair_change": "/generate_hairstyle" if HAIR_CHANGE_AVAILABLE else "unavailable",
             "basp_diagnosis": "/api/basp/evaluate" if BASP_AVAILABLE else "unavailable",
-            "hair_encyclopedia": "/api/paper" if openai_api_key else "unavailable"
+            "hair_encyclopedia": "/api/paper" if openai_api_key else "unavailable",
+            "gemini_hair_analysis": "/api/hair-analysis" if google_api_key else "unavailable"
         }
     }
 
 @app.get("/health")
+
 def health_check():
     """헬스 체크 엔드포인트"""
     return {"status": "healthy", "service": "python-backend-integrated"}
@@ -301,6 +324,66 @@ async def products_health_check():
     return {
         "status": "healthy",
         "service": "hair-products-recommendation",
+        "timestamp": datetime.now().isoformat()
+    }
+
+# --- Gemini Hair Analysis API ---
+@app.post("/api/hair-analysis", response_model=HairAnalysisResponse)
+async def analyze_hair_with_gemini(request: HairAnalysisRequest):
+    """Gemini API를 사용한 두피/탈모 분석"""
+    if not genai:
+        raise HTTPException(status_code=503, detail="Gemini API가 설정되지 않았습니다.")
+    
+    try:
+        # Gemini 모델 초기화
+        model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        
+        # 프롬프트 설정
+        prompt = """당신은 두피 및 탈모 분석 전문가입니다. 주어진 이미지를 분석하여 탈모 진행 단계를 1~7단계로 진단하고, 결과를 반드시 다음 JSON 형식으로만 응답해주세요: 
+        {"stage": <1-7>, "title": "<진단명>", "description": "<상세 설명>", "advice": ["<가이드 1>", "<가이드 2>"]}
+        
+        단계별 기준:
+        1-2단계: 정상 또는 초기 탈모
+        3-4단계: 중간 단계 탈모
+        5-7단계: 심각한 탈모"""
+        
+        # 이미지 데이터 처리
+        import base64
+        image_data = base64.b64decode(request.image_base64)
+        
+        # Gemini API 호출
+        response = model.generate_content([prompt, {"mime_type": "image/jpeg", "data": image_data}])
+        
+        # JSON 파싱
+        response_text = response.text
+        import re
+        json_match = re.search(r'\{[\s\S]*\}', response_text)
+        
+        if not json_match:
+            raise ValueError("JSON 형식의 응답을 찾을 수 없습니다.")
+        
+        result = json.loads(json_match.group())
+        
+        # 응답 검증
+        required_fields = ['stage', 'title', 'description', 'advice']
+        for field in required_fields:
+            if field not in result:
+                raise ValueError(f"필수 필드 '{field}'가 누락되었습니다.")
+        
+        return HairAnalysisResponse(**result)
+        
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=500, detail=f"JSON 파싱 오류: {str(e)}")
+    except Exception as e:
+        print(f"Gemini 분석 중 오류: {e}")
+        raise HTTPException(status_code=500, detail=f"분석 중 오류가 발생했습니다: {str(e)}")
+
+@app.get("/api/hair-analysis/health")
+async def hair_analysis_health_check():
+    """두피 분석 서비스 헬스체크"""
+    return {
+        "status": "healthy" if genai else "unavailable",
+        "service": "gemini-hair-analysis",
         "timestamp": datetime.now().isoformat()
     }
 
