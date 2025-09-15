@@ -55,18 +55,18 @@ export interface HairProductHealthResponse {
 export const hairProductApi = {
   /**
    * 탈모 단계별 제품 목록 조회
-   * @param stage 탈모 단계 (1-6)
+   * @param stage 탈모 단계 (0-3)
    * @returns 제품 목록과 단계별 정보
    */
   async getProductsByStage(stage: number): Promise<HairProductResponse> {
-    if (stage < 1 || stage > 6) {
-      throw new Error('탈모 단계는 1-6 사이의 값이어야 합니다.');
+    if (stage < 0 || stage > 3) {
+      throw new Error('탈모 단계는 0-3 사이의 값이어야 합니다.');
     }
 
     try {
       console.log(`탈모 ${stage}단계 제품 조회 시작`);
       
-      // Spring Boot를 통해 Python API 호출
+      // 스프링을 통해 Python API 호출
       const response = await apiClient.get<HairProductResponse>('/ai/products', {
         params: { stage },
         timeout: 10000, // 10초 타임아웃
