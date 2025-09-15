@@ -1,7 +1,7 @@
 package com.example.springboot.controller.ai;
 
-import com.example.springboot.data.dto.HairProductResponseDTO;
-import com.example.springboot.service.HairProductService;
+import com.example.springboot.data.dto.ai.HairProductResponseDTO;
+import com.example.springboot.service.ai.HairProductService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,14 +23,14 @@ public class HairProductController {
 
     /**
      * 탈모 단계별 제품 목록 조회
-     * @param stage 탈모 단계 (1-6)
+     * @param stage 탈모 단계 (0-3)
      * @return 제품 목록과 단계별 정보
      */
     @GetMapping
     public ResponseEntity<?> getProductsByStage(@RequestParam(name = "stage") int stage) {
-        if (stage < 1 || stage > 6) {
+        if (stage < 0 || stage > 3) {
             Map<String, Object> error = new HashMap<>();
-            error.put("message", "잘못된 탈모 단계입니다. 1-6단계 중 선택해주세요.");
+            error.put("message", "잘못된 탈모 단계입니다. 0-3단계 중 선택해주세요.");
             error.put("stage", stage);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
