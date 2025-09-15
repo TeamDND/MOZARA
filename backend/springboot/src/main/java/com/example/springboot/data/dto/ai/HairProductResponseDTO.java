@@ -1,4 +1,4 @@
-package com.example.springboot.data.dto;
+package com.example.springboot.data.dto.ai;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;

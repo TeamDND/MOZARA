@@ -1,7 +1,6 @@
-package com.example.springboot.service;
+package com.example.springboot.service.ai;
 
-import com.example.springboot.data.dto.HairProductDTO;
-import com.example.springboot.data.dto.HairProductResponseDTO;
+import com.example.springboot.data.dto.ai.HairProductResponseDTO;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -14,8 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.List;
 
 @Service
 public class HairProductService {

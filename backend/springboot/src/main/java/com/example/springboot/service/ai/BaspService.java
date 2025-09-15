@@ -1,7 +1,7 @@
-package com.example.springboot.service;
+package com.example.springboot.service.ai;
 
-import com.example.springboot.data.dto.BaspRequestDTO;
-import com.example.springboot.data.dto.BaspResponseDTO;
+import com.example.springboot.data.dto.ai.BaspRequestDTO;
+import com.example.springboot.data.dto.ai.BaspResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;

@@ -1,8 +1,8 @@
 package com.example.springboot.controller.ai;
 
-import com.example.springboot.data.dto.BaspRequestDTO;
-import com.example.springboot.data.dto.BaspResponseDTO;
-import com.example.springboot.service.BaspService;
+import com.example.springboot.data.dto.ai.BaspRequestDTO;
+import com.example.springboot.data.dto.ai.BaspResponseDTO;
+import com.example.springboot.service.ai.BaspService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
