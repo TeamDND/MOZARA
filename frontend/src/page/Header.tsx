@@ -30,13 +30,6 @@ export default function Header() {
     navigate('/');
   };
 
-  const handleHamburgerClick = () => {
-    setIsSidebarOpen(true);
-  };
-
-  const handleCloseSidebar = () => {
-    setIsSidebarOpen(false);
-  };
 
   const handleLogout = () => {
     dispatch(clearUser());
@@ -49,16 +42,6 @@ export default function Header() {
       <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 px-2 sm:px-4 py-2 sm:py-3 z-50">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-2 sm:gap-4">
-            <button 
-              onClick={handleHamburgerClick}
-              className="p-1 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <div className="w-5 h-5 sm:w-6 sm:h-6 flex flex-col justify-center gap-1">
-                <div className="w-full h-0.5 bg-gray-600"></div>
-                <div className="w-full h-0.5 bg-gray-600"></div>
-                <div className="w-full h-0.5 bg-gray-600"></div>
-              </div>
-            </button>
             <button 
               onClick={handleLogoClick}
               className="text-lg sm:text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
