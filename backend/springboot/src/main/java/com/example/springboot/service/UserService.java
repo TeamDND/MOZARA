@@ -67,6 +67,20 @@ public class UserService {
     }
 
     /**
+     * 사용자명 중복 확인
+     */
+    public boolean checkUsernameAvailability(String username) {
+        return userDAO.findByUsername(username) == null;
+    }
+
+    /**
+     * 닉네임 중복 확인
+     */
+    public boolean checkNicknameAvailability(String nickname) {
+        return usersInfoDAO.findByNickname(nickname) == null;
+    }
+
+    /**
      * 사용자명으로 사용자 정보 조회
      */
     public UserInfoDTO getUserInfo(String username) {

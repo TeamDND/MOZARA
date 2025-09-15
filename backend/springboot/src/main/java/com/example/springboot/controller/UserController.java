@@ -34,6 +34,34 @@ public class UserController {
     }
 
     /**
+     * 사용자명 중복 확인
+     */
+    @GetMapping("/check-username/{username}")
+    public ResponseEntity<?> checkUsername(@PathVariable String username) {
+        try {
+            boolean isAvailable = userService.checkUsernameAvailability(username);
+            return ResponseEntity.ok("{\"available\": " + isAvailable + "}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"사용자명 확인 중 오류가 발생했습니다.\"}");
+        }
+    }
+
+    /**
+     * 닉네임 중복 확인
+     */
+    @GetMapping("/check-nickname/{nickname}")
+    public ResponseEntity<?> checkNickname(@PathVariable String nickname) {
+        try {
+            boolean isAvailable = userService.checkNicknameAvailability(nickname);
+            return ResponseEntity.ok("{\"available\": " + isAvailable + "}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"닉네임 확인 중 오류가 발생했습니다.\"}");
+        }
+    }
+
+    /**
      * 사용자 정보 조회
      */
     @GetMapping("/userinfo/{username}")

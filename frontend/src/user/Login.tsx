@@ -1,12 +1,20 @@
 import React, { useState, FormEvent, ChangeEvent } from 'react';
 import apiClient from '../api/apiClient';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../store/userSlice';
+import { setToken } from '../store/tokenSlice';
 
 // TypeScript: Login 컴포넌트 타입 정의
 const Login: React.FC = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  
   // TypeScript: 상태 타입 정의
   const [id, setId] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // TypeScript: 폼 제출 핸들러 (이벤트 타입 지정)
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -15,17 +23,40 @@ const Login: React.FC = () => {
       setError('아이디와 비밀번호를 입력해주세요.');
       return;
     }
+    
+    setIsLoading(true);
+    setError('');
+    
     try {
       const res = await apiClient.post('/login', {
         "username": id,
         "password": password
       });
-      console.log(res.data);
+      
+      console.log('로그인 성공:', res.data);
+      
+      // JWT 토큰 저장
+      const token = res.headers['authorization'];
+      if (token) {
+        dispatch(setToken(token));
+      }
+      
+      // 사용자 정보 가져오기
+      const userResponse = await apiClient.get(`/userinfo/${id}`);
+      console.log('사용자 정보:', userResponse.data);
+      
+      // 사용자 정보 저장
+      dispatch(setUser(userResponse.data));
+      
       alert('로그인 성공');
-      const response = await apiClient.get("/userinfo/" + id);
-      console.log(response.data);
-    } catch (error) {
-      console.log(error);
+      navigate('/'); // 메인페이지로 이동
+      
+    } catch (error: any) {
+      console.error('로그인 오류:', error);
+      const errorMessage = error.response?.data?.error || '로그인 중 오류가 발생했습니다.';
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -83,10 +114,25 @@ const Login: React.FC = () => {
         {/* Tailwind CSS: 로그인 버튼 */}
         <button
           type="submit"
-          className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary/90 transition-colors font-medium"
+          disabled={isLoading}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          로그인
+          {isLoading ? '로그인 중...' : '로그인'}
         </button>
+        
+        {/* 회원가입 링크 */}
+        <div className="text-center">
+          <p className="text-gray-600">
+            계정이 없으신가요?{' '}
+            <button
+              type="button"
+              onClick={() => navigate('/signup')}
+              className="text-blue-600 hover:text-blue-700 font-medium"
+            >
+              회원가입하기
+            </button>
+          </p>
+        </div>
       </form>
     </div>
   );
