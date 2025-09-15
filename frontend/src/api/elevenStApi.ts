@@ -42,17 +42,14 @@ export const elevenStApi = {
     try {
       console.log(`11번가 제품 검색 시작: keyword=${keyword}, page=${page}, pageSize=${pageSize}`);
       
-      // 환경변수에서 API Base URL 가져오기
-      const apiBaseUrl = await configApi.getApiBaseUrl();
-      
-      const response = await apiClient.get<ElevenStSearchResponse>('/11st/products', {
+      // 스프링을 통해 Python API 호출
+      const response = await apiClient.get<ElevenStSearchResponse>('/ai/11st/products', {
         params: { 
           keyword: keyword.trim(),
           page,
           pageSize 
         },
         timeout: 15000, // 15초 타임아웃 (외부 API이므로 더 길게)
-        baseURL: apiBaseUrl,
       });
 
       console.log(`11번가에서 ${response.data.products.length}개 제품 검색 완료`);
@@ -118,12 +115,10 @@ export const elevenStApi = {
     pageSize: number = 20
   ): Promise<ElevenStSearchResponse> {
     const stageKeywords = {
-      1: '탈모 예방 샴푸',
-      2: '탈모 강화 트리트먼트',
-      3: '탈모 치료 에센스',
-      4: '탈모 집중 케어',
-      5: '탈모 전문 치료',
-      6: '탈모 의료진 상담'
+      0: '탈모 예방 샴푸',
+      1: '탈모 방지 샴푸',
+      2: '두피 앰플',
+      3: '탈모 치료'
     };
     
     const keyword = stageKeywords[stage as keyof typeof stageKeywords] || '탈모 제품';
