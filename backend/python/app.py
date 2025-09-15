@@ -139,9 +139,8 @@ class QnaResponse(BaseModel):
     answer: str
 
 from services.hair_loss_products import (
-    HAIR_LOSS_STAGE_PRODUCTS,
-    STAGE_DESCRIPTIONS,
     build_stage_response,
+    search_11st_products,
 )
 
 # API 엔드포인트 정의
@@ -275,7 +274,7 @@ if BASP_AVAILABLE:
 
 @app.get("/api/products")
 async def get_hair_loss_products(
-    stage: int = Query(..., description="탈모 단계 (1-6)", ge=1, le=6)
+    stage: int = Query(..., description="탈모 단계 (0-3)", ge=0, le=3)
 ):
     """탈모 단계별 제품 추천 API"""
     try:
@@ -303,6 +302,70 @@ async def products_health_check():
         "service": "hair-products-recommendation",
         "timestamp": datetime.now().isoformat()
     }
+
+@app.get("/api/11st/products")
+async def get_11st_products(
+    keyword: str = Query(..., description="검색 키워드"),
+    page: int = Query(1, description="페이지 번호", ge=1),
+    pageSize: int = Query(20, description="페이지 크기", ge=1, le=100)
+):
+    """11번가 제품 검색 API"""
+    try:
+        print(f"11번가 제품 검색 요청: keyword={keyword}, page={page}, pageSize={pageSize}")
+        
+        # 서비스 계층에서 11번가 제품 검색
+        result = search_11st_products(keyword, page, pageSize)
+        
+        print(f"성공: 11번가에서 {len(result['products'])}개 제품 조회")
+        return result
+        
+    except Exception as e:
+        print(f"11번가 제품 검색 중 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail="제품 검색 중 오류가 발생했습니다."
+        )
+
+@app.post("/api/refresh")
+async def refresh_token():
+    """토큰 갱신 API (임시 구현)"""
+    try:
+        # 실제 구현에서는 JWT 토큰 갱신 로직이 필요
+        # 현재는 임시로 성공 응답 반환
+        return {
+            "message": "토큰 갱신 완료",
+            "status": "success"
+        }
+    except Exception as e:
+        print(f"토큰 갱신 중 오류: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="토큰 갱신 중 오류가 발생했습니다."
+        )
+
+@app.get("/api/config")
+async def get_config():
+    """프론트엔드에서 필요한 환경변수 설정 조회"""
+    try:
+        youtube_api_key = os.getenv("YOUTUBE_API_KEY")
+        eleven_st_api_key = os.getenv("ELEVEN_ST_API_KEY")
+        api_base_url = os.getenv("API_BASE_URL", "http://localhost:8000/api")
+        
+        return {
+            "apiBaseUrl": api_base_url,
+            "youtubeApiKey": youtube_api_key if youtube_api_key else None,
+            "hasYouTubeKey": bool(youtube_api_key),
+            "elevenStApiKey": eleven_st_api_key if eleven_st_api_key else None,
+            "hasElevenStKey": bool(eleven_st_api_key),
+        }
+    except Exception as e:
+        print(f"설정 조회 중 오류: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="설정 조회 중 오류가 발생했습니다."
+        )
 
 
 
