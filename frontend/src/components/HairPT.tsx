@@ -19,6 +19,9 @@ interface MissionState {
   nightWash: boolean;
   dryHair: boolean;
   brushHair: boolean;
+  scalpScrub: boolean;
+  earlySleep: boolean;
+  scalpPack: boolean;
 }
 
 interface BadHabitsState {
@@ -60,7 +63,10 @@ const HairPT: React.FC = () => {
     zinc: false,
     nightWash: false,
     dryHair: false,
-    brushHair: false
+    brushHair: false,
+    scalpScrub: false,
+    earlySleep: false,
+    scalpPack: false
   });
   const [badHabitsState, setBadHabitsState] = useState<BadHabitsState>({
     smoking: false,
@@ -147,7 +153,10 @@ const HairPT: React.FC = () => {
         zinc: false,
         nightWash: false,
         dryHair: false,
-        brushHair: false
+        brushHair: false,
+        scalpScrub: false,
+        earlySleep: false,
+        scalpPack: false
       });
       setBadHabitsState({
         smoking: false,
@@ -193,7 +202,7 @@ const HairPT: React.FC = () => {
 
   // 진행률 계산 함수
   const calculateProgress = () => {
-    const totalMissions = 15; // 총 미션 수 (2개 카운터 + 13개 체크박스)
+    const totalMissions = 18; // 총 미션 수 (2개 카운터 + 16개 체크박스)
     let completedMissions = 0;
 
     // 카운터 미션 (물 7잔, 이펙터 4번)
@@ -724,200 +733,68 @@ const HairPT: React.FC = () => {
 
           {/* Weekly Content */}
           {activeTab === 'weekly' && (
-            <div className="col-span-full">
+            <>
+              {/* Task Card: Photo Recording */}
               <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <h3 className="text-base md:text-lg font-semibold mb-4">주간 미션</h3>
-                <p className="text-xs md:text-sm text-gray-500 mb-6">이번 주 목표를 확인하세요.</p>
-                
-                {/* Two scalp photos gallery */}
-                <div className="mb-6">
-                  <h4 className="text-sm md:text-base font-semibold mb-3 text-gray-700">두피 사진 기록</h4>
-                  {scalpPhotos.length === 0 ? (
-                    <div className="text-center py-8 text-gray-400">
-                      <i className="fas fa-camera text-4xl mb-2"></i>
-                      <p className="text-sm">아직 촬영한 사진이 없습니다</p>
-                      <p className="text-xs">루틴 탭에서 두피 사진을 촬영해보세요</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {scalpPhotos.map((photoData, index) => {
-                        const [photoUrl, date] = photoData.split('|');
-                        return (
-                          <div key={index} className="relative group">
-                            <img 
-                              src={photoUrl} 
-                              alt={`두피 사진 ${index + 1}`}
-                              className="w-full h-24 md:h-32 object-cover rounded-lg shadow-sm"
-                            />
-                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b-lg">
-                              {date}
-                            </div>
-                            <button
-                              onClick={() => {
-                                setScalpPhotos(prev => prev.filter((_, i) => i !== index));
-                              }}
-                              className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* Bad Habits Checklist */}
-                <div className="mb-6">
-                  <h4 className="text-sm md:text-base font-semibold mb-3 text-gray-700">피해야 할 습관</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
-                    {/* Smoking */}
-                    <div className="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200">
-                      <button
-                        onClick={() => toggleBadHabit('smoking')}
-                        className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                          badHabitsState.smoking 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-red-300 hover:border-red-400'
-                        }`}
-                      >
-                        {badHabitsState.smoking && <span className="text-xs">✓</span>}
-                      </button>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">🚭 흡연</div>
-                        <div className="text-xs text-gray-500">담배 피우지 않기</div>
-                      </div>
-                    </div>
-
-                    {/* Drinking */}
-                    <div className="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200">
-                      <button
-                        onClick={() => toggleBadHabit('drinking')}
-                        className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                          badHabitsState.drinking 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-red-300 hover:border-red-400'
-                        }`}
-                      >
-                        {badHabitsState.drinking && <span className="text-xs">✓</span>}
-                      </button>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">🍺 과음</div>
-                        <div className="text-xs text-gray-500">술 과도하게 마시지 않기</div>
-                      </div>
-                    </div>
-
-                    {/* Stress */}
-                    <div className="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200">
-                      <button
-                        onClick={() => toggleBadHabit('stress')}
-                        className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                          badHabitsState.stress 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-red-300 hover:border-red-400'
-                        }`}
-                      >
-                        {badHabitsState.stress && <span className="text-xs">✓</span>}
-                      </button>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">😰 스트레스</div>
-                        <div className="text-xs text-gray-500">과도한 스트레스 피하기</div>
-                      </div>
-                    </div>
-
-                    {/* Late Sleep */}
-                    <div className="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200">
-                      <button
-                        onClick={() => toggleBadHabit('lateSleep')}
-                        className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                          badHabitsState.lateSleep 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-red-300 hover:border-red-400'
-                        }`}
-                      >
-                        {badHabitsState.lateSleep && <span className="text-xs">✓</span>}
-                      </button>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">🌙 늦은 잠</div>
-                        <div className="text-xs text-gray-500">늦게 자지 않기</div>
-                      </div>
-                    </div>
-
-                    {/* Junk Food */}
-                    <div className="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200">
-                      <button
-                        onClick={() => toggleBadHabit('junkFood')}
-                        className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                          badHabitsState.junkFood 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-red-300 hover:border-red-400'
-                        }`}
-                      >
-                        {badHabitsState.junkFood && <span className="text-xs">✓</span>}
-                      </button>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">🍔 정크푸드</div>
-                        <div className="text-xs text-gray-500">불량식품 피하기</div>
-                      </div>
-                    </div>
-
-                    {/* Hot Shower */}
-                    <div className="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200">
-                      <button
-                        onClick={() => toggleBadHabit('hotShower')}
-                        className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                          badHabitsState.hotShower 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-red-300 hover:border-red-400'
-                        }`}
-                      >
-                        {badHabitsState.hotShower && <span className="text-xs">✓</span>}
-                      </button>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">🔥 뜨거운 물</div>
-                        <div className="text-xs text-gray-500">뜨거운 물로 머리 감지 않기</div>
-                      </div>
-                    </div>
-
-                    {/* Tight Hair */}
-                    <div className="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200">
-                      <button
-                        onClick={() => toggleBadHabit('tightHair')}
-                        className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                          badHabitsState.tightHair 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-red-300 hover:border-red-400'
-                        }`}
-                      >
-                        {badHabitsState.tightHair && <span className="text-xs">✓</span>}
-                      </button>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">🎀 꽉 묶기</div>
-                        <div className="text-xs text-gray-500">머리를 꽉 묶지 않기</div>
-                      </div>
-                    </div>
-
-                    {/* Scratching */}
-                    <div className="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200">
-                      <button
-                        onClick={() => toggleBadHabit('scratching')}
-                        className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                          badHabitsState.scratching 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-red-300 hover:border-red-400'
-                        }`}
-                      >
-                        {badHabitsState.scratching && <span className="text-xs">✓</span>}
-                      </button>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">🤏 긁기</div>
-                        <div className="text-xs text-gray-500">두피 긁지 않기</div>
-                      </div>
-                    </div>
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-purple-100 rounded-lg">
+                    <i className="fas fa-camera text-purple-500 text-lg md:text-xl"></i>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base md:text-lg font-semibold">사진 기록하기</h3>
+                    <p className="text-xs md:text-sm text-gray-500">두피 상태 기록하기</p>
                   </div>
                 </div>
+                <button 
+                  className="w-full py-3 md:py-4 rounded-full font-bold transition-colors bg-purple-500 hover:bg-purple-600 text-white"
+                  onClick={takeScalpPhoto}
+                >
+                  사진 촬영하기
+                </button>
               </div>
-            </div>
+
+              {/* Task Card: Scalp Scrub */}
+              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-blue-100 rounded-lg">
+                    <i className="fas fa-spa text-blue-500 text-lg md:text-xl"></i>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base md:text-lg font-semibold">두피 스크럽</h3>
+                    <p className="text-xs md:text-sm text-gray-500">각질 제거 및 모공 청결</p>
+                  </div>
+                </div>
+                <button {...getMissionButtonProps('scalpScrub', '스크럽하기')} />
+              </div>
+
+              {/* Task Card: Sleep before 11 */}
+              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-indigo-100 rounded-lg">
+                    <i className="fas fa-moon text-indigo-500 text-lg md:text-xl"></i>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base md:text-lg font-semibold">11시 전에 잠자기</h3>
+                    <p className="text-xs md:text-sm text-gray-500">충분한 수면으로 모발 건강</p>
+                  </div>
+                </div>
+                <button {...getMissionButtonProps('earlySleep', '잠자기')} />
+              </div>
+
+              {/* Task Card: Scalp Nutrition Pack */}
+              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-green-100 rounded-lg">
+                    <i className="fas fa-leaf text-green-500 text-lg md:text-xl"></i>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base md:text-lg font-semibold">두피 영양팩하기</h3>
+                    <p className="text-xs md:text-sm text-gray-500">두피 영양 공급 및 보습</p>
+                  </div>
+                </div>
+                <button {...getMissionButtonProps('scalpPack', '영양팩하기')} />
+              </div>
+            </>
           )}
           </div>
         </main>
