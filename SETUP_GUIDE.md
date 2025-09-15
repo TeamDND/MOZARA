@@ -24,7 +24,7 @@ pip install -r requirements.txt
 `backend/.env` 파일을 생성하고 다음 내용을 추가하세요:
 
 ```env
-ELEVEN_ST_API_KEY=313ea9b108e7e2dd9a3cc79425553004
+ELEVEN_ST_API_KEY=your_api_key_here
 ```
 
 **⚠️ 중요**: API 키가 없어도 더미 데이터로 테스트할 수 있습니다.

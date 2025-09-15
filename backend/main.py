@@ -27,7 +27,7 @@ app.add_middleware(
 )
 
 # .env 파일에서 API 키를 안전하게 불러옵니다.
-ELEVEN_ST_API_KEY = os.getenv("ELEVEN_ST_API_KEY", "313ea9b108e7e2dd9a3cc79425553004")
+ELEVEN_ST_API_KEY = os.getenv("ELEVEN_ST_API_KEY")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8080/api")
 BASE_URL = 'https://openapi.11st.co.kr/openapi/OpenApiService.tmall'
