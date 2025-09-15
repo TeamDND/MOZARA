@@ -1,4 +1,4 @@
-package com.example.springboot.service;
+package com.example.springboot.service.ai;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;

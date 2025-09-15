@@ -1,8 +1,8 @@
-package com.example.springboot.controller;
+package com.example.springboot.controller.user;
 
-import com.example.springboot.data.dto.SignUpDTO;
-import com.example.springboot.data.dto.UserInfoDTO;
-import com.example.springboot.service.UserService;
+import com.example.springboot.data.dto.user.SignUpDTO;
+import com.example.springboot.data.dto.user.UserInfoDTO;
+import com.example.springboot.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
