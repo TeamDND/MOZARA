@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 import os
 
-# .env 파일 로드 (상위 디렉토리의 .env 파일 사용)
+# .env 파일 로드 (프로젝트 루트의 .env 파일 사용)
 load_dotenv("../../.env")
 
 # MOZARA Hair Change 모듈

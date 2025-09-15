@@ -15,7 +15,7 @@ import java.util.Map;
 @Service
 public class ElevenStService {
 
-    @Value("${eleven.st.api.key:313ea9b108e7e2dd9a3cc79425553004}")
+    @Value("${eleven.st.api.key:${ELEVEN_ST_API_KEY:}}")
     private String elevenStApiKey;
 
     private final RestTemplate restTemplate = new RestTemplate();
