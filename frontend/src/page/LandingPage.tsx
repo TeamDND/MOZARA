@@ -6,7 +6,6 @@ import HeroSection from "../components/sections/HeroSection"
 import ServicesSection from "../components/sections/ServicesSection"
 import StepsSection from "../components/sections/StepsSection"
 import FeaturesSection from "../components/sections/FeaturesSection"
-import SectionNavigation from "../components/navigation/SectionNavigation"
 import BackgroundImage from "../components/sections/BackgroundImage"
 
 export default function HomePage() {
@@ -114,10 +113,6 @@ export default function HomePage() {
       className={`relative ${isMobile ? 'min-h-screen' : 'h-screen overflow-hidden'}`}
       style={isMobile ? {} : { height: '100vh' }}
     >
-      <SectionNavigation 
-        currentSection={currentSection} 
-        onScrollToSection={scrollToSection} 
-      />
 
       <BackgroundImage parallaxOffset={parallaxOffset} />
 

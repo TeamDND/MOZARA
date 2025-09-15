@@ -13,8 +13,9 @@ from dotenv import load_dotenv
 from datetime import datetime
 import os
 
-# .env 파일 로드 (상위 디렉토리의 .env 파일 사용)
+# .env 파일 로드 (프로젝트 루트의 .env 파일 사용)
 load_dotenv("../../.env")
+load_dotenv(".env")  # 현재 디렉토리도 확인
 
 # MOZARA Hair Change 모듈
 try:
@@ -106,6 +107,16 @@ else:
     openai_client = None
     print("OPENAI_API_KEY가 설정되지 않았습니다. 일부 기능이 제한될 수 있습니다.")
 
+# Google Gemini setup
+google_api_key = os.getenv("GOOGLE_API_KEY")
+if google_api_key:
+    import google.generativeai as genai
+    genai.configure(api_key=google_api_key)
+    print("Google Gemini 클라이언트 초기화 완료")
+else:
+    genai = None
+    print("GOOGLE_API_KEY가 설정되지 않았습니다. Gemini 기능이 제한될 수 있습니다.")
+
 # Hair Encyclopedia Pydantic Models
 class SearchQuery(BaseModel):
     question: str
@@ -138,10 +149,28 @@ class QnaQuery(BaseModel):
 class QnaResponse(BaseModel):
     answer: str
 
+# Gemini Hair Analysis Models
+class HairAnalysisRequest(BaseModel):
+    image_base64: str
+
+class HairAnalysisResponse(BaseModel):
+    stage: int
+    title: str
+    description: str
+    advice: List[str]
+
+# Gemini Hair Quiz Models
+class QuizQuestion(BaseModel):
+    question: str
+    answer: str
+    explanation: str
+
+class QuizGenerateResponse(BaseModel):
+    items: List[QuizQuestion]
+
 from services.hair_loss_products import (
-    HAIR_LOSS_STAGE_PRODUCTS,
-    STAGE_DESCRIPTIONS,
     build_stage_response,
+    search_11st_products,
 )
 
 # API 엔드포인트 정의
@@ -155,11 +184,13 @@ def read_root():
             "hair_damage_analysis": "/api/hair-damage" if HAIR_ANALYSIS_AVAILABLE else "unavailable",
             "hair_change": "/generate_hairstyle" if HAIR_CHANGE_AVAILABLE else "unavailable",
             "basp_diagnosis": "/api/basp/evaluate" if BASP_AVAILABLE else "unavailable",
-            "hair_encyclopedia": "/api/paper" if openai_api_key else "unavailable"
+            "hair_encyclopedia": "/api/paper" if openai_api_key else "unavailable",
+            "gemini_hair_analysis": "/api/hair-analysis" if google_api_key else "unavailable"
         }
     }
 
 @app.get("/health")
+
 def health_check():
     """헬스 체크 엔드포인트"""
     return {"status": "healthy", "service": "python-backend-integrated"}
@@ -275,7 +306,7 @@ if BASP_AVAILABLE:
 
 @app.get("/api/products")
 async def get_hair_loss_products(
-    stage: int = Query(..., description="탈모 단계 (1-6)", ge=1, le=6)
+    stage: int = Query(..., description="탈모 단계 (0-3)", ge=0, le=3)
 ):
     """탈모 단계별 제품 추천 API"""
     try:
@@ -303,6 +334,118 @@ async def products_health_check():
         "service": "hair-products-recommendation",
         "timestamp": datetime.now().isoformat()
     }
+
+
+from services.hair_quiz.hair_quiz import (
+    analyze_hair_with_gemini_service,
+    generate_hair_quiz_service,
+)
+
+
+@app.get("/api/11st/products")
+async def get_11st_products(
+    keyword: str = Query(..., description="검색 키워드"),
+    page: int = Query(1, description="페이지 번호", ge=1),
+    pageSize: int = Query(20, description="페이지 크기", ge=1, le=100)
+):
+    """11번가 제품 검색 API"""
+    try:
+        print(f"11번가 제품 검색 요청: keyword={keyword}, page={page}, pageSize={pageSize}")
+        
+        # 서비스 계층에서 11번가 제품 검색
+        result = search_11st_products(keyword, page, pageSize)
+        
+        print(f"성공: 11번가에서 {len(result['products'])}개 제품 조회")
+        return result
+        
+    except Exception as e:
+        print(f"11번가 제품 검색 중 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail="제품 검색 중 오류가 발생했습니다."
+        )
+
+@app.post("/api/refresh")
+async def refresh_token():
+    """토큰 갱신 API (임시 구현)"""
+    try:
+        # 실제 구현에서는 JWT 토큰 갱신 로직이 필요
+        # 현재는 임시로 성공 응답 반환
+        return {
+            "message": "토큰 갱신 완료",
+            "status": "success"
+        }
+    except Exception as e:
+        print(f"토큰 갱신 중 오류: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="토큰 갱신 중 오류가 발생했습니다."
+        )
+
+@app.get("/api/config")
+async def get_config():
+    """프론트엔드에서 필요한 환경변수 설정 조회"""
+    try:
+        youtube_api_key = os.getenv("YOUTUBE_API_KEY")
+        eleven_st_api_key = os.getenv("ELEVEN_ST_API_KEY")
+        api_base_url = os.getenv("API_BASE_URL", "http://localhost:8000/api")
+        
+        return {
+            "apiBaseUrl": api_base_url,
+            "youtubeApiKey": youtube_api_key if youtube_api_key else None,
+            "hasYouTubeKey": bool(youtube_api_key),
+            "elevenStApiKey": eleven_st_api_key if eleven_st_api_key else None,
+            "hasElevenStKey": bool(eleven_st_api_key),
+        }
+    except Exception as e:
+        print(f"설정 조회 중 오류: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="설정 조회 중 오류가 발생했습니다."
+        )
+
+
+# --- Gemini Hair Analysis API ---
+@app.post("/api/hair-analysis", response_model=HairAnalysisResponse)
+async def analyze_hair_with_gemini(request: HairAnalysisRequest):
+    """Gemini API를 사용한 두피/탈모 분석 (서비스로 위임)"""
+    try:
+        result = analyze_hair_with_gemini_service(request.image_base64)
+        return HairAnalysisResponse(**result)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        print(f"Gemini 분석 중 오류: {e}")
+        raise HTTPException(status_code=500, detail=f"분석 중 오류가 발생했습니다: {str(e)}")
+
+@app.get("/api/hair-analysis/health")
+async def hair_analysis_health_check():
+    """두피 분석 서비스 헬스체크"""
+    return {
+        "status": "healthy" if genai else "unavailable",
+        "service": "gemini-hair-analysis",
+        "timestamp": datetime.now().isoformat()
+    }
+
+# --- Gemini Hair Quiz API ---
+@app.post("/api/hair-quiz/generate", response_model=QuizGenerateResponse)
+async def generate_hair_quiz():
+    """Gemini로 O/X 탈모 퀴즈 20문항 생성 (서비스로 위임)"""
+    try:
+        items = generate_hair_quiz_service()
+        return {"items": items}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        print(f"Gemini 퀴즈 생성 오류: {e}")
+        raise HTTPException(status_code=500, detail=f"퀴즈 생성 중 오류가 발생했습니다: {str(e)}")
+
 
 
 

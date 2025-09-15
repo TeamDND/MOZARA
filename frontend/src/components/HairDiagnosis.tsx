@@ -15,8 +15,6 @@ const HairDiagnosis: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
-
   // API 호출 재시도 로직
   const fetchWithRetry = async (url: string, options: RequestInit, retries = 3, delay = 1000): Promise<Response> => {
     for (let i = 0; i < retries; i++) {
@@ -51,13 +49,12 @@ const HairDiagnosis: React.FC = () => {
   };
 
   const analyzeImageWithGemini = async (imageBase64: string): Promise<AnalysisResult> => {
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GOOGLE_API_KEY}`;
-    const prompt = `당신은 두피 및 탈모 분석 전문가입니다. 주어진 이미지를 분석하여 탈모 진행 단계를 1~7단계로 진단하고, 결과를 반드시 다음 JSON 형식으로만 응답해주세요: {"stage": <1-7>, "title": "<진단명>", "description": "<상세 설명>", "advice": ["<가이드 1>", "<가이드 2>"]}`;
+    const apiUrl = 'http://localhost:8000/api/hair-analysis';
     const payload = { 
-      contents: [{ 
-        parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: imageBase64 } }] 
-      }] 
+      image_base64: imageBase64
     };
+    
+    console.log('API 호출 시작:', apiUrl);
     
     const response = await fetchWithRetry(apiUrl, { 
       method: 'POST', 
@@ -65,17 +62,22 @@ const HairDiagnosis: React.FC = () => {
       body: JSON.stringify(payload) 
     });
     
+    console.log('API 응답 상태:', response.status, response.statusText);
+    
     if (!response.ok) {
-      const errorBody = await response.json();
-      throw new Error(`API 요청 실패: ${errorBody.error.message}`);
+      let errorMessage = `API 요청 실패: ${response.status} ${response.statusText}`;
+      try {
+        const errorBody = await response.json();
+        errorMessage = errorBody.detail || errorMessage;
+      } catch (e) {
+        console.log('JSON 파싱 실패, 텍스트 응답:', await response.text());
+      }
+      throw new Error(errorMessage);
     }
 
     const result = await response.json();
-    const jsonText = result.candidates[0].content.parts[0].text;
-    const cleanedJsonText = jsonText.match(/\{[\s\S]*\}/)?.[0];
-    if (!cleanedJsonText) throw new Error('JSON 파싱 실패');
-    
-    return JSON.parse(cleanedJsonText);
+    console.log('API 응답 성공:', result);
+    return result;
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,10 +101,6 @@ const HairDiagnosis: React.FC = () => {
       return;
     }
 
-    if (!GOOGLE_API_KEY) {
-      alert('API 키가 설정되지 않았습니다. 환경변수를 확인해주세요.');
-      return;
-    }
 
     setIsAnalyzing(true);
     setAnalysisResult(null);
