@@ -159,6 +159,15 @@ class HairAnalysisResponse(BaseModel):
     description: str
     advice: List[str]
 
+# Gemini Hair Quiz Models
+class QuizQuestion(BaseModel):
+    question: str
+    answer: str
+    explanation: str
+
+class QuizGenerateResponse(BaseModel):
+    items: List[QuizQuestion]
+
 from services.hair_loss_products import (
     HAIR_LOSS_STAGE_PRODUCTS,
     STAGE_DESCRIPTIONS,
@@ -327,53 +336,22 @@ async def products_health_check():
         "timestamp": datetime.now().isoformat()
     }
 
+from services.hair_quiz.hair_quiz import (
+    analyze_hair_with_gemini_service,
+    generate_hair_quiz_service,
+)
+
 # --- Gemini Hair Analysis API ---
 @app.post("/api/hair-analysis", response_model=HairAnalysisResponse)
 async def analyze_hair_with_gemini(request: HairAnalysisRequest):
-    """Gemini API를 사용한 두피/탈모 분석"""
-    if not genai:
-        raise HTTPException(status_code=503, detail="Gemini API가 설정되지 않았습니다.")
-    
+    """Gemini API를 사용한 두피/탈모 분석 (서비스로 위임)"""
     try:
-        # Gemini 모델 초기화
-        model = genai.GenerativeModel('gemini-2.0-flash-exp')
-        
-        # 프롬프트 설정
-        prompt = """당신은 두피 및 탈모 분석 전문가입니다. 주어진 이미지를 분석하여 탈모 진행 단계를 1~7단계로 진단하고, 결과를 반드시 다음 JSON 형식으로만 응답해주세요: 
-        {"stage": <1-7>, "title": "<진단명>", "description": "<상세 설명>", "advice": ["<가이드 1>", "<가이드 2>"]}
-        
-        단계별 기준:
-        1-2단계: 정상 또는 초기 탈모
-        3-4단계: 중간 단계 탈모
-        5-7단계: 심각한 탈모"""
-        
-        # 이미지 데이터 처리
-        import base64
-        image_data = base64.b64decode(request.image_base64)
-        
-        # Gemini API 호출
-        response = model.generate_content([prompt, {"mime_type": "image/jpeg", "data": image_data}])
-        
-        # JSON 파싱
-        response_text = response.text
-        import re
-        json_match = re.search(r'\{[\s\S]*\}', response_text)
-        
-        if not json_match:
-            raise ValueError("JSON 형식의 응답을 찾을 수 없습니다.")
-        
-        result = json.loads(json_match.group())
-        
-        # 응답 검증
-        required_fields = ['stage', 'title', 'description', 'advice']
-        for field in required_fields:
-            if field not in result:
-                raise ValueError(f"필수 필드 '{field}'가 누락되었습니다.")
-        
+        result = analyze_hair_with_gemini_service(request.image_base64)
         return HairAnalysisResponse(**result)
-        
-    except json.JSONDecodeError as e:
-        raise HTTPException(status_code=500, detail=f"JSON 파싱 오류: {str(e)}")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         print(f"Gemini 분석 중 오류: {e}")
         raise HTTPException(status_code=500, detail=f"분석 중 오류가 발생했습니다: {str(e)}")
@@ -386,6 +364,21 @@ async def hair_analysis_health_check():
         "service": "gemini-hair-analysis",
         "timestamp": datetime.now().isoformat()
     }
+
+# --- Gemini Hair Quiz API ---
+@app.post("/api/hair-quiz/generate", response_model=QuizGenerateResponse)
+async def generate_hair_quiz():
+    """Gemini로 O/X 탈모 퀴즈 20문항 생성 (서비스로 위임)"""
+    try:
+        items = generate_hair_quiz_service()
+        return {"items": items}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        print(f"Gemini 퀴즈 생성 오류: {e}")
+        raise HTTPException(status_code=500, detail=f"퀴즈 생성 중 오류가 발생했습니다: {str(e)}")
 
 
 

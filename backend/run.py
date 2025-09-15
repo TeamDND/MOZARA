@@ -7,6 +7,13 @@ import uvicorn
 import os
 from dotenv import load_dotenv
 
+# FastAPI 앱 직접 임포트 (백엔드 통합 앱 사용)
+try:
+    from python.app import app as fastapi_app  # backend/python/app.py
+except Exception as e:
+    fastapi_app = None
+    print(f"WARNING: FastAPI 앱 임포트 실패: {e}")
+
 # .env 파일 로드
 load_dotenv()
 
@@ -28,10 +35,21 @@ if __name__ == "__main__":
     print("\n   종료하려면 Ctrl+C를 누르세요.\n")
     
     # 서버 실행
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,  # 개발 모드에서 코드 변경 시 자동 재시작
-        log_level="info"
-    )
+    if fastapi_app is not None:
+        # 이미 로드된 FastAPI 앱을 직접 실행
+        uvicorn.run(
+            fastapi_app,
+            host="0.0.0.0",
+            port=8000,
+            reload=True,
+            log_level="info"
+        )
+    else:
+        # 폴백: 기존 엔트리포인트 (환경에 따라 main:app을 사용하는 프로젝트일 수 있음)
+        uvicorn.run(
+            "main:app",
+            host="0.0.0.0",
+            port=8000,
+            reload=True,
+            log_level="info"
+        )
