@@ -5,6 +5,8 @@ export interface ConfigResponse {
   apiBaseUrl: string;
   youtubeApiKey: string | null;
   hasYouTubeKey: boolean;
+  elevenStApiKey: string | null;
+  hasElevenStKey: boolean;
 }
 
 // TypeScript: 환경변수 설정 캐시
@@ -52,11 +54,13 @@ export const configApi = {
       return response.data;
     } catch (error) {
       console.error('환경변수 설정 조회 중 오류:', error);
-      // 기본값 반환 - Spring Boot 포트 사용
+      // 기본값 반환 - 스프링 서버 포트 사용
       return {
         apiBaseUrl: 'http://localhost:8080/api',
         youtubeApiKey: null,
         hasYouTubeKey: false,
+        elevenStApiKey: null,
+        hasElevenStKey: false,
       };
     }
   },
@@ -83,5 +87,13 @@ export const configApi = {
   async getApiBaseUrl(): Promise<string> {
     const config = await this.getConfig();
     return config.apiBaseUrl;
+  },
+
+  /**
+   * 11번가 API 키 조회
+   */
+  async getElevenStApiKey(): Promise<string | null> {
+    const config = await this.getConfig();
+    return config.elevenStApiKey;
   },
 };
