@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 interface Counters {
   water: number;
@@ -19,6 +19,9 @@ interface MissionState {
   nightWash: boolean;
   dryHair: boolean;
   brushHair: boolean;
+  scalpScrub: boolean;
+  earlySleep: boolean;
+  scalpPack: boolean;
 }
 
 interface BadHabitsState {
@@ -60,7 +63,10 @@ const HairPT: React.FC = () => {
     zinc: false,
     nightWash: false,
     dryHair: false,
-    brushHair: false
+    brushHair: false,
+    scalpScrub: false,
+    earlySleep: false,
+    scalpPack: false
   });
   const [badHabitsState, setBadHabitsState] = useState<BadHabitsState>({
     smoking: false,
@@ -86,6 +92,10 @@ const HairPT: React.FC = () => {
     plantStage: 'seed'
   });
   const [statusMessage] = useState('오늘의 건강한 습관을 실천하고 새싹을 키워보세요!');
+  const [plantTitle, setPlantTitle] = useState<string>('새싹 키우기');
+  const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
+  const titleInputRef = useRef<HTMLInputElement | null>(null);
+  const [toast, setToast] = useState<{ visible: boolean; message: string }>({ visible: false, message: '' });
   const [showAchievement, setShowAchievement] = useState(false);
   const [achievementData, setAchievementData] = useState({ icon: '', title: '', description: '' });
   const [showSidebar, setShowSidebar] = useState(false);
@@ -147,7 +157,10 @@ const HairPT: React.FC = () => {
         zinc: false,
         nightWash: false,
         dryHair: false,
-        brushHair: false
+        brushHair: false,
+        scalpScrub: false,
+        earlySleep: false,
+        scalpPack: false
       });
       setBadHabitsState({
         smoking: false,
@@ -167,25 +180,42 @@ const HairPT: React.FC = () => {
   useEffect(() => {
     resetDailyMissions();
     loadGameState();
+    const savedTitle = localStorage.getItem('plantTitle');
+    if (savedTitle) setPlantTitle(savedTitle);
   }, [resetDailyMissions]);
 
-  // 오늘 날짜를 기준으로 7일간의 날짜 데이터 생성
+  const startEditTitle = () => {
+    setIsEditingTitle(true);
+    setTimeout(() => titleInputRef.current?.focus(), 0);
+  };
+
+  const saveTitle = () => {
+    localStorage.setItem('plantTitle', plantTitle);
+    setIsEditingTitle(false);
+    setToast({ visible: true, message: '제목이 저장되었습니다.' });
+    setTimeout(() => setToast({ visible: false, message: '' }), 1800);
+  };
+
+  // 이번 주(일요일~토요일) 날짜 데이터 생성
   const generateDateData = () => {
     const today = new Date();
-    const dates = [];
-    
-    for (let i = -3; i <= 3; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      
+    const dates: any[] = [];
+    const startOfWeek = new Date(today);
+    // 일요일부터 시작 (0: 일요일)
+    startOfWeek.setDate(today.getDate() - today.getDay());
+
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + i);
+
       dates.push({
         date: date.getDate(),
         day: date.toLocaleDateString('ko-KR', { weekday: 'short' }),
         fullDate: date,
-        isToday: i === 0
+        isToday: date.toDateString() === today.toDateString()
       });
     }
-    
+
     return dates;
   };
 
@@ -193,7 +223,7 @@ const HairPT: React.FC = () => {
 
   // 진행률 계산 함수
   const calculateProgress = () => {
-    const totalMissions = 15; // 총 미션 수 (2개 카운터 + 13개 체크박스)
+    const totalMissions = 18; // 총 미션 수 (2개 카운터 + 16개 체크박스)
     let completedMissions = 0;
 
     // 카운터 미션 (물 7잔, 이펙터 4번)
@@ -406,13 +436,6 @@ const HairPT: React.FC = () => {
           >
             <i className="fas fa-magnifying-glass text-blue-400 text-xs md:text-sm"></i>
             <span className="hidden sm:inline">청결</span>
-          </div>
-          <div 
-            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-2 md:px-3 py-2 rounded-lg transition-colors ${activeTab === 'weekly' ? 'text-blue-500 bg-blue-50' : 'text-gray-600 hover:bg-gray-50'}`}
-            onClick={() => showContent('weekly')}
-          >
-            <i className="fas fa-fire text-orange-500 text-xs md:text-sm"></i>
-            <span className="hidden sm:inline">주간</span>
           </div>
         </div>
 
@@ -706,6 +729,35 @@ const HairPT: React.FC = () => {
                 <button {...getMissionButtonProps('dryHair')} />
               </div>
 
+              {/* Task Card: Massage (moved from routine) */}
+              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-pink-100 rounded-lg">
+                      <i className="fas fa-hand-holding-medical text-pink-500 text-lg md:text-xl"></i>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base md:text-lg font-semibold">백회혈/사신총혈 마사지</h3>
+                    <p className="text-xs md:text-sm text-gray-500">상열감 감소로 탈모 예방</p>
+                  </div>
+                </div>
+                <button 
+                  className={`w-full py-3 md:py-4 rounded-full font-bold transition-colors ${
+                    missionState.massage 
+                      ? 'bg-green-500 text-white cursor-not-allowed' 
+                      : 'bg-blue-500 hover:bg-blue-600 text-white'
+                  }`}
+                  onClick={() => {
+                    if (!missionState.massage) {
+                      setShowVideoModal(true);
+                      toggleMission('massage');
+                    }
+                  }}
+                  disabled={missionState.massage}
+                >
+                  {missionState.massage ? '완료됨' : '시작하기'}
+                </button>
+              </div>
+
               {/* Task Card: Brush hair before shampoo */}
               <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
                 <div className="flex items-center space-x-4 mb-4">
@@ -719,206 +771,23 @@ const HairPT: React.FC = () => {
                 </div>
                 <button {...getMissionButtonProps('brushHair')} />
               </div>
-            </>
-          )}
 
-          {/* Weekly Content */}
-          {activeTab === 'weekly' && (
-            <div className="col-span-full">
+              {/* Task Card: Scalp Nutrition Pack (moved from weekly) */}
               <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <h3 className="text-base md:text-lg font-semibold mb-4">주간 미션</h3>
-                <p className="text-xs md:text-sm text-gray-500 mb-6">이번 주 목표를 확인하세요.</p>
-                
-                {/* Two scalp photos gallery */}
-                <div className="mb-6">
-                  <h4 className="text-sm md:text-base font-semibold mb-3 text-gray-700">두피 사진 기록</h4>
-                  {scalpPhotos.length === 0 ? (
-                    <div className="text-center py-8 text-gray-400">
-                      <i className="fas fa-camera text-4xl mb-2"></i>
-                      <p className="text-sm">아직 촬영한 사진이 없습니다</p>
-                      <p className="text-xs">루틴 탭에서 두피 사진을 촬영해보세요</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {scalpPhotos.map((photoData, index) => {
-                        const [photoUrl, date] = photoData.split('|');
-                        return (
-                          <div key={index} className="relative group">
-                            <img 
-                              src={photoUrl} 
-                              alt={`두피 사진 ${index + 1}`}
-                              className="w-full h-24 md:h-32 object-cover rounded-lg shadow-sm"
-                            />
-                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b-lg">
-                              {date}
-                            </div>
-                            <button
-                              onClick={() => {
-                                setScalpPhotos(prev => prev.filter((_, i) => i !== index));
-                              }}
-                              className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* Bad Habits Checklist */}
-                <div className="mb-6">
-                  <h4 className="text-sm md:text-base font-semibold mb-3 text-gray-700">피해야 할 습관</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
-                    {/* Smoking */}
-                    <div className="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200">
-                      <button
-                        onClick={() => toggleBadHabit('smoking')}
-                        className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                          badHabitsState.smoking 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-red-300 hover:border-red-400'
-                        }`}
-                      >
-                        {badHabitsState.smoking && <span className="text-xs">✓</span>}
-                      </button>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">🚭 흡연</div>
-                        <div className="text-xs text-gray-500">담배 피우지 않기</div>
-                      </div>
-                    </div>
-
-                    {/* Drinking */}
-                    <div className="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200">
-                      <button
-                        onClick={() => toggleBadHabit('drinking')}
-                        className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                          badHabitsState.drinking 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-red-300 hover:border-red-400'
-                        }`}
-                      >
-                        {badHabitsState.drinking && <span className="text-xs">✓</span>}
-                      </button>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">🍺 과음</div>
-                        <div className="text-xs text-gray-500">술 과도하게 마시지 않기</div>
-                      </div>
-                    </div>
-
-                    {/* Stress */}
-                    <div className="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200">
-                      <button
-                        onClick={() => toggleBadHabit('stress')}
-                        className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                          badHabitsState.stress 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-red-300 hover:border-red-400'
-                        }`}
-                      >
-                        {badHabitsState.stress && <span className="text-xs">✓</span>}
-                      </button>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">😰 스트레스</div>
-                        <div className="text-xs text-gray-500">과도한 스트레스 피하기</div>
-                      </div>
-                    </div>
-
-                    {/* Late Sleep */}
-                    <div className="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200">
-                      <button
-                        onClick={() => toggleBadHabit('lateSleep')}
-                        className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                          badHabitsState.lateSleep 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-red-300 hover:border-red-400'
-                        }`}
-                      >
-                        {badHabitsState.lateSleep && <span className="text-xs">✓</span>}
-                      </button>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">🌙 늦은 잠</div>
-                        <div className="text-xs text-gray-500">늦게 자지 않기</div>
-                      </div>
-                    </div>
-
-                    {/* Junk Food */}
-                    <div className="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200">
-                      <button
-                        onClick={() => toggleBadHabit('junkFood')}
-                        className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                          badHabitsState.junkFood 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-red-300 hover:border-red-400'
-                        }`}
-                      >
-                        {badHabitsState.junkFood && <span className="text-xs">✓</span>}
-                      </button>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">🍔 정크푸드</div>
-                        <div className="text-xs text-gray-500">불량식품 피하기</div>
-                      </div>
-                    </div>
-
-                    {/* Hot Shower */}
-                    <div className="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200">
-                      <button
-                        onClick={() => toggleBadHabit('hotShower')}
-                        className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                          badHabitsState.hotShower 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-red-300 hover:border-red-400'
-                        }`}
-                      >
-                        {badHabitsState.hotShower && <span className="text-xs">✓</span>}
-                      </button>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">🔥 뜨거운 물</div>
-                        <div className="text-xs text-gray-500">뜨거운 물로 머리 감지 않기</div>
-                      </div>
-                    </div>
-
-                    {/* Tight Hair */}
-                    <div className="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200">
-                      <button
-                        onClick={() => toggleBadHabit('tightHair')}
-                        className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                          badHabitsState.tightHair 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-red-300 hover:border-red-400'
-                        }`}
-                      >
-                        {badHabitsState.tightHair && <span className="text-xs">✓</span>}
-                      </button>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">🎀 꽉 묶기</div>
-                        <div className="text-xs text-gray-500">머리를 꽉 묶지 않기</div>
-                      </div>
-                    </div>
-
-                    {/* Scratching */}
-                    <div className="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200">
-                      <button
-                        onClick={() => toggleBadHabit('scratching')}
-                        className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                          badHabitsState.scratching 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-red-300 hover:border-red-400'
-                        }`}
-                      >
-                        {badHabitsState.scratching && <span className="text-xs">✓</span>}
-                      </button>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">🤏 긁기</div>
-                        <div className="text-xs text-gray-500">두피 긁지 않기</div>
-                      </div>
-                    </div>
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-green-100 rounded-lg">
+                    <i className="fas fa-leaf text-green-500 text-lg md:text-xl"></i>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base md:text-lg font-semibold">두피 영양팩하기</h3>
+                    <p className="text-xs md:text-sm text-gray-500">두피 영양 공급 및 보습</p>
                   </div>
                 </div>
+                <button {...getMissionButtonProps('scalpPack', '영양팩하기')} />
               </div>
-            </div>
+            </>
           )}
+          
           </div>
         </main>
 
@@ -988,7 +857,39 @@ const HairPT: React.FC = () => {
           {/* Plant Game Header */}
           <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4">
             <div className="flex justify-between items-center mb-3">
-              <h2 className="text-lg font-bold">🌱 새싹 키우기</h2>
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold">🌱</span>
+                {isEditingTitle ? (
+                  <input
+                    value={plantTitle}
+                    onChange={(e) => setPlantTitle(e.target.value)}
+                    onBlur={saveTitle}
+                    className="px-2 py-1 rounded-md text-gray-800"
+                    ref={titleInputRef}
+                    autoFocus
+                  />
+                ) : (
+                  <h2 className="text-lg font-bold" onDoubleClick={startEditTitle}>{plantTitle}</h2>
+                )}
+                {!isEditingTitle ? (
+                  <button
+                    title="제목 편집"
+                    onClick={startEditTitle}
+                    className="ml-1 p-1 rounded-md bg-white/20 hover:bg-white/30"
+                  >
+                    <i className="fas fa-pen"></i>
+                  </button>
+                ) : (
+                  <button
+                    title="저장"
+                    onMouseDown={(e) => { e.preventDefault(); }}
+                    onClick={saveTitle}
+                    className="ml-1 px-2 py-1 rounded-md bg-white text-indigo-600 font-semibold hover:bg-gray-100"
+                  >
+                    저장
+                  </button>
+                )}
+              </div>
               <button
                 onClick={() => setShowSidebar(false)}
                 className="lg:hidden p-1 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
@@ -1053,6 +954,15 @@ const HairPT: React.FC = () => {
             {gameState.level}
           </div>
         </button>
+
+        {/* Toast */}
+        {toast.visible && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+            <div className="px-4 py-2 bg-gray-900 text-white rounded-full shadow-lg text-sm">
+              {toast.message}
+            </div>
+          </div>
+        )}
 
       </div>
     </div>
