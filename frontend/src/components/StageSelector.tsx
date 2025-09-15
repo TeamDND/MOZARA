@@ -1,12 +1,21 @@
 import React from 'react';
 
-// 탈모 단계 정보
+// 탈모 단계 정보 (0-3단계)
 const HAIR_LOSS_STAGES = [
+  {
+    stage: 0,
+    title: '0단계',
+    description: '예방 단계',
+    subtitle: '예방용 샴푸, 두피 클렌저, 생활습관 가이드',
+    color: 'bg-blue-100 border-blue-300 text-blue-800',
+    hoverColor: 'hover:bg-blue-200',
+    icon: '🛡️'
+  },
   {
     stage: 1,
     title: '1단계',
     description: '초기 탈모',
-    subtitle: '예방 중심',
+    subtitle: '탈모 방지 샴푸, 영양제, 두피 토닉',
     color: 'bg-green-100 border-green-300 text-green-800',
     hoverColor: 'hover:bg-green-200',
     icon: '🌱'
@@ -14,8 +23,8 @@ const HAIR_LOSS_STAGES = [
   {
     stage: 2,
     title: '2단계',
-    description: '경미한 탈모',
-    subtitle: '강화 중심',
+    description: '진행 단계',
+    subtitle: '두피 앰플, 기능성 치료제, 홈케어 기기',
     color: 'bg-yellow-100 border-yellow-300 text-yellow-800',
     hoverColor: 'hover:bg-yellow-200',
     icon: '🌿'
@@ -23,37 +32,10 @@ const HAIR_LOSS_STAGES = [
   {
     stage: 3,
     title: '3단계',
-    description: '중등도 탈모',
-    subtitle: '치료 중심',
+    description: '전문 단계',
+    subtitle: '전문 클리닉 연계, 고농축 앰플, 가발·헤어시스템',
     color: 'bg-orange-100 border-orange-300 text-orange-800',
     hoverColor: 'hover:bg-orange-200',
-    icon: '🍂'
-  },
-  {
-    stage: 4,
-    title: '4단계',
-    description: '심한 탈모',
-    subtitle: '집중 치료',
-    color: 'bg-red-100 border-red-300 text-red-800',
-    hoverColor: 'hover:bg-red-200',
-    icon: '🍁'
-  },
-  {
-    stage: 5,
-    title: '5단계',
-    description: '매우 심한 탈모',
-    subtitle: '전문 치료',
-    color: 'bg-purple-100 border-purple-300 text-purple-800',
-    hoverColor: 'hover:bg-purple-200',
-    icon: '🌾'
-  },
-  {
-    stage: 6,
-    title: '6단계',
-    description: '극심한 탈모',
-    subtitle: '의료진 상담 필수',
-    color: 'bg-gray-100 border-gray-300 text-gray-800',
-    hoverColor: 'hover:bg-gray-200',
     icon: '🏥'
   }
 ];
@@ -80,7 +62,7 @@ const StageSelector: React.FC<StageSelectorProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {HAIR_LOSS_STAGES.map((stageInfo) => {
           const isSelected = selectedStage === stageInfo.stage;
           
@@ -126,12 +108,10 @@ const StageSelector: React.FC<StageSelectorProps> = ({
 
               {/* 단계별 설명 */}
               <div className="mt-3 text-xs text-center opacity-75">
-                {stageInfo.stage === 1 && '두피 건강 관리와 예방'}
-                {stageInfo.stage === 2 && '모발 강화와 탈모 억제'}
-                {stageInfo.stage === 3 && '탈모 진행 억제와 치료'}
-                {stageInfo.stage === 4 && '집중적인 탈모 치료'}
-                {stageInfo.stage === 5 && '전문가 처방 치료'}
-                {stageInfo.stage === 6 && '의료진 상담 후 치료'}
+                {stageInfo.stage === 0 && '두피 건강 관리와 예방'}
+                {stageInfo.stage === 1 && '모발 강화와 탈모 억제'}
+                {stageInfo.stage === 2 && '탈모 진행 억제와 치료'}
+                {stageInfo.stage === 3 && '전문가 처방 치료'}
               </div>
             </button>
           );

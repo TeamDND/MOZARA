@@ -16,6 +16,9 @@ public class ConfigController {
     @Value("${youtube.api.key:}")
     private String youtubeApiKey;
 
+    @Value("${eleven.st.api.key:}")
+    private String elevenStApiKey;
+
     /**
      * 환경변수 설정 조회
      * @return 환경변수 설정 정보
@@ -26,6 +29,8 @@ public class ConfigController {
         config.put("apiBaseUrl", "http://localhost:8080/api");
         config.put("youtubeApiKey", youtubeApiKey);
         config.put("hasYouTubeKey", !youtubeApiKey.isEmpty());
+        config.put("elevenStApiKey", elevenStApiKey);
+        config.put("hasElevenStKey", !elevenStApiKey.isEmpty());
         
         return ResponseEntity.ok(config);
     }
