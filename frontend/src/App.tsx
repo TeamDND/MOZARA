@@ -5,7 +5,7 @@ import MainLayout from './page/MainLayout';
 import LandingPage from './page/LandingPage';
 import HairCheck from './page/HairCheck';
 import SignUp from './user/SignUp';
-import Login from './user/LogIn';
+import LogIn from './user/LogIn';
 import BaspSelfCheck from './features/selfcheck/BaspSelfCheck';
 import HairDamageAnalysis from './page/HairDamageAnalysis';
 import HairChange from './page/HairChange';
@@ -41,7 +41,7 @@ const App: React.FC = () => {
         </Route>
         
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<LogIn />} />
       </Routes>
     </>
   );
