@@ -26,7 +26,7 @@ const GoogleIcon = () => (
   </svg>
 )
 
-const Login: React.FC = () => {
+const LogIn: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -167,4 +167,4 @@ const Login: React.FC = () => {
   )
 }
 
-export default Login;
+export default LogIn;
