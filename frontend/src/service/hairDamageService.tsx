@@ -30,6 +30,7 @@ export interface HairAnalysisResponse {
 
 
 class HairDamageService {
+  // 스프링 중계 엔드포인트로 연결 (/api + baseURL 설정 기준)
   private readonly baseUrl = '/ai/hair-damage';
   
   /**
@@ -52,20 +53,16 @@ class HairDamageService {
    */
   async analyzeHairDamage(request: HairAnalysisRequest): Promise<HairAnalysisResponse> {
     try {
+      // 스프링 중계: POST /ai/hair-damage/analyze (multipart/form-data)
       const formData = new FormData();
-      
       if (request.image) {
         formData.append('image', request.image);
       }
-      
       if (request.textQuery) {
         formData.append('textQuery', request.textQuery);
       }
-
       const response = await apiClient.post(`${this.baseUrl}/analyze`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       return response.data;
     } catch (error) {
@@ -81,6 +78,7 @@ class HairDamageService {
    */
   async saveAnalysisResult(analysisResult: any): Promise<any> {
     try {
+      // 스프링 중계: POST /ai/hair-damage/save-result
       const response = await apiClient.post(`${this.baseUrl}/save-result`, analysisResult);
       return response.data;
     } catch (error) {

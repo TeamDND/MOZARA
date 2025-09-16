@@ -13,7 +13,7 @@ const MainLayout: React.FC = () => {
       <Header />
       {/* Tailwind CSS: 메인 콘텐츠 영역 */}
       <main className="pt-16 pl-[4.5rem] pr-4 py-8">
-        <div className="container mx-auto">
+        <div className="w-full max-w-[1400px] mx-auto px-4">
           <Outlet />
         </div>
       </main>
