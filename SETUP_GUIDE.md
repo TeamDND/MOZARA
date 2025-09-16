@@ -21,10 +21,29 @@ pip install -r requirements.txt
 ```
 
 #### 1.2 환경 변수 설정
-`backend/.env` 파일을 생성하고 다음 내용을 추가하세요:
+프로젝트 루트에 `.env` 파일을 생성하고 다음 내용을 추가하세요:
 
+```env
+# API Keys - 실제 값으로 교체하세요
+GEMINI_API_KEY=your_gemini_api_key_here
+GOOGLE_API_KEY=your_gemini_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
+PINECONE_API_KEY=your_pinecone_api_key_here
+PINECONE_INDEX_NAME=your_pinecone_index_name_here
+YOUTUBE_API_KEY=your_youtube_api_key_here
 
-**⚠️ 중요**: API 키가 없어도 더미 데이터로 테스트할 수 있습니다.
+# Backend Configuration
+BACKEND_PORT=8000
+FRONTEND_PORT=3000
+
+# Database Configuration (if needed)
+DATABASE_URL=your_database_url_here
+```
+
+**⚠️ 중요**: 
+- API 키가 없어도 더미 데이터로 테스트할 수 있습니다.
+- `.env` 파일은 `.gitignore`에 포함되어 Git에 업로드되지 않습니다.
+- Gemini API 키는 AI 두피 분석 기능에 필요합니다.
 
 #### 1.3 백엔드 서버 실행
 ```bash
@@ -66,6 +85,9 @@ npm start
 - ✅ CORS 설정
 - ✅ 에러 핸들링
 - ✅ API 키 보안 관리
+- ✅ AI 두피 분석 (Gemini API)
+- ✅ 탈모 진행 단계 분석 (0-3단계)
+- ✅ 맞춤형 추천 시스템
 
 ### 프론트엔드 (React)
 - ✅ 제품 검색 UI
@@ -74,6 +96,9 @@ npm start
 - ✅ 페이지네이션
 - ✅ 이미지 로딩/에러 처리
 - ✅ 11번가 직접 링크
+- ✅ AI 두피 분석 인터페이스
+- ✅ 진행 단계별 맞춤 추천
+- ✅ 유튜브/서비스/제품 추천
 
 ## 🔧 API 엔드포인트
 
@@ -94,6 +119,44 @@ GET /api/products/search
 ```
 GET /api/products/search?keyword=탈모샴푸&pageNo=1&pageSize=5
 ```
+
+### AI 두피 분석
+```
+POST /api/hair-damage/search/image-and-text
+```
+
+**요청 본문:**
+```json
+{
+  "image_base64": "base64_encoded_image_string",
+  "text_query": "optional_text_description"
+}
+```
+
+**응답:**
+```json
+{
+  "message": "이미지 및 텍스트 검색 성공",
+  "summary": "AI 분석 요약",
+  "results": [
+    {
+      "uuid": "current_image_analysis",
+      "properties": {
+        "diagnosis": "초기 탈모",
+        "stage": 1,
+        "confidence": 0.8,
+        "gender": "남성"
+      }
+    }
+  ]
+}
+```
+
+**진행 단계:**
+- **0단계**: 정상 상태 (초록색)
+- **1단계**: 초기 탈모 (파란색)
+- **2단계**: 중등도 탈모 (노란색)
+- **3단계**: 심각한 탈모 (빨간색)
 
 ## 🛡️ 보안 개선사항
 
@@ -127,8 +190,25 @@ uvicorn main:app --host 0.0.0.0 --port 8001 --reload
 ### API 키 오류
 ```
 ⚠️ 경고: ELEVEN_ST_API_KEY가 설정되지 않았습니다.
+⚠️ GEMINI_API_KEY가 설정되지 않았습니다. AI 요약 기능이 비활성화됩니다.
 ```
-**해결 방법**: `backend/.env` 파일에 API 키를 설정하세요.
+**해결 방법**: 프로젝트 루트의 `.env` 파일에 API 키를 설정하세요.
+
+### AI 두피 분석 오류
+```
+분석에 실패했습니다: API 요청 실패: 500 Internal Server Error
+```
+**해결 방법**: 
+1. Gemini API 키가 올바르게 설정되었는지 확인
+2. 백엔드 서버 로그에서 상세 오류 메시지 확인
+3. 이미지 파일이 올바른 형식인지 확인 (JPEG, PNG)
+
+### 분석 단계가 7단계로 나오는 문제
+**해결됨**: 백엔드 코드가 0-3단계로 수정되었습니다.
+- 0단계: 정상 상태
+- 1단계: 초기 탈모  
+- 2단계: 중등도 탈모
+- 3단계: 심각한 탈모
 
 ## 📝 개발 정보
 
