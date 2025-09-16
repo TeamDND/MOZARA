@@ -231,8 +231,10 @@ async def api_hair_gemini_check(file: Annotated[UploadFile, File(...)]):
         image_bytes = await file.read()
         print(f"--- [DEBUG] File received. Size: {len(image_bytes)} bytes ---")
 
-        # 여기가 바로 핵심입니다. await를 추가하세요.
-        result = await analyze_hair_with_gemini(image_bytes)
+        # bytes를 base64 문자열로 변환하여 올바른 함수 호출
+        import base64
+        image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+        result = analyze_hair_with_gemini_service(image_base64)
 
         return result
     except Exception as e:
