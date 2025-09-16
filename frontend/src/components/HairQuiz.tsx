@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './HairComponents.css';
+import apiClient from '../api/apiClient';
 
 interface QuizQuestion {
   question: string;
@@ -17,45 +18,14 @@ const HairQuiz: React.FC = () => {
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
 
-  // 프론트에서는 API 키를 사용하지 않습니다. 백엔드 프록시 사용
-
-  // API 호출 재시도 로직
-  const fetchWithRetry = async (url: string, options: RequestInit, retries = 3, delay = 1000): Promise<Response> => {
-    for (let i = 0; i < retries; i++) {
-      try {
-        const response = await fetch(url, options);
-        if (response.ok || (response.status >= 400 && response.status < 500)) {
-          return response;
-        }
-        if (response.status >= 500) {
-          throw new Error(`Server error: ${response.status}`);
-        }
-      } catch (error) {
-        console.warn(`API 호출 실패 (시도 ${i + 1}/${retries}). ${delay / 1000}초 후 재시도합니다.`);
-        if (i === retries - 1) throw error;
-        await new Promise(resolve => setTimeout(resolve, delay));
-        delay *= 2;
-      }
-    }
-    throw new Error('API 호출 실패');
-  };
-
   const generateQuizWithGemini = async (): Promise<QuizQuestion[]> => {
-    const apiUrl = 'http://localhost:8000/api/hair-quiz/generate';
-    const response = await fetchWithRetry(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    });
-    if (!response.ok) {
-      let msg = `API 요청 실패: ${response.status} ${response.statusText}`;
-      try {
-        const body = await response.json();
-        msg = body.detail || msg;
-      } catch {}
-      throw new Error(msg);
+    try {
+      const response = await apiClient.post('/ai/hair-quiz/generate');
+      return response.data.items as QuizQuestion[];
+    } catch (error: any) {
+      console.error('퀴즈 생성 API 호출 실패:', error);
+      throw new Error(error.response?.data?.message || '퀴즈 생성에 실패했습니다.');
     }
-    const data = await response.json();
-    return data.items as QuizQuestion[];
   };
 
   const initQuiz = async () => {

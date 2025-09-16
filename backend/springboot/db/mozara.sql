@@ -59,8 +59,9 @@ CREATE TABLE `daily_habits` (
   `description` tinytext,
   `habit_name` varchar(255) DEFAULT NULL,
   `reward_points` int DEFAULT NULL,
+  `category` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`habit_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -69,6 +70,7 @@ CREATE TABLE `daily_habits` (
 
 LOCK TABLES `daily_habits` WRITE;
 /*!40000 ALTER TABLE `daily_habits` DISABLE KEYS */;
+INSERT INTO `daily_habits` VALUES (1,'매일 물 7잔 이상 마시기','물 마시기',10,'routine'),(2,'이펙터 4번 사용','이펙터 사용',10,'routine'),(3,'탈모 에센스로 직접 개선','아침 부스터 사용',5,'routine'),(4,'탈모 에센스로 직접 개선','밤 부스터 사용',5,'routine'),(5,'상열감 감소로 탈모 예방','백회혈/사신총혈 마사지',5,'routine'),(6,'혈액 순환 촉진 및 염증 완화','오메가-3 섭취',5,'nutrient '),(7,'모낭 자극 및 모발 성장 촉진','비타민 D 섭취',5,'nutrient '),(8,'항산화 작용 및 건조함 완화','비타민 E 섭취',5,'nutrient '),(9,'모발 구성 성분 및 성장 촉진','단백질 섭취',5,'nutrient '),(10,'산소 운반 및 모발 건강 유지','철분 섭취',5,'nutrient '),(11,'모발 성장 및 강화 촉진','비오틴 섭취',5,'nutrient '),(12,'모발 성장 및 재생 촉진','아연 섭취',5,'nutrient '),(13,'모공 청결 유지로 탈모 방지','밤에 머리 감기',5,'cleanliness'),(14,'모발 약화 및 냉기 방지','머리 바싹 말리기',5,'cleanliness'),(15,'상열감 감소로 탈모 예방','백회혈/사신총혈 마사지',5,'cleanliness'),(16,'머리 엉킴 방지 및 노폐물 제거','샴푸 전 머리 빗질',5,'cleanliness'),(17,'두피 영양 공급 및 보습','두피 영양팩하기',5,'cleanliness');
 /*!40000 ALTER TABLE `daily_habits` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -172,7 +174,7 @@ CREATE TABLE `user_log` (
   PRIMARY KEY (`list_id`),
   KEY `user_id_foreign` (`user_id_foreign`),
   CONSTRAINT `user_log_ibfk_1` FOREIGN KEY (`user_id_foreign`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -200,7 +202,7 @@ CREATE TABLE `users` (
   `username` varchar(100) DEFAULT NULL,
   `address` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -209,6 +211,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (1,'$2a$10$yEq/Y7VSn/.VU4o17dfUYuKtw8nNe7DISyAYZl9iF1u6JtCgQ2kG.','ROLE_USER','2025-09-15 08:36:33','jeongtae9324@gmail.com','aaaaaa','서울시 성동구 송정동'),(2,'$2a$10$j.twxjJfOdgyArAT884G5.sPRVSTVpNf3JGrtB1BBDiM92E.Bv7qW','ROLE_USER','2025-09-15 08:47:32','test@test.com','testuser','???');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -228,7 +231,7 @@ CREATE TABLE `users_info` (
   PRIMARY KEY (`user_info_id`),
   KEY `user_id_foreign` (`user_id_foreign`),
   CONSTRAINT `users_info_ibfk_1` FOREIGN KEY (`user_id_foreign`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -237,6 +240,7 @@ CREATE TABLE `users_info` (
 
 LOCK TABLES `users_info` WRITE;
 /*!40000 ALTER TABLE `users_info` DISABLE KEYS */;
+INSERT INTO `users_info` VALUES (1,'남',28,'정태',1),(2,'??',25,'?????',2);
 /*!40000 ALTER TABLE `users_info` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -249,4 +253,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-09-10 16:29:37
+-- Dump completed on 2025-09-16 14:45:14
