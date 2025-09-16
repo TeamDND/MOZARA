@@ -27,15 +27,15 @@ except ImportError as e:
     HAIR_CHANGE_AVAILABLE = False
 
 # Hair Damage Analysis 모듈 - services 폴더 내에 있다고 가정하고 경로 수정
-try:
-    # app 객체를 가져와 마운트하기 때문에, 이 파일에 uvicorn 실행 코드는 없어야 합니다.
-    from services.hair_damage_analysis.api.hair_analysis_api import app as hair_analysis_app
-    HAIR_ANALYSIS_AVAILABLE = True
-    print("Hair Damage Analysis 모듈 로드 성공")
-except ImportError as e:
-    print(f"Hair Damage Analysis 모듈 로드 실패: {e}")
-    HAIR_ANALYSIS_AVAILABLE = False
-    hair_analysis_app = None
+# try:
+#     # app 객체를 가져와 마운트하기 때문에, 이 파일에 uvicorn 실행 코드는 없어야 합니다.
+#     from services.hair_damage_analysis.api.hair_analysis_api import app as hair_analysis_app
+#     HAIR_ANALYSIS_AVAILABLE = True
+#     print("Hair Damage Analysis 모듈 로드 성공")
+# except ImportError as e:
+#     print(f"Hair Damage Analysis 모듈 로드 실패: {e}")
+#     HAIR_ANALYSIS_AVAILABLE = False
+#     hair_analysis_app = None
 
 # BASP Hair Loss Diagnosis 모듈
 try:
@@ -71,13 +71,13 @@ app.add_middleware(
 )
 
 # 라우터 마운트 (조건부)
-if HAIR_ANALYSIS_AVAILABLE and hair_analysis_app:
-    # 스프링부트 경로에 맞게 /api/hair-damage 로 마운트 경로 수정
-    app.mount("/api/hair-damage", hair_analysis_app)
-    print("Hair Damage Analysis 라우터 마운트 완료")
-else:
-    index = None
-    print("Hair Damage Analysis 라우터 마운트 건너뜀")
+# if HAIR_ANALYSIS_AVAILABLE and hair_analysis_app:
+#     # 스프링부트 경로에 맞게 /api/hair-damage 로 마운트 경로 수정
+#     app.mount("/api/hair-damage", hair_analysis_app)
+#     print("Hair Damage Analysis 라우터 마운트 완료")
+# else:
+#     index = None
+#     print("Hair Damage Analysis 라우터 마운트 건너뜀")
 
 # Pinecone setup
 try:
@@ -108,14 +108,20 @@ else:
     print("OPENAI_API_KEY가 설정되지 않았습니다. 일부 기능이 제한될 수 있습니다.")
 
 # Google Gemini setup
+gemini_api_key = os.getenv("GEMINI_API_KEY")
 google_api_key = os.getenv("GOOGLE_API_KEY")
-if google_api_key:
+
+if gemini_api_key:
+    import google.generativeai as genai
+    genai.configure(api_key=gemini_api_key)
+    print("Google Gemini 클라이언트 초기화 완료 (GEMINI_API_KEY 사용)")
+elif google_api_key:
     import google.generativeai as genai
     genai.configure(api_key=google_api_key)
-    print("Google Gemini 클라이언트 초기화 완료")
+    print("Google Gemini 클라이언트 초기화 완료 (GOOGLE_API_KEY 사용)")
 else:
     genai = None
-    print("GOOGLE_API_KEY가 설정되지 않았습니다. Gemini 기능이 제한될 수 있습니다.")
+    print("GEMINI_API_KEY 또는 GOOGLE_API_KEY가 설정되지 않았습니다. Gemini 기능이 제한될 수 있습니다.")
 
 # Hair Encyclopedia Pydantic Models
 class SearchQuery(BaseModel):
@@ -181,7 +187,7 @@ def read_root():
         "message": "MOZARA Python Backend 통합 서버",
         "status": "running",
         "modules": {
-            "hair_damage_analysis": "/api/hair-damage" if HAIR_ANALYSIS_AVAILABLE else "unavailable",
+            # "hair_damage_analysis": "/api/hair-damage" if HAIR_ANALYSIS_AVAILABLE else "unavailable",
             "hair_change": "/generate_hairstyle" if HAIR_CHANGE_AVAILABLE else "unavailable",
             "basp_diagnosis": "/api/basp/evaluate" if BASP_AVAILABLE else "unavailable",
             "hair_encyclopedia": "/api/paper" if openai_api_key else "unavailable",

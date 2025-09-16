@@ -1,6 +1,6 @@
 package com.example.springboot.controller.ai;
 
-import com.example.springboot.service.ElevenStService;
+import com.example.springboot.service.ai.ElevenStService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
