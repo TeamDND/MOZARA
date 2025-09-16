@@ -44,7 +44,7 @@ export default function Footer() {
         {/* 하단 저작권 */}
         <div className="border-t border-gray-200 mt-8 pt-8 text-center">
           <p className="text-sm text-gray-500">
-            © 2024 毛자라. All rights reserved.
+            © 2025 毛자라. All rights reserved.
           </p>
         </div>
       </div>
