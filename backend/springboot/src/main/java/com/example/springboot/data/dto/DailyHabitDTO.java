@@ -9,12 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserInfoDTO {
-    private String username;
-    private String email;
-    private String address;
-    private String nickname;
-    private String gender;
-    private Integer age;
-
+public class DailyHabitDTO {
+    
+    private Integer id;
+    private String habitName;
+    private String description;
+    private Integer rewardPoints;
 }
