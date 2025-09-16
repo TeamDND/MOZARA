@@ -1,7 +1,7 @@
 // TypeScript: API 클라이언트 설정
 import axios, { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-// import { setToken } from '../store/tokenSlice';
-// import { store } from '../store/store';
+import { setToken } from '../store/tokenSlice';
+import { store } from '../store/store';
 
 // TypeScript: API 클라이언트 인스턴스 생성
 const apiClient = axios.create({
@@ -22,12 +22,12 @@ apiClient.interceptors.request.use(
             config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
         }
         
-        // JWT 토큰 추가 (현재 비활성화 - JWT 시스템 미구현)
-        // const jwtToken = store.getState().token.jwtToken;
-        // if(jwtToken){
-        //     config.headers = config.headers || {};
-        //     config.headers['authorization'] = jwtToken;
-        // }
+        // JWT 토큰 추가 (Bearer 접두사 포함)
+        const jwtToken = store.getState().token.jwtToken;
+        if(jwtToken){
+            config.headers = config.headers || {};
+            config.headers['authorization'] = `Bearer ${jwtToken}`;
+        }
         return config;
     },
     (error: AxiosError) => {
@@ -41,27 +41,29 @@ apiClient.interceptors.response.use(
     async (error: AxiosError) => {
         const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
         
-        // 401 에러 처리 (현재 JWT 시스템 미구현으로 비활성화)
-        // if(error.response?.status === 401 && !originalRequest._retry){
-        //     originalRequest._retry = true;
-        //     try{
-        //         const res = await axios.post('/api/refresh', null, {
-        //             withCredentials: true,
-        //         });
-        //         const newAccessToken = res.headers['authorization'];
-        //         if(newAccessToken){
-        //             store.dispatch(setToken(newAccessToken));
-        //             originalRequest.headers = originalRequest.headers || {};
-        //             originalRequest.headers['authorization'] = newAccessToken;
-        //             return apiClient(originalRequest);
-        //         }else{
-        //             console.error('토큰 갱신 실패:', error);
-        //         }
-        //     }catch(refreshError){
-        //         console.error('토큰 갱신 실패:', refreshError);
-        //         return Promise.reject(refreshError);
-        //     }
-        // }
+        // 401 에러 처리 (토큰 갱신)
+        if(error.response?.status === 401 && !originalRequest._retry){
+            originalRequest._retry = true;
+            try{
+                const res = await axios.post('/api/refresh', null, {
+                    withCredentials: true,
+                });
+                const newAccessToken = res.headers['authorization'];
+                if(newAccessToken){
+                    // Bearer 접두사 제거 후 저장
+                    const cleanToken = newAccessToken.replace(/^Bearer\s+/i, '');
+                    store.dispatch(setToken(cleanToken));
+                    originalRequest.headers = originalRequest.headers || {};
+                    originalRequest.headers['authorization'] = `Bearer ${cleanToken}`;
+                    return apiClient(originalRequest);
+                }else{
+                    console.error('토큰 갱신 실패:', error);
+                }
+            }catch(refreshError){
+                console.error('토큰 갱신 실패:', refreshError);
+                return Promise.reject(refreshError);
+            }
+        }
         
         // 에러 로깅
         console.error('API 요청 실패:', {

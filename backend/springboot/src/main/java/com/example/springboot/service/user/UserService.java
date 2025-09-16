@@ -23,6 +23,9 @@ public class UserService {
      * 회원가입
      */
     public UserInfoDTO signUp(SignUpDTO signUpDTO) {
+        // 입력 데이터 검증
+        validateSignUpData(signUpDTO);
+
         // 중복 사용자명 체크
         if (userDAO.findByUsername(signUpDTO.getUsername()).isPresent()) {
             throw new RuntimeException("이미 존재하는 사용자명입니다.");
@@ -69,7 +72,7 @@ public class UserService {
      * 사용자명 중복 확인
      */
     public boolean checkUsernameAvailability(String username) {
-        return userDAO.findByUsername(username) == null;
+        return userDAO.findByUsername(username).isEmpty();
     }
 
     /**
@@ -97,6 +100,60 @@ public class UserService {
                 .gender(usersInfoEntity != null ? usersInfoEntity.getGender() : null)
                 .age(usersInfoEntity != null ? usersInfoEntity.getAge() : null)
                 .build();
+    }
+
+    /**
+     * 회원가입 데이터 검증
+     */
+    private void validateSignUpData(SignUpDTO signUpDTO) {
+        // 아이디 검증: 6-18자, 영문과 숫자만
+        String username = signUpDTO.getUsername();
+        if (username == null || username.trim().isEmpty()) {
+            throw new RuntimeException("username을 다시 확인해주세요");
+        }
+        if (username.length() < 6 || username.length() > 18) {
+            throw new RuntimeException("username을 다시 확인해주세요");
+        }
+        if (!username.matches("^[a-zA-Z0-9]+$")) {
+            throw new RuntimeException("username을 다시 확인해주세요");
+        }
+
+        // 비밀번호 검증: 8자 이상
+        String password = signUpDTO.getPassword();
+        if (password == null || password.length() < 8) {
+            throw new RuntimeException("password를 다시 확인해주세요");
+        }
+
+        // 닉네임 검증: 한글 8자, 영문 14자까지, 특수문자 금지
+        String nickname = signUpDTO.getNickname();
+        if (nickname == null || nickname.trim().isEmpty()) {
+            throw new RuntimeException("nickname을 다시 확인해주세요");
+        }
+        if (nickname.contains(" ")) {
+            throw new RuntimeException("nickname을 다시 확인해주세요");
+        }
+        if (!nickname.matches("^[가-힣a-zA-Z0-9]+$")) {
+            throw new RuntimeException("nickname을 다시 확인해주세요");
+        }
+
+        // 닉네임 길이 검증
+        long koreanCount = nickname.chars().filter(c -> c >= '가' && c <= '힣').count();
+        long englishCount = nickname.chars().filter(c -> (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')).count();
+        if (koreanCount > 8 || englishCount > 14) {
+            throw new RuntimeException("nickname을 다시 확인해주세요");
+        }
+
+        // 이메일 기본 검증
+        String email = signUpDTO.getEmail();
+        if (email == null || !email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            throw new RuntimeException("email을 다시 확인해주세요");
+        }
+
+        // 나이 검증
+        Integer age = signUpDTO.getAge();
+        if (age == null || age < 1 || age > 120) {
+            throw new RuntimeException("age를 다시 확인해주세요");
+        }
     }
 
 }
