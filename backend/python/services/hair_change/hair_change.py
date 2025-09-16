@@ -11,7 +11,17 @@ from typing import Optional
 load_dotenv("../../../../.env")
 
 # Gemini API 설정
-genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+gemini_api_key = os.getenv('GEMINI_API_KEY')
+google_api_key = os.getenv('GOOGLE_API_KEY')
+
+if gemini_api_key:
+    genai.configure(api_key=gemini_api_key)
+    print("Hair Change: GEMINI_API_KEY 사용")
+elif google_api_key:
+    genai.configure(api_key=google_api_key)
+    print("Hair Change: GOOGLE_API_KEY 사용")
+else:
+    print("Hair Change: API 키가 설정되지 않음")
 
 # 사용 가능한 가발 스타일
 WIG_STYLES = {

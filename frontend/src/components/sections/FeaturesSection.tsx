@@ -1,5 +1,5 @@
 import type React from "react"
-import { MapPin, Clock, Heart, BookOpen, Camera } from "../ui/icons"
+import { MapPin, Clock, Heart, Tv, Camera } from "../ui/icons"
 import { Button } from "../ui/Button"
 
 interface FeaturesSectionProps {
@@ -24,7 +24,7 @@ export default function FeaturesSection({ isVisible }: FeaturesSectionProps) {
       description: "나에게 맞는 제품을 추천받아보세요"
     },
     {
-      icon: BookOpen,
+      icon: Tv,
       title: "유튜브 컨텐츠 추천",
       description: "관련 유튜브 컨텐츠를 추천합니다"
     },

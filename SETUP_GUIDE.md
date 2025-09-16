@@ -23,22 +23,10 @@ pip install -r requirements.txt
 #### 1.2 환경 변수 설정
 프로젝트 루트에 `.env` 파일을 생성하고 다음 내용을 추가하세요:
 
-```env
-# API Keys - 실제 값으로 교체하세요
-GEMINI_API_KEY=your_gemini_api_key_here
-GOOGLE_API_KEY=your_gemini_api_key_here
-OPENAI_API_KEY=your_openai_api_key_here
-PINECONE_API_KEY=your_pinecone_api_key_here
-PINECONE_INDEX_NAME=your_pinecone_index_name_here
-YOUTUBE_API_KEY=your_youtube_api_key_here
+<<<<<<< HEAD
 
-# Backend Configuration
-BACKEND_PORT=8000
-FRONTEND_PORT=3000
-
-# Database Configuration (if needed)
-DATABASE_URL=your_database_url_here
-```
+=======
+>>>>>>> 4db0a47346bf4ca79506b311747d0f93b89ae166
 
 **⚠️ 중요**: 
 - API 키가 없어도 더미 데이터로 테스트할 수 있습니다.

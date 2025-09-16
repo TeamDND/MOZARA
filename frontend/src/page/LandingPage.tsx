@@ -147,7 +147,7 @@ export default function HomePage() {
         </section>
 
         <section ref={featuresAnimation.ref}>
-          <FeaturesSection 
+          <FeaturesSection
             isVisible={featuresAnimation.isVisible}
           />
         </section>
