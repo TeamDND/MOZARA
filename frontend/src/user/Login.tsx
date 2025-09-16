@@ -55,10 +55,11 @@ const Login: React.FC = () => {
 
       console.log('로그인 성공:', res.data);
 
-      // JWT 토큰 저장
+      // JWT 토큰 저장 (Bearer 접두사 제거)
       const token = res.headers['authorization'];
       if (token) {
-        dispatch(setToken(token));
+        const cleanToken = token.replace(/^Bearer\s+/i, '');
+        dispatch(setToken(cleanToken));
       }
 
       // 사용자 정보 가져오기
