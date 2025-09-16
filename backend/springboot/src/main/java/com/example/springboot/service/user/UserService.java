@@ -4,6 +4,7 @@ import com.example.springboot.data.dao.UserDAO;
 import com.example.springboot.data.dao.UsersInfoDAO;
 import com.example.springboot.data.dto.user.SignUpDTO;
 import com.example.springboot.data.dto.user.UserInfoDTO;
+import com.example.springboot.data.dto.seedling.SeedlingStatusDTO;
 import com.example.springboot.data.entity.UserEntity;
 import com.example.springboot.data.entity.UsersInfoEntity;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import java.time.Instant;
 public class UserService {
     private final UserDAO userDAO;
     private final UsersInfoDAO usersInfoDAO;
+    private final SeedlingService seedlingService;
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -57,6 +59,9 @@ public class UserService {
         
         UsersInfoEntity savedUserInfo = usersInfoDAO.addUserInfo(usersInfoEntity);
 
+        // SeedlingService를 통해 새싹 생성
+        SeedlingStatusDTO seedlingStatusDTO = seedlingService.createSeedling(savedUser, savedUserInfo.getNickname());
+
         // UserInfoDTO로 변환하여 반환 (password, role 제외)
         return UserInfoDTO.builder()
                 .username(savedUser.getUsername())
@@ -65,6 +70,7 @@ public class UserService {
                 .nickname(savedUserInfo.getNickname())
                 .gender(savedUserInfo.getGender())
                 .age(savedUserInfo.getAge())
+                .seedlingStatus(seedlingStatusDTO)
                 .build();
     }
 
@@ -82,6 +88,7 @@ public class UserService {
         return usersInfoDAO.findByNickname(nickname) == null;
     }
 
+
     /**
      * 사용자명으로 사용자 정보 조회
      */
@@ -92,6 +99,9 @@ public class UserService {
         // UsersInfoEntity에서 추가 정보 조회
         UsersInfoEntity usersInfoEntity = usersInfoDAO.findByUserId(userEntity.getId());
         
+        // SeedlingService를 통해 새싹 정보 조회
+        SeedlingStatusDTO seedlingStatusDTO = seedlingService.getSeedlingByUserId(userEntity.getId());
+        
         return UserInfoDTO.builder()
                 .username(userEntity.getUsername())
                 .email(userEntity.getEmail())
@@ -99,6 +109,7 @@ public class UserService {
                 .nickname(usersInfoEntity != null ? usersInfoEntity.getNickname() : null)
                 .gender(usersInfoEntity != null ? usersInfoEntity.getGender() : null)
                 .age(usersInfoEntity != null ? usersInfoEntity.getAge() : null)
+                .seedlingStatus(seedlingStatusDTO)
                 .build();
     }
 

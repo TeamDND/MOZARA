@@ -52,7 +52,7 @@ public class HairEncyclopediaService {
     public Map<String, Object> getPapersCount() throws Exception {
         log.info("논문 수 조회 요청");
 
-        String url = pythonBaseUrl + "/api/papers/count";
+        String url = pythonBaseUrl + "/papers/count";
         
         try {
             ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
@@ -75,7 +75,7 @@ public class HairEncyclopediaService {
     public List<Map<String, Object>> searchPapers(Map<String, Object> searchQuery) throws Exception {
         log.info("논문 검색 요청: {}", searchQuery);
 
-        String url = pythonBaseUrl + "/api/paper/search";
+        String url = pythonBaseUrl + "/paper/search";
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -131,7 +131,7 @@ public class HairEncyclopediaService {
     public Map<String, Object> getPaperAnalysis(String paperId) throws Exception {
         log.info("논문 분석 결과 조회 요청: {}", paperId);
 
-        String url = pythonBaseUrl + "/api/paper/" + paperId + "/analysis";
+        String url = pythonBaseUrl + "/paper/" + paperId + "/analysis";
         
         try {
             ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
@@ -154,7 +154,7 @@ public class HairEncyclopediaService {
     public Map<String, Object> answerQuestion(Map<String, Object> qnaQuery) throws Exception {
         log.info("논문 Q&A 요청: {}", qnaQuery);
 
-        String url = pythonBaseUrl + "/api/paper/qna";
+        String url = pythonBaseUrl + "/paper/qna";
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -182,7 +182,7 @@ public class HairEncyclopediaService {
     public Map<String, Object> triggerPubMedCollection() throws Exception {
         log.info("PubMed 논문 수집 트리거 요청");
 
-        String url = pythonBaseUrl + "/api/pubmed/collect";
+        String url = pythonBaseUrl + "/pubmed/collect";
         
         try {
             ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
@@ -205,7 +205,7 @@ public class HairEncyclopediaService {
     public Map<String, Object> clearPineconeIndex() throws Exception {
         log.info("Pinecone 인덱스 초기화 요청");
 
-        String url = pythonBaseUrl + "/api/admin/clear-index";
+        String url = pythonBaseUrl + "/admin/clear-index";
         
         try {
             ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.DELETE, null, Map.class);

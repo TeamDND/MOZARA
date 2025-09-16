@@ -9,12 +9,28 @@ import java.util.List;
 @Repository
 public interface DailyHabitRepository extends JpaRepository<DailyHabitEntity, Integer> {
     
-    // 습관명으로 검색
+    /**
+     * 카테고리별 습관 조회
+     */
+    List<DailyHabitEntity> findByCategory(String category);
+    
+    /**
+     * 모든 습관 조회
+     */
+    List<DailyHabitEntity> findAllByOrderByCategoryAsc();
+    
+    /**
+     * 습관 이름으로 검색
+     */
     List<DailyHabitEntity> findByHabitNameContaining(String habitName);
     
-    // 보상 포인트 범위로 검색
+    /**
+     * 포인트 범위로 습관 조회
+     */
     List<DailyHabitEntity> findByRewardPointsBetween(Integer minPoints, Integer maxPoints);
     
-    // 보상 포인트로 정렬하여 조회
+    /**
+     * 포인트 순으로 정렬된 모든 습관 조회
+     */
     List<DailyHabitEntity> findAllByOrderByRewardPointsDesc();
 }
