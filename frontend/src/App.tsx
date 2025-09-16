@@ -5,7 +5,7 @@ import MainLayout from './page/MainLayout';
 import LandingPage from './page/LandingPage';
 import HairCheck from './page/HairCheck';
 import SignUp from './user/SignUp';
-import Login from './user/Login';
+import Login from './user/LogIn';
 import BaspSelfCheck from './features/selfcheck/BaspSelfCheck';
 import HairDamageAnalysis from './page/HairDamageAnalysis';
 import HairChange from './page/HairChange';

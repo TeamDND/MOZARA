@@ -46,7 +46,8 @@ export default function HeroSection({ isVisible, parallaxOffset, onNavigate }: H
                 className="text-sm md:text-base px-6 md:px-8 py-3 md:py-4 border-gray-300 text-gray-700 hover:bg-gray-50"
                 onClick={() => onNavigate('/temp-main')}
               >
-                더 알아보기(임시페이지 이동)
+                전체 기능 보기
+                {/* 더 알아보기(임시페이지 이동) */}
                 <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             </div>

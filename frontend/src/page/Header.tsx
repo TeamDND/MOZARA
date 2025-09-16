@@ -1,29 +1,23 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/store';
 import { clearUser } from '../store/userSlice';
 import { clearToken } from '../store/tokenSlice';
-import Login from '../user/Login';
 
 export default function Header() {
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   // Redux에서 사용자 정보와 토큰 가져오기
   const user = useSelector((state: RootState) => state.user);
   const token = useSelector((state: RootState) => state.token.jwtToken);
-  
+
   // 로그인 상태 확인
   const isLoggedIn = !!(user.username && token);
 
   const handleLoginClick = () => {
-    setIsLoginModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsLoginModalOpen(false);
+    navigate('/login');
   };
 
   const handleLogoClick = () => {
@@ -101,20 +95,6 @@ export default function Header() {
       </header>
 
 
-      {/* 로그인 모달 */}
-      {isLoginModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="relative">
-            <button
-              onClick={handleCloseModal}
-              className="absolute -top-4 -right-4 w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 shadow-lg"
-            >
-              ×
-            </button>
-            <Login />
-          </div>
-        </div>
-      )}
     </>
   )
 }
