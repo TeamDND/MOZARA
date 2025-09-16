@@ -5,7 +5,7 @@ import MainLayout from './page/MainLayout';
 import LandingPage from './page/LandingPage';
 import HairCheck from './page/HairCheck';
 import SignUp from './user/SignUp';
-import Login from './user/LogIn';
+import LogIn from './user/LogIn';
 import BaspSelfCheck from './features/selfcheck/BaspSelfCheck';
 import HairDamageAnalysis from './page/HairDamageAnalysis';
 import HairChange from './page/HairChange';
@@ -17,6 +17,7 @@ import YouTubeVideos from './page/YouTubeVideos';
 import HairEncyclopediaMain from './features/hairEncyclopedia/HairEncyclopediaMain';
 import HairDiagnosis from './components/HairDiagnosis';
 import HairQuiz from './components/HairQuiz';
+import DailyCare from './page/DailyCare';
 
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
@@ -38,10 +39,11 @@ const App: React.FC = () => {
           <Route path="hair-encyclopedia/*" element={<HairEncyclopediaMain />} />
           <Route path="hair-diagnosis" element={<HairDiagnosis />} />
           <Route path="hair-quiz" element={<HairQuiz />} />
+          <Route path="daily-care" element={<DailyCare />} />
         </Route>
         
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<LogIn />} />
       </Routes>
     </>
   );
