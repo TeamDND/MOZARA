@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import apiClient from '../api/apiClient';
 
 interface Counters {
   water: number;
@@ -8,6 +9,8 @@ interface Counters {
 interface MissionState {
   morningBooster: boolean;
   nightBooster: boolean;
+  water: boolean;
+  effector: boolean;
   massage: boolean;
   omega3: boolean;
   vitaminD: boolean;
@@ -24,6 +27,24 @@ interface MissionState {
   scalpPack: boolean;
 }
 
+// daily_habits 테이블 데이터 기반 미션 정보
+interface DailyHabit {
+  habitId: number;
+  description: string;
+  habitName: string;
+  rewardPoints: number;
+  category: string;
+}
+
+interface MissionInfo {
+  id: number;
+  name: string;
+  description: string;
+  category: 'routine' | 'nutrient' | 'cleanliness';
+  rewardPoints: number;
+  key: keyof MissionState;
+}
+
 interface BadHabitsState {
   smoking: boolean;
   drinking: boolean;
@@ -35,15 +56,6 @@ interface BadHabitsState {
   scratching: boolean;
 }
 
-interface GameState {
-  level: number;
-  currentExp: number;
-  maxExp: number;
-  totalPoints: number;
-  streak: number;
-  lastPlayDate: string;
-  plantStage: string;
-}
 
 const HairPT: React.FC = () => {
   const [counters, setCounters] = useState<Counters>({
@@ -53,6 +65,8 @@ const HairPT: React.FC = () => {
   const [missionState, setMissionState] = useState<MissionState>({
     morningBooster: false,
     nightBooster: false,
+    water: false,
+    effector: false,
     massage: false,
     omega3: false,
     vitaminD: false,
@@ -82,15 +96,6 @@ const HairPT: React.FC = () => {
   const [lastResetDate, setLastResetDate] = useState<string>('');
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [scalpPhotos, setScalpPhotos] = useState<string[]>([]);
-  const [gameState, setGameState] = useState<GameState>({
-    level: 1,
-    currentExp: 0,
-    maxExp: 100,
-    totalPoints: 0,
-    streak: 0,
-    lastPlayDate: new Date().toDateString(),
-    plantStage: 'seed'
-  });
   const [statusMessage] = useState('오늘의 건강한 습관을 실천하고 새싹을 키워보세요!');
   const [plantTitle, setPlantTitle] = useState<string>('새싹 키우기');
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
@@ -99,6 +104,11 @@ const HairPT: React.FC = () => {
   const [showAchievement, setShowAchievement] = useState(false);
   const [achievementData, setAchievementData] = useState({ icon: '', title: '', description: '' });
   const [showSidebar, setShowSidebar] = useState(false);
+  const [dailyHabits, setDailyHabits] = useState<DailyHabit[]>([]);
+  const [missionData, setMissionData] = useState<MissionInfo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [seedlingPoints, setSeedlingPoints] = useState(0);
+  const [seedlingLevel, setSeedlingLevel] = useState(1);
 
   const plantStages = {
     1: { emoji: '🌱', name: '새싹' },
@@ -107,37 +117,6 @@ const HairPT: React.FC = () => {
     4: { emoji: '🍎', name: '열매 나무' }
   };
 
-  // 게임 상태 저장
-  const saveGameState = (newState: GameState) => {
-    localStorage.setItem('hairHealthGame', JSON.stringify(newState));
-  };
-
-  // 게임 상태 로드
-  const loadGameState = () => {
-    const saved = localStorage.getItem('hairHealthGame');
-    if (saved) {
-      const savedState = JSON.parse(saved);
-      
-      // 날짜 체크 - 새로운 날이면 연속일 체크
-      const today = new Date().toDateString();
-      if (savedState.lastPlayDate !== today) {
-        const lastDate = new Date(savedState.lastPlayDate);
-        const todayDate = new Date(today);
-        const diffTime = Math.abs(todayDate.getTime() - lastDate.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        if (diffDays === 1) {
-          savedState.streak++;
-        } else if (diffDays > 1) {
-          savedState.streak = 0;
-        }
-        
-        savedState.lastPlayDate = today;
-      }
-      
-      setGameState(savedState);
-    }
-  };
 
   // 일일 리셋 함수
   const resetDailyMissions = useCallback(() => {
@@ -147,6 +126,8 @@ const HairPT: React.FC = () => {
       setMissionState({
         morningBooster: false,
         nightBooster: false,
+        water: false,
+        effector: false,
         massage: false,
         omega3: false,
         vitaminD: false,
@@ -176,10 +157,84 @@ const HairPT: React.FC = () => {
     }
   }, [lastResetDate]);
 
+  // daily_habits 데이터 로드
+  const loadDailyHabits = async () => {
+    try {
+      setLoading(true);
+      const response = await apiClient.get('/habit/daily-habits');
+      setDailyHabits(response.data);
+      
+      // DailyHabit을 MissionInfo로 변환
+      const convertedMissions: MissionInfo[] = response.data.map((habit: DailyHabit) => ({
+        id: habit.habitId,
+        name: habit.habitName,
+        description: habit.description,
+        category: habit.category.trim() as 'routine' | 'nutrient' | 'cleanliness', // 공백 제거
+        rewardPoints: habit.rewardPoints,
+        key: getMissionKey(habit.habitName) // 습관 이름을 기반으로 키 매핑
+      }));
+      setMissionData(convertedMissions);
+    } catch (error) {
+      console.error('습관 데이터 로드 실패:', error);
+      setToast({ visible: true, message: '습관 데이터를 불러오는데 실패했습니다.' });
+      setTimeout(() => setToast({ visible: false, message: '' }), 3000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 습관 이름을 기반으로 미션 키 매핑
+  const getMissionKey = (habitName: string): keyof MissionState => {
+    const keyMap: { [key: string]: keyof MissionState } = {
+      '물 마시기': 'water',
+      '이펙터 사용': 'effector',
+      '아침 부스터 사용': 'morningBooster',
+      '밤 부스터 사용': 'nightBooster',
+      '백회혈/사신총혈 마사지': 'massage',
+      '오메가-3 섭취': 'omega3',
+      '비타민 D 섭취': 'vitaminD',
+      '비타민 E 섭취': 'vitaminE',
+      '단백질 섭취': 'protein',
+      '철분 섭취': 'iron',
+      '비오틴 섭취': 'biotin',
+      '아연 섭취': 'zinc',
+      '밤에 머리 감기': 'nightWash',
+      '머리 바싹 말리기': 'dryHair',
+      '샴푸 전 머리 빗질': 'brushHair',
+      '두피 영양팩하기': 'scalpPack'
+    };
+    return keyMap[habitName] || 'morningBooster';
+  };
+
+  // 포인트에 따른 새싹 레벨 계산
+  const calculateSeedlingLevel = (points: number): number => {
+    if (points >= 200) return 4; // 열매 나무
+    if (points >= 100) return 3; // 나무
+    if (points >= 50) return 2;  // 어린 나무
+    return 1; // 새싹
+  };
+
+  // 새싹 포인트 로드
+  const loadSeedlingPoints = async () => {
+    try {
+      // 임시로 userId = 1 사용 (실제로는 로그인한 사용자 ID 사용)
+      const userId = 1;
+      const response = await apiClient.get(`/api/user/seedling/${userId}`);
+      if (response.data && response.data.currentPoint) {
+        const points = response.data.currentPoint;
+        setSeedlingPoints(points);
+        setSeedlingLevel(calculateSeedlingLevel(points));
+      }
+    } catch (error) {
+      console.error('새싹 포인트 로드 실패:', error);
+    }
+  };
+
   // 컴포넌트 마운트 시 리셋 확인
   useEffect(() => {
     resetDailyMissions();
-    loadGameState();
+    loadDailyHabits();
+    loadSeedlingPoints();
     const savedTitle = localStorage.getItem('plantTitle');
     if (savedTitle) setPlantTitle(savedTitle);
   }, [resetDailyMissions]);
@@ -223,7 +278,7 @@ const HairPT: React.FC = () => {
 
   // 진행률 계산 함수
   const calculateProgress = () => {
-    const totalMissions = 18; // 총 미션 수 (2개 카운터 + 16개 체크박스)
+    const totalMissions = 18; // 총 미션 수
     let completedMissions = 0;
 
     // 카운터 미션 (물 7잔, 이펙터 4번)
@@ -240,9 +295,6 @@ const HairPT: React.FC = () => {
 
   const progressPercentage = calculateProgress();
 
-  const updateCounterDisplay = (id: keyof Counters) => {
-    return counters[id];
-  };
 
   const toggleMission = (missionKey: keyof MissionState) => {
     setMissionState(prev => ({
@@ -250,37 +302,74 @@ const HairPT: React.FC = () => {
       [missionKey]: !prev[missionKey]
     }));
     
-    // 미션 완료 시 경험치 추가
+    // 미션 완료 시 경험치 추가 및 로그 저장
     if (!missionState[missionKey]) {
-      addExp(10); // 미션 완료 시 10 경험치
-    }
-  };
-
-  // 경험치 추가 함수
-  const addExp = (points: number) => {
-    const newState = {
-      ...gameState,
-      currentExp: gameState.currentExp + points,
-      totalPoints: gameState.totalPoints + points
-    };
-
-    // 레벨업 체크
-    if (newState.currentExp >= newState.maxExp) {
-      if (newState.level < 4) {
-        newState.level++;
-        newState.currentExp = newState.currentExp - newState.maxExp;
-        newState.maxExp = newState.level * 100;
-        
-        const plant = plantStages[newState.level as keyof typeof plantStages];
-        showAchievementPopup(plant.emoji, `레벨업! ${plant.name}`, `축하합니다! ${plant.name} 단계에 도달했습니다!`);
-      } else {
-        newState.currentExp = newState.maxExp;
+      const missionInfo = missionData.find(m => m.key === missionKey);
+      if (missionInfo) {
+        saveMissionLog(missionInfo.id, missionInfo.rewardPoints);
       }
     }
-    
-    setGameState(newState);
-    saveGameState(newState);
   };
+
+  // 미션 완료 로그 저장 함수 (API 연동)
+  const saveMissionLog = async (habitId: number, points: number) => {
+    try {
+      // 임시로 userId = 1 사용 (실제로는 로그인한 사용자 ID 사용)
+      const userId = 1;
+      
+      const response = await apiClient.post('/api/habit/complete', null, {
+        params: {
+          userId: userId,
+          habitId: habitId
+        }
+      });
+      
+      console.log('미션 완료 로그 저장 성공:', response.data);
+      
+      // 성공 시 토스트 메시지 및 새싹 포인트 업데이트
+      setSeedlingPoints(prev => {
+        const newPoints = prev + points;
+        const newLevel = calculateSeedlingLevel(newPoints);
+        
+        // 레벨업 체크
+        if (newLevel > seedlingLevel) {
+          const plant = plantStages[newLevel as keyof typeof plantStages];
+        showAchievementPopup(plant.emoji, `레벨업! ${plant.name}`, `축하합니다! ${plant.name} 단계에 도달했습니다!`);
+          setSeedlingLevel(newLevel);
+        }
+        
+        return newPoints;
+      });
+      
+      setToast({ 
+        visible: true, 
+        message: `+${points} 포인트 획득! 새싹이 성장했어요 🌱` 
+      });
+      setTimeout(() => setToast({ visible: false, message: '' }), 3000);
+      
+    } catch (error) {
+      console.error('미션 완료 로그 저장 실패:', error);
+      
+      // 실패 시에도 로컬에 임시 저장
+      const logData = {
+        habitId,
+        points,
+        completionDate: new Date().toISOString().split('T')[0],
+        timestamp: new Date().toISOString()
+      };
+      
+      const existingLogs = JSON.parse(localStorage.getItem('missionLogs') || '[]');
+      existingLogs.push(logData);
+      localStorage.setItem('missionLogs', JSON.stringify(existingLogs));
+      
+      setToast({ 
+        visible: true, 
+        message: '미션 완료! (오프라인 모드)' 
+      });
+      setTimeout(() => setToast({ visible: false, message: '' }), 3000);
+    }
+  };
+
 
   // 업적 팝업 표시
   const showAchievementPopup = (icon: string, title: string, description: string) => {
@@ -288,18 +377,6 @@ const HairPT: React.FC = () => {
     setShowAchievement(true);
   };
 
-  // 안좋은 습관 토글 함수
-  const toggleBadHabit = (habitKey: keyof BadHabitsState) => {
-    setBadHabitsState(prev => ({
-      ...prev,
-      [habitKey]: !prev[habitKey]
-    }));
-    
-    // 안좋은 습관 체크 시 경험치 감소
-    if (!badHabitsState[habitKey]) {
-      addExp(-5); // 안좋은 습관 체크 시 -5 경험치
-    }
-  };
 
   // 두피 사진 촬영 함수
   const takeScalpPhoto = () => {
@@ -325,19 +402,21 @@ const HairPT: React.FC = () => {
     input.click();
   };
 
-  // 미션 버튼 스타일과 클릭 핸들러를 반환하는 함수
-  const getMissionButtonProps = (missionKey: keyof MissionState, defaultText: string = '미션 완료') => {
-    const isCompleted = missionState[missionKey];
-    return {
-      className: `w-full py-3 md:py-4 rounded-full font-bold transition-colors ${
-        isCompleted 
-          ? 'bg-green-500 text-white cursor-not-allowed' 
-          : 'bg-blue-500 hover:bg-blue-600 text-white'
-      }`,
-      onClick: () => !isCompleted && toggleMission(missionKey),
-      disabled: isCompleted,
-      children: isCompleted ? '완료됨' : defaultText
-    };
+
+  // 카테고리별 미션 필터링 함수
+  const getMissionsByCategory = (category: 'routine' | 'nutrient' | 'cleanliness') => {
+    const filteredMissions = missionData.filter(mission => mission.category === category);
+    
+    // 중복된 미션 제거 (물마시기와 이펙터 사용은 각각 하나씩만 표시)
+    const uniqueMissions = filteredMissions.filter((mission, index, array) => {
+      if (mission.name === '물 마시기' || mission.name === '이펙터 사용') {
+        // 같은 이름의 첫 번째 미션만 유지
+        return array.findIndex(m => m.name === mission.name) === index;
+      }
+      return true;
+    });
+    
+    return uniqueMissions;
   };
 
   const incrementCounter = (id: keyof Counters) => {
@@ -347,8 +426,16 @@ const HairPT: React.FC = () => {
       if (id === 'water' && newValue > 7) return prev;
       if (id === 'effector' && newValue > 4) return prev;
       
-      // 카운터 증가 시 경험치 추가
-      addExp(5); // 카운터 증가 시 5 경험치
+      // 카운터 완료 시 로그 저장 (물 7잔, 이펙터 4번 완료 시)
+      if ((id === 'water' && newValue === 7) || (id === 'effector' && newValue === 4)) {
+        const missionInfo = missionData.find(m => 
+          (id === 'water' && m.name === '물 마시기') || 
+          (id === 'effector' && m.name === '이펙터 사용')
+        );
+        if (missionInfo) {
+          saveMissionLog(missionInfo.id, missionInfo.rewardPoints);
+        }
+      }
       
       return {
         ...prev,
@@ -357,16 +444,145 @@ const HairPT: React.FC = () => {
     });
   };
 
-  const decrementCounter = (id: keyof Counters) => {
-    setCounters(prev => ({
-      ...prev,
-      [id]: Math.max(0, prev[id] - 1)
-    }));
-  };
 
 
   const showContent = (tabId: string) => {
     setActiveTab(tabId);
+  };
+
+  // 미션별 아이콘과 색상 반환 함수
+  const getMissionIcon = (missionName: string) => {
+    const iconMap: { [key: string]: { icon: string; bgColor: string; textColor: string } } = {
+      '물 마시기': { icon: 'fas fa-tint', bgColor: 'bg-blue-100', textColor: 'text-blue-500' },
+      '이펙터 사용': { icon: 'fas fa-wand-magic-sparkles', bgColor: 'bg-purple-100', textColor: 'text-purple-500' },
+      '아침 부스터 사용': { icon: 'fas fa-sun', bgColor: 'bg-yellow-100', textColor: 'text-yellow-500' },
+      '밤 부스터 사용': { icon: 'fas fa-moon', bgColor: 'bg-indigo-100', textColor: 'text-indigo-500' },
+      '백회혈/사신총혈 마사지': { icon: 'fas fa-hand-holding-medical', bgColor: 'bg-pink-100', textColor: 'text-pink-500' },
+      '오메가-3 섭취': { icon: 'fas fa-fish', bgColor: 'bg-blue-100', textColor: 'text-blue-500' },
+      '비타민 D 섭취': { icon: 'fas fa-sun', bgColor: 'bg-yellow-100', textColor: 'text-yellow-500' },
+      '비타민 E 섭취': { icon: 'fas fa-leaf', bgColor: 'bg-green-100', textColor: 'text-green-500' },
+      '단백질 섭취': { icon: 'fas fa-drumstick-bite', bgColor: 'bg-red-100', textColor: 'text-red-500' },
+      '철분 섭취': { icon: 'fas fa-apple-alt', bgColor: 'bg-red-100', textColor: 'text-red-500' },
+      '비오틴 섭취': { icon: 'fas fa-pills', bgColor: 'bg-purple-100', textColor: 'text-purple-500' },
+      '아연 섭취': { icon: 'fas fa-capsules', bgColor: 'bg-orange-100', textColor: 'text-orange-500' },
+      '밤에 머리 감기': { icon: 'fas fa-shower', bgColor: 'bg-sky-100', textColor: 'text-sky-500' },
+      '머리 바싹 말리기': { icon: 'fas fa-wind', bgColor: 'bg-sky-100', textColor: 'text-sky-500' },
+      '샴푸 전 머리 빗질': { icon: 'fas fa-broom', bgColor: 'bg-yellow-100', textColor: 'text-yellow-500' },
+      '두피 영양팩하기': { icon: 'fas fa-spa', bgColor: 'bg-green-100', textColor: 'text-green-500' }
+    };
+    return iconMap[missionName] || { icon: 'fas fa-check', bgColor: 'bg-blue-100', textColor: 'text-blue-500' };
+  };
+
+  // 미션 카드 렌더링 함수
+  const renderMissionCard = (mission: MissionInfo) => {
+    const isCompleted = missionState[mission.key];
+    const missionIcon = getMissionIcon(mission.name);
+    
+    // 물마시기와 이펙터 사용은 카운터 방식으로 처리
+    if (mission.key === 'water' || mission.key === 'effector') {
+      const currentCount = counters[mission.key];
+      const targetCount = mission.key === 'water' ? 7 : 4; // 물마시기 7잔, 이펙터 4회
+      const isCounterCompleted = currentCount >= targetCount;
+      
+      return (
+        <div key={mission.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow h-full flex flex-col">
+          <div className="flex-1 flex flex-col">
+            <div className="flex items-center space-x-4 mb-3">
+              <div className={`w-14 h-14 flex items-center justify-center ${missionIcon.bgColor} rounded-lg`}>
+                <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
+              </div>
+              <div className="flex-1 min-h-[45px] flex flex-col justify-between">
+                <div>
+                  <h3 className="text-[1rem] font-semibold leading-tight">{mission.name}</h3>
+                  <p className="text-sm text-gray-500 mt-1 leading-tight">{mission.description}</p>
+                </div>
+                <div className="flex items-center mt-2">
+                  <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
+                    +{mission.rewardPoints} 포인트
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="mb-3">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-gray-600">진행률</span>
+                <span className="text-sm font-medium text-gray-800">{currentCount}/{targetCount}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min((currentCount / targetCount) * 100, 100)}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
+          {isCounterCompleted ? (
+            <div className="w-full py-4 rounded-full font-bold bg-green-500 text-white text-center">
+              미션완료
+            </div>
+          ) : (
+            <div className="flex gap-3 justify-center">
+              <button 
+                className="w-10 h-10 rounded-full font-bold bg-gray-400 hover:bg-gray-500 text-white transition-colors flex items-center justify-center"
+                onClick={() => {
+                  const currentCount = counters[mission.key as keyof Counters];
+                  if (currentCount > 0) {
+                    setCounters(prev => ({
+                      ...prev,
+                      [mission.key as keyof Counters]: currentCount - 1
+                    }));
+                  }
+                }}
+                disabled={counters[mission.key as keyof Counters] <= 0}
+              >
+                -1
+              </button>
+              <button 
+                className="w-10 h-10 rounded-full font-bold bg-blue-500 hover:bg-blue-600 text-white transition-colors flex items-center justify-center"
+                onClick={() => incrementCounter(mission.key as keyof Counters)}
+              >
+                +1
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    // 일반 미션들 (기존 로직)
+    return (
+      <div key={mission.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow h-full flex flex-col">
+        <div className="flex-1 flex flex-col">
+          <div className="flex items-center space-x-4 mb-3">
+            <div className={`w-14 h-14 flex items-center justify-center ${missionIcon.bgColor} rounded-lg`}>
+              <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
+            </div>
+            <div className="flex-1 min-h-[45px] flex flex-col justify-between">
+              <div>
+                <h3 className="text-[1rem] font-semibold leading-tight">{mission.name}</h3>
+                <p className="text-sm text-gray-500 mt-1 leading-tight">{mission.description}</p>
+              </div>
+              <div className="flex items-center mt-2">
+                <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
+                  +{mission.rewardPoints} 포인트
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button 
+          className={`w-full py-4 rounded-full font-bold transition-colors mt-auto ${
+            isCompleted 
+              ? 'bg-green-500 text-white cursor-not-allowed' 
+              : 'bg-blue-500 hover:bg-blue-600 text-white'
+          }`}
+          onClick={() => !isCompleted && toggleMission(mission.key)}
+          disabled={isCompleted}
+        >
+          {isCompleted ? '완료됨' : '미션 시작'}
+        </button>
+      </div>
+    );
   };
 
   return (
@@ -440,153 +656,38 @@ const HairPT: React.FC = () => {
         </div>
 
         {/* Main Content (Tasks) */}
-        <main className="flex-1 p-3 md:p-4 lg:p-6 overflow-y-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
+        <main className="flex-1 p-6 overflow-y-auto">
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <p className="text-gray-600">습관 데이터를 불러오는 중...</p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 max-w-7xl mx-auto">
           {/* Routine Content */}
           {activeTab === 'routine' && (
             <>
-              {/* Task Card: Drink water */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-blue-100 rounded-lg">
-                      <i className="fas fa-tint text-blue-500 text-lg md:text-xl"></i>
-                    </div>
-                    <div>
-                      <h3 className="text-base md:text-lg font-semibold">물 7잔</h3>
-                      <p className="text-xs md:text-sm text-gray-500">모발 수분 유지</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <button 
-                      onClick={() => decrementCounter('water')} 
-                      className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold hover:bg-gray-300 transition-colors"
-                    >
-                      -
-                    </button>
-                    <span className="font-semibold text-lg md:text-xl min-w-[2rem] text-center">{updateCounterDisplay('water')}/7</span>
-                    <button 
-                      onClick={() => incrementCounter('water')} 
-                      className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold transition-colors ${
-                        counters.water >= 7 
-                          ? 'bg-green-500 text-white cursor-not-allowed' 
-                          : 'bg-blue-500 text-white hover:bg-blue-600'
-                      }`}
-                      disabled={counters.water >= 7}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              </div>
 
-              {/* Task Card: Use effector */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-purple-100 rounded-lg">
-                      <i className="fas fa-wand-magic-sparkles text-purple-500 text-lg md:text-xl"></i>
-                    </div>
-                    <div>
-                      <h3 className="text-base md:text-lg font-semibold">이펙터 4번 사용</h3>
-                      <p className="text-xs md:text-sm text-gray-500">미션 진행 중</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <button 
-                      onClick={() => decrementCounter('effector')} 
-                      className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold hover:bg-gray-300 transition-colors"
-                    >
-                      -
-                    </button>
-                    <span className="font-semibold text-lg md:text-xl min-w-[2rem] text-center">{updateCounterDisplay('effector')}/4</span>
-                    <button 
-                      onClick={() => incrementCounter('effector')} 
-                      className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold transition-colors ${
-                        counters.effector >= 4 
-                          ? 'bg-green-500 text-white cursor-not-allowed' 
-                          : 'bg-blue-500 text-white hover:bg-blue-600'
-                      }`}
-                      disabled={counters.effector >= 4}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              </div>
+              {/* 데이터 기반 미션 카드들 */}
+              {getMissionsByCategory('routine').map(mission => renderMissionCard(mission))}
 
-              {/* Task Card: Morning booster */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+              {/* 두피 사진 촬영 (특별 기능) */}
+              <div className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow h-full flex flex-col">
+                <div className="flex-1 flex flex-col">
                 <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-orange-100 rounded-lg">
-                    <i className="fas fa-sun text-orange-500 text-lg md:text-xl"></i>
+                    <div className="w-14 h-14 flex items-center justify-center bg-purple-100 rounded-lg">
+                      <i className="fas fa-camera text-purple-500 text-lg"></i>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">아침 부스터 사용</h3>
-                    <p className="text-xs md:text-sm text-gray-500">탈모 에센스로 직접 개선</p>
+                    <div className="flex-1 min-h-[45px] flex flex-col justify-center">
+                      <h3 className="text-[1rem] font-semibold leading-tight">두피 사진 촬영</h3>
+                      <p className="text-sm text-gray-500 mt-1 leading-tight">두피 상태 기록하기</p>
                   </div>
-                </div>
-                <button {...getMissionButtonProps('morningBooster')} />
-              </div>
-              
-              {/* Task Card: Night booster */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-indigo-100 rounded-lg">
-                    <i className="fas fa-moon text-indigo-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">밤 부스터 사용</h3>
-                    <p className="text-xs md:text-sm text-gray-500">탈모 에센스로 직접 개선</p>
-                  </div>
-                </div>
-                <button {...getMissionButtonProps('nightBooster')} />
-              </div>
-
-              {/* Task Card: Massage */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-pink-100 rounded-lg">
-                      <i className="fas fa-hand-holding-medical text-pink-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">백회혈/사신총혈 마사지</h3>
-                    <p className="text-xs md:text-sm text-gray-500">상열감 감소로 탈모 예방</p>
                   </div>
                 </div>
                 <button 
-                  className={`w-full py-3 md:py-4 rounded-full font-bold transition-colors ${
-                    missionState.massage 
-                      ? 'bg-green-500 text-white cursor-not-allowed' 
-                      : 'bg-blue-500 hover:bg-blue-600 text-white'
-                  }`}
-                  onClick={() => {
-                    if (!missionState.massage) {
-                      setShowVideoModal(true);
-                      toggleMission('massage');
-                    }
-                  }}
-                  disabled={missionState.massage}
-                >
-                  {missionState.massage ? '완료됨' : '시작하기'}
-                </button>
-              </div>
-
-              {/* Task Card: Take scalp photo */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-purple-100 rounded-lg">
-                      <i className="fas fa-camera text-purple-500 text-lg md:text-xl"></i>
-                    </div>
-                    <div>
-                      <h3 className="text-base md:text-lg font-semibold">두피 사진 촬영</h3>
-                      <p className="text-xs md:text-sm text-gray-500">두피 상태 기록하기</p>
-                    </div>
-                  </div>
-                </div>
-                <button 
-                  className="w-full py-3 md:py-4 rounded-full font-bold transition-colors bg-purple-500 hover:bg-purple-600 text-white mt-4"
+                  className="w-full py-4 rounded-full font-bold transition-colors bg-purple-500 hover:bg-purple-600 text-white mt-auto"
                   onClick={takeScalpPhoto}
                 >
                   사진 촬영하기
@@ -598,197 +699,68 @@ const HairPT: React.FC = () => {
           {/* Nutrition Content */}
           {activeTab === 'nutrition' && (
             <>
-              {/* Task Card: Omega-3 */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-cyan-100 rounded-lg">
-                    <i className="fas fa-fish text-cyan-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">오메가-3 섭취</h3>
-                    <p className="text-xs md:text-sm text-gray-500">혈액 순환 촉진 및 염증 완화</p>
-                  </div>
-                </div>
-                <button {...getMissionButtonProps('omega3')} />
-              </div>
-
-              {/* Task Card: Vitamin D */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-yellow-100 rounded-lg">
-                    <i className="fas fa-sun text-yellow-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">비타민 D 섭취</h3>
-                    <p className="text-xs md:text-sm text-gray-500">모낭 자극 및 모발 성장 촉진</p>
-                  </div>
-                </div>
-                <button {...getMissionButtonProps('vitaminD')} />
-              </div>
-
-              {/* Task Card: Vitamin E */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-green-100 rounded-lg">
-                    <i className="fas fa-leaf text-green-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">비타민 E 섭취</h3>
-                    <p className="text-xs md:text-sm text-gray-500">항산화 작용 및 건조함 완화</p>
-                  </div>
-                </div>
-                <button {...getMissionButtonProps('vitaminE')} />
-              </div>
-
-              {/* Task Card: Protein */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-red-100 rounded-lg">
-                    <i className="fas fa-drumstick-bite text-red-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">단백질 섭취</h3>
-                    <p className="text-xs md:text-sm text-gray-500">모발 구성 성분 및 성장 촉진</p>
-                  </div>
-                </div>
-                <button {...getMissionButtonProps('protein')} />
-              </div>
-
-              {/* Task Card: Iron */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-orange-100 rounded-lg">
-                    <i className="fas fa-hammer text-orange-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">철분 섭취</h3>
-                    <p className="text-xs md:text-sm text-gray-500">산소 운반 및 모발 건강 유지</p>
-                  </div>
-                </div>
-                <button {...getMissionButtonProps('iron')} />
-              </div>
-
-              {/* Task Card: Biotin */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-emerald-100 rounded-lg">
-                    <i className="fas fa-seedling text-emerald-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">비오틴 섭취</h3>
-                    <p className="text-xs md:text-sm text-gray-500">모발 성장 및 강화 촉진</p>
-                  </div>
-                </div>
-                <button {...getMissionButtonProps('biotin')} />
-              </div>
-
-              {/* Task Card: Zinc */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-gray-100 rounded-lg">
-                    <i className="fas fa-atom text-gray-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">아연 섭취</h3>
-                    <p className="text-xs md:text-sm text-gray-500">모발 성장 및 재생 촉진</p>
-                  </div>
-                </div>
-                <button {...getMissionButtonProps('zinc')} />
-              </div>
+              {getMissionsByCategory('nutrient').map(mission => renderMissionCard(mission))}
             </>
           )}
           
           {/* Clean Content */}
           {activeTab === 'clean' && (
             <>
-              {/* Task Card: Night wash hair */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-teal-100 rounded-lg">
-                    <i className="fas fa-shower text-teal-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">밤에 머리 감기</h3>
-                    <p className="text-xs md:text-sm text-gray-500">모공 청결 유지로 탈모 방지</p>
-                  </div>
-                </div>
-                <button {...getMissionButtonProps('nightWash')} />
-              </div>
-
-              {/* Task Card: Dry hair well */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-sky-100 rounded-lg">
-                      <i className="fas fa-wind text-sky-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">머리 바싹 말리기</h3>
-                    <p className="text-xs md:text-sm text-gray-500">모발 약화 및 냉기 방지</p>
-                  </div>
-                </div>
-                <button {...getMissionButtonProps('dryHair')} />
-              </div>
-
-              {/* Task Card: Massage (moved from routine) */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-pink-100 rounded-lg">
-                      <i className="fas fa-hand-holding-medical text-pink-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">백회혈/사신총혈 마사지</h3>
-                    <p className="text-xs md:text-sm text-gray-500">상열감 감소로 탈모 예방</p>
-                  </div>
-                </div>
-                <button 
-                  className={`w-full py-3 md:py-4 rounded-full font-bold transition-colors ${
-                    missionState.massage 
-                      ? 'bg-green-500 text-white cursor-not-allowed' 
-                      : 'bg-blue-500 hover:bg-blue-600 text-white'
-                  }`}
-                  onClick={() => {
-                    if (!missionState.massage) {
-                      setShowVideoModal(true);
-                      toggleMission('massage');
-                    }
-                  }}
-                  disabled={missionState.massage}
-                >
-                  {missionState.massage ? '완료됨' : '시작하기'}
-                </button>
-              </div>
-
-              {/* Task Card: Brush hair before shampoo */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-amber-100 rounded-lg">
-                    <i className="fas fa-brush text-amber-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">샴푸 전 머리 빗질</h3>
-                    <p className="text-xs md:text-sm text-gray-500">머리 엉킴 방지 및 노폐물 제거</p>
-                  </div>
-                </div>
-                <button {...getMissionButtonProps('brushHair')} />
-              </div>
-
-              {/* Task Card: Scalp Nutrition Pack (moved from weekly) */}
-              <div className="bg-white p-3 md:p-4 lg:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-green-100 rounded-lg">
-                    <i className="fas fa-leaf text-green-500 text-lg md:text-xl"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold">두피 영양팩하기</h3>
-                    <p className="text-xs md:text-sm text-gray-500">두피 영양 공급 및 보습</p>
-                  </div>
-                </div>
-                <button {...getMissionButtonProps('scalpPack', '영양팩하기')} />
-              </div>
+              {/* 데이터 기반 미션 카드들 */}
+              {getMissionsByCategory('cleanliness').map(mission => {
+                // 백회혈 마사지는 특별한 기능(비디오 모달)이 있으므로 별도 처리
+                if (mission.name === '백회혈/사신총혈 마사지') {
+                  const isCompleted = missionState[mission.key];
+                  const missionIcon = getMissionIcon(mission.name);
+                  
+                  return (
+                    <div key={mission.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow h-full flex flex-col">
+                      <div className="flex-1 flex flex-col">
+                        <div className="flex items-center space-x-4 mb-3">
+                          <div className={`w-14 h-14 flex items-center justify-center ${missionIcon.bgColor} rounded-lg`}>
+                            <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
+                          </div>
+                          <div className="flex-1 min-h-[45px] flex flex-col justify-between">
+                            <div>
+                              <h3 className="text-[1rem] font-semibold leading-tight">{mission.name}</h3>
+                              <p className="text-sm text-gray-500 mt-1 leading-tight">{mission.description}</p>
+                            </div>
+                            <div className="flex items-center mt-2">
+                              <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
+                                +{mission.rewardPoints} 포인트
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <button 
+                        className={`w-full py-4 rounded-full font-bold transition-colors mt-auto ${
+                          isCompleted 
+                            ? 'bg-green-500 text-white cursor-not-allowed' 
+                            : 'bg-blue-500 hover:bg-blue-600 text-white'
+                        }`}
+                        onClick={() => {
+                          if (!isCompleted) {
+                            setShowVideoModal(true);
+                            toggleMission(mission.key);
+                          }
+                        }}
+                        disabled={isCompleted}
+                      >
+                        {isCompleted ? '완료됨' : '시작하기'}
+                      </button>
+                    </div>
+                  );
+                }
+                
+                // 일반 미션들은 renderMissionCard 함수 사용
+                return renderMissionCard(mission);
+              })}
             </>
           )}
           
           </div>
+          )}
         </main>
 
         {/* Video Modal */}
@@ -899,15 +871,15 @@ const HairPT: React.FC = () => {
             </div>
             <div className="flex items-center bg-white/20 rounded-2xl p-3">
               <span className="bg-white text-indigo-600 px-3 py-1 rounded-full text-sm font-bold">
-                Lv.{gameState.level}
+                Lv.{seedlingLevel}
               </span>
               <div className="flex-1 h-2 bg-white/30 rounded-full mx-3 overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full transition-all duration-500"
-                  style={{ width: `${(gameState.currentExp / gameState.maxExp) * 100}%` }}
+                  style={{ width: `${(seedlingPoints % 50) * 2}%` }}
                 />
               </div>
-              <span className="text-xs">{gameState.currentExp}/{gameState.maxExp}</span>
+              <span className="text-xs">{seedlingPoints % 50}/50</span>
             </div>
           </div>
 
@@ -915,7 +887,7 @@ const HairPT: React.FC = () => {
           <div className="bg-gradient-to-b from-sky-200 to-green-200 p-6 text-center">
             <div className="relative inline-block">
               <div className="text-6xl transition-transform duration-500 hover:scale-110 animate-bounce">
-                {plantStages[gameState.level as keyof typeof plantStages].emoji}
+                {plantStages[seedlingLevel as keyof typeof plantStages].emoji}
               </div>
             </div>
             <div className="mt-3 p-2 bg-white/90 rounded-xl text-xs text-gray-700">
@@ -927,12 +899,12 @@ const HairPT: React.FC = () => {
           <div className="p-4 bg-white border-t border-gray-200">
             <div className="flex justify-around text-center">
               <div>
-                <div className="text-lg font-bold text-indigo-600">{gameState.streak}</div>
+                <div className="text-lg font-bold text-indigo-600">0</div>
                 <div className="text-xs text-gray-600">연속일</div>
               </div>
               <div>
-                <div className="text-lg font-bold text-indigo-600">{gameState.totalPoints}</div>
-                <div className="text-xs text-gray-600">포인트</div>
+                <div className="text-lg font-bold text-indigo-600">{seedlingPoints}</div>
+                <div className="text-xs text-gray-600">새싹 포인트</div>
               </div>
               <div>
                 <div className="text-lg font-bold text-indigo-600">{Math.round((Object.values(missionState).filter(v => v).length / Object.keys(missionState).length) * 100)}%</div>
@@ -948,10 +920,10 @@ const HairPT: React.FC = () => {
           className="fixed bottom-6 right-6 lg:hidden w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-50 flex flex-col items-center justify-center relative"
         >
           <div className="text-2xl animate-bounce">
-            {plantStages[gameState.level as keyof typeof plantStages].emoji}
+            {plantStages[seedlingLevel as keyof typeof plantStages].emoji}
           </div>
           <div className="absolute -top-1 -right-1 w-5 h-5 bg-white text-indigo-600 rounded-full flex items-center justify-center text-xs font-bold">
-            {gameState.level}
+            {seedlingLevel}
           </div>
         </button>
 

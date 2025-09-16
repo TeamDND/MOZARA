@@ -20,50 +20,6 @@ def _get_genai_client():
     return genai
 
 
-def analyze_hair_with_gemini_service(image_base64: str) -> Dict[str, Any]:
-    """Gemini로 이미지 분석을 수행하고 표준 결과를 반환.
-
-    Returns: {"stage": int, "title": str, "description": str, "advice": List[str]}
-    """
-    genai = _get_genai_client()
-    model = genai.GenerativeModel('gemini-2.0-flash-exp')
-
-    prompt = (
-        "당신은 두피 및 탈모 분석 전문가입니다. 주어진 이미지를 분석하여 탈모 진행 단계를 1~7단계로 진단하고, "
-        "결과를 반드시 다음 JSON 형식으로만 응답해주세요: "
-        '{"stage": <1-7>, "title": "<진단명>", "description": "<상세 설명>", "advice": ["<가이드 1>", "<가이드 2>"]}'
-        "\n\n단계별 기준:\n1-2단계: 정상 또는 초기 탈모\n3-4단계: 중간 단계 탈모\n5-7단계: 심각한 탈모"
-    )
-
-    image_data = base64.b64decode(image_base64)
-
-    response = model.generate_content([prompt, {"mime_type": "image/jpeg", "data": image_data}])
-    response_text = response.text or ""
-
-    import re
-    json_match = re.search(r'\{[\s\S]*\}', response_text)
-    if not json_match:
-        raise ValueError("JSON 형식의 응답을 찾을 수 없습니다.")
-
-    result = json.loads(json_match.group())
-
-    # 검증 및 정규화
-    required_fields = ['stage', 'title', 'description', 'advice']
-    for field in required_fields:
-        if field not in result:
-            raise ValueError(f"필수 필드 '{field}'가 누락되었습니다.")
-
-    if not isinstance(result.get('advice'), list):
-        result['advice'] = [str(result.get('advice', ''))]
-
-    return {
-        "stage": int(result["stage"]),
-        "title": str(result["title"]),
-        "description": str(result["description"]),
-        "advice": [str(a) for a in result["advice"]],
-    }
-
-
 def generate_hair_quiz_service() -> List[Dict[str, str]]:
     """Gemini로 O/X 퀴즈 20문항 생성하여 리스트로 반환."""
     genai = _get_genai_client()

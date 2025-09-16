@@ -34,7 +34,7 @@ public class AIService {
         log.info("모발 손상 분석 요청 - 이미지: {}, 텍스트: {}", 
                 image != null ? image.getOriginalFilename() : "없음", textQuery);
 
-        String url = pythonBaseUrl + "/api/hair-damage/search/image-and-text";
+        String url = pythonBaseUrl + "/hair-damage/search/image-and-text";
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -188,7 +188,7 @@ public class AIService {
     public Map<String, Object> searchYouTubeVideos(String query, String order, int maxResults) throws Exception {
         log.info("YouTube 영상 검색 요청 - 쿼리: {}, 정렬: {}, 최대결과: {}", query, order, maxResults);
 
-        String url = pythonBaseUrl + "/api/youtube/search";
+        String url = pythonBaseUrl + "/youtube/search";
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

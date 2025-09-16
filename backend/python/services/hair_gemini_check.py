@@ -22,8 +22,8 @@ def _get_genai_client():
     return genai
 
 
-# 함수를 async로 변경
-async def analyze_hair_with_gemini(image_data: bytes) -> Dict[str, Any]:
+# 함수를 동기 함수로 변경
+def analyze_hair_with_gemini(image_data: bytes) -> Dict[str, Any]:
     """
     Gemini로 이미지 분석을 수행하고 표준 결과를 반환합니다.
     Args:
@@ -42,8 +42,8 @@ async def analyze_hair_with_gemini(image_data: bytes) -> Dict[str, Any]:
     )
 
     # image_data는 이미 이진(bytes) 데이터이므로, 바로 사용
-    # 제미니 API 호출을 비동기 버전(generate_content_async)으로 변경하고 await 추가
-    response = await model.generate_content_async([prompt, {"mime_type": "image/jpeg", "data": image_data}])
+    # 제미니 API 호출을 동기 버전으로 변경
+    response = model.generate_content([prompt, {"mime_type": "image/jpeg", "data": image_data}])
     response_text = response.text or ""
 
     json_match = re.search(r'\{[\s\S]*\}', response_text)

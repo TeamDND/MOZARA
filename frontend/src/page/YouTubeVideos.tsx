@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { configApi } from '../api/configApi';
 import Header from './Header';
 import apiClient from '../api/apiClient';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store/store';
 
 interface Video {
   videoId: string;
@@ -30,7 +32,9 @@ export default function YouTubeVideos() {
   const [feedTitle, setFeedTitle] = useState('⭐ 인기 급상승 영상');
   const [selectedStage, setSelectedStage] = useState('stage0');
   const [likedVideos, setLikedVideos] = useState<Set<string>>(new Set());
-  const [username, setUsername] = useState('testuser'); // 임시 사용자명
+  
+  // Redux에서 현재 로그인된 사용자 정보 가져오기
+  const username = useSelector((state: RootState) => state.user.username) || 'testuser';
 
   const fetchVideosFromYouTube = useCallback(async (query: string, order: string = 'viewCount') => {
     setLoading(true);
@@ -55,7 +59,50 @@ export default function YouTubeVideos() {
       setVideos(videoList);
     } catch (err) {
       console.error('YouTube API Error:', err);
-      setError(err instanceof Error ? err.message : 'API 호출 중 오류가 발생했습니다.');
+      console.log('더미 데이터로 대체합니다.');
+      
+      // YouTube API 오류 시 더미 데이터 사용
+      const dummyVideos: Video[] = [
+        {
+          videoId: 'dummy1',
+          title: '탈모 예방을 위한 올바른 샴푸 사용법',
+          channelName: '헤어케어 채널',
+          thumbnailUrl: 'https://placehold.co/300x168/4F46E5/FFFFFF?text=탈모+예방+샴푸'
+        },
+        {
+          videoId: 'dummy2',
+          title: '모발이식 수술 후 관리 방법',
+          channelName: '의료 정보 채널',
+          thumbnailUrl: 'https://placehold.co/300x168/059669/FFFFFF?text=모발이식+관리'
+        },
+        {
+          videoId: 'dummy3',
+          title: '탈모 원인과 치료법 완벽 가이드',
+          channelName: '건강 정보 채널',
+          thumbnailUrl: 'https://placehold.co/300x168/DC2626/FFFFFF?text=탈모+원인+치료'
+        },
+        {
+          videoId: 'dummy4',
+          title: '두피 마사지로 탈모 예방하기',
+          channelName: '뷰티 케어 채널',
+          thumbnailUrl: 'https://placehold.co/300x168/7C3AED/FFFFFF?text=두피+마사지'
+        },
+        {
+          videoId: 'dummy5',
+          title: '영양제로 탈모 개선하기',
+          channelName: '건강 관리 채널',
+          thumbnailUrl: 'https://placehold.co/300x168/EA580C/FFFFFF?text=영양제+탈모개선'
+        },
+        {
+          videoId: 'dummy6',
+          title: '탈모 전문의가 알려주는 진실',
+          channelName: '의료 전문 채널',
+          thumbnailUrl: 'https://placehold.co/300x168/0891B2/FFFFFF?text=탈모+전문의+진실'
+        }
+      ];
+      
+      setVideos(dummyVideos);
+      setError('YouTube API 할당량 초과로 인해 샘플 데이터를 표시합니다.');
     } finally {
       setLoading(false);
     }
@@ -81,20 +128,29 @@ export default function YouTubeVideos() {
 
   // 찜 토글 기능
   const toggleLike = useCallback(async (videoId: string) => {
+    if (username === 'guest') {
+      alert('로그인이 필요한 기능입니다.');
+      return;
+    }
+    
     try {
-      await apiClient.post('/api/userlog/youtube/like', null, {
+      console.log('찜 토글 요청:', { username, videoId });
+      const response = await apiClient.post('/userlog/youtube/like', null, {
         params: {
           username: username,
           videoId: videoId
         }
       });
+      console.log('찜 토글 응답:', response.data);
       
       setLikedVideos(prev => {
         const newSet = new Set(prev);
         if (newSet.has(videoId)) {
           newSet.delete(videoId);
+          console.log('찜 취소:', videoId);
         } else {
           newSet.add(videoId);
+          console.log('찜 추가:', videoId);
         }
         return newSet;
       });
@@ -105,9 +161,15 @@ export default function YouTubeVideos() {
 
   // 사용자의 찜한 영상 목록 불러오기
   const fetchLikedVideos = useCallback(async () => {
+    if (username === 'guest') {
+      return; // 게스트 사용자는 찜한 영상 목록을 불러오지 않음
+    }
+    
     try {
-      const response = await apiClient.get(`/api/userlog/youtube/likes/${username}`);
-      const likedVideoIds = response.data.split(',').filter((id: string) => id.trim() !== '');
+      const response = await apiClient.get(`/userlog/youtube/likes/${username}`);
+      console.log('찜한 영상 응답:', response.data);
+      const likedVideoIds = response.data ? response.data.split(',').filter((id: string) => id.trim() !== '') : [];
+      console.log('찜한 영상 ID 목록:', likedVideoIds);
       setLikedVideos(new Set(likedVideoIds));
     } catch (error) {
       console.error('찜한 영상 목록 불러오기 실패:', error);
@@ -254,7 +316,17 @@ export default function YouTubeVideos() {
 
                   {!loading && !error && videos.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {videos.map((video) => (
+                      {videos
+                        .sort((a, b) => {
+                          // 찜한 영상을 맨 위로 정렬
+                          const aIsLiked = likedVideos.has(a.videoId);
+                          const bIsLiked = likedVideos.has(b.videoId);
+                          
+                          if (aIsLiked && !bIsLiked) return -1; // a가 찜한 영상이면 위로
+                          if (!aIsLiked && bIsLiked) return 1;  // b가 찜한 영상이면 위로
+                          return 0; // 둘 다 찜한 영상이거나 둘 다 아닌 경우 원래 순서 유지
+                        })
+                        .map((video) => (
                         <div
                           key={video.videoId}
                           className="group bg-white rounded-xl border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
