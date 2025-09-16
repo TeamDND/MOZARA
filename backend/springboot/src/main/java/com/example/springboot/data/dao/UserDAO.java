@@ -15,6 +15,7 @@ public class UserDAO {
     public Optional<UserEntity> findByUsername(String username){
         return userRepository.findByUsername(username);
     }
+
     public UserEntity addUser(UserEntity userEntity){
         return userRepository.save(userEntity);
     }
