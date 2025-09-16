@@ -39,11 +39,10 @@ const App: React.FC = () => {
           <Route path="hair-encyclopedia/*" element={<HairEncyclopediaMain />} />
           <Route path="hair-diagnosis" element={<HairDiagnosis />} />
           <Route path="hair-quiz" element={<HairQuiz />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<LogIn />} />
           <Route path="daily-care" element={<DailyCare />} />
         </Route>
-        
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/login" element={<LogIn />} />
       </Routes>
     </>
   );
