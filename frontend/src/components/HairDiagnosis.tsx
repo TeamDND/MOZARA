@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import apiClient from '../api/apiClient';
 import './HairComponents.css';
 
 interface AnalysisResult {
@@ -6,6 +7,21 @@ interface AnalysisResult {
   title: string;
   description: string;
   advice: string[];
+}
+
+interface Recommendation {
+  type: 'youtube' | 'salon' | 'tattoo' | 'wig' | 'hospital' | 'product';
+  title: string;
+  description: string;
+  url?: string;
+  location?: string;
+  price?: string;
+}
+
+interface StageRecommendations {
+  youtube: Recommendation[];
+  services: Recommendation[];
+  products: Recommendation[];
 }
 
 const HairDiagnosis: React.FC = () => {
@@ -48,36 +64,62 @@ const HairDiagnosis: React.FC = () => {
     });
   };
 
-  const analyzeImageWithGemini = async (imageBase64: string): Promise<AnalysisResult> => {
-    const apiUrl = 'http://localhost:8000/api/hair-analysis';
-    const payload = { 
-      image_base64: imageBase64
-    };
-    
-    console.log('API 호출 시작:', apiUrl);
-    
-    const response = await fetchWithRetry(apiUrl, { 
-      method: 'POST', 
-      headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify(payload) 
-    });
-    
-    console.log('API 응답 상태:', response.status, response.statusText);
-    
-    if (!response.ok) {
-      let errorMessage = `API 요청 실패: ${response.status} ${response.statusText}`;
-      try {
-        const errorBody = await response.json();
-        errorMessage = errorBody.detail || errorMessage;
-      } catch (e) {
-        console.log('JSON 파싱 실패, 텍스트 응답:', await response.text());
-      }
-      throw new Error(errorMessage);
-    }
+  // Spring Boot 프록시를 통해 Python 분석 호출 (multipart/form-data) - apiClient 사용
+  const analyzeImageWithGemini = async (file: File): Promise<AnalysisResult> => {
+    const formData = new FormData();
+    formData.append('image', file);
 
-    const result = await response.json();
+    console.log('API 호출 시작: /ai/gemini-check/analyze');
+
+    const { data: result } = await apiClient.post('/ai/gemini-check/analyze', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
     console.log('API 응답 성공:', result);
-    return result;
+
+    // Spring → Python 표준 응답 {stage, title, description, advice}
+    const stage = result.stage as number;
+
+    const defaultAdviceForStage = (stage: number) => {
+      switch (stage) {
+        case 0:
+          return [
+            "현재 두피 상태가 양호합니다.",
+            "정기적인 두피 케어를 유지하세요.",
+            "건강한 생활습관을 계속 유지하세요."
+          ];
+        case 1:
+          return [
+            "초기 탈모 단계입니다.",
+            "두피 마사지를 꾸준히 하세요.",
+            "탈모 방지 샴푸 사용을 권장합니다."
+          ];
+        case 2:
+          return [
+            "중등도 탈모 단계입니다.",
+            "전문적인 두피 치료를 고려하세요.",
+            "두피 문신이나 가발을 검토해보세요."
+          ];
+        case 3:
+          return [
+            "심각한 탈모 단계입니다.",
+            "탈모 전문 병원 상담을 권장합니다.",
+            "가발이나 두피 문신을 고려하세요."
+          ];
+        default:
+          return [
+            "정기적인 두피 관리가 필요합니다.",
+            "전문의 상담을 권장합니다.",
+            "건강한 생활습관을 유지하세요."
+          ];
+      }
+    };
+
+    return {
+      stage: stage,
+      title: String(result.title || ''),
+      description: String(result.description || ''),
+      advice: (Array.isArray(result.advice) && result.advice.length > 0) ? result.advice : defaultAdviceForStage(stage)
+    };
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,8 +148,7 @@ const HairDiagnosis: React.FC = () => {
     setAnalysisResult(null);
 
     try {
-      const imageBase64 = await toBase64(selectedFile);
-      const result = await analyzeImageWithGemini(imageBase64);
+      const result = await analyzeImageWithGemini(selectedFile);
       setAnalysisResult(result);
     } catch (error) {
       console.error('Gemini 분석 중 오류 발생:', error);
@@ -118,15 +159,167 @@ const HairDiagnosis: React.FC = () => {
   };
 
   const getStageColor = (stage: number) => {
-    if (stage <= 2) return 'bg-green-500';
-    if (stage <= 4) return 'bg-yellow-500';
+    if (stage === 0) return 'bg-green-500';
+    if (stage === 1) return 'bg-blue-500';
+    if (stage === 2) return 'bg-yellow-500';
     return 'bg-red-500';
   };
 
   const getStageTextColor = (stage: number) => {
-    if (stage <= 2) return 'text-green-600';
-    if (stage <= 4) return 'text-yellow-600';
+    if (stage === 0) return 'text-green-600';
+    if (stage === 1) return 'text-blue-600';
+    if (stage === 2) return 'text-yellow-600';
     return 'text-red-600';
+  };
+
+  // 진행 단계에 따른 추천 데이터 생성
+  const getStageRecommendations = (stage: number): StageRecommendations => {
+    const baseRecommendations = {
+      youtube: [
+        {
+          type: 'youtube' as const,
+          title: '두피 마사지 방법',
+          description: '두피 혈액순환을 개선하는 마사지 기법',
+          url: 'https://youtube.com/watch?v=example1'
+        },
+        {
+          type: 'youtube' as const,
+          title: '탈모 예방 생활습관',
+          description: '일상에서 실천할 수 있는 탈모 예방법',
+          url: 'https://youtube.com/watch?v=example2'
+        }
+      ],
+      services: [],
+      products: []
+    };
+
+    switch (stage) {
+      case 0:
+        return {
+          ...baseRecommendations,
+          services: [
+            {
+              type: 'salon' as const,
+              title: '두피 케어 전문 미용실',
+              description: '예방적 두피 관리 서비스',
+              location: '강남구, 서초구',
+              price: '5만원~'
+            }
+          ],
+          products: [
+            {
+              type: 'product' as const,
+              title: '두피 건강 샴푸',
+              description: '두피 환경을 개선하는 샴푸',
+              price: '2만원~'
+            }
+          ]
+        };
+      case 1:
+        return {
+          ...baseRecommendations,
+          services: [
+            {
+              type: 'salon' as const,
+              title: '두피 진단 및 케어',
+              description: '전문적인 두피 상태 진단과 관리',
+              location: '강남구, 서초구, 송파구',
+              price: '8만원~'
+            }
+          ],
+          products: [
+            {
+              type: 'product' as const,
+              title: '탈모 방지 샴푸',
+              description: '초기 탈모 예방에 효과적인 샴푸',
+              price: '3만원~'
+            },
+            {
+              type: 'product' as const,
+              title: '두피 토닉',
+              description: '두피 혈액순환 개선 토닉',
+              price: '4만원~'
+            }
+          ]
+        };
+      case 2:
+        return {
+          ...baseRecommendations,
+          services: [
+            {
+              type: 'salon' as const,
+              title: '두피 전문 치료',
+              description: '중등도 탈모 치료 서비스',
+              location: '강남구, 서초구, 송파구, 마포구',
+              price: '15만원~'
+            },
+            {
+              type: 'tattoo' as const,
+              title: '두피 문신',
+              description: '자연스러운 헤어라인 복원',
+              location: '강남구, 서초구',
+              price: '50만원~'
+            }
+          ],
+          products: [
+            {
+              type: 'product' as const,
+              title: '탈모 치료 샴푸',
+              description: '중등도 탈모에 효과적인 치료 샴푸',
+              price: '5만원~'
+            },
+            {
+              type: 'product' as const,
+              title: '두피 세럼',
+              description: '모발 성장 촉진 세럼',
+              price: '8만원~'
+            }
+          ]
+        };
+      case 3:
+        return {
+          ...baseRecommendations,
+          services: [
+            {
+              type: 'hospital' as const,
+              title: '탈모 전문 병원',
+              description: '의료진이 진료하는 전문 탈모 클리닉',
+              location: '강남구, 서초구, 송파구, 마포구, 영등포구',
+              price: '상담비 5만원~'
+            },
+            {
+              type: 'tattoo' as const,
+              title: '두피 문신',
+              description: '고급스러운 헤어라인 복원',
+              location: '강남구, 서초구, 송파구',
+              price: '80만원~'
+            },
+            {
+              type: 'wig' as const,
+              title: '가발 전문점',
+              description: '자연스러운 가발 제작 및 관리',
+              location: '강남구, 서초구, 송파구, 마포구',
+              price: '30만원~'
+            }
+          ],
+          products: [
+            {
+              type: 'product' as const,
+              title: '강력 탈모 치료제',
+              description: '고급 탈모 치료를 위한 전문 제품',
+              price: '10만원~'
+            },
+            {
+              type: 'product' as const,
+              title: '두피 관리 세트',
+              description: '종합적인 두피 관리 제품 세트',
+              price: '15만원~'
+            }
+          ]
+        };
+      default:
+        return baseRecommendations;
+    }
   };
 
   return (
@@ -177,39 +370,179 @@ const HairDiagnosis: React.FC = () => {
 
           {/* 분석 결과 */}
           {analysisResult && (
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* 이미지 */}
-              <div>
-                {imagePreview && (
-                  <img
-                    src={imagePreview}
-                    alt="업로드된 두피 사진"
-                    className="w-full rounded-lg border border-gray-300"
-                  />
-                )}
+            <div>
+              <div className="grid md:grid-cols-2 gap-8 mb-8">
+                {/* 이미지 */}
+                <div>
+                  {imagePreview && (
+                    <img
+                      src={imagePreview}
+                      alt="업로드된 두피 사진"
+                      className="w-full rounded-lg border border-gray-300"
+                    />
+                  )}
+                </div>
+
+                {/* 분석 결과 텍스트 */}
+                <div>
+                  <h3 className="text-2xl font-bold text-blue-600 mb-4">AI 분석 결과</h3>
+                  
+                  <div className={`inline-block px-4 py-2 rounded-full text-white font-bold mb-4 ${getStageColor(analysisResult.stage)}`}>
+                    진행 단계: {analysisResult.stage}단계 ({analysisResult.title})
+                  </div>
+                  
+                  <p className="text-gray-700 mb-6 leading-relaxed">
+                    {analysisResult.description}
+                  </p>
+                  
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">생활 습관 가이드</h4>
+                  <ul className="space-y-2">
+                    {analysisResult.advice.map((item, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-blue-600 mr-2">•</span>
+                        <span className="text-gray-700">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
 
-              {/* 분석 결과 텍스트 */}
-              <div>
-                <h3 className="text-2xl font-bold text-blue-600 mb-4">AI 분석 결과</h3>
+              {/* 추천 섹션 */}
+              <div className="border-t pt-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">나의 진행 단계 맞춤 추천</h3>
                 
-                <div className={`inline-block px-4 py-2 rounded-full text-white font-bold mb-4 ${getStageColor(analysisResult.stage)}`}>
-                  진행 단계: {analysisResult.stage}단계 ({analysisResult.title})
+                {(() => {
+                  const recommendations = getStageRecommendations(analysisResult.stage);
+                  return (
+                    <div className="space-y-8">
+                      {/* 유튜브 추천 */}
+                      <div>
+                        <h4 className="text-xl font-semibold text-red-600 mb-4 flex items-center">
+                          <span className="mr-2">📺</span>
+                          유튜브 추천
+                        </h4>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          {recommendations.youtube.map((video, index) => (
+                            <div key={index} className="bg-gray-50 p-4 rounded-lg border">
+                              <h5 className="font-semibold text-gray-900 mb-2">{video.title}</h5>
+                              <p className="text-gray-600 text-sm mb-3">{video.description}</p>
+                              <a 
+                                href="http://localhost:3000/youtube-videos" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-red-600 hover:text-red-700 font-medium text-sm"
+                              >
+                                영상 보기 →
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* 서비스 추천 */}
+                      <div>
+                        <h4 className="text-xl font-semibold text-blue-600 mb-4 flex items-center">
+                          <span className="mr-2">🏥</span>
+                          위치 기반 서비스 추천
+                        </h4>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {recommendations.services.map((service, index) => (
+                            <div key={index} className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                              <div className="flex items-center mb-2">
+                                <span className="text-lg mr-2">
+                                  {service.type === 'salon' && '💇‍♀️'}
+                                  {service.type === 'hospital' && '🏥'}
+                                  {service.type === 'tattoo' && '🎨'}
+                                  {service.type === 'wig' && '👑'}
+                                </span>
+                                <h5 className="font-semibold text-gray-900">{service.title}</h5>
+                              </div>
+                              <p className="text-gray-600 text-sm mb-2">{service.description}</p>
+                              {service.location && (
+                                <p className="text-blue-600 text-sm mb-1">📍 {service.location}</p>
+                              )}
+                              {service.price && (
+                                <p className="text-gray-700 font-medium text-sm">💰 {service.price}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* 제품 추천 */}
+                      <div>
+                        <h4 className="text-xl font-semibold text-green-600 mb-4 flex items-center">
+                          <span className="mr-2">🛍️</span>
+                          제품 추천
+                        </h4>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {recommendations.products.map((product, index) => (
+                            <div key={index} className="bg-green-50 p-4 rounded-lg border border-green-200">
+                              <div className="flex items-center mb-2">
+                                <span className="text-lg mr-2">🧴</span>
+                                <h5 className="font-semibold text-gray-900">{product.title}</h5>
+                              </div>
+                              <p className="text-gray-600 text-sm mb-2">{product.description}</p>
+                              {product.price && (
+                                <p className="text-green-600 font-medium text-sm">💰 {product.price}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* 다른 서비스 연결 버튼 */}
+              <div className="border-t pt-8 mt-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">다른 서비스 이용하기</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <a
+                    href="http://localhost:3000/hair-pt"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 text-center"
+                  >
+                    <div className="text-3xl mb-3">💪</div>
+                    <h4 className="font-bold text-lg mb-2">헤어 PT</h4>
+                    <p className="text-sm opacity-90">두피 운동 및 관리</p>
+                  </a>
+
+                  <a
+                    href="http://localhost:3000/hair-encyclopedia"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-gradient-to-r from-blue-400 to-blue-500 text-white p-6 rounded-lg shadow-lg hover:from-blue-500 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 text-center"
+                  >
+                    <div className="text-3xl mb-3">📚</div>
+                    <h4 className="font-bold text-lg mb-2">헤어 백과</h4>
+                    <p className="text-sm opacity-90">모발 관련 지식</p>
+                  </a>
+
+                  <a
+                    href="http://localhost:3000/hair-change"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-gradient-to-r from-blue-300 to-blue-400 text-white p-6 rounded-lg shadow-lg hover:from-blue-400 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 text-center"
+                  >
+                    <div className="text-3xl mb-3">✨</div>
+                    <h4 className="font-bold text-lg mb-2">헤어 체인지</h4>
+                    <p className="text-sm opacity-90">헤어스타일 변화</p>
+                  </a>
+
+                  <a
+                    href="http://localhost:3000/hair-quiz"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-gradient-to-r from-blue-700 to-blue-800 text-white p-6 rounded-lg shadow-lg hover:from-blue-800 hover:to-blue-900 transition-all duration-300 transform hover:scale-105 text-center"
+                  >
+                    <div className="text-3xl mb-3">🧩</div>
+                    <h4 className="font-bold text-lg mb-2">헤어 퀴즈</h4>
+                    <p className="text-sm opacity-90">모발 지식 테스트</p>
+                  </a>
                 </div>
-                
-                <p className="text-gray-700 mb-6 leading-relaxed">
-                  {analysisResult.description}
-                </p>
-                
-                <h4 className="text-lg font-semibold text-gray-900 mb-3">생활 습관 가이드</h4>
-                <ul className="space-y-2">
-                  {analysisResult.advice.map((item, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="text-blue-600 mr-2">•</span>
-                      <span className="text-gray-700">{item}</span>
-                    </li>
-                  ))}
-                </ul>
               </div>
             </div>
           )}
