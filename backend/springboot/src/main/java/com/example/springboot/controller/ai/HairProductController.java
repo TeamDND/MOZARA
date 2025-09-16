@@ -1,7 +1,7 @@
 package com.example.springboot.controller.ai;
 
-import com.example.springboot.data.dto.HairProductResponseDTO;
-import com.example.springboot.service.HairProductService;
+import com.example.springboot.data.dto.ai.HairProductResponseDTO;
+import com.example.springboot.service.ai.HairProductService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
