@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/userlog")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class UserLogController {
 
     private final UserLogService userLogService;

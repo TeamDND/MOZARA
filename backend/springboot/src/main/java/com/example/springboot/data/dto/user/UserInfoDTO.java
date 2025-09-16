@@ -1,5 +1,6 @@
 package com.example.springboot.data.dto.user;
 
+import com.example.springboot.data.dto.seedling.SeedlingStatusDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,5 +17,6 @@ public class UserInfoDTO {
     private String nickname;
     private String gender;
     private Integer age;
+    private SeedlingStatusDTO seedlingStatus;
 
 }
