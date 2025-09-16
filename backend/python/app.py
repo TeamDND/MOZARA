@@ -172,7 +172,7 @@ def read_root():
             "hair_change": "/generate_hairstyle" if HAIR_CHANGE_AVAILABLE else "unavailable",
             "basp_diagnosis": "/basp/evaluate" if BASP_AVAILABLE else "unavailable",
             "hair_encyclopedia": "/paper" if openai_api_key else "unavailable",
-            "gemini_hair_analysis": "/api/hair-analysis" if google_api_key else "unavailable"
+            "gemini_hair_analysis": "/hair-analysis" if google_api_key else "unavailable"
         }
     }
 
@@ -195,10 +195,8 @@ async def api_hair_gemini_check(file: Annotated[UploadFile, File(...)]):
         image_bytes = await file.read()
         print(f"--- [DEBUG] File received. Size: {len(image_bytes)} bytes ---")
 
-        # bytes를 base64 문자열로 변환하여 올바른 함수 호출
-        import base64
-        image_base64 = base64.b64encode(image_bytes).decode('utf-8')
-        result = analyze_hair_with_gemini_service(image_base64)
+        # bytes 데이터를 직접 전달
+        result = analyze_hair_with_gemini(image_bytes)
 
         return result
     except Exception as e:
@@ -356,7 +354,6 @@ async def products_health_check():
 
 
 from services.hair_quiz.hair_quiz import (
-    analyze_hair_with_gemini_service,
     generate_hair_quiz_service,
 )
 
@@ -428,10 +425,13 @@ async def get_config():
 
 # --- Gemini Hair Analysis API ---
 @app.post("/hair-analysis", response_model=HairAnalysisResponse)
-async def analyze_hair_with_gemini(request: HairAnalysisRequest):
+async def analyze_hair_with_gemini_endpoint(request: HairAnalysisRequest):
     """Gemini API를 사용한 두피/탈모 분석 (서비스로 위임)"""
     try:
-        result = analyze_hair_with_gemini_service(request.image_base64)
+        # base64 문자열을 bytes로 변환하여 hair_gemini_check 함수 사용
+        import base64
+        image_bytes = base64.b64decode(request.image_base64)
+        result = analyze_hair_with_gemini(image_bytes)
         return HairAnalysisResponse(**result)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
