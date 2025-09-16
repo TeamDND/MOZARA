@@ -10,6 +10,7 @@ export default function Home() {
     { name: "YouTube 영상", icon: "📺", badge: "NEW" },
     { name: "제품추천", icon: "🛍️", badge: "NEW" },
     { name: "탈모 백과", icon: "📚", badge: "NEW" },
+    { name: "데일리 케어", icon: "📅", badge: "NEW" },
     { name: "이미지 생성", icon: "🎨", badge: null },
     { name: "챗봇요약", icon: "💬", badge: null },
     { name: "상가찾기", icon: "🏪", badge: null },
@@ -94,6 +95,8 @@ export default function Home() {
                         navigate('/basp-check');
                       } else if(tool.name === "탈모 백과"){
                         navigate('/hair-encyclopedia')
+                      } else if(tool.name === "데일리 케어"){
+                        navigate('/daily-care')
                       }
                     }}
                   >
