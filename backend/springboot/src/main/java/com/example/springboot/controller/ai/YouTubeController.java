@@ -1,6 +1,6 @@
 package com.example.springboot.controller.ai;
 
-import com.example.springboot.service.ai.AIService;
+import com.example.springboot.service.ai.YouTubeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +14,7 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class YouTubeController {
     
-    private final AIService aiService;
+    private final YouTubeService youTubeService;
 
     /**
      * YouTube 영상 검색 API 프록시
@@ -26,7 +26,7 @@ public class YouTubeController {
             @RequestParam(value = "max_results", defaultValue = "12") int maxResults) {
         
         try {
-            Map<String, Object> result = aiService.searchYouTubeVideos(query, order, maxResults);
+            Map<String, Object> result = youTubeService.searchYouTubeVideos(query, order, maxResults);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
