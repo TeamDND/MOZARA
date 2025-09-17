@@ -13,7 +13,7 @@ interface SidebarItem {
 const sidebarItems: SidebarItem[] = [
   { icon: Home, label: "홈", href: "/", active: true },
   { icon: Search, label: "진단 바로가기", href: "/hair-check" },
-  { icon: Layers3, label: "도구모음", href: "/temp-main" },
+  { icon: Layers3, label: "도구모음", href: "/main" },
   { icon: User, label: "마이페이지", href: "#" },
   { icon: Settings, label: "관리자 설정", href: "#", requireRole: "admin" },
 ]
