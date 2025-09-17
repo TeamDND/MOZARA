@@ -10,11 +10,11 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "measurement_logs")
-public class MeasurementLogEntity {
+@Table(name = "user_metrics")
+public class UserMetricsEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "log_id", nullable = false)
+    @Column(name = "user_metrics_id", nullable = false)
     private Integer id;
 
     @Size(max = 255)

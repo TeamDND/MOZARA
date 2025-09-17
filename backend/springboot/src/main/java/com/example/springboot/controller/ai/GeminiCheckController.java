@@ -1,6 +1,6 @@
 package com.example.springboot.controller.ai;
 
-import com.example.springboot.service.ai.AIService;
+import com.example.springboot.service.ai.GeminiCheckService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +15,7 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class GeminiCheckController {
 
-    private final AIService aiService;
+    private final GeminiCheckService geminiCheckService;
 
     /**
      * Gemini 기반 탈모 분석 프록시 (Spring → Python)
@@ -23,7 +23,7 @@ public class GeminiCheckController {
     @PostMapping("/analyze")
     public ResponseEntity<Map<String, Object>> analyze(@RequestParam("image") MultipartFile image) {
         try {
-            Map<String, Object> result = aiService.analyzeHairWithGemini(image);
+            Map<String, Object> result = geminiCheckService.analyzeHairWithGemini(image);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

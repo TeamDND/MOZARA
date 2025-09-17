@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '../store/store';
+import { fetchSeedlingInfo, updateSeedlingNickname, setSeedling } from '../store/seedlingSlice';
 import apiClient from '../api/apiClient';
 
 interface Counters {
@@ -43,6 +46,7 @@ interface MissionInfo {
   category: 'routine' | 'nutrient' | 'cleanliness';
   rewardPoints: number;
   key: keyof MissionState;
+  completed?: boolean;
 }
 
 interface BadHabitsState {
@@ -58,6 +62,10 @@ interface BadHabitsState {
 
 
 const HairPT: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { seedlingId, seedlingName, currentPoint, loading: seedlingLoading, error: seedlingError } = useSelector((state: RootState) => state.seedling);
+  const { username, userId } = useSelector((state: RootState) => state.user);
+  
   const [counters, setCounters] = useState<Counters>({
     water: 0,
     effector: 0
@@ -99,6 +107,8 @@ const HairPT: React.FC = () => {
   const [statusMessage] = useState('오늘의 건강한 습관을 실천하고 새싹을 키워보세요!');
   const [plantTitle, setPlantTitle] = useState<string>('새싹 키우기');
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
+  const [isUserTyping, setIsUserTyping] = useState<boolean>(false);
+  const [originalTitle, setOriginalTitle] = useState<string>('');
   const titleInputRef = useRef<HTMLInputElement | null>(null);
   const [toast, setToast] = useState<{ visible: boolean; message: string }>({ visible: false, message: '' });
   const [showAchievement, setShowAchievement] = useState(false);
@@ -122,58 +132,55 @@ const HairPT: React.FC = () => {
   const resetDailyMissions = useCallback(() => {
     const today = new Date().toDateString();
     if (lastResetDate !== today) {
+      // 날짜가 바뀌었으므로 카운터만 초기화 (미션 상태는 백엔드에서 가져옴)
       setCounters({ water: 0, effector: 0 });
-      setMissionState({
-        morningBooster: false,
-        nightBooster: false,
-        water: false,
-        effector: false,
-        massage: false,
-        omega3: false,
-        vitaminD: false,
-        vitaminE: false,
-        protein: false,
-        iron: false,
-        biotin: false,
-        zinc: false,
-        nightWash: false,
-        dryHair: false,
-        brushHair: false,
-        scalpScrub: false,
-        earlySleep: false,
-        scalpPack: false
-      });
-      setBadHabitsState({
-        smoking: false,
-        drinking: false,
-        stress: false,
-        lateSleep: false,
-        junkFood: false,
-        hotShower: false,
-        tightHair: false,
-        scratching: false
-      });
       setLastResetDate(today);
     }
   }, [lastResetDate]);
 
   // daily_habits 데이터 로드
   const loadDailyHabits = async () => {
+    if (!userId) {
+      console.log('사용자 ID가 없어서 습관 데이터를 로드할 수 없습니다.');
+      return;
+    }
+
     try {
       setLoading(true);
+      
+      // 모든 습관 데이터 가져오기
       const response = await apiClient.get('/habit/daily-habits');
       setDailyHabits(response.data);
       
-      // DailyHabit을 MissionInfo로 변환
-      const convertedMissions: MissionInfo[] = response.data.map((habit: DailyHabit) => ({
-        id: habit.habitId,
-        name: habit.habitName,
-        description: habit.description,
-        category: habit.category.trim() as 'routine' | 'nutrient' | 'cleanliness', // 공백 제거
-        rewardPoints: habit.rewardPoints,
-        key: getMissionKey(habit.habitName) // 습관 이름을 기반으로 키 매핑
-      }));
+      // 오늘 완료된 습관들 가져오기
+      const completedResponse = await apiClient.get(`/habit/completed/${userId}`);
+      const completedHabits = completedResponse.data || [];
+      
+      // DailyHabit을 MissionInfo로 변환하면서 완료 상태도 설정
+      const convertedMissions: MissionInfo[] = response.data.map((habit: DailyHabit) => {
+        const isCompleted = completedHabits.some((completed: any) => completed.habitId === habit.habitId);
+        return {
+          id: habit.habitId,
+          name: habit.habitName,
+          description: habit.description,
+          category: habit.category.trim() as 'routine' | 'nutrient' | 'cleanliness', // 공백 제거
+          rewardPoints: habit.rewardPoints,
+          key: getMissionKey(habit.habitName), // 습관 이름을 기반으로 키 매핑
+          completed: isCompleted // 완료 상태 추가
+        };
+      });
       setMissionData(convertedMissions);
+
+      // 카운터 방식 미션들의 완료 상태에 따라 카운터 설정
+      const waterMission = convertedMissions.find(m => m.name === '물 마시기');
+      const effectorMission = convertedMissions.find(m => m.name === '이펙터 사용');
+      
+      if (waterMission?.completed) {
+        setCounters(prev => ({ ...prev, water: 7 }));
+      }
+      if (effectorMission?.completed) {
+        setCounters(prev => ({ ...prev, effector: 4 }));
+      }
     } catch (error) {
       console.error('습관 데이터 로드 실패:', error);
       setToast({ visible: true, message: '습관 데이터를 불러오는데 실패했습니다.' });
@@ -214,34 +221,63 @@ const HairPT: React.FC = () => {
     return 1; // 새싹
   };
 
-  // 새싹 포인트 로드
-  const loadSeedlingPoints = async () => {
-    try {
-      // 임시로 userId = 1 사용 (실제로는 로그인한 사용자 ID 사용)
-      const userId = 1;
-      const response = await apiClient.get(`/api/user/seedling/${userId}`);
-      if (response.data && response.data.currentPoint) {
-        const points = response.data.currentPoint;
-        setSeedlingPoints(points);
-        setSeedlingLevel(calculateSeedlingLevel(points));
-      }
-    } catch (error) {
-      console.error('새싹 포인트 로드 실패:', error);
+  // 새싹 정보 로드 (Redux 사용)
+  const loadSeedlingInfo = useCallback(async () => {
+    if (!userId) {
+      console.log('사용자 ID가 없습니다.');
+      return;
     }
-  };
+
+    try {
+      console.log('새싹 정보 로드 시도:', userId);
+      
+      // 직접 API 호출로 테스트
+      const response = await apiClient.get(`/user/seedling/${userId}`);
+      console.log('새싹 정보 API 응답:', response.data);
+      
+      const result = await dispatch(fetchSeedlingInfo(userId)).unwrap();
+      console.log('Redux 새싹 정보:', result);
+      
+      if (result) {
+        // 새싹 포인트 설정
+        if (result.currentPoint) {
+          setSeedlingPoints(result.currentPoint);
+          setSeedlingLevel(calculateSeedlingLevel(result.currentPoint));
+        }
+        // 새싹 이름 설정 (백엔드에서 가져온 이름이 있으면 사용, 없으면 로컬 스토리지 사용)
+        if (result.seedlingName) {
+          setPlantTitle(result.seedlingName);
+        } else {
+          const savedTitle = localStorage.getItem('plantTitle');
+          if (savedTitle) setPlantTitle(savedTitle);
+        }
+      }
+    } catch (error: any) {
+      console.error('새싹 정보 로드 실패:', error);
+      console.error('에러 상세:', error.response?.data);
+      console.error('에러 상태:', error.response?.status);
+      
+      // 에러 시 로컬 스토리지에서 제목 로드
+      const savedTitle = localStorage.getItem('plantTitle');
+      if (savedTitle) setPlantTitle(savedTitle);
+    }
+  }, [dispatch, userId]);
 
   // 컴포넌트 마운트 시 리셋 확인
   useEffect(() => {
     resetDailyMissions();
     loadDailyHabits();
-    loadSeedlingPoints();
-    const savedTitle = localStorage.getItem('plantTitle');
-    if (savedTitle) setPlantTitle(savedTitle);
-  }, [resetDailyMissions]);
+    loadSeedlingInfo();
+  }, [resetDailyMissions, loadSeedlingInfo]);
+
 
   const startEditTitle = () => {
+    setOriginalTitle(plantTitle); // 편집 시작 시 원래 제목 저장
     setIsEditingTitle(true);
-    setTimeout(() => titleInputRef.current?.focus(), 0);
+    setIsUserTyping(false); // 사용자 타이핑 상태 초기화
+    setTimeout(() => {
+      titleInputRef.current?.focus();
+    }, 200);
   };
 
   const saveTitle = () => {
@@ -249,6 +285,42 @@ const HairPT: React.FC = () => {
     setIsEditingTitle(false);
     setToast({ visible: true, message: '제목이 저장되었습니다.' });
     setTimeout(() => setToast({ visible: false, message: '' }), 1800);
+  };
+
+  // 새싹 이름 변경 함수
+  const handleSeedlingNameChange = async (newName: string) => {
+    if (!userId) {
+      console.log('사용자 ID가 없습니다.');
+      setToast({ visible: true, message: '로그인이 필요합니다.' });
+      setTimeout(() => setToast({ visible: false, message: '' }), 3000);
+      return;
+    }
+
+    try {
+      console.log('새싹 이름 변경 시도:', { userId, seedlingName: newName });
+      
+      // 직접 API 호출로 테스트
+      const response = await apiClient.put(`/user/seedling/${userId}/nickname`, {
+        seedlingName: newName
+      });
+      
+      console.log('API 응답:', response.data);
+      
+      // Redux 상태도 업데이트
+      await dispatch(updateSeedlingNickname({ userId, seedlingName: newName })).unwrap();
+      
+      // 로컬 스토리지도 업데이트
+      localStorage.setItem('plantTitle', newName);
+      setToast({ visible: true, message: '새싹 이름이 변경되었습니다.' });
+      setTimeout(() => setToast({ visible: false, message: '' }), 1800);
+    } catch (error: any) {
+      console.error('새싹 이름 변경 실패:', error);
+      console.error('에러 상세:', error.response?.data);
+      console.error('에러 상태:', error.response?.status);
+      
+      setToast({ visible: true, message: '새싹 이름 변경에 실패했습니다.' });
+      setTimeout(() => setToast({ visible: false, message: '' }), 3000);
+    }
   };
 
   // 이번 주(일요일~토요일) 날짜 데이터 생성
@@ -296,7 +368,7 @@ const HairPT: React.FC = () => {
   const progressPercentage = calculateProgress();
 
 
-  const toggleMission = (missionKey: keyof MissionState) => {
+  const toggleMission = async (missionKey: keyof MissionState) => {
     setMissionState(prev => ({
       ...prev,
       [missionKey]: !prev[missionKey]
@@ -306,18 +378,23 @@ const HairPT: React.FC = () => {
     if (!missionState[missionKey]) {
       const missionInfo = missionData.find(m => m.key === missionKey);
       if (missionInfo) {
-        saveMissionLog(missionInfo.id, missionInfo.rewardPoints);
+        await saveMissionLog(missionInfo.id, missionInfo.rewardPoints);
+        // 미션 완료 후 습관 데이터 다시 로드하여 완료 상태 업데이트
+        await loadDailyHabits();
       }
     }
   };
 
   // 미션 완료 로그 저장 함수 (API 연동)
   const saveMissionLog = async (habitId: number, points: number) => {
+    if (!userId) {
+      console.log('사용자 ID가 없습니다.');
+      return;
+    }
+
     try {
-      // 임시로 userId = 1 사용 (실제로는 로그인한 사용자 ID 사용)
-      const userId = 1;
       
-      const response = await apiClient.post('/api/habit/complete', null, {
+      const response = await apiClient.post('/habit/complete', null, {
         params: {
           userId: userId,
           habitId: habitId
@@ -327,19 +404,27 @@ const HairPT: React.FC = () => {
       console.log('미션 완료 로그 저장 성공:', response.data);
       
       // 성공 시 토스트 메시지 및 새싹 포인트 업데이트
-      setSeedlingPoints(prev => {
-        const newPoints = prev + points;
-        const newLevel = calculateSeedlingLevel(newPoints);
-        
-        // 레벨업 체크
-        if (newLevel > seedlingLevel) {
-          const plant = plantStages[newLevel as keyof typeof plantStages];
+      const newPoints = (currentPoint || seedlingPoints) + points;
+      const newLevel = calculateSeedlingLevel(newPoints);
+      
+      // Redux 상태 업데이트
+      if (userId && seedlingId) {
+        dispatch(setSeedling({
+          seedlingId: seedlingId,
+          seedlingName: seedlingName || plantTitle || '새싹 키우기',
+          currentPoint: newPoints,
+          userId: userId
+        }));
+      }
+      
+      setSeedlingPoints(newPoints);
+      
+      // 레벨업 체크
+      if (newLevel > seedlingLevel) {
+        const plant = plantStages[newLevel as keyof typeof plantStages];
         showAchievementPopup(plant.emoji, `레벨업! ${plant.name}`, `축하합니다! ${plant.name} 단계에 도달했습니다!`);
-          setSeedlingLevel(newLevel);
-        }
-        
-        return newPoints;
-      });
+        setSeedlingLevel(newLevel);
+      }
       
       setToast({ 
         visible: true, 
@@ -419,7 +504,7 @@ const HairPT: React.FC = () => {
     return uniqueMissions;
   };
 
-  const incrementCounter = (id: keyof Counters) => {
+  const incrementCounter = async (id: keyof Counters) => {
     setCounters(prev => {
       const newValue = prev[id] + 1;
       // 물 7잔, 이펙터 4번 제한
@@ -433,7 +518,10 @@ const HairPT: React.FC = () => {
           (id === 'effector' && m.name === '이펙터 사용')
         );
         if (missionInfo) {
-          saveMissionLog(missionInfo.id, missionInfo.rewardPoints);
+          saveMissionLog(missionInfo.id, missionInfo.rewardPoints).then(() => {
+            // 미션 완료 후 습관 데이터 다시 로드하여 완료 상태 업데이트
+            loadDailyHabits();
+          });
         }
       }
       
@@ -475,7 +563,8 @@ const HairPT: React.FC = () => {
 
   // 미션 카드 렌더링 함수
   const renderMissionCard = (mission: MissionInfo) => {
-    const isCompleted = missionState[mission.key];
+    // 백엔드에서 가져온 완료 상태를 우선 사용, 없으면 로컬 상태 사용
+    const isCompleted = mission.completed !== undefined ? mission.completed : missionState[mission.key];
     const missionIcon = getMissionIcon(mission.name);
     
     // 물마시기와 이펙터 사용은 카운터 방식으로 처리
@@ -833,32 +922,77 @@ const HairPT: React.FC = () => {
                 <span className="text-lg font-bold">🌱</span>
                 {isEditingTitle ? (
                   <input
+                    type="text"
                     value={plantTitle}
-                    onChange={(e) => setPlantTitle(e.target.value)}
-                    onBlur={saveTitle}
+                    onChange={(e) => {
+                      const newName = e.target.value;
+                      setPlantTitle(newName);
+                      setIsUserTyping(true); // 사용자가 타이핑하고 있음을 표시
+                      // Redux 상태도 업데이트
+                      if (userId && seedlingId) {
+                        dispatch(setSeedling({
+                          seedlingId: seedlingId,
+                          seedlingName: newName,
+                          currentPoint: currentPoint || seedlingPoints || 0,
+                          userId: userId
+                        }));
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && isUserTyping) {
+                        // 빈 값이면 기본값으로 설정
+                        const finalName = plantTitle.trim() || '새싹 키우기';
+                        setPlantTitle(finalName);
+                        
+                        // 백엔드에 저장
+                        if (originalTitle !== finalName) {
+                          handleSeedlingNameChange(finalName);
+                        }
+                        setIsEditingTitle(false);
+                      }
+                    }}
+                    placeholder="새싹 이름을 입력하세요"
                     className="px-2 py-1 rounded-md text-gray-800"
                     ref={titleInputRef}
-                    autoFocus
                   />
                 ) : (
-                  <h2 className="text-lg font-bold" onDoubleClick={startEditTitle}>{plantTitle}</h2>
+                  <h2 className="text-lg font-bold" onDoubleClick={startEditTitle}>
+                    {seedlingName || plantTitle || '새싹 키우기'}
+                  </h2>
                 )}
                 {!isEditingTitle ? (
                   <button
                     title="제목 편집"
                     onClick={startEditTitle}
-                    className="ml-1 p-1 rounded-md bg-white/20 hover:bg-white/30"
+                    disabled={seedlingLoading}
+                    className="ml-1 p-1 rounded-md bg-white/20 hover:bg-white/30 disabled:opacity-50 cursor-pointer"
+                    style={{ minWidth: '32px', minHeight: '32px' }}
                   >
-                    <i className="fas fa-pen"></i>
+                    {seedlingLoading ? (
+                      <i className="fas fa-spinner fa-spin"></i>
+                    ) : (
+                      <i className="fas fa-pen"></i>
+                    )}
                   </button>
                 ) : (
                   <button
                     title="저장"
                     onMouseDown={(e) => { e.preventDefault(); }}
-                    onClick={saveTitle}
-                    className="ml-1 px-2 py-1 rounded-md bg-white text-indigo-600 font-semibold hover:bg-gray-100"
+                    onClick={() => {
+                      // 빈 값이면 기본값으로 설정
+                      const finalName = plantTitle.trim() || '새싹 키우기';
+                      setPlantTitle(finalName);
+                      
+                      // 백엔드에 저장
+                      if (originalTitle !== finalName) {
+                        handleSeedlingNameChange(finalName);
+                      }
+                      setIsEditingTitle(false);
+                    }}
+                    disabled={seedlingLoading}
+                    className="ml-1 px-2 py-1 rounded-md bg-white text-indigo-600 font-semibold hover:bg-gray-100 disabled:opacity-50"
                   >
-                    저장
+                    {seedlingLoading ? '저장중...' : '저장'}
                   </button>
                 )}
               </div>
@@ -876,10 +1010,10 @@ const HairPT: React.FC = () => {
               <div className="flex-1 h-2 bg-white/30 rounded-full mx-3 overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full transition-all duration-500"
-                  style={{ width: `${(seedlingPoints % 50) * 2}%` }}
+                  style={{ width: `${((currentPoint || seedlingPoints) % 50) * 2}%` }}
                 />
               </div>
-              <span className="text-xs">{seedlingPoints % 50}/50</span>
+              <span className="text-xs">{(currentPoint || seedlingPoints) % 50}/50</span>
             </div>
           </div>
 
@@ -903,7 +1037,7 @@ const HairPT: React.FC = () => {
                 <div className="text-xs text-gray-600">연속일</div>
               </div>
               <div>
-                <div className="text-lg font-bold text-indigo-600">{seedlingPoints}</div>
+                <div className="text-lg font-bold text-indigo-600">{currentPoint || seedlingPoints}</div>
                 <div className="text-xs text-gray-600">새싹 포인트</div>
               </div>
               <div>
@@ -932,6 +1066,15 @@ const HairPT: React.FC = () => {
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
             <div className="px-4 py-2 bg-gray-900 text-white rounded-full shadow-lg text-sm">
               {toast.message}
+            </div>
+          </div>
+        )}
+
+        {/* Error Toast */}
+        {seedlingError && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+            <div className="px-4 py-2 bg-red-600 text-white rounded-full shadow-lg text-sm">
+              {seedlingError}
             </div>
           </div>
         )}

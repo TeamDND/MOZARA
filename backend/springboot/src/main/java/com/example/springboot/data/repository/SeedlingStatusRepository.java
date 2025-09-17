@@ -20,3 +20,4 @@ public interface SeedlingStatusRepository extends JpaRepository<SeedlingStatusEn
      */
     Optional<SeedlingStatusEntity> findByUserEntityIdForeign_Id(Integer userId);
 }
+

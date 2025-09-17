@@ -14,3 +14,4 @@ public class HairQuizQuestionDTO {
     private String answer; // "O" 또는 "X"
     private String explanation;
 }
+

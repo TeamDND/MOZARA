@@ -19,7 +19,7 @@ import java.time.LocalDate;
 public class UserHabitLogEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "log_id", nullable = false)
+    @Column(name = "habit_log_id", nullable = false)
     private Integer logId;
 
     @ManyToOne(fetch = FetchType.LAZY)
