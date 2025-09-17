@@ -1,6 +1,6 @@
 package com.example.springboot.service.ai;
 
-import com.example.springboot.data.dto.ai.HairProductResponseDTO;
+import com.example.springboot.data.dto.ai.HairQuizResponseDTO;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -12,31 +12,26 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
-public class HairProductService {
+public class HairQuizService {
 
     @Value("${ai.python.base-url}")
     private String pythonBaseUrl;
 
-    private static final Logger log = LoggerFactory.getLogger(HairProductService.class);
+    private static final Logger log = LoggerFactory.getLogger(HairQuizService.class);
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     /**
-     * 탈모 단계별 제품 목록 조회
-     * @param stage 탈모 단계 (1-6)
-     * @return 제품 목록과 단계별 정보
+     * 탈모 퀴즈 생성
+     * @return 생성된 퀴즈 목록
      */
-    public HairProductResponseDTO getProductsByStage(int stage) {
+    public HairQuizResponseDTO generateQuiz() {
         try {
-            String url = UriComponentsBuilder
-                    .fromHttpUrl(pythonBaseUrl + "/products")
-                    .queryParam("stage", stage)
-                    .toUriString();
+            String url = pythonBaseUrl + "/hair-quiz/generate";
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("Content-Type", "application/json");
@@ -44,7 +39,7 @@ public class HairProductService {
 
             ResponseEntity<String> response = restTemplate.exchange(
                     url,
-                    HttpMethod.GET,
+                    HttpMethod.POST,
                     entity,
                     String.class
             );
@@ -52,27 +47,27 @@ public class HairProductService {
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 String body = response.getBody();
                 try {
-                    return objectMapper.readValue(body, HairProductResponseDTO.class);
+                    return objectMapper.readValue(body, HairQuizResponseDTO.class);
                 } catch (Exception parseEx) {
-                    log.error("[Products] Python 응답 파싱 실패: {}", parseEx.getMessage(), parseEx);
+                    log.error("[HairQuiz] Python 응답 파싱 실패: {}", parseEx.getMessage(), parseEx);
                     throw new RuntimeException("Python 응답 파싱 실패");
                 }
             }
-            log.error("[Products] Python 비정상 응답 status={}, body={}", response.getStatusCodeValue(), response.getBody());
+            log.error("[HairQuiz] Python 비정상 응답 status={}, body={}", response.getStatusCodeValue(), response.getBody());
             throw new RuntimeException("Python 서버 응답이 유효하지 않습니다.");
         } catch (Exception e) {
-            log.error("[Products] Python 연동 예외: {}", e.getMessage(), e);
-            throw new RuntimeException("Python 서버에서 제품 정보를 가져오는 중 오류가 발생했습니다: " + e.getMessage(), e);
+            log.error("[HairQuiz] Python 연동 예외: {}", e.getMessage(), e);
+            throw new RuntimeException("Python 서버에서 퀴즈를 생성하는 중 오류가 발생했습니다: " + e.getMessage(), e);
         }
     }
 
     /**
-     * 제품 추천 서비스 헬스체크
+     * 퀴즈 서비스 헬스체크
      * @return 서비스 상태 정보
      */
     public String healthCheck() {
         try {
-            String url = pythonBaseUrl + "/products/health";
+            String url = pythonBaseUrl + "/hair-quiz/health";
             
             HttpHeaders headers = new HttpHeaders();
             headers.set("Content-Type", "application/json");
@@ -91,5 +86,3 @@ public class HairProductService {
         }
     }
 }
-
-

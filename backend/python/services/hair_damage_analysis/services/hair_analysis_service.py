@@ -28,10 +28,11 @@ class HairAnalysisService:
         self.pinecone_client = PineconeClient()
 
         # Gemini API 설정
-        gemini_api_key = os.getenv("GEMINI_API_KEY")
-        if gemini_api_key:
+        gemini_api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+        if gemini_api_key and gemini_api_key != "your_gemini_api_key_here":
             genai.configure(api_key=gemini_api_key)
             self.gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+            print("✅ Gemini API 설정 완료")
         else:
             # API 키가 없어도 서비스 자체는 동작하도록 설정
             self.gemini_model = None
@@ -191,10 +192,12 @@ class HairAnalysisService:
                     
                     # Gemini에 이미지와 함께 분석 요청
                     analysis_prompt = """
-                    이 모발 이미지를 분석하여 다음 정보를 제공해주세요:
-                    1. 모발 상태 (정상, 경미한 손상, 중간 손상, 심각한 손상)
-                    2. 탈모 단계 (1-7단계, 1이 가장 정상, 7이 가장 심각)
+                    이 두피/모발 이미지를 분석하여 다음 정보를 제공해주세요:
+                    1. 두피 상태 (정상, 초기 탈모, 중등도 탈모, 심각한 탈모)
+                    2. 탈모 진행 단계 (0-3단계만 사용, 0=정상, 1=초기, 2=중등도, 3=심각)
                     3. 신뢰도 (0.0-1.0)
+                    
+                    중요: 단계는 반드시 0, 1, 2, 3 중 하나만 사용하세요. 4 이상의 숫자는 사용하지 마세요.
                     
                     답변은 반드시 다음 JSON 형식으로만 제공해주세요:
                     {"diagnosis": "상태", "stage": 단계번호, "confidence": 신뢰도}
@@ -255,7 +258,7 @@ class HairAnalysisService:
             print(f"[DEBUG] 이미지 분석 중 오류: {e}")
             return {
                 "diagnosis": "분석 오류",
-                "stage": 1,
+                "stage": 0,
                 "confidence": 0.1,
                 "gender": "남성"
             }
@@ -269,32 +272,34 @@ class HairAnalysisService:
             
             # 기본값 설정
             diagnosis = "분석 불가"
-            stage = 1
+            stage = 0
             confidence = 0.5
             
-            # 진단 상태 추출 (모발 손상 단계 기준)
+            # 진단 상태 추출 (탈모 진행 단계 기준)
             if "정상" in response_text:
                 diagnosis = "정상"
-                stage = 1  # 모발 손상 없음
+                stage = 0  # 정상 상태
                 confidence = 0.8
-            elif "경미" in response_text or "초기" in response_text:
-                diagnosis = "경미한 손상"
-                stage = 2  # 모발 끝부분 손상, 건조함
+            elif "초기" in response_text or "경미" in response_text:
+                diagnosis = "초기 탈모"
+                stage = 1  # 초기 탈모 단계
                 confidence = 0.7
-            elif "중간" in response_text or "중기" in response_text:
-                diagnosis = "중간 손상"
-                stage = 3  # 모발 중간 부분 손상, 갈라짐
+            elif "중등도" in response_text or "중간" in response_text:
+                diagnosis = "중등도 탈모"
+                stage = 2  # 중등도 탈모 단계
                 confidence = 0.6
-            elif "심각" in response_text or "후기" in response_text:
-                diagnosis = "심각한 손상"
-                stage = 4  # 모발 뿌리 부분 손상, 탈락 위험
+            elif "심각" in response_text or "고급" in response_text:
+                diagnosis = "심각한 탈모"
+                stage = 3  # 심각한 탈모 단계
                 confidence = 0.5
             
-            # 단계 번호 추출 시도
+            # 단계 번호 추출 시도 (0-3 범위로 제한)
             import re
             stage_match = re.search(r'(\d+)단계', response_text)
             if stage_match:
-                stage = int(stage_match.group(1))
+                extracted_stage = int(stage_match.group(1))
+                # 0-3 범위로 제한
+                stage = max(0, min(3, extracted_stage))
             
             # 신뢰도 추출 시도
             confidence_match = re.search(r'(\d+\.?\d*)', response_text)
@@ -318,7 +323,7 @@ class HairAnalysisService:
             print(f"[DEBUG] 텍스트 파싱 중 오류: {e}")
             return {
                 "diagnosis": "분석 불가",
-                "stage": 1,
+                "stage": 0,
                 "confidence": 0.1,
                 "gender": "남성"
             }
@@ -332,22 +337,22 @@ class HairAnalysisService:
             vector_mean = sum(image_vector) / len(image_vector)
             vector_std = (sum((x - vector_mean) ** 2 for x in image_vector) / len(image_vector)) ** 0.5
             
-            # 간단한 휴리스틱 분석 (모발 손상 단계 기준)
+            # 간단한 휴리스틱 분석 (탈모 진행 단계 기준)
             if vector_std < 0.1:
                 diagnosis = "정상"
-                stage = 1  # 모발 손상 없음
+                stage = 0  # 정상 상태
                 confidence = 0.8
             elif vector_std < 0.2:
-                diagnosis = "경미한 손상"
-                stage = 2  # 모발 끝부분 손상, 건조함
+                diagnosis = "초기 탈모"
+                stage = 1  # 초기 탈모 단계
                 confidence = 0.7
             elif vector_std < 0.3:
-                diagnosis = "중간 손상"
-                stage = 3  # 모발 중간 부분 손상, 갈라짐
+                diagnosis = "중등도 탈모"
+                stage = 2  # 중등도 탈모 단계
                 confidence = 0.6
             else:
-                diagnosis = "심각한 손상"
-                stage = 4  # 모발 뿌리 부분 손상, 탈락 위험
+                diagnosis = "심각한 탈모"
+                stage = 3  # 심각한 탈모 단계
                 confidence = 0.5
             
             return {
@@ -361,7 +366,7 @@ class HairAnalysisService:
             print(f"[DEBUG] 기본 분석 중 오류: {e}")
             return {
                 "diagnosis": "분석 불가",
-                "stage": 1,
+                "stage": 0,
                 "confidence": 0.1,
                 "gender": "남성"
             }
