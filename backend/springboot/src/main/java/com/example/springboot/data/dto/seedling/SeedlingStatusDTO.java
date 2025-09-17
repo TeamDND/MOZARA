@@ -17,3 +17,4 @@ public class SeedlingStatusDTO {
     private Integer currentPoint;
     private Integer userId;
 }
+
