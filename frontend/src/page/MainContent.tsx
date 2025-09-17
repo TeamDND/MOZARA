@@ -11,20 +11,9 @@ export default function Home() {
     { name: "제품추천", icon: "🛍️", badge: "NEW" },
     { name: "탈모 백과", icon: "📚", badge: "NEW" },
     { name: "데일리 케어", icon: "📅", badge: "NEW" },
-    { name: "이미지 생성", icon: "🎨", badge: null },
-    { name: "챗봇요약", icon: "💬", badge: null },
     { name: "상가찾기", icon: "🏪", badge: null },
     { name: "BASP 탈모 진단", icon: "🔍", badge: "자가진단" },
-    { name: "고민 상담", icon: "💭", badge: null },
     { name: "탈모 OX 퀴즈", icon: "⭕❌", badge: null },
-  ]
-
-  const trendingSearches = [
-    "APEC 정상회의 준비 상황",
-    "김동률 톡톡 사태",
-    "김예지 4타수 무안타 경기",
-    "스톤시 가맹 사이트 피해",
-    "센터로 초등생 우리미수 영상 실시",
   ]
 
   return (
@@ -52,18 +41,6 @@ export default function Home() {
                   />
                 </div>
 
-                <div className="flex items-center justify-center gap-4">
-                  <button className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200">
-                    <span className="text-2xl">+</span>
-                  </button>
-                  <button className="flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-full hover:bg-gray-200">
-                    <span className="text-sm">🌐</span>
-                    <span className="text-sm text-gray-700">검색</span>
-                  </button>
-                  <button className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200">
-                    <span className="text-xl">↑</span>
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -109,42 +86,6 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Content Cards */}
-            <div className="grid grid-cols-2 gap-6">
-              {/* 새로운 기능 카드 */}
-              <div className="bg-gradient-to-r from-green-100 to-green-200 rounded-2xl p-6 relative overflow-hidden cursor-pointer hover:shadow-lg transition-shadow">
-                <div className="relative z-10">
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">새로운 기능</h3>
-                  <h4 className="text-lg font-semibold text-gray-700 mb-2">곧 출시 예정</h4>
-                  <p className="text-sm text-gray-600">더 많은 유용한 기능들이 준비 중이에요</p>
-                </div>
-                <div className="absolute right-4 top-4 w-24 h-24 bg-gray-800 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-2xl">🚀</span>
-                </div>
-              </div>
-
-              {/* Trending Searches */}
-              <div className="bg-white rounded-2xl p-6 border border-gray-200">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-blue-600">⚡</span>
-                  <h3 className="font-semibold text-gray-800">실시간 검색어 순위</h3>
-                </div>
-                <div className="space-y-3">
-                  {trendingSearches.map((search, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-medium text-gray-600">
-                        {index + 1}
-                      </span>
-                      <span className="text-sm text-gray-700 flex-1">{search}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex justify-center gap-2 mt-4">
-                  <div className="w-2 h-2 bg-gray-800 rounded-full"></div>
-                  <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                </div>
-              </div>
-            </div>
           </div>
         </main>
       </div>
