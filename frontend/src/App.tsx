@@ -26,7 +26,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<LandingPage />} />
-          <Route path="temp-main" element={<MainContent />} />
+          <Route path="main" element={<MainContent />} />
           <Route path="hair-check" element={<HairCheck />} />
           <Route path="hair-damage" element={<HairDamageAnalysis />} />
           <Route path="hair-change" element={<HairChange />} />
@@ -39,8 +39,8 @@ const App: React.FC = () => {
           <Route path="hair-encyclopedia/*" element={<HairEncyclopediaMain />} />
           <Route path="hair-diagnosis" element={<HairDiagnosis />} />
           <Route path="hair-quiz" element={<HairQuiz />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/login" element={<LogIn />} />
+          <Route path="signup" element={<SignUp />} />
+          <Route path="login" element={<LogIn />} />
           <Route path="daily-care" element={<DailyCare />} />
         </Route>
       </Routes>
