@@ -3,6 +3,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 // TypeScript: 사용자 상태 인터페이스 정의
 interface UserState {
+  userId: number | null;
   username: string | null;
   nickname: string | null;
   email: string | null;
@@ -14,6 +15,7 @@ interface UserState {
 
 // TypeScript: 사용자 데이터 인터페이스 정의
 interface UserData {
+  userId?: number;
   username: string;
   nickname: string;
   email: string;
@@ -25,6 +27,7 @@ interface UserData {
 
 // TypeScript: 초기 상태 정의
 const initialState: UserState = {
+  userId: null,
   username: null,
   nickname: null,
   email: null,
@@ -45,6 +48,7 @@ const userSlice = createSlice({
     },
     // TypeScript: 사용자 클리어 액션
     clearUser: (state) => {
+      state.userId = null;
       state.username = null;
       state.nickname = null;
       state.email = null;
