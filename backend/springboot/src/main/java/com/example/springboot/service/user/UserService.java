@@ -103,6 +103,7 @@ public class UserService {
         SeedlingStatusDTO seedlingStatusDTO = seedlingService.getSeedlingByUserId(userEntity.getId());
         
         return UserInfoDTO.builder()
+                .userId(userEntity.getId())
                 .username(userEntity.getUsername())
                 .email(userEntity.getEmail())
                 .address(userEntity.getAddress())
