@@ -11,20 +11,9 @@ export default function Home() {
     { name: "제품추천", icon: "🛍️", badge: "NEW" },
     { name: "탈모 백과", icon: "📚", badge: "NEW" },
     { name: "데일리 케어", icon: "📅", badge: "NEW" },
-    { name: "이미지 생성", icon: "🎨", badge: null },
-    { name: "챗봇요약", icon: "💬", badge: null },
     { name: "상가찾기", icon: "🏪", badge: null },
     { name: "BASP 탈모 진단", icon: "🔍", badge: "자가진단" },
-    { name: "고민 상담", icon: "💭", badge: null },
     { name: "탈모 OX 퀴즈", icon: "⭕❌", badge: null },
-  ]
-
-  const hairLossSearches = [
-    "탈모 모발이식",
-    "탈모샴푸",
-    "탈모",
-    "탈모약",
-    "정수리 탈모",
   ]
 
   return (
@@ -97,23 +86,6 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Trending Hair Loss Searches */}
-            <div className="bg-white rounded-2xl p-6 border border-gray-200">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-blue-600">📈</span>
-                <h3 className="font-semibold text-gray-800">탈모 검색어 통계 순위</h3>
-              </div>
-              <div className="space-y-3">
-                {hairLossSearches.map((search, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <span className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-600">
-                      {index + 1}
-                    </span>
-                    <span className="text-base text-gray-700 flex-1 font-medium">{search}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </main>
       </div>
