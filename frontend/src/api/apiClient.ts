@@ -45,7 +45,7 @@ apiClient.interceptors.response.use(
         if(error.response?.status === 401 && !originalRequest._retry){
             originalRequest._retry = true;
             try{
-                const res = await axios.post('/api/refresh', null, {
+                const res = await axios.post('/api/reissue', null, {
                     withCredentials: true,
                 });
                 const newAccessToken = res.headers['authorization'];

@@ -14,3 +14,5 @@ import java.util.List;
 public class HairQuizResponseDTO {
     private List<HairQuizQuestionDTO> items;
 }
+
+

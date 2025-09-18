@@ -1,6 +1,7 @@
 package com.example.springboot.controller.ai;
 
-import com.example.springboot.service.ai.AIService;
+import com.example.springboot.service.ai.HairDamageAnalysisService;
+import com.example.springboot.service.ai.RagChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,8 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class HairDamageController {
     
-    private final AIService aiService;
+    private final HairDamageAnalysisService hairDamageAnalysisService;
+    private final RagChatService ragChatService;
 
     /**
      * 이미지와 텍스트를 통한 모발 손상 분석 요청
@@ -26,7 +28,7 @@ public class HairDamageController {
             @RequestParam(value = "textQuery", required = false) String textQuery) {
         
         try {
-            Map<String, Object> result = aiService.analyzeHairDamage(image, textQuery);
+            Map<String, Object> result = hairDamageAnalysisService.analyzeHairDamage(image, textQuery);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -43,7 +45,7 @@ public class HairDamageController {
             @RequestParam(value = "textQuery", required = false) String textQuery) {
         
         try {
-            Map<String, Object> result = aiService.chatWithAI(image, textQuery);
+            Map<String, Object> result = ragChatService.chatWithAI(image, textQuery);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -57,7 +59,7 @@ public class HairDamageController {
     @PostMapping("/save-result")
     public ResponseEntity<Map<String, Object>> saveAnalysisResult(@RequestBody Map<String, Object> analysisResult) {
         try {
-            Map<String, Object> result = aiService.saveAnalysisResult(analysisResult);
+            Map<String, Object> result = hairDamageAnalysisService.saveAnalysisResult(analysisResult);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
