@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 # .env 파일 로드 (프로젝트 루트의 .env 파일 사용)
 load_dotenv("../../../.env")
 load_dotenv("../../.env")
-load_dotenv(".env")  # 현재 디렉토리도 확인
+load_dotenv("../../../../.env")
 
 # Pinecone setup
 try:
