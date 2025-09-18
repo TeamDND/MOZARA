@@ -232,7 +232,7 @@ const HairPT: React.FC = () => {
       console.log('새싹 정보 로드 시도:', userId);
       
       // 직접 API 호출로 테스트
-      const response = await apiClient.get(`/user/seedling/${userId}`);
+      const response = await apiClient.get('/user/seedling/my-seedling');
       console.log('새싹 정보 API 응답:', response.data);
       
       const result = await dispatch(fetchSeedlingInfo(userId)).unwrap();
@@ -299,15 +299,8 @@ const HairPT: React.FC = () => {
     try {
       console.log('새싹 이름 변경 시도:', { userId, seedlingName: newName });
       
-      // 직접 API 호출로 테스트
-      const response = await apiClient.put(`/user/seedling/${userId}/nickname`, {
-        seedlingName: newName
-      });
-      
-      console.log('API 응답:', response.data);
-      
-      // Redux 상태도 업데이트
-      await dispatch(updateSeedlingNickname({ userId, seedlingName: newName })).unwrap();
+      // 새싹 이름 변경 API 호출
+      await dispatch(updateSeedlingNickname(newName)).unwrap();
       
       // 로컬 스토리지도 업데이트
       localStorage.setItem('plantTitle', newName);
