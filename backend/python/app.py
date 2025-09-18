@@ -89,7 +89,7 @@ async def add_cors_headers(request, call_next):
 # 라우터 마운트 (조건부)
 if HAIR_ANALYSIS_AVAILABLE and hair_analysis_app:
     # 스프링부트 경로에 맞게 /api/hair-damage 로 마운트 경로 수정
-    app.mount("/api/hair-damage", hair_analysis_app)
+    app.mount("/hair-damage", hair_analysis_app)
     print("Hair Damage Analysis 라우터 마운트 완료")
 else:
     index = None
@@ -168,7 +168,7 @@ def read_root():
         "message": "MOZARA Python Backend 통합 서버",
         "status": "running",
         "modules": {
-            "hair_damage_analysis": "/api/hair-damage" if HAIR_ANALYSIS_AVAILABLE else "unavailable",
+            "hair_damage_analysis": "/hair-damage" if HAIR_ANALYSIS_AVAILABLE else "unavailable",
             "hair_change": "/generate_hairstyle" if HAIR_CHANGE_AVAILABLE else "unavailable",
             "basp_diagnosis": "/basp/evaluate" if BASP_AVAILABLE else "unavailable",
             "hair_encyclopedia": "/paper" if openai_api_key else "unavailable",
