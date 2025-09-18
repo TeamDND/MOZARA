@@ -40,7 +40,7 @@ export const fetchSeedlingInfo = createAsyncThunk(
   'seedling/fetchSeedlingInfo',
   async (userId: number, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get(`/user/seedling/${userId}`);
+      const response = await apiClient.get('/user/seedling/my-seedling');
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || '새싹 정보를 불러오는데 실패했습니다.');
@@ -51,9 +51,9 @@ export const fetchSeedlingInfo = createAsyncThunk(
 // TypeScript: 새싹 이름 업데이트 비동기 액션
 export const updateSeedlingNickname = createAsyncThunk(
   'seedling/updateSeedlingNickname',
-  async ({ userId, seedlingName }: { userId: number; seedlingName: string }, { rejectWithValue }) => {
+  async (seedlingName: string, { rejectWithValue }) => {
     try {
-      const response = await apiClient.put(`/user/seedling/${userId}/nickname`, {
+      const response = await apiClient.put('/user/seedling/my-seedling/nickname', {
         seedlingName
       });
       return response.data;
@@ -108,10 +108,7 @@ const seedlingSlice = createSlice({
       .addCase(fetchSeedlingInfo.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
-
-    // 새싹 이름 업데이트
-    builder
+      })
       .addCase(updateSeedlingNickname.pending, (state) => {
         state.loading = true;
         state.error = null;
