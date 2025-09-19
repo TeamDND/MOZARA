@@ -5,6 +5,9 @@ import os
 import pinecone
 from dotenv import load_dotenv
 import random
+import json
+import glob
+from pathlib import Path
 
 # .env 파일 로드 (상위 디렉토리의 .env 파일 사용)
 load_dotenv("../../../.env")
@@ -21,7 +24,7 @@ def create_index_and_import_data():
     print("🌲 Pinecone 클라이언트 초기화 중...")
     pinecone.init(api_key=api_key, environment="us-east-1")
     
-    index_name = "hair-loss-image"
+    index_name = os.getenv("PINECONE_INDEX_NAME2")
     
     try:
         # 기존 인덱스 확인
@@ -47,31 +50,74 @@ def create_index_and_import_data():
         # 인덱스 연결
         index = pinecone.Index(index_name)
         
-        # 샘플 데이터 입력
-        print("📊 샘플 데이터 입력 중...")
-        sample_data = []
+        # 실제 데이터 입력
+        print("📊 실제 데이터 입력 중...")
+        data_path = "C:/Users/301/Desktop/data_all"
+        vectors_data = []
         
-        for i in range(10):
-            # 768차원 랜덤 벡터 생성
-            vector = [random.random() for _ in range(768)]
-            
-            # 메타데이터
-            metadata = {
-                "diagnosis": random.choice(["경미", "중등도", "심각"]),
-                "gender": random.choice(["남성", "여성"]),
-                "stage": random.randint(1, 5),
-                "confidence": round(random.uniform(0.7, 0.95), 2)
-            }
-            
-            sample_data.append({
-                "id": f"sample_{i}",
-                "values": vector,
-                "metadata": metadata
-            })
+        # 라벨링 데이터 폴더 경로
+        labeling_path = os.path.join(data_path, "라벨링데이터")
         
-        # 벡터 업로드
-        index.upsert(vectors=sample_data)
-        print(f"✅ {len(sample_data)}개 샘플 데이터 입력 완료!")
+        # 카테고리별로 데이터 처리
+        categories = ["1.미세각질", "2.피지과다", "3.모낭사이홍반", "4.모낭홍반농포", "5.비듬", "6.탈모"]
+        severity_levels = ["0.양호", "1.경증", "2.중등도", "3.중증"]
+        
+        for category in categories:
+            print(f"📁 카테고리 '{category}' 처리 중...")
+            
+            for severity in severity_levels:
+                category_path = os.path.join(labeling_path, category, severity)
+                
+                if not os.path.exists(category_path):
+                    continue
+                
+                # JSON 파일들 읽기
+                json_files = glob.glob(os.path.join(category_path, "*.json"))
+                
+                for json_file in json_files:
+                    try:
+                        with open(json_file, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                        
+                        # 768차원 랜덤 벡터 생성 (실제로는 이미지 임베딩을 사용해야 함)
+                        vector = [random.random() for _ in range(768)]
+                        
+                        # 메타데이터 구성
+                        metadata = {
+                            "image_id": data.get("image_id", ""),
+                            "image_file_name": data.get("image_file_name", ""),
+                            "category": category,
+                            "severity": severity,
+                            "severity_level": severity.split(".")[0],
+                            "value_1": data.get("value_1", "0"),
+                            "value_2": data.get("value_2", "0"),
+                            "value_3": data.get("value_3", "0"),
+                            "value_4": data.get("value_4", "0"),
+                            "value_5": data.get("value_5", "0"),
+                            "value_6": data.get("value_6", "0")
+                        }
+                        
+                        vectors_data.append({
+                            "id": data.get("image_id", f"unknown_{len(vectors_data)}"),
+                            "values": vector,
+                            "metadata": metadata
+                        })
+                        
+                    except Exception as e:
+                        print(f"⚠️ 파일 처리 오류: {json_file} - {str(e)}")
+                        continue
+        
+        # 벡터 업로드 (배치 단위로)
+        batch_size = 100
+        total_uploaded = 0
+        
+        for i in range(0, len(vectors_data), batch_size):
+            batch = vectors_data[i:i + batch_size]
+            index.upsert(vectors=batch)
+            total_uploaded += len(batch)
+            print(f"📤 {total_uploaded}/{len(vectors_data)} 벡터 업로드 완료...")
+        
+        print(f"✅ 총 {len(vectors_data)}개 데이터 입력 완료!")
         
         # 인덱스 상태 확인
         stats = index.describe_index_stats()

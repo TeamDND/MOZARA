@@ -1,4 +1,6 @@
 import React, { useState, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store/store';
 import apiClient from '../api/apiClient';
 import './HairComponents.css';
 
@@ -30,6 +32,9 @@ const HairDiagnosis: React.FC = () => {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Redux에서 사용자 정보 가져오기
+  const { userId } = useSelector((state: RootState) => state.user);
 
   // API 호출 재시도 로직
   const fetchWithRetry = async (url: string, options: RequestInit, retries = 3, delay = 1000): Promise<Response> => {
@@ -68,6 +73,14 @@ const HairDiagnosis: React.FC = () => {
   const analyzeImageWithGemini = async (file: File): Promise<AnalysisResult> => {
     const formData = new FormData();
     formData.append('image', file);
+    
+    // 로그인한 사용자의 user_id 추가
+    if (userId) {
+      formData.append('user_id', userId.toString());
+      console.log('user_id 추가:', userId);
+    } else {
+      console.log('로그인하지 않은 사용자 - user_id 없음');
+    }
 
     console.log('API 호출 시작: /ai/gemini-check/analyze');
 
@@ -76,8 +89,9 @@ const HairDiagnosis: React.FC = () => {
     });
     console.log('API 응답 성공:', result);
 
-    // Spring → Python 표준 응답 {stage, title, description, advice}
-    const stage = result.stage as number;
+    // Spring → Python 표준 응답 {analysis: {stage, title, description, advice}, save_result: {...}}
+    const analysisData = result.analysis || result; // 하위 호환성을 위해 fallback
+    const stage = analysisData.stage as number;
 
     const defaultAdviceForStage = (stage: number) => {
       switch (stage) {
@@ -116,9 +130,9 @@ const HairDiagnosis: React.FC = () => {
 
     return {
       stage: stage,
-      title: String(result.title || ''),
-      description: String(result.description || ''),
-      advice: (Array.isArray(result.advice) && result.advice.length > 0) ? result.advice : defaultAdviceForStage(stage)
+      title: String(analysisData.title || ''),
+      description: String(analysisData.description || ''),
+      advice: (Array.isArray(analysisData.advice) && analysisData.advice.length > 0) ? analysisData.advice : defaultAdviceForStage(stage)
     };
   };
 

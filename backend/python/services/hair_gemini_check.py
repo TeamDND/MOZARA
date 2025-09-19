@@ -5,6 +5,7 @@ from typing import Dict, Any, List
 from dotenv import load_dotenv
 import google.generativeai as genai
 import re
+from datetime import datetime
 
 
 # 환경 변수 로드 (여러 경로 시도: 프로젝트 루트, backend, 현재 디렉터리)
@@ -89,3 +90,43 @@ def analyze_hair_with_gemini(image_data: bytes) -> Dict[str, Any]:
     }
 
     return normalized
+
+
+def convert_to_database_format(gemini_result: Dict[str, Any], user_id: int = None, image_url: str = None) -> Dict[str, Any]:
+    """
+    Gemini 분석 결과를 데이터베이스 analysis_results 테이블 형식으로 변환합니다.
+    user_id가 없으면 None을 반환하여 저장하지 않습니다.
+    
+    Args:
+        gemini_result: analyze_hair_with_gemini() 함수의 반환값
+        user_id: 사용자 ID (None이면 저장하지 않음)
+        image_url: 이미지 URL (선택사항)
+    
+    Returns:
+        데이터베이스 저장용 딕셔너리 또는 None (저장 불가)
+    """
+    # 로그인하지 않은 사용자는 저장하지 않음
+    if user_id is None or user_id <= 0:
+        return None
+    # advice 배열을 문자열로 변환 (구분자: "|")
+    advice_str = "|".join(gemini_result.get("advice", []))
+    
+    # analysis_summary: title + description 조합
+    title = gemini_result.get("title", "")
+    description = gemini_result.get("description", "")
+    analysis_summary = f"{title}\n{description}".strip()
+    
+    # 데이터베이스 형식으로 변환
+    db_format = {
+        "inspection_date": datetime.now().date(),
+        "analysis_summary": analysis_summary,
+        "advice": advice_str,
+        "grade": gemini_result.get("stage", 0),
+        "image_url": image_url or "",  # None이면 빈 문자열로 저장
+        "user_id_foreign": user_id
+    }
+    
+    return db_format
+
+
+
