@@ -4,6 +4,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/store';
 import { clearUser } from '../store/userSlice';
 import { clearToken } from '../store/tokenSlice';
+import { clearSeedling } from '../store/seedlingSlice';
+import apiClient from '../api/apiClient';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -25,10 +27,21 @@ export default function Header() {
   };
 
 
-  const handleLogout = () => {
-    dispatch(clearUser());
-    dispatch(clearToken());
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      console.log('로그아웃 시작 - 백엔드 API 호출');
+      const response = await apiClient.delete('/logout');
+      console.log('로그아웃 API 응답:', response.data);
+    } catch (error) {
+      console.error('로그아웃 API 호출 실패:', error);
+    } finally {
+      console.log('프론트엔드 상태 정리 중...');
+      dispatch(clearUser());
+      dispatch(clearToken());
+      dispatch(clearSeedling());
+      console.log('로그아웃 완료 - 홈으로 이동');
+      navigate('/');
+    }
   };
 
   return (

@@ -18,7 +18,7 @@ load_dotenv("../../../../.env")
 try:
     from pinecone import Pinecone
     pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
-    index_name = os.getenv("PINECONE_INDEX_NAME")
+    index_name = os.getenv("PINECONE_INDEX_NAME1")
     if index_name and index_name in pc.list_indexes().names():
         index = pc.Index(index_name)
         print("Pinecone index connection success")
