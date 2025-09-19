@@ -1,7 +1,5 @@
 // TypeScript: API 클라이언트 설정
 import axios, { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import { setToken } from '../store/tokenSlice';
-import { store } from '../store/store';
 
 // TypeScript: API 클라이언트 인스턴스 생성
 const apiClient = axios.create({
@@ -23,7 +21,10 @@ apiClient.interceptors.request.use(
         }
         
         // JWT 토큰 추가 (Bearer 접두사 포함)
-        const jwtToken = store.getState().token.jwtToken;
+        // localStorage에서 토큰 가져오기 (순환 참조 방지)
+        const jwtToken = localStorage.getItem('persist:root') 
+            ? JSON.parse(JSON.parse(localStorage.getItem('persist:root') || '{}').token || '{}').jwtToken
+            : null;
         if(jwtToken){
             config.headers = config.headers || {};
             config.headers['authorization'] = `Bearer ${jwtToken}`;
@@ -52,7 +53,11 @@ apiClient.interceptors.response.use(
                 if(newAccessToken){
                     // Bearer 접두사 제거 후 저장
                     const cleanToken = newAccessToken.replace(/^Bearer\s+/i, '');
-                    store.dispatch(setToken(cleanToken));
+                    // localStorage에 직접 저장 (순환 참조 방지)
+                    const persistData = JSON.parse(localStorage.getItem('persist:root') || '{}');
+                    persistData.token = JSON.stringify({ jwtToken: cleanToken });
+                    localStorage.setItem('persist:root', JSON.stringify(persistData));
+                    
                     originalRequest.headers = originalRequest.headers || {};
                     originalRequest.headers['authorization'] = `Bearer ${cleanToken}`;
                     return apiClient(originalRequest);
