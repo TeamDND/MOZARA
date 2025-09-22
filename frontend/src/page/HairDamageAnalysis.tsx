@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { hairDamageService, HairAnalysisRequest, HairAnalysisResponse } from '../service/hairDamageService';
+import { hairDamageService, HairAnalysisRequest, HairAnalysisResponse, RAGAnalysis, AIAnalysis, SimilarCase } from '../service/hairDamageService';
 
 export default function HairDamageAnalysis() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -46,14 +46,26 @@ export default function HairDamageAnalysis() {
     }
   };
 
-  const getStageDescription = (stage: number) => {
-    switch (stage) {
-      case 1: return '모발 손상 없음';
-      case 2: return '모발 끝부분 손상, 건조함';
-      case 3: return '모발 중간 부분 손상, 갈라짐';
-      case 4: return '모발 뿌리 부분 손상, 탈락 위험';
-      default: return '알 수 없음';
+  const getSeverityDescription = (severity: string) => {
+    switch (severity) {
+      case '0.양호': return '양호한 상태';
+      case '1.경증': return '경미한 증상';
+      case '2.중등도': return '중등도 증상';
+      case '3.중증': return '심각한 증상';
+      default: return severity;
     }
+  };
+
+  const getCategoryName = (category: string) => {
+    const categoryMap: Record<string, string> = {
+      '1.미세각질': '미세각질',
+      '2.피지과다': '피지과다',
+      '3.모낭사이홍반': '모낭사이홍반',
+      '4.모낭홍반농포': '모낭홍반농포',
+      '5.비듬': '비듬',
+      '6.탈모': '탈모'
+    };
+    return categoryMap[category] || category;
   };
 
   return (
@@ -125,73 +137,158 @@ export default function HairDamageAnalysis() {
 
         {/* Analysis Results */}
         {analysisResult && !isLoading && (
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">🔍 분석 결과</h3>
-            
+          <div className="space-y-6">
             {/* Medical Disclaimer */}
-            <div className="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 p-4 mb-6 rounded-r-lg">
+            <div className="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-r-lg">
               <h4 className="font-bold mb-2">⚠️ 중요 안내</h4>
               <p className="text-sm">
                 이 분석 결과는 AI가 측정한 참고용 데이터입니다. 정확한 진단과 치료를 위해서는 반드시 전문의와 상담하시기 바랍니다.
               </p>
             </div>
-            
-            {/* AI Summary Section */}
-            {analysisResult.summary && (
-              <div className="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 mb-6 rounded-r-lg">
-                <h4 className="font-bold mb-2">🤖 AI 종합 분석</h4>
-                <p>{analysisResult.summary}</p>
+
+            {/* AI Analysis Section */}
+            {analysisResult.ai_analysis && (
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">🤖 AI 종합 분석</h3>
+                
+                <div className="space-y-4">
+                  <div className="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-r-lg">
+                    <h4 className="font-bold mb-2">진단 결과</h4>
+                    <p>{analysisResult.ai_analysis.diagnosis}</p>
+                  </div>
+
+                  {analysisResult.ai_analysis.main_issues.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-gray-700 mb-2">주요 문제점</h4>
+                      <ul className="list-disc list-inside space-y-1 text-gray-600">
+                        {analysisResult.ai_analysis.main_issues.map((issue, index) => (
+                          <li key={index}>{issue}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {analysisResult.ai_analysis.management_plan.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-gray-700 mb-2">관리 방법</h4>
+                      <ul className="list-disc list-inside space-y-1 text-gray-600">
+                        {analysisResult.ai_analysis.management_plan.map((plan, index) => (
+                          <li key={index}>{plan}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {analysisResult.ai_analysis.medical_consultation && (
+                    <div className="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-r-lg">
+                      <h4 className="font-bold mb-2">🏥 의료진 상담 권장</h4>
+                      <p className="text-sm">현재 상태로는 전문의 상담을 받으시는 것을 권장합니다.</p>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
-            {analysisResult.results.length > 0 ? (
-              <div className="space-y-4">
-                {analysisResult.results.map((result, index: number) => {
-                  const damageStatus = hairDamageService.determineHairDamageStatus(result.properties.diagnosis);
-                  const isCurrentImage = result.uuid === "current_image_analysis";
-                  
-                  return (
-                    <div key={result.uuid} className={`border rounded-lg p-4 ${isCurrentImage ? 'border-blue-300 bg-blue-50' : 'border-gray-200'}`}>
+            {/* RAG Analysis Section */}
+            {analysisResult.analysis && (
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">📊 데이터 기반 분석</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-3">주요 진단</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">카테고리:</span>
+                        <span className="font-medium">{getCategoryName(analysisResult.analysis.primary_category)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">심각도:</span>
+                        <span className="font-medium">{getSeverityDescription(analysisResult.analysis.primary_severity)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">평균 신뢰도:</span>
+                        <span className="font-medium">{(analysisResult.analysis.average_confidence * 100).toFixed(1)}%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-3">진단 점수</h4>
+                    <div className="space-y-2">
+                      {Object.entries(analysisResult.analysis.diagnosis_scores).map(([category, score]) => (
+                        <div key={category} className="flex justify-between">
+                          <span className="text-gray-600">{category}:</span>
+                          <span className="font-medium">{score.toFixed(1)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {analysisResult.analysis.recommendations.length > 0 && (
+                  <div className="mt-6">
+                    <h4 className="font-semibold text-gray-700 mb-3">추천사항</h4>
+                    <ul className="list-disc list-inside space-y-1 text-gray-600">
+                      {analysisResult.analysis.recommendations.map((recommendation, index) => (
+                        <li key={index}>{recommendation}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Similar Cases Section */}
+            {analysisResult.similar_cases && analysisResult.similar_cases.length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  🔍 유사 케이스 ({analysisResult.total_similar_cases}개)
+                </h3>
+                
+                <div className="space-y-4">
+                  {analysisResult.similar_cases.map((case_, index) => (
+                    <div key={case_.id} className="border rounded-lg p-4 border-gray-200">
                       <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium text-gray-800">
-                          {isCurrentImage ? '📸 현재 이미지 분석 결과' : `유사 사례 #${index}`}
-                        </h4>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(damageStatus.color)}`}>
-                          {damageStatus.status}
+                        <h4 className="font-medium text-gray-800">유사 케이스 #{index + 1}</h4>
+                        <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                          유사도: {(case_.score * 100).toFixed(1)}%
                         </span>
                       </div>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <span className="text-gray-600">상태:</span>
-                          <span className="ml-2 font-medium">{result.properties.diagnosis}</span>
+                          <span className="text-gray-600">카테고리:</span>
+                          <span className="ml-2 font-medium">{getCategoryName(case_.metadata.category)}</span>
                         </div>
                         <div>
-                          <span className="text-gray-600">성별:</span>
-                          <span className="ml-2 font-medium">{result.properties.gender}</span>
+                          <span className="text-gray-600">심각도:</span>
+                          <span className="ml-2 font-medium">{getSeverityDescription(case_.metadata.severity)}</span>
                         </div>
                         <div>
-                          <span className="text-gray-600">단계:</span>
-                          <span className="ml-2 font-medium">
-                            {result.properties.stage}단계
-                            <span className="text-xs text-gray-500 ml-1">
-                              ({getStageDescription(result.properties.stage)})
-                            </span>
-                          </span>
+                          <span className="text-gray-600">이미지 ID:</span>
+                          <span className="ml-2 font-medium text-xs">{case_.metadata.image_id}</span>
                         </div>
                         <div>
-                          <span className="text-gray-600">{isCurrentImage ? '신뢰도:' : '유사도:'}</span>
-                          <span className="ml-2 font-medium">{(result.properties.confidence * 100).toFixed(1)}%</span>
+                          <span className="text-gray-600">파일명:</span>
+                          <span className="ml-2 font-medium text-xs">{case_.metadata.image_file_name}</span>
                         </div>
                       </div>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
-            ) : (
-              <p className="text-gray-600">관련된 검색 결과를 찾을 수 없습니다.</p>
+            )}
+
+            {/* Error Message */}
+            {analysisResult.error && (
+              <div className="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-r-lg">
+                <h4 className="font-bold mb-2">❌ 오류 발생</h4>
+                <p>{analysisResult.error}</p>
+              </div>
             )}
           </div>
         )}
     </div>
   );
 }
+

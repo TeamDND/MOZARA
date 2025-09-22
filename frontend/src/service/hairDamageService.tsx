@@ -11,27 +11,62 @@ export interface HairAnalysisRequest {
   textQuery?: string;
 }
 
-export interface HairAnalysisResult {
+// Python API 구조에 맞는 인터페이스
+export interface SimilarCase {
+  id: string;
+  score: number;
+  metadata: {
+    image_id: string;
+    image_file_name: string;
+    image_path?: string;
+    category: string;
+    severity: string;
+    severity_level: string;
+    value_1: string;
+    value_2: string;
+    value_3: string;
+    value_4: string;
+    value_5: string;
+    value_6: string;
+  };
+}
+
+export interface RAGAnalysis {
+  primary_category: string;
+  primary_severity: string;
+  average_confidence: number;
+  category_distribution: Record<string, number>;
+  severity_distribution: Record<string, number>;
+  diagnosis_scores: Record<string, number>;
+  recommendations: string[];
+}
+
+export interface AIAnalysis {
   diagnosis: string;
-  gender: string;
-  stage: number;
-  confidence: number;
+  main_issues: string[];
+  causes: string[];
+  management_plan: string[];
+  precautions: string[];
+  medical_consultation: boolean;
+  prevention_tips: string[];
+  confidence_level: string;
 }
 
 export interface HairAnalysisResponse {
-  message: string;
-  summary: string; // AI 요약 필드 추가
-  results: Array<{
-    uuid: string;
-    properties: HairAnalysisResult;
-  }>;
+  success: boolean;
+  analysis?: RAGAnalysis;
+  ai_analysis?: AIAnalysis;
+  similar_cases: SimilarCase[];
+  total_similar_cases: number;
+  model_info: Record<string, any>;
+  error?: string;
 }
 
 
 
 class HairDamageService {
   // 스프링 중계 엔드포인트로 연결 (/api + baseURL 설정 기준)
-  private readonly baseUrl = '/ai/hair-damage';
+  private readonly baseUrl = '/ai/hair-loss-daily';
   
   /**
    * Header와 Footer를 포함한 레이아웃 컴포넌트
