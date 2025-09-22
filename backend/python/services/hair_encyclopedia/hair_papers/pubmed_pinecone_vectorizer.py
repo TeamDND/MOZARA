@@ -17,7 +17,7 @@ class PubMedPineconeVectorizer:
         
         # Pinecone 초기화
         self.pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
-        self.index_name = os.getenv("PINECONE_INDEX_NAME")
+        self.index_name = os.getenv("PINECONE_INDEX_NAME1")
         self.index = self.pc.Index(self.index_name)
         
         logging.basicConfig(level=logging.INFO)
