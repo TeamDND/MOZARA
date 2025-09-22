@@ -6,7 +6,7 @@ load_dotenv()
 class Settings:
     # Pinecone 설정
     PINECONE_API_KEY: str = os.getenv("PINECONE_API_KEY", "")
-    INDEX_NAME: str = "hair-loss-rag-analysis"
+    INDEX_NAME: str = "hair-loss-rag-analysis-convnext"
     PINECONE_ENVIRONMENT: str = "us-east-1-aws"
 
     # FastAPI 설정
@@ -19,19 +19,20 @@ class Settings:
     ALLOWED_HOSTS: list = ["localhost", "127.0.0.1"]
 
     # 데이터셋 설정
-    DATASET_PATH: str = os.getenv("DATASET_PATH", "")
+    DATASET_PATH: str = os.getenv("DATASET_PATH", "C:/Users/301/Desktop/hair_loss_rag/hair_rag_dataset_image/hair_rag_dataset_ragging")
 
     # 업로드 설정
-    UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "./uploads")
+    UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "C:/Users/301/Desktop/main_project/backend/hair_classification/hair_loss_rag_analyzer_v0/backend/uploads")
     MAX_FILE_SIZE: int = int(os.getenv("MAX_FILE_SIZE", "10485760"))  # 10MB
     ALLOWED_EXTENSIONS: set = {".jpg", ".jpeg", ".png", ".bmp"}
 
     # 모델 설정
-    CLIP_MODEL_NAME: str = "clip-ViT-B-32"
-    EMBEDDING_DIMENSION: int = 512
+    MODEL_NAME: str = "convnext_large.fb_in22k_ft_in1k_384"
+    EMBEDDING_DIMENSION: int = 1536  # ConvNeXt-L의 feature dimension
 
     # 탈모 단계 설명
     STAGE_DESCRIPTIONS: dict = {
+        1: "정상 또는 극히 경미한 탈모 - 탈모 징후가 거의 없거나 전혀 없음",
         2: "경미한 탈모 - M자 탈모가 시작되거나 이마선이 약간 후퇴",
         3: "초기 탈모 - M자 탈모가 뚜렷해지고 정수리 부분 모발 밀도 감소",
         4: "중기 탈모 - M자 탈모 진행, 정수리 탈모 본격화",

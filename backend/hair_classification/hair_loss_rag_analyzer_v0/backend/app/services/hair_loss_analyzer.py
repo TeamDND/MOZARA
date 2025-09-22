@@ -4,7 +4,7 @@ from typing import Dict, List, Any, Optional
 import logging
 from datetime import datetime
 from .image_processor import ImageProcessor
-from .pinecone_manager import PineconeManager
+from .faiss_manager import FAISSManager
 from ..config import settings
 from PIL import Image
 
@@ -13,7 +13,7 @@ class HairLossAnalyzer:
         """탈모 RAG 분석기 초기화"""
         try:
             self.image_processor = ImageProcessor()
-            self.pinecone_manager = PineconeManager()
+            self.vector_manager = FAISSManager()
             self.logger = logging.getLogger(__name__)
             self.logger.info("HairLossAnalyzer 초기화 완료")
         except Exception as e:
@@ -34,11 +34,11 @@ class HairLossAnalyzer:
                 }
 
             # 인덱스 생성
-            index_created = self.pinecone_manager.create_index(delete_if_exists=recreate_index)
+            index_created = self.vector_manager.create_index(delete_if_exists=recreate_index)
             if not index_created:
                 return {
                     'success': False,
-                    'error': 'Pinecone 인덱스 생성 실패',
+                    'error': 'FAISS 인덱스 생성 실패',
                     'timestamp': datetime.now()
                 }
 
@@ -53,14 +53,15 @@ class HairLossAnalyzer:
                     'timestamp': datetime.now()
                 }
 
-            # Pinecone에 업로드
-            self.logger.info("Pinecone에 임베딩 업로드 중...")
-            upload_success = self.pinecone_manager.upload_embeddings(embeddings_data)
+            # FAISS에 업로드
+            self.logger.info("FAISS에 임베딩 업로드 중...")
+            embeddings_data['recreate'] = recreate_index
+            upload_success = self.vector_manager.upload_embeddings(embeddings_data)
 
             if not upload_success:
                 return {
                     'success': False,
-                    'error': 'Pinecone 임베딩 업로드 실패',
+                    'error': 'FAISS 임베딩 업로드 실패',
                     'timestamp': datetime.now()
                 }
 
@@ -117,7 +118,7 @@ class HairLossAnalyzer:
                 }
 
             # 탈모 단계 예측
-            prediction_result = self.pinecone_manager.predict_hair_loss_stage(
+            prediction_result = self.vector_manager.predict_hair_loss_stage(
                 query_embedding, top_k
             )
 
@@ -165,14 +166,14 @@ class HairLossAnalyzer:
         """데이터베이스 정보 조회"""
         try:
             # 인덱스 존재 확인
-            if not self.pinecone_manager.index_exists():
+            if not self.vector_manager.index_exists():
                 return {
                     'success': False,
-                    'error': 'Pinecone 인덱스가 존재하지 않습니다. 먼저 데이터베이스를 설정하세요.',
+                    'error': 'FAISS 인덱스가 존재하지 않습니다. 먼저 데이터베이스를 설정하세요.',
                     'timestamp': datetime.now()
                 }
 
-            stats = self.pinecone_manager.get_index_stats()
+            stats = self.vector_manager.get_index_stats()
 
             if not stats['success']:
                 return {
@@ -183,11 +184,10 @@ class HairLossAnalyzer:
 
             return {
                 'success': True,
-                'index_name': self.pinecone_manager.index_name,
+                'index_type': stats.get('index_type', 'FAISS'),
                 'total_vectors': stats.get('total_vector_count', 0),
                 'dimension': stats.get('dimension', 0),
-                'namespaces': stats.get('namespaces', {}),
-                'index_fullness': stats.get('index_fullness', 0),
+                'metadata_count': stats.get('metadata_count', 0),
                 'timestamp': datetime.now()
             }
         except Exception as e:
@@ -205,17 +205,17 @@ class HairLossAnalyzer:
                 'status': 'healthy',
                 'services': {
                     'image_processor': True,
-                    'pinecone': False,
+                    'vector_storage': False,
                     'dataset': False
                 },
                 'timestamp': datetime.now()
             }
 
-            # Pinecone 연결 확인
+            # 벡터 저장소 연결 확인
             try:
-                health_status['services']['pinecone'] = self.pinecone_manager.index_exists()
+                health_status['services']['vector_storage'] = self.vector_manager.index_exists()
             except:
-                health_status['services']['pinecone'] = False
+                health_status['services']['vector_storage'] = False
 
             # 데이터셋 경로 확인
             health_status['services']['dataset'] = os.path.exists(settings.DATASET_PATH)
@@ -247,11 +247,11 @@ class HairLossAnalyzer:
                 }
 
             # 필요시 인덱스 생성 또는 재생성
-            index_created = self.pinecone_manager.create_index(delete_if_exists=recreate_index)
+            index_created = self.vector_manager.create_index(delete_if_exists=recreate_index)
             if not index_created:
                 return {
                     'success': False,
-                    'error': 'Failed to create or verify Pinecone index',
+                    'error': 'Failed to create or verify FAISS index',
                     'timestamp': datetime.now()
                 }
 
@@ -266,14 +266,15 @@ class HairLossAnalyzer:
                     'timestamp': datetime.now()
                 }
 
-            # Pinecone에 업로드
-            self.logger.info("Uploading embeddings to Pinecone...")
-            upload_success = self.pinecone_manager.upload_embeddings(embeddings_data)
+            # FAISS에 업로드
+            self.logger.info("Uploading embeddings to FAISS...")
+            embeddings_data['recreate'] = recreate_index
+            upload_success = self.vector_manager.upload_embeddings(embeddings_data)
 
             if not upload_success:
                 return {
                     'success': False,
-                    'error': 'Failed to upload embeddings to Pinecone',
+                    'error': 'Failed to upload embeddings to FAISS',
                     'timestamp': datetime.now()
                 }
 
