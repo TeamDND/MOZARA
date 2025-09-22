@@ -2,15 +2,17 @@
 Pinecone 인덱스 생성 및 데이터 입력 스크립트
 """
 import os
-import pinecone
+from pinecone import Pinecone, ServerlessSpec
 from dotenv import load_dotenv
 import random
 import json
 import glob
 from pathlib import Path
+import numpy as np
 
 # .env 파일 로드 (상위 디렉토리의 .env 파일 사용)
 load_dotenv("../../../.env")
+
 
 def create_index_and_import_data():
     """인덱스 생성 및 데이터 입력"""
@@ -22,33 +24,50 @@ def create_index_and_import_data():
         return
     
     print("🌲 Pinecone 클라이언트 초기화 중...")
-    pinecone.init(api_key=api_key, environment="us-east-1")
+    pc = Pinecone(api_key=api_key)
     
     index_name = os.getenv("PINECONE_INDEX_NAME2")
     
     try:
         # 기존 인덱스 확인
-        existing_indexes = [index.name for index in pinecone.list_indexes()]
+        existing_indexes = pc.list_indexes().names()
         print(f"📋 기존 인덱스 목록: {existing_indexes}")
         
         if index_name in existing_indexes:
             print(f"✅ 인덱스 '{index_name}'이(가) 이미 존재합니다.")
             # 기존 인덱스 삭제
             print(f"🗑️ 기존 인덱스 '{index_name}' 삭제 중...")
-            pinecone.delete_index(index_name)
+            pc.delete_index(index_name)
             print(f"✅ 인덱스 '{index_name}' 삭제 완료!")
         
         # 새 인덱스 생성
         print(f"🆕 인덱스 '{index_name}' 생성 중...")
-        pinecone.create_index(
+        pc.create_index(
             name=index_name,
-            dimension=768,  # CLIP 모델의 벡터 차원
-            metric="cosine"
+            dimension=1552,  # CLIP 앙상블 모델들(3개 × 512) + 프롬프트 특징(16) = 1552차원 (탈모 제외, 메모리 최적화)
+            metric="cosine",
+            spec=ServerlessSpec(
+                cloud='aws',
+                region='us-east-1'
+            )
         )
         print(f"✅ 인덱스 '{index_name}' 생성 완료!")
         
         # 인덱스 연결
-        index = pinecone.Index(index_name)
+        index = pc.Index(index_name)
+        
+        # CLIP 앙상블 모델 초기화
+        print("🤖 CLIP 앙상블 모델 초기화 중...")
+        try:
+            import sys
+            sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+            from services.hair_loss_daily.services.clip_ensemble_service import clip_ensemble_service
+            clip_service = clip_ensemble_service
+            print("✅ CLIP 앙상블 모델 초기화 완료!")
+        except Exception as e:
+            print(f"❌ CLIP 앙상블 로드 실패: {str(e)}")
+            print("❌ CLIP 앙상블이 필요합니다. 종료합니다.")
+            return
         
         # 실제 데이터 입력
         print("📊 실제 데이터 입력 중...")
@@ -58,8 +77,8 @@ def create_index_and_import_data():
         # 라벨링 데이터 폴더 경로
         labeling_path = os.path.join(data_path, "라벨링데이터")
         
-        # 카테고리별로 데이터 처리
-        categories = ["1.미세각질", "2.피지과다", "3.모낭사이홍반", "4.모낭홍반농포", "5.비듬", "6.탈모"]
+        # 카테고리별로 데이터 처리 (탈모 제외)
+        categories = ["1.미세각질", "2.피지과다", "3.모낭사이홍반", "4.모낭홍반농포", "5.비듬"]
         severity_levels = ["0.양호", "1.경증", "2.중등도", "3.중증"]
         
         for category in categories:
@@ -79,13 +98,39 @@ def create_index_and_import_data():
                         with open(json_file, 'r', encoding='utf-8') as f:
                             data = json.load(f)
                         
-                        # 768차원 랜덤 벡터 생성 (실제로는 이미지 임베딩을 사용해야 함)
-                        vector = [random.random() for _ in range(768)]
+                        # 이미지 파일 경로 구성
+                        image_file_name = data.get("image_file_name", "")
+                        if not image_file_name:
+                            continue
+                            
+                        # 원천데이터 폴더에서 해당 이미지 찾기
+                        source_data_path = os.path.join(data_path, "원천데이터", category, severity, image_file_name)
                         
-                        # 메타데이터 구성
+                        if not os.path.exists(source_data_path):
+                            print(f"⚠️ 이미지 파일을 찾을 수 없습니다: {source_data_path}")
+                            continue
+                        
+                        # CLIP 앙상블로 이미지 임베딩 생성
+                        try:
+                            # CLIP 앙상블로 벡터 생성
+                            with open(source_data_path, 'rb') as f:
+                                image_bytes = f.read()
+                            hybrid_features = clip_service.extract_hybrid_features(image_bytes)
+                            vector = hybrid_features["combined"]
+                            print(f"✅ CLIP 앙상블 벡터 생성: {len(vector)}차원")
+                        except Exception as e:
+                            print(f"❌ CLIP 앙상블 실패: {str(e)}")
+                            continue
+                        
+                        if vector is None or len(vector) == 0:
+                            print(f"⚠️ 이미지 임베딩 생성 실패: {source_data_path}")
+                            continue
+                        
+                        # 메타데이터 구성 (탈모 제외)
                         metadata = {
                             "image_id": data.get("image_id", ""),
                             "image_file_name": data.get("image_file_name", ""),
+                            "image_path": source_data_path,  # 전체 이미지 경로 추가
                             "category": category,
                             "severity": severity,
                             "severity_level": severity.split(".")[0],
@@ -93,8 +138,8 @@ def create_index_and_import_data():
                             "value_2": data.get("value_2", "0"),
                             "value_3": data.get("value_3", "0"),
                             "value_4": data.get("value_4", "0"),
-                            "value_5": data.get("value_5", "0"),
-                            "value_6": data.get("value_6", "0")
+                            "value_5": data.get("value_5", "0")
+                            # "value_6": data.get("value_6", "0") - 탈모 제외
                         }
                         
                         vectors_data.append({
