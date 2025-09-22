@@ -32,11 +32,11 @@ class HairAnalysisService:
         if gemini_api_key and gemini_api_key != "your_gemini_api_key_here":
             genai.configure(api_key=gemini_api_key)
             self.gemini_model = genai.GenerativeModel('gemini-1.5-flash')
-            print("✅ Gemini API 설정 완료")
+            print("Gemini API 설정 완료")
         else:
             # API 키가 없어도 서비스 자체는 동작하도록 설정
             self.gemini_model = None
-            print("⚠️ GEMINI_API_KEY가 설정되지 않았습니다. AI 요약 기능이 비활성화됩니다.")
+            print("경고: GEMINI_API_KEY가 설정되지 않았습니다. AI 요약 기능이 비활성화됩니다.")
 
     def _build_summary_prompt(self, context: str, result_count: int) -> str:
         """
