@@ -1,6 +1,6 @@
 import type React from "react"
 import { Camera, ChevronRight } from "../ui/icons"
-import { Button } from "../ui/Button"
+import { Button } from "../ui/button"
 
 interface HeroSectionProps {
   isVisible: boolean
