@@ -1,7 +1,39 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { hairDamageService, HairAnalysisResponse } from '../../services/hairDamageService';
 import { hairProductApi, HairProduct } from '../../services/hairProductApi';
+import apiClient from '../../services/apiClient';
+
+// 분석 결과 타입 정의
+interface HairAnalysisResponse {
+  success: boolean;
+  analysis?: {
+    primary_category: string;
+    primary_severity: string;
+    average_confidence: number;
+    category_distribution: Record<string, number>;
+    severity_distribution: Record<string, number>;
+    diagnosis_scores: Record<string, number>;
+    recommendations: string[];
+  };
+  similar_cases: Array<{
+    id: string;
+    score: number;
+    metadata: {
+      image_id: string;
+      image_file_name: string;
+      category: string;
+      severity: string;
+    };
+  }>;
+  total_similar_cases: number;
+  model_info: Record<string, any>;
+  preprocessing_used?: boolean;
+  preprocessing_info?: {
+    enabled: boolean;
+    description: string;
+  };
+  error?: string;
+}
 
 // TypeScript: DailyCare 페이지 컴포넌트
 const DailyCare: React.FC = () => {
@@ -14,38 +46,70 @@ const DailyCare: React.FC = () => {
 
   // 대시보드 카드 상태 (분석 결과 연동)
   const [scalpScore, setScalpScore] = useState<number>(78);
-  const [oilLabel, setOilLabel] = useState<string>('정상');
-  const [oilSub, setOilSub] = useState<string>('유지중');
+  const [dandruffLabel, setDandruffLabel] = useState<string>('양호');
+  const [dandruffSub, setDandruffSub] = useState<string>('깨끗함');
   const [flakeLabel, setFlakeLabel] = useState<string>('양호');
   const [flakeSub, setFlakeSub] = useState<string>('개선됨');
-  const [poreLabel, setPoreLabel] = useState<string>('깨끗');
-  const [poreSub, setPoreSub] = useState<string>('좋아짐');
+  const [rednessLabel, setRednessLabel] = useState<string>('양호');
+  const [rednessSub, setRednessSub] = useState<string>('정상');
 
   const updateDashboardFromAnalysis = (res: HairAnalysisResponse) => {
-    const first = res.results[0]?.properties;
-    if (!first) return;
-    const stageRaw = typeof first.stage === 'number' ? first.stage : 1; // 1~4 가정
-    const stage01to03 = Math.min(3, Math.max(0, stageRaw - 1)); // 0~3
-    const conf = typeof first.confidence === 'number' ? first.confidence : 0.7; // 0~1
+    // LLM 기반 종합 두피 점수 계산
+    if (!res.analysis) return;
+    
+    const primaryCategory = res.analysis.primary_category;
+    const primarySeverity = res.analysis.primary_severity;
+    const avgConfidence = res.analysis.average_confidence;
+    const diagnosisScores = res.analysis.diagnosis_scores;
 
-    // 간단한 스코어 산식: 85 - stage*15 + confidence*10 (0~100 범위 보정)
-    const score = Math.max(0, Math.min(100, Math.round(85 - stage01to03 * 15 + conf * 10)));
-    setScalpScore(score);
+    // 심각도에 따른 단계 계산 (0.양호=0, 1.경증=1, 2.중등도=2, 3.중증=3)
+    const severityLevel = parseInt(primarySeverity.split('.')[0]) || 0;
+    const stage01to03 = Math.min(3, Math.max(0, severityLevel)); // 0~3
+    const conf = typeof avgConfidence === 'number' ? avgConfidence : 0.7; // 0~1
 
-    // 유분/각질 상태 추정: 진단 키워드와 단계 기반
-    const dx = (first.diagnosis || '').toLowerCase();
-    if (dx.includes('지성') || stage01to03 >= 2) {
-      setOilLabel('높음');
-      setOilSub('관리 필요');
-    } else if (dx.includes('건성')) {
-      setOilLabel('낮음');
-      setOilSub('보습 필요');
+    // LLM 기반 종합 점수 계산 (더 정교한 알고리즘)
+    let baseScore = 100; // 기본 점수
+    
+    // 심각도에 따른 감점
+    baseScore -= stage01to03 * 20; // 심각도별 20점씩 감점
+    
+    // 진단 점수 기반 조정
+    if (diagnosisScores) {
+      const avgDiagnosisScore = Object.values(diagnosisScores).reduce((sum, score) => sum + score, 0) / Object.keys(diagnosisScores).length;
+      baseScore -= (avgDiagnosisScore - 0.5) * 30; // 진단 점수 기반 조정
+    }
+    
+    // 신뢰도 기반 보정
+    baseScore += (conf - 0.5) * 20; // 신뢰도 기반 보정
+    
+    // 카테고리별 특별 감점
+    const category = primaryCategory.toLowerCase();
+    if (category.includes('비듬') || category.includes('탈모')) {
+      baseScore -= 15; // 비듬/탈모는 추가 감점
+    }
+    if (category.includes('홍반') || category.includes('농포')) {
+      baseScore -= 10; // 염증 관련 추가 감점
+    }
+    
+    const finalScore = Math.max(0, Math.min(100, Math.round(baseScore)));
+    setScalpScore(finalScore);
+
+    // 카테고리와 심각도에 따른 상태 추정 (새로운 카테고리)
+    
+    // 비듬 상태 판정
+    if (category.includes('비듬') || stage01to03 >= 2) {
+      setDandruffLabel('주의');
+      setDandruffSub('관리 필요');
+    } else if (stage01to03 === 1) {
+      setDandruffLabel('보통');
+      setDandruffSub('관찰중');
     } else {
-      setOilLabel('정상');
-      setOilSub('유지중');
+      setDandruffLabel('양호');
+      setDandruffSub('깨끗함');
     }
 
-    if (dx.includes('각질') || stage01to03 >= 2) {
+    // 각질 상태 판정
+    if (category.includes('미세각질') || stage01to03 >= 2) {
       setFlakeLabel('주의');
       setFlakeSub('개선 필요');
     } else if (stage01to03 === 1) {
@@ -56,47 +120,70 @@ const DailyCare: React.FC = () => {
       setFlakeSub('개선됨');
     }
 
-    if (dx.includes('염증') || dx.includes('모공막힘') || stage01to03 >= 2) {
-      setPoreLabel('막힘');
-      setPoreSub('케어 필요');
+    // 홍반 상태 판정
+    if (category.includes('홍반') || category.includes('농포') || stage01to03 >= 2) {
+      setRednessLabel('주의');
+      setRednessSub('케어 필요');
+    } else if (stage01to03 === 1) {
+      setRednessLabel('보통');
+      setRednessSub('관찰중');
     } else {
-      setPoreLabel('깨끗');
-      setPoreSub('좋아짐');
+      setRednessLabel('양호');
+      setRednessSub('정상');
     }
 
-    // 상태 기반 데일리 솔루션 생성
+    // 분석 결과 기반 맞춤형 케어 팁 생성
     const buildSolutions = (
       score: number,
-      oil: string,
+      dandruff: string,
       flake: string,
-      pore: string
+      redness: string
     ): string[] => {
       const s: string[] = [];
+      
+      // 두피 점수 기반 기본 케어
       if (score >= 85) {
-        s.push('현재 상태 좋아요! 기존 루틴을 유지하고 수분 케어를 꾸준히 해주세요.');
+        s.push('🎉 두피 상태가 매우 좋습니다! 현재 케어 루틴을 유지하세요.');
+        s.push('💧 수분 케어를 꾸준히 하여 건강한 상태를 지속하세요.');
       } else if (score >= 70) {
-        s.push('저자극 보습 샴푸와 두피 보습 토닉으로 컨디션을 끌어올리세요.');
+        s.push('👍 두피 상태가 양호합니다. 저자극 보습 샴푸로 컨디션을 끌어올리세요.');
+        s.push('🌿 두피 보습 토닉을 사용하여 수분 밸런스를 맞춰보세요.');
       } else if (score >= 50) {
-        s.push('단백질/보습 케어를 병행하고, 열기구 사용을 줄여주세요.');
+        s.push('⚠️ 두피 관리가 필요합니다. 단백질과 보습 케어를 병행하세요.');
+        s.push('🔥 열기구 사용을 줄이고 저온으로 스타일링하세요.');
       } else {
-        s.push('전문가 상담을 권장해요. 당분간 저자극 샴푸와 진정 토닉을 사용하세요.');
+        s.push('🚨 전문가 상담을 권장합니다. 저자극 샴푸와 진정 토닉을 사용하세요.');
+        s.push('🏥 피부과 전문의와 상담하여 정확한 진단을 받아보세요.');
       }
-      if (oil === '높음') {
-        s.push('지성용 샴푸를 사용하고 주 1회 딥클렌징을 해주세요.');
-      } else if (oil === '낮음') {
-        s.push('보습 샴푸와 오일/수분 에센스로 건조함을 완화하세요.');
+      
+      // 비듬 상태별 맞춤 케어
+      if (dandruff === '주의') {
+        s.push('🧴 항비듬 성분(피리티온아연, 셀레늄) 샴푸를 주 2-3회 사용하세요.');
+        s.push('🚿 샴푸 시 두피를 부드럽게 마사지하며 충분히 헹구세요.');
+      } else if (dandruff === '보통') {
+        s.push('🧽 두피 클렌징을 강화하고 비듬 예방 샴푸를 주 1-2회 사용하세요.');
       }
+      
+      // 각질 상태별 맞춤 케어
       if (flake === '주의') {
-        s.push('각질이 신경 쓰인다면 항비듬 성분(피리티온아연 등) 샴푸를 주 2-3회 사용하세요.');
+        s.push('✨ 각질 제거를 위해 두피 스크럽을 주 1회 사용하세요.');
+        s.push('💆‍♀️ 보습에 신경 쓰고 각질이 생기지 않도록 관리하세요.');
       }
-      if (pore === '막힘') {
-        s.push('모공 클렌징 스크럽을 주 1회 사용해 노폐물을 제거하세요.');
+      
+      // 홍반 상태별 맞춤 케어
+      if (redness === '주의') {
+        s.push('🌿 두피 진정 토닉과 저자극 샴푸로 염증을 완화하세요.');
+        s.push('❄️ 차가운 물로 마무리 헹굼을 하여 두피를 진정시키세요.');
       }
-      s.push('샴푸 전후 3분 두피 마사지로 혈행을 개선해보세요.');
+      
+      // 공통 케어 팁
+      s.push('💆‍♀️ 샴푸 전후 3분 두피 마사지로 혈행을 개선하세요.');
+      s.push('🌙 충분한 수면과 스트레스 관리로 두피 건강을 지켜주세요.');
+      
       return s.slice(0, 6);
     };
 
-    setTips(buildSolutions(score, oilLabel, flakeLabel, poreLabel));
+    setTips(buildSolutions(finalScore, dandruffLabel, flakeLabel, rednessLabel));
   };
   const todayStr = new Date().toLocaleDateString('ko-KR', {
     year: 'numeric',
@@ -180,21 +267,27 @@ const DailyCare: React.FC = () => {
                 setIsAnalyzing(true);
                 setProducts(null);
                 try {
-                  const result = await hairDamageService.analyzeHairDamage({ image: selectedImage });
+                  // 스프링부트 API 호출
+                  const formData = new FormData();
+                  formData.append('image', selectedImage);
+                  formData.append('top_k', '10');
+                  formData.append('use_preprocessing', 'true');
+                  
+                  const response = await apiClient.post('/ai/hair-loss-daily/analyze', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                  });
+                  
+                  const result: HairAnalysisResponse = response.data;
                   setAnalysis(result);
                   updateDashboardFromAnalysis(result);
-                  const first = result.results[0]?.properties;
-                  const rawStage = typeof first?.stage === 'number' ? first.stage : 1;
-                  const stage = Math.min(3, Math.max(0, rawStage - 1));
+                  
+                  // 심각도에 따른 제품 추천
+                  const severityLevel = result.analysis ? parseInt(result.analysis.primary_severity.split('.')[0]) || 0 : 0;
+                  const stage = Math.min(3, Math.max(0, severityLevel));
                   const prodRes = await hairProductApi.getProductsByStage(stage);
                   setProducts(prodRes.products.slice(0, 6));
-                  const stageTips: Record<number, string[]> = {
-                    0: ['미지근한 물로 부드럽게 샴푸하기', '드라이 전 열 보호제 사용', '주 1-2회 두피 마사지'],
-                    1: ['수분 에센스 사용', '단백질 팩 주 1회', '카페인/비오틴 성분 샴푸 사용'],
-                    2: ['두피 진정 토닉', '열기구 사용 최소화', '단백질/보습 병행 케어'],
-                    3: ['전문가 상담 권장', '저자극 샴푸로 전환', '영양제/스칼프 세럼 병행']
-                  };
-                  setTips(stageTips[stage]);
+                  
+                  // 케어 팁은 updateDashboardFromAnalysis에서 설정됨
                 } catch (e) {
                   console.error(e);
                   alert('분석 또는 추천 호출 중 오류가 발생했습니다.');
@@ -210,17 +303,17 @@ const DailyCare: React.FC = () => {
           </div>
         </div>
 
-          {/* 통계 카드 (요청에 따라 복원 + 모공 상태 추가) */}
+          {/* 통계 카드 (LLM 기반 종합 분석) */}
           <div className="grid md:grid-cols-4 gap-6 mb-8">
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <p className="text-sm text-gray-500">두피 점수</p>
               <div className="mt-2 text-3xl font-bold text-gray-800">{scalpScore}</div>
-              <p className="mt-1 text-xs text-green-600">AI 분석 기반</p>
+              <p className="mt-1 text-xs text-green-600">LLM 종합 분석</p>
             </div>
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <p className="text-sm text-gray-500">유분 상태</p>
-              <div className="mt-2 text-2xl font-bold text-gray-800">{oilLabel}</div>
-              <p className="mt-1 text-xs text-emerald-600">{oilSub}</p>
+              <p className="text-sm text-gray-500">비듬 상태</p>
+              <div className="mt-2 text-2xl font-bold text-gray-800">{dandruffLabel}</div>
+              <p className="mt-1 text-xs text-emerald-600">{dandruffSub}</p>
             </div>
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <p className="text-sm text-gray-500">각질 상태</p>
@@ -228,9 +321,9 @@ const DailyCare: React.FC = () => {
               <p className="mt-1 text-xs text-teal-600">{flakeSub}</p>
             </div>
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <p className="text-sm text-gray-500">모공 상태</p>
-              <div className="mt-2 text-2xl font-bold text-gray-800">{poreLabel}</div>
-              <p className="mt-1 text-xs text-green-600">{poreSub}</p>
+              <p className="text-sm text-gray-500">홍반 상태</p>
+              <div className="mt-2 text-2xl font-bold text-gray-800">{rednessLabel}</div>
+              <p className="mt-1 text-xs text-green-600">{rednessSub}</p>
             </div>
           </div>
 
@@ -312,32 +405,6 @@ const DailyCare: React.FC = () => {
             </button>
           </div>
 
-          {/* 분석 결과/추천/팁 */}
-          {(analysis || products || tips.length > 0) && (
-            <div className="mt-10 grid gap-6">
-              {analysis && (
-                <div className="bg-white border border-gray-200 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">AI 분석 요약</h3>
-                  <p className="text-gray-700 text-sm">{analysis.summary || '업로드한 사진을 기반으로 상태를 분석했습니다.'}</p>
-                </div>
-              )}
-              {products && (
-                <div className="bg-white border border-gray-200 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">추천 제품</h3>
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {products.map(p => (
-                      <a key={p.productId} href={p.productUrl} target="_blank" rel="noreferrer" className="block border rounded-lg p-4 hover:shadow">
-                        <div className="text-sm font-medium text-gray-800 mb-1">{p.productName}</div>
-                        <div className="text-xs text-gray-500">{p.brand} · {p.mallName}</div>
-                        <div className="text-indigo-600 font-semibold mt-2">{p.productPrice.toLocaleString()}원</div>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {/* 케어 팁은 위로 이동 */}
-            </div>
-          )}
         </div>
     </div>
   );
