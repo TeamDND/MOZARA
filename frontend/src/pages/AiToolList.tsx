@@ -63,14 +63,6 @@ export default function AiToolList() {
   
   const aiTools = [
     { 
-      id: "hair-damage", 
-      name: "모발 손상 분석", 
-      icon: SearchIcon, 
-      color: "bg-blue-500",
-      description: "AI 기반 모발 손상 상태를 분석하고 개선 방안을 제시합니다.",
-      category: "hair"
-    },
-    { 
       id: "hair-change", 
       name: "머리스타일 변경", 
       icon: HairIcon, 
@@ -165,9 +157,7 @@ export default function AiToolList() {
                     key={tool.id}
                     className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer group"
                     onClick={() => {
-                      if (tool.id === "hair-damage") {
-                        navigate('/hair-damage');
-                      } else if (tool.id === "hair-change") {
+                      if (tool.id === "hair-change") {
                         navigate('/hair-change');
                       } else if (tool.id === "basp-check") {
                         navigate('/basp-check');
