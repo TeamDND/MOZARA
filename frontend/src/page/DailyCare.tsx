@@ -22,22 +22,28 @@ const DailyCare: React.FC = () => {
   const [poreSub, setPoreSub] = useState<string>('좋아짐');
 
   const updateDashboardFromAnalysis = (res: HairAnalysisResponse) => {
-    const first = res.results[0]?.properties;
-    if (!first) return;
-    const stageRaw = typeof first.stage === 'number' ? first.stage : 1; // 1~4 가정
-    const stage01to03 = Math.min(3, Math.max(0, stageRaw - 1)); // 0~3
-    const conf = typeof first.confidence === 'number' ? first.confidence : 0.7; // 0~1
+    // 새로운 API 구조에 맞게 수정
+    if (!res.analysis) return;
+    
+    const primaryCategory = res.analysis.primary_category;
+    const primarySeverity = res.analysis.primary_severity;
+    const avgConfidence = res.analysis.average_confidence;
+
+    // 심각도에 따른 단계 계산 (0.양호=0, 1.경증=1, 2.중등도=2, 3.중증=3)
+    const severityLevel = parseInt(primarySeverity.split('.')[0]) || 0;
+    const stage01to03 = Math.min(3, Math.max(0, severityLevel)); // 0~3
+    const conf = typeof avgConfidence === 'number' ? avgConfidence : 0.7; // 0~1
 
     // 간단한 스코어 산식: 85 - stage*15 + confidence*10 (0~100 범위 보정)
     const score = Math.max(0, Math.min(100, Math.round(85 - stage01to03 * 15 + conf * 10)));
     setScalpScore(score);
 
-    // 유분/각질 상태 추정: 진단 키워드와 단계 기반
-    const dx = (first.diagnosis || '').toLowerCase();
-    if (dx.includes('지성') || stage01to03 >= 2) {
+    // 카테고리와 심각도에 따른 상태 추정
+    const category = primaryCategory.toLowerCase();
+    if (category.includes('피지과다') || stage01to03 >= 2) {
       setOilLabel('높음');
       setOilSub('관리 필요');
-    } else if (dx.includes('건성')) {
+    } else if (category.includes('미세각질') || stage01to03 >= 1) {
       setOilLabel('낮음');
       setOilSub('보습 필요');
     } else {
@@ -45,7 +51,7 @@ const DailyCare: React.FC = () => {
       setOilSub('유지중');
     }
 
-    if (dx.includes('각질') || stage01to03 >= 2) {
+    if (category.includes('미세각질') || category.includes('비듬') || stage01to03 >= 2) {
       setFlakeLabel('주의');
       setFlakeSub('개선 필요');
     } else if (stage01to03 === 1) {
@@ -56,7 +62,7 @@ const DailyCare: React.FC = () => {
       setFlakeSub('개선됨');
     }
 
-    if (dx.includes('염증') || dx.includes('모공막힘') || stage01to03 >= 2) {
+    if (category.includes('모낭') || category.includes('홍반') || stage01to03 >= 2) {
       setPoreLabel('막힘');
       setPoreSub('케어 필요');
     } else {
@@ -183,9 +189,9 @@ const DailyCare: React.FC = () => {
                   const result = await hairDamageService.analyzeHairDamage({ image: selectedImage });
                   setAnalysis(result);
                   updateDashboardFromAnalysis(result);
-                  const first = result.results[0]?.properties;
-                  const rawStage = typeof first?.stage === 'number' ? first.stage : 1;
-                  const stage = Math.min(3, Math.max(0, rawStage - 1));
+                  // 새로운 API 구조에 맞게 수정
+                  const severityLevel = result.analysis ? parseInt(result.analysis.primary_severity.split('.')[0]) || 0 : 0;
+                  const stage = Math.min(3, Math.max(0, severityLevel));
                   const prodRes = await hairProductApi.getProductsByStage(stage);
                   setProducts(prodRes.products.slice(0, 6));
                   const stageTips: Record<number, string[]> = {
@@ -318,7 +324,7 @@ const DailyCare: React.FC = () => {
               {analysis && (
                 <div className="bg-white border border-gray-200 rounded-xl p-6">
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">AI 분석 요약</h3>
-                  <p className="text-gray-700 text-sm">{analysis.summary || '업로드한 사진을 기반으로 상태를 분석했습니다.'}</p>
+                  <p className="text-gray-700 text-sm">{analysis.ai_analysis?.diagnosis || '업로드한 사진을 기반으로 상태를 분석했습니다.'}</p>
                 </div>
               )}
               {products && (
