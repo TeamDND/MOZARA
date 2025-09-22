@@ -6,7 +6,6 @@ import LandingPage from './pages/LandingPage';
 import HairCheck from './pages/check/HairCheck';
 import SignUp from './pages/users/SignUp';
 import LogIn from './pages/users/LogIn';
-import HairDamageAnalysis from './pages/check/HairDamageAnalysis';
 import HairChange from './pages/hair_contents/HairChange';
 import HairPT from './pages/hair_solutions/HairPT';
 import HairLossProducts from './pages/hair_solutions/HairLossProducts';
@@ -56,7 +55,6 @@ const App: React.FC = () => {
           {/* 기존 라우트들 (호환성 유지) */}
           <Route path="main" element={<MainContent />} />
           <Route path="hair-check" element={<HairCheck />} />
-          <Route path="hair-damage" element={<HairDamageAnalysis />} />
           <Route path="hair-change" element={<HairChange />} />
           <Route path="hair-pt" element={<HairPT />} />
           <Route path="hair-loss-products" element={<HairLossProducts />} />

@@ -4,7 +4,6 @@ export default function Home() {
   const navigate = useNavigate();
   
   const aiTools = [
-    { name: "모발 손상 분석", icon: "🔍", badge: "NEW" },
     { name: "머리스타일 변경", icon: "💇", badge: "NEW" },
     { name: "탈모 PT", icon: "🏃", badge: "NEW" },
     { name: "YouTube 영상", icon: "📺", badge: "NEW" },
@@ -56,9 +55,7 @@ export default function Home() {
                   <div 
                     className="bg-white p-6 rounded-2xl border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
                     onClick={() => {
-                      if (tool.name === "모발 손상 분석") {
-                        navigate('/hair-damage');
-                      } else if (tool.name === "머리스타일 변경") {
+                      if (tool.name === "머리스타일 변경") {
                         navigate('/hair-change');
                       } else if (tool.name === "탈모 PT") {
                         navigate('/hair-pt');

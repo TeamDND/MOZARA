@@ -27,27 +27,17 @@ except ImportError as e:
     print(f"Hair Change 모듈 로드 실패: {e}")
     HAIR_CHANGE_AVAILABLE = False
 
-# Hair Damage Analysis 모듈 - services 폴더 내에 있다고 가정하고 경로 수정
+# Hair Loss Daily 모듈 - services 폴더 내에 있다고 가정하고 경로 수정
 try:
     # app 객체를 가져와 마운트하기 때문에, 이 파일에 uvicorn 실행 코드는 없어야 합니다.
-    from services.hair_damage_analysis.api.hair_analysis_api import app as hair_analysis_app
+    from services.hair_loss_daily.api.hair_analysis_api import app as hair_analysis_app
     HAIR_ANALYSIS_AVAILABLE = True
-    print("Hair Damage Analysis 모듈 로드 성공")
+    print("Hair Loss Daily 모듈 로드 성공")
 except ImportError as e:
-    print(f"Hair Damage Analysis 모듈 로드 실패: {e}")
+    print(f"Hair Loss Daily 모듈 로드 실패: {e}")
     HAIR_ANALYSIS_AVAILABLE = False
     hair_analysis_app = None
 
-# BASP Hair Loss Diagnosis 모듈
-try:
-    from services.basp_selfcheck import (
-        BaspRequest, BaspResponse, BaspDiagnosisEngine, LifestyleData
-    )
-    BASP_AVAILABLE = True
-    print("BASP Hair Loss Diagnosis 모듈 로드 성공")
-except ImportError as e:
-    print(f"BASP Hair Loss Diagnosis 모듈 로드 실패: {e}")
-    BASP_AVAILABLE = False
 
 
 # Pydantic 모델 정의
@@ -88,12 +78,12 @@ async def add_cors_headers(request, call_next):
 
 # 라우터 마운트 (조건부)
 if HAIR_ANALYSIS_AVAILABLE and hair_analysis_app:
-    # 스프링부트 경로에 맞게 /api/hair-damage 로 마운트 경로 수정
-    app.mount("/hair-damage", hair_analysis_app)
-    print("Hair Damage Analysis 라우터 마운트 완료")
+    # Hair Loss Daily API를 /hair-loss-daily 경로에 마운트
+    app.mount("/hair-loss-daily", hair_analysis_app)
+    print("Hair Loss Daily 라우터 마운트 완료 (/hair-loss-daily)")
 else:
     index = None
-    print("Hair Damage Analysis 라우터 마운트 건너뜀")
+    print("Hair Loss Daily 라우터 마운트 건너뜀")
 
 # OpenAI setup
 openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -168,9 +158,8 @@ def read_root():
         "message": "MOZARA Python Backend 통합 서버",
         "status": "running",
         "modules": {
-            "hair_damage_analysis": "/hair-damage" if HAIR_ANALYSIS_AVAILABLE else "unavailable",
+            "hair_loss_daily": "/hair-loss-daily" if HAIR_ANALYSIS_AVAILABLE else "unavailable",
             "hair_change": "/generate_hairstyle" if HAIR_CHANGE_AVAILABLE else "unavailable",
-            "basp_diagnosis": "/basp/evaluate" if BASP_AVAILABLE else "unavailable",
             "hair_encyclopedia": "/paper" if openai_api_key else "unavailable",
             "gemini_hair_analysis": "/hair-analysis" if google_api_key else "unavailable"
         }
@@ -285,39 +274,6 @@ if HAIR_CHANGE_AVAILABLE:
         return get_wig_styles_service()
 
 
-# --- BASP Hair Loss Diagnosis API (조건부) ---
-if BASP_AVAILABLE:
-    @app.get("/basp/evaluate")
-    def evaluate_basp_get():
-        """BASP 탈모 진단 API (GET 테스트용)"""
-        sample_request = BaspRequest(
-            hairline="M",
-            vertex=1,
-            density=1,
-            lifestyle=LifestyleData(
-                shedding6m=True,
-                familyHistory=False,
-                sleepHours="5to7",
-                smoking=False,
-                alcohol="light"
-            )
-        )
-        try:
-            result = BaspDiagnosisEngine.diagnose(sample_request)
-            return result
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"진단 중 오류가 발생했습니다: {str(e)}")
-
-    @app.post("/basp/evaluate", response_model=BaspResponse)
-    def evaluate_basp(request: BaspRequest):
-        """BASP 탈모 진단 API"""
-        try:
-            result = BaspDiagnosisEngine.diagnose(request)
-            return result
-        except ValueError as e:
-            raise HTTPException(status_code=400, detail=str(e))
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"진단 중 오류가 발생했습니다: {str(e)}")
 
 
 
