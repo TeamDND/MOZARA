@@ -18,14 +18,40 @@ import HairQuiz from './pages/hair_contents/HairQuiz';
 import DailyCare from './pages/hair_solutions/DailyCare';
 import LandingPageV2 from './pages/LandingPageV2';
 
+// new_fn_flow.md에 따른 새로운 컴포넌트들
+import { MainPage } from './pages/MainPage';
+import Dashboard from './pages/Dashboard';
+import IntegratedDiagnosis from './pages/check/IntegratedDiagnosis';
+import DiagnosisResults from './pages/check/DiagnosisResults';
+import ProgressTracking from './pages/hair_solutions/ProgressTracking';
+import WeeklyChallenges from './pages/hair_solutions/WeeklyChallenges';
+import VirtualHairstyle from './pages/hair_contents/VirtualHairstyle';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { PlantGrowth } from './components/PlantGrowth';
+
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
   return (
-    <>
+    <ErrorBoundary>
       <Routes>
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<LandingPageV2 />} />
+          {/* <Route index element={<LandingPageV2 />} /> */}
           {/* <Route index element={<LandingPage />} /> */}
+          <Route index element={<MainPage />} />
+          
+          {/* 메인 플로우 (Main Flow) - new_fn_flow.md */}
+          {/* <Route path="main-page" element={<MainPage />} /> */}
+          <Route path="login" element={<LogIn />} />
+          <Route path="integrated-diagnosis" element={<IntegratedDiagnosis />} />
+          <Route path="diagnosis-results" element={<DiagnosisResults />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          
+          {/* 추가 기능 화면들 (Additional Features) */}
+          <Route path="progress-tracking" element={<ProgressTracking />} />
+          <Route path="weekly-challenges" element={<WeeklyChallenges />} />
+          <Route path="virtual-hairstyle" element={<VirtualHairstyle />} />
+          
+          {/* 기존 라우트들 (호환성 유지) */}
           <Route path="main" element={<MainContent />} />
           <Route path="hair-check" element={<HairCheck />} />
           <Route path="hair-change" element={<HairChange />} />
@@ -38,11 +64,10 @@ const App: React.FC = () => {
           <Route path="hair-diagnosis" element={<HairDiagnosis />} />
           <Route path="hair-quiz" element={<HairQuiz />} />
           <Route path="signup" element={<SignUp />} />
-          <Route path="login" element={<LogIn />} />
           <Route path="daily-care" element={<DailyCare />} />
         </Route>
       </Routes>
-    </>
+    </ErrorBoundary>
   );
 };
 
