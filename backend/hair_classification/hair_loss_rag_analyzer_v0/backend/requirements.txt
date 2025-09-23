@@ -15,3 +15,4 @@ passlib[bcrypt]==1.7.4
 pydantic==2.5.0
 python-multipart==0.0.6
 faiss-cpu==1.7.4
+openai==1.54.3
