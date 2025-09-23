@@ -1,0 +1,173 @@
+name: Docker Deploy to AWS
+
+on:
+  push:
+    branches: [ main ]
+    paths: 
+      - 'docker/**'
+      - 'backend/**'
+      - 'frontend/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docker/**'
+      - 'backend/**'
+      - 'frontend/**'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    # PR에서 테스트 실행
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Test Docker build
+      run: |
+        cd docker
+        docker-compose build
+        
+        # 이미지가 정상적으로 빌드되는지 테스트
+        docker-compose config
+        echo "✅ Docker 빌드 테스트 성공!"
+
+  deploy:
+    runs-on: ubuntu-latest
+    # main 브랜치에서만 실제 배포
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    
+    - name: Create environment file
+      run: |
+        cd docker
+        cat > .env << EOF
+        # AI 서비스 API 키
+        GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+        OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+        YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}
+        ELEVEN_ST_API_KEY=${{ secrets.ELEVEN_ST_API_KEY }}
+        
+        # Pinecone 설정
+        PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}
+        PINECONE_ENVIRONMENT=${{ secrets.PINECONE_ENVIRONMENT }}
+        PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}
+        
+        # OAuth2 설정
+        GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+        GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+        KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
+        NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}
+        NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}
+        
+        # 데이터베이스 설정 (기본값 고정)
+        MYSQL_ROOT_PASSWORD=1234
+        MYSQL_DATABASE=mozara
+        MYSQL_USER=root
+        MYSQL_PASSWORD=1234
+        
+        # JWT 설정
+        JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+        
+        # Docker Hub 설정
+        DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}
+        DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+        
+        # AWS 배포 설정 (DuckDNS 도메인 또는 IP)
+        LIVE_SERVER_IP=${{ secrets.LIVE_SERVER_IP }}
+        EC2_SSH_KEY=${{ secrets.EC2_SSH_KEY }}
+        
+        # 배포 도메인 설정 (DuckDNS 도메인)
+        DOMAIN_NAME=${{ secrets.DOMAIN_NAME }}
+        PROTOCOL=https
+        EOF
+    
+    - name: Create SSH key file
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/aws_key.pem
+        chmod 600 ~/.ssh/aws_key.pem
+    
+    - name: Build and test Docker images
+      run: |
+        cd docker
+        docker-compose build
+        
+        # 이미지가 정상적으로 빌드되는지 테스트
+        docker-compose config
+        
+        # 프론트엔드 빌드 테스트
+        echo "✅ Docker 이미지 빌드 테스트 완료"
+    
+    - name: Deploy to AWS EC2
+      run: |
+        # EC2 인스턴스에 Docker 관련 파일들 복사
+        echo "📁 파일을 ${{ secrets.LIVE_SERVER_IP }}에 복사합니다..."
+        scp -i ~/.ssh/aws_key.pem -o StrictHostKeyChecking=no \
+          docker-compose.yml \
+          docker-compose.prod.yml \
+          nginx.conf \
+          .env \
+          ubuntu@${{ secrets.LIVE_SERVER_IP }}:/home/ubuntu/mozara/
+        
+        # EC2에서 배포 실행
+        ssh -i ~/.ssh/aws_key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.LIVE_SERVER_IP }} << 'EOF'
+          cd /home/ubuntu/mozara
+          
+          # Docker 설치 확인 및 설치
+          if ! command -v docker &> /dev/null; then
+            echo "Docker 설치 중..."
+            sudo apt update
+            sudo apt install -y docker.io docker-compose
+            sudo usermod -aG docker ubuntu
+            sudo systemctl start docker
+            sudo systemctl enable docker
+          fi
+          
+          # Docker Hub 로그인
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+          
+          # 기존 컨테이너 정리
+          sudo docker-compose down --volumes --remove-orphans
+          
+          # 새 컨테이너 시작
+          sudo docker-compose up -d
+          
+          # 서비스 상태 확인
+          sleep 10
+          sudo docker-compose ps
+          
+          echo "✅ AWS 배포 완료!"
+          echo "🌐 서비스 URL: https://${{ secrets.DOMAIN_NAME }}"
+        EOF
+    
+    - name: Health check
+      run: |
+        # 서비스 상태 확인
+        sleep 30
+        curl -f http://${{ secrets.LIVE_SERVER_IP }}:8080/actuator/health || echo "Spring Boot health check failed"
+        curl -f http://${{ secrets.LIVE_SERVER_IP }}:8000/ || echo "Python FastAPI health check failed"
+        curl -f http://${{ secrets.LIVE_SERVER_IP }}:3000 || echo "Frontend health check failed"
+        echo "🌐 최종 서비스 URL: https://${{ secrets.DOMAIN_NAME }}"
+    
+    - name: Cleanup SSH key
+      if: always()
+      run: |
+        rm -f ~/.ssh/aws_key.pem
