@@ -137,7 +137,7 @@ jobs:
           cd /home/ubuntu/mozara/docker
           
           # .env 파일 생성 (GitHub Secrets에서 직접 전달)
-          cat > .env << EOF
+          cat > .env << 'ENV_EOF'
 GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
 OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
 YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}
@@ -151,7 +151,7 @@ KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
 JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
 DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}
 DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
-EOF
+ENV_EOF
           
           # .env 파일 권한 설정
           chmod 644 .env
@@ -198,17 +198,9 @@ EOF
             DOCKER_COMPOSE="docker compose"
           fi
           
-          # Docker Compose 파일의 빌드 경로 수정 (EC2 환경에 맞게)
-          echo "📝 Docker Compose 파일 경로 수정 중..."
-          sed -i 's|context: \\.\\./backend/springboot|context: \\./backend/springboot|g' docker-compose.prod.yml
-          sed -i 's|context: \\.\\./backend/python|context: \\./backend/python|g' docker-compose.prod.yml
-          sed -i 's|context: \\.\\./frontend|context: \\./frontend|g' docker-compose.prod.yml
-          sed -i 's|- \\.\\./backend/springboot/db/mozara\\.sql|- \\./backend/springboot/db/mozara\\.sql|g' docker-compose.prod.yml
-          sed -i 's|- \\.\\./uploads|- \\./uploads|g' docker-compose.prod.yml
-          sed -i 's|- \\.\\./backend/python/uploads|- \\./backend/python/uploads|g' docker-compose.prod.yml
-          
-          # 수정된 파일 확인
-          echo "✅ 수정된 Docker Compose 파일 확인:"
+          # Docker Compose 파일 확인
+          echo "📝 Docker Compose 파일 확인 중..."
+          echo "✅ Docker Compose 파일 확인:"
           grep -n "context:\|mozara.sql" docker-compose.prod.yml
           
           # 필수 환경변수 확인
