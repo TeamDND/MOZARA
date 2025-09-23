@@ -68,7 +68,6 @@ jobs:
         GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
         GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
-        JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
         DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         LIVE_SERVER_IP: ${{ secrets.LIVE_SERVER_IP }}
@@ -106,6 +105,21 @@ jobs:
         cd docker
         # EC2 인스턴스에 Docker 관련 파일들 복사
         echo "📁 파일을 ${{ secrets.LIVE_SERVER_IP }}에 복사합니다..."
+        # LIVE_SERVER_IP 값 확인 및 검증
+        echo "LIVE_SERVER_IP 값: '${{ secrets.LIVE_SERVER_IP }}'"
+        echo "LIVE_SERVER_IP 길이: $(echo '${{ secrets.LIVE_SERVER_IP }}' | wc -c)"
+        
+        # LIVE_SERVER_IP가 비어있거나 잘못된 형식인지 확인
+        if [ -z "${{ secrets.LIVE_SERVER_IP }}" ]; then
+          echo "❌ LIVE_SERVER_IP가 비어있습니다!"
+          exit 1
+        fi
+        
+        if [[ "${{ secrets.LIVE_SERVER_IP }}" == http* ]]; then
+          echo "❌ LIVE_SERVER_IP에 http:// 또는 https://가 포함되어 있습니다!"
+          echo "올바른 형식: your-domain.duckdns.org 또는 IP주소"
+          exit 1
+        fi
         scp -i ~/.ssh/aws_key.pem -o StrictHostKeyChecking=no \
           docker-compose.yml \
           docker-compose.prod.yml \
@@ -127,7 +141,6 @@ jobs:
           export GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}"
           export GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}"
           export KAKAO_CLIENT_SECRET="${{ secrets.KAKAO_CLIENT_SECRET }}"
-          export JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}"
           
           # Docker 설치 확인 및 설치
           if ! command -v docker &> /dev/null; then
