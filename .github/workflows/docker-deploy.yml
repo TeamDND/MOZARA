@@ -167,8 +167,32 @@ jobs:
           echo "1️⃣ MySQL 데이터베이스 시작..."
           sudo docker compose -f docker-compose.prod.yml up -d mysql
           
+          echo "⏳ MySQL 컨테이너 시작 대기..."
+          sleep 5
+          
+          # MySQL 컨테이너 상태 확인
+          if ! sudo docker compose -f docker-compose.prod.yml ps mysql | grep -q "Up"; then
+            echo "❌ MySQL 컨테이너가 시작되지 않았습니다. 로그 확인:"
+            sudo docker compose -f docker-compose.prod.yml logs mysql
+            exit 1
+          fi
+          echo "✅ MySQL 컨테이너가 시작되었습니다."
+          
           echo "⏳ MySQL 헬스체크 대기..."
-          timeout 60 bash -c 'until sudo docker compose -f docker-compose.prod.yml exec mysql mysqladmin ping -h localhost -u root -p1234 --silent; do sleep 2; done'
+          for i in {1..30}; do
+            if sudo docker compose -f docker-compose.prod.yml exec mysql mysqladmin ping -h localhost -u root -p1234 --silent; then
+              echo "✅ MySQL이 준비되었습니다."
+              break
+            else
+              echo "⏳ MySQL 대기 중... ($i/30)"
+              sleep 2
+            fi
+            if [ $i -eq 30 ]; then
+              echo "❌ MySQL 시작 실패. 컨테이너 로그 확인:"
+              sudo docker compose -f docker-compose.prod.yml logs mysql
+              exit 1
+            fi
+          done
           
           echo "2️⃣ Spring Boot 백엔드 시작..."
           sudo docker compose -f docker-compose.prod.yml up -d springboot
