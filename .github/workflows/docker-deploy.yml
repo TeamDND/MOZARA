@@ -191,10 +191,15 @@ jobs:
           fi
           
           # Docker Compose 파일의 빌드 경로 수정 (EC2 환경에 맞게)
+          echo "📝 Docker Compose 파일 경로 수정 중..."
           sed -i 's|context: ../backend/springboot|context: ./backend/springboot|g' docker-compose.prod.yml
           sed -i 's|context: ../backend/python|context: ./backend/python|g' docker-compose.prod.yml
           sed -i 's|context: ../frontend|context: ./frontend|g' docker-compose.prod.yml
           sed -i 's|- \\.\\./backend/springboot/db/mozara\\.sql|- \\./backend/springboot/db/mozara\\.sql|g' docker-compose.prod.yml
+          
+          # 수정된 파일 확인
+          echo "✅ 수정된 Docker Compose 파일 확인:"
+          grep -n "context:\|mozara.sql" docker-compose.prod.yml
           
           # 기존 컨테이너 정리
           sudo $DOCKER_COMPOSE -f docker-compose.prod.yml down --volumes --remove-orphans
