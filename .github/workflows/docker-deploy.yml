@@ -60,24 +60,25 @@ jobs:
     - name: Create environment file
       run: |
         cd docker
-        cat > .env << EOF
+        # 환경변수 파일 생성 (특수문자 처리)
+        cat > .env << 'EOF'
         # AI 서비스 API 키
-        GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-        OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-        YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}
-        ELEVEN_ST_API_KEY=${{ secrets.ELEVEN_ST_API_KEY }}
+        GEMINI_API_KEY=${GEMINI_API_KEY}
+        OPENAI_API_KEY=${OPENAI_API_KEY}
+        YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+        ELEVEN_ST_API_KEY=${ELEVEN_ST_API_KEY}
         
         # Pinecone 설정
-        PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}
-        PINECONE_ENVIRONMENT=${{ secrets.PINECONE_ENVIRONMENT }}
-        PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}
+        PINECONE_API_KEY=${PINECONE_API_KEY}
+        PINECONE_ENVIRONMENT=${PINECONE_ENVIRONMENT}
+        PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME}
         
         # OAuth2 설정
-        GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-        GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
-        KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
-        NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}
-        NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}
+        GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+        GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+        KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
+        NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
+        NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
         
         # 데이터베이스 설정 (기본값 고정)
         MYSQL_ROOT_PASSWORD=1234
@@ -86,20 +87,40 @@ jobs:
         MYSQL_PASSWORD=1234
         
         # JWT 설정
-        JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+        JWT_SECRET_KEY=${JWT_SECRET_KEY}
         
         # Docker Hub 설정
-        DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}
-        DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+        DOCKERHUB_TOKEN=${DOCKERHUB_TOKEN}
+        DOCKERHUB_USERNAME=${DOCKERHUB_USERNAME}
         
         # AWS 배포 설정 (DuckDNS 도메인 또는 IP)
-        LIVE_SERVER_IP=${{ secrets.LIVE_SERVER_IP }}
-        EC2_SSH_KEY=${{ secrets.EC2_SSH_KEY }}
+        LIVE_SERVER_IP=${LIVE_SERVER_IP}
+        EC2_SSH_KEY=${EC2_SSH_KEY}
         
         # 배포 도메인 설정 (DuckDNS 도메인)
-        DOMAIN_NAME=${{ secrets.DOMAIN_NAME }}
+        DOMAIN_NAME=${DOMAIN_NAME}
         PROTOCOL=https
         EOF
+        
+        # GitHub Secrets를 환경변수로 설정
+        echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
+        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+        echo "YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}" >> .env
+        echo "ELEVEN_ST_API_KEY=${{ secrets.ELEVEN_ST_API_KEY }}" >> .env
+        echo "PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}" >> .env
+        echo "PINECONE_ENVIRONMENT=${{ secrets.PINECONE_ENVIRONMENT }}" >> .env
+        echo "PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}" >> .env
+        echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+        echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+        echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
+        echo "NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}" >> .env
+        echo "NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}" >> .env
+        echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+        echo "DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}" >> .env
+        echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> .env
+        echo "LIVE_SERVER_IP=${{ secrets.LIVE_SERVER_IP }}" >> .env
+        echo "EC2_SSH_KEY=${{ secrets.EC2_SSH_KEY }}" >> .env
+        echo "DOMAIN_NAME=${{ secrets.DOMAIN_NAME }}" >> .env
     
     - name: Create SSH key file
       run: |
