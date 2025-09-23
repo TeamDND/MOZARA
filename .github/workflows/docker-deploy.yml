@@ -83,22 +83,28 @@ jobs:
         echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/aws_key.pem
         chmod 600 ~/.ssh/aws_key.pem
     
-    - name: Build and test Docker images
+    - name: Build and push Docker images
+      if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
       run: |
-        cd docker
+        # Docker Hub 로그인
+        echo "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
         
-        # Docker Compose 파일 존재 확인
-        if [ ! -f "docker-compose.yml" ]; then
-          echo "❌ docker-compose.yml 파일을 찾을 수 없습니다."
-          ls -la
-          exit 1
-        fi
+        # Spring Boot 이미지 빌드 및 푸시
+        echo "🔨 Spring Boot 이미지 빌드 중..."
+        docker build -t $DOCKERHUB_USERNAME/mozara-springboot ./backend/springboot
+        docker push $DOCKERHUB_USERNAME/mozara-springboot
         
-        # PR에서는 환경변수 없이 설정 파일만 검증
-        echo "🔍 Docker Compose 설정 파일 검증 중..."
-        docker compose config --quiet
+        # Python API 이미지 빌드 및 푸시
+        echo "🔨 Python API 이미지 빌드 중..."
+        docker build -t $DOCKERHUB_USERNAME/mozara-python-api ./backend/python
+        docker push $DOCKERHUB_USERNAME/mozara-python-api
         
-        echo "✅ Docker Compose 설정 검증 완료"
+        # Frontend 이미지 빌드 및 푸시
+        echo "🔨 Frontend 이미지 빌드 중..."
+        docker build -t $DOCKERHUB_USERNAME/mozara-frontend ./frontend
+        docker push $DOCKERHUB_USERNAME/mozara-frontend
+        
+        echo "✅ 모든 Docker 이미지 빌드 및 푸시 완료"
     
     - name: Deploy to AWS EC2
       if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
@@ -210,27 +216,69 @@ jobs:
           ls -la ../backend/springboot/
           
           # 기존 컨테이너 정리
-          sudo "$DOCKER_COMPOSE" -f docker-compose.prod.yml down --volumes --remove-orphans
+          echo "🧹 기존 컨테이너 정리 중..."
+          if [ "$(sudo docker ps -a -q -f name=mozara-mysql-prod)" ]; then
+            sudo docker rm -f mozara-mysql-prod
+          fi
+          if [ "$(sudo docker ps -a -q -f name=mozara-springboot-prod)" ]; then
+            sudo docker rm -f mozara-springboot-prod
+          fi
+          if [ "$(sudo docker ps -a -q -f name=mozara-python-api-prod)" ]; then
+            sudo docker rm -f mozara-python-api-prod
+          fi
+          if [ "$(sudo docker ps -a -q -f name=mozara-frontend-prod)" ]; then
+            sudo docker rm -f mozara-frontend-prod
+          fi
+          if [ "$(sudo docker ps -a -q -f name=mozara-nginx-prod)" ]; then
+            sudo docker rm -f mozara-nginx-prod
+          fi
+          
+          # 기존 볼륨 정리
+          if [ "$(sudo docker volume ls -q -f name=mysql_prod_data)" ]; then
+            sudo docker volume rm mysql_prod_data
+          fi
+          
+          # 기존 이미지 정리
+          if [ "$(sudo docker images -q $DOCKERHUB_USERNAME/mozara-springboot)" ]; then
+            sudo docker rmi -f $DOCKERHUB_USERNAME/mozara-springboot
+          fi
+          if [ "$(sudo docker images -q $DOCKERHUB_USERNAME/mozara-python-api)" ]; then
+            sudo docker rmi -f $DOCKERHUB_USERNAME/mozara-python-api
+          fi
+          if [ "$(sudo docker images -q $DOCKERHUB_USERNAME/mozara-frontend)" ]; then
+            sudo docker rmi -f $DOCKERHUB_USERNAME/mozara-frontend
+          fi
           
           # 새 컨테이너 시작 (순서대로)
           echo "🚀 새 컨테이너 시작..."
+          
           echo "1️⃣ MySQL 데이터베이스 시작..."
-          sudo "$DOCKER_COMPOSE" -f docker-compose.prod.yml up -d mysql
+          sudo docker run -d \
+            --name mozara-mysql-prod \
+            -p 3306:3306 \
+            -e MYSQL_ROOT_PASSWORD=1234 \
+            -e MYSQL_DATABASE=mozara \
+            -e MYSQL_USER=root \
+            -e MYSQL_PASSWORD=1234 \
+            -v mysql_prod_data:/var/lib/mysql \
+            -v ./backend/springboot/db/mozara.sql:/docker-entrypoint-initdb.d/mozara.sql \
+            --restart unless-stopped \
+            mysql:8.0 --default-authentication-plugin=mysql_native_password
           
           echo "⏳ MySQL 컨테이너 시작 대기..."
-          sleep 5
+          sleep 10
           
           # MySQL 컨테이너 상태 확인
-          if ! sudo "$DOCKER_COMPOSE" -f docker-compose.prod.yml ps mysql | grep -q "Up"; then
+          if ! sudo docker ps | grep -q "mozara-mysql-prod"; then
             echo "❌ MySQL 컨테이너가 시작되지 않았습니다. 로그 확인:"
-            sudo "$DOCKER_COMPOSE" -f docker-compose.prod.yml logs mysql
+            sudo docker logs mozara-mysql-prod
             exit 1
           fi
           echo "✅ MySQL 컨테이너가 시작되었습니다."
           
           echo "⏳ MySQL 헬스체크 대기..."
           for i in {1..30}; do
-            if sudo "$DOCKER_COMPOSE" -f docker-compose.prod.yml exec mysql mysqladmin ping -h localhost -u root -p1234 --silent; then
+            if sudo docker exec mozara-mysql-prod mysqladmin ping -h localhost -u root -p1234 --silent; then
               echo "✅ MySQL이 준비되었습니다."
               break
             else
@@ -239,26 +287,121 @@ jobs:
             fi
             if [ $i -eq 30 ]; then
               echo "❌ MySQL 시작 실패. 컨테이너 로그 확인:"
-              sudo "$DOCKER_COMPOSE" -f docker-compose.prod.yml logs mysql
+              sudo docker logs mozara-mysql-prod
               exit 1
             fi
           done
           
-          echo "2️⃣ Spring Boot 백엔드 시작..."
-          sudo "$DOCKER_COMPOSE" -f docker-compose.prod.yml up -d springboot
+          echo "2️⃣ Backend 서비스들 시작..."
           
-          echo "3️⃣ Python API 백엔드 시작..."
-          sudo "$DOCKER_COMPOSE" -f docker-compose.prod.yml up -d python-api
+          echo "2-1️⃣ Spring Boot 백엔드 시작..."
+          if [ "$(sudo docker images -q $DOCKERHUB_USERNAME/mozara-springboot)" ]; then
+            sudo docker rmi -f $DOCKERHUB_USERNAME/mozara-springboot
+          fi
+          sudo docker pull $DOCKERHUB_USERNAME/mozara-springboot
+          sudo docker run -d \
+            --name mozara-springboot-prod \
+            -p 8080:8080 \
+            -e SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/mozara?useSSL=false&serverTimezone=UTC \
+            -e SPRING_DATASOURCE_USERNAME=root \
+            -e SPRING_DATASOURCE_PASSWORD=1234 \
+            -e AI_PYTHON_BASE_URL=http://localhost:8000 \
+            -e ELEVEN_ST_API_KEY=$ELEVEN_ST_API_KEY \
+            -e GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID \
+            -e GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET \
+            -e KAKAO_CLIENT_SECRET=$KAKAO_CLIENT_SECRET \
+            --restart unless-stopped \
+            $DOCKERHUB_USERNAME/mozara-springboot
           
-          echo "4️⃣ React 프론트엔드 시작..."
-          sudo "$DOCKER_COMPOSE" -f docker-compose.prod.yml up -d frontend
+          echo "2-2️⃣ Python API 백엔드 시작..."
+          if [ "$(sudo docker images -q $DOCKERHUB_USERNAME/mozara-python-api)" ]; then
+            sudo docker rmi -f $DOCKERHUB_USERNAME/mozara-python-api
+          fi
+          sudo docker pull $DOCKERHUB_USERNAME/mozara-python-api
+          sudo docker run -d \
+            --name mozara-python-api-prod \
+            -p 8000:8000 \
+            -e GEMINI_API_KEY=$GEMINI_API_KEY \
+            -e OPENAI_API_KEY=$OPENAI_API_KEY \
+            -e YOUTUBE_API_KEY=$YOUTUBE_API_KEY \
+            -e ELEVEN_ST_API_KEY=$ELEVEN_ST_API_KEY \
+            -e PINECONE_API_KEY=$PINECONE_API_KEY \
+            -e PINECONE_ENVIRONMENT=$PINECONE_ENVIRONMENT \
+            -e PINECONE_INDEX_NAME=$PINECONE_INDEX_NAME \
+            --restart unless-stopped \
+            $DOCKERHUB_USERNAME/mozara-python-api
           
-          echo "5️⃣ Nginx 프록시 시작..."
-          sudo "$DOCKER_COMPOSE" -f docker-compose.prod.yml up -d nginx
+          echo "⏳ Backend 서비스들 시작 대기..."
+          sleep 10
+          
+          echo "3️⃣ React 프론트엔드 시작..."
+          if [ "$(sudo docker images -q $DOCKERHUB_USERNAME/mozara-frontend)" ]; then
+            sudo docker rmi -f $DOCKERHUB_USERNAME/mozara-frontend
+          fi
+          sudo docker pull $DOCKERHUB_USERNAME/mozara-frontend
+          sudo docker run -d \
+            --name mozara-frontend-prod \
+            -p 3000:80 \
+            --restart unless-stopped \
+            $DOCKERHUB_USERNAME/mozara-frontend
+          
+          echo "4️⃣ Nginx 프록시 시작..."
+          # Nginx 설정 파일 생성
+          cat > nginx.conf << 'NGINX_EOF'
+server {
+    listen 80;
+    server_name mozaracare.duckdns.org;
+
+    client_max_body_size 10m;
+
+    # Frontend 프록시
+    location / {
+        proxy_pass http://172.17.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # API 프록시
+    location /api/ {
+        proxy_pass http://172.17.0.1:8080/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+    
+    # WebSocket 프록시
+    location /ws-game/ {
+        proxy_pass http://172.17.0.1:8080/ws-game/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host $host;
+    }
+    
+    # 파일 업로드 프록시
+    location /uploads/{
+        proxy_pass http://172.17.0.1:8080/uploads/;
+    }
+}
+NGINX_EOF
+          
+          # Nginx 컨테이너 실행
+          sudo docker run -d \
+            --name mozara-nginx-prod \
+            -p 80:80 \
+            -v $(pwd)/nginx.conf:/etc/nginx/conf.d/default.conf:ro \
+            --restart unless-stopped \
+            nginx:alpine
+          
           
           # 서비스 상태 확인
           sleep 10
-          sudo "$DOCKER_COMPOSE" -f docker-compose.prod.yml ps
+          sudo docker ps
           
           echo "✅ AWS 배포 완료!"
           echo "🌐 서비스 URL: https://mozaracare.duckdns.org"
