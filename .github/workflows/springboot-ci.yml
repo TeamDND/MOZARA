@@ -1,13 +1,14 @@
 name: Spring Boot CI/CD
 
-on:
-  push:
-    branches: [ main ]
-    paths: [ 'backend/springboot/**' ]
-  # pull_request 비활성화 (dev 브랜치에서 실행 방지)
-  # pull_request:
-  #   branches: [ main ]
-  #   paths: [ 'backend/springboot/**' ]
+# Spring Boot CI/CD 비활성화 - Docker Deploy to AWS 사용
+# on:
+#   push:
+#     branches: [ main ]
+#     paths: [ 'backend/springboot/**' ]
+#   # pull_request 비활성화 (dev 브랜치에서 실행 방지)
+#   # pull_request:
+#   #   branches: [ main ]
+#   #   paths: [ 'backend/springboot/**' ]
 
 jobs:
   test:
