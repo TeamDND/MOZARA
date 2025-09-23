@@ -259,8 +259,8 @@ GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 KAKAO_CLIENT_SECRET=your_kakao_client_secret
 
-# JWT 설정
-JWT_SECRET_KEY=your_jwt_secret_key
+# JWT 설정 (application.properties에 하드코딩됨)
+# jwt.secret.key=alaoskjovjcpovcjqawpjcxapsjcpaosjcpasocpoadasjdlakslaks
 
 # Docker Hub 설정 (선택사항)
 DOCKERHUB_TOKEN=your_dockerhub_token
@@ -276,8 +276,7 @@ EC2_SSH_KEY=your_ec2_ssh_private_key
 GEMINI_API_KEY, OPENAI_API_KEY, YOUTUBE_API_KEY, ELEVEN_ST_API_KEY
 PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME
 GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, KAKAO_CLIENT_SECRET
-JWT_SECRET_KEY, DOCKERHUB_TOKEN, DOCKERHUB_USERNAME
-LIVE_SERVER_IP, EC2_SSH_KEY
+DOCKERHUB_TOKEN, DOCKERHUB_USERNAME, LIVE_SERVER_IP, EC2_SSH_KEY
 ```
 
 ### `application.properties` (SpringBoot)
