@@ -137,20 +137,18 @@ jobs:
           cd /home/ubuntu/mozara/docker
           
           # .env 파일 생성 (GitHub Secrets에서 직접 전달)
-          cat > .env << 'ENVEOF'
-          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-          YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}
-          ELEVEN_ST_API_KEY=${{ secrets.ELEVEN_ST_API_KEY }}
-          PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}
-          PINECONE_ENVIRONMENT=${{ secrets.PINECONE_ENVIRONMENT }}
-          PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}
-          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
-          KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
-          DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}
-          DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
-          ENVEOF
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+          echo "YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}" >> .env
+          echo "ELEVEN_ST_API_KEY=${{ secrets.ELEVEN_ST_API_KEY }}" >> .env
+          echo "PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}" >> .env
+          echo "PINECONE_ENVIRONMENT=${{ secrets.PINECONE_ENVIRONMENT }}" >> .env
+          echo "PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}" >> .env
+          echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+          echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+          echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
+          echo "DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}" >> .env
+          echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> .env
           
           # 환경변수 설정
           export $(cat .env | xargs)
