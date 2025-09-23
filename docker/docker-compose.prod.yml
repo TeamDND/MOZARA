@@ -19,7 +19,7 @@ services:
       MYSQL_PASSWORD: 1234
     volumes:
       - mysql_prod_data:/var/lib/mysql
-      - ../backend/springboot/db/mozara.sql:/docker-entrypoint-initdb.d/mozara.sql
+      - ./backend/springboot/db/mozara.sql:/docker-entrypoint-initdb.d/mozara.sql
     networks:
       - mozara-prod-network
     command: --default-authentication-plugin=mysql_native_password
