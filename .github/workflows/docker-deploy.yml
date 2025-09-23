@@ -137,22 +137,29 @@ jobs:
           cd /home/ubuntu/mozara/docker
           
           # .env 파일 생성 (GitHub Secrets에서 직접 전달)
-          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
-          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
-          echo "YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}" >> .env
-          echo "ELEVEN_ST_API_KEY=${{ secrets.ELEVEN_ST_API_KEY }}" >> .env
-          echo "PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}" >> .env
-          echo "PINECONE_ENVIRONMENT=${{ secrets.PINECONE_ENVIRONMENT }}" >> .env
-          echo "PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}" >> .env
-          echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
-          echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-          echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
-          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
-          echo "DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}" >> .env
-          echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> .env
+          cat > .env << EOF
+GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}
+ELEVEN_ST_API_KEY=${{ secrets.ELEVEN_ST_API_KEY }}
+PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}
+PINECONE_ENVIRONMENT=${{ secrets.PINECONE_ENVIRONMENT }}
+PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}
+GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
+JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}
+DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+EOF
+          
+          # .env 파일 권한 설정
+          chmod 644 .env
           
           # 환경변수 설정
-          export $(cat .env | xargs)
+          set -a
+          source .env
+          set +a
           
           # Docker 설치 확인 및 설치
           if ! command -v docker &> /dev/null; then
@@ -193,14 +200,31 @@ jobs:
           
           # Docker Compose 파일의 빌드 경로 수정 (EC2 환경에 맞게)
           echo "📝 Docker Compose 파일 경로 수정 중..."
-          sed -i 's|context: ../backend/springboot|context: ./backend/springboot|g' docker-compose.prod.yml
-          sed -i 's|context: ../backend/python|context: ./backend/python|g' docker-compose.prod.yml
-          sed -i 's|context: ../frontend|context: ./frontend|g' docker-compose.prod.yml
+          sed -i 's|context: \\.\\./backend/springboot|context: \\./backend/springboot|g' docker-compose.prod.yml
+          sed -i 's|context: \\.\\./backend/python|context: \\./backend/python|g' docker-compose.prod.yml
+          sed -i 's|context: \\.\\./frontend|context: \\./frontend|g' docker-compose.prod.yml
           sed -i 's|- \\.\\./backend/springboot/db/mozara\\.sql|- \\./backend/springboot/db/mozara\\.sql|g' docker-compose.prod.yml
+          sed -i 's|- \\.\\./uploads|- \\./uploads|g' docker-compose.prod.yml
+          sed -i 's|- \\.\\./backend/python/uploads|- \\./backend/python/uploads|g' docker-compose.prod.yml
           
           # 수정된 파일 확인
           echo "✅ 수정된 Docker Compose 파일 확인:"
           grep -n "context:\|mozara.sql" docker-compose.prod.yml
+          
+          # 필수 환경변수 확인
+          echo "🔍 필수 환경변수 확인 중..."
+          if [ -z "$JWT_SECRET_KEY" ]; then
+            echo "❌ JWT_SECRET_KEY가 설정되지 않았습니다."
+            echo "💡 GitHub Secrets에 JWT_SECRET_KEY를 설정해주세요."
+            exit 1
+          fi
+          echo "✅ JWT_SECRET_KEY 확인됨"
+          
+          # 디렉토리 구조 확인
+          echo "📁 디렉토리 구조 확인:"
+          ls -la ../
+          ls -la ../backend/
+          ls -la ../backend/springboot/
           
           # 기존 컨테이너 정리
           sudo $DOCKER_COMPOSE -f docker-compose.prod.yml down --volumes --remove-orphans
