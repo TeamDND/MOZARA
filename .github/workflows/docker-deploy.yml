@@ -7,12 +7,13 @@ on:
       - 'docker/**'
       - 'backend/**'
       - 'frontend/**'
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'docker/**'
-      - 'backend/**'
-      - 'frontend/**'
+  # pull_request 비활성화 (dev 브랜치에서 실행 방지)
+  # pull_request:
+  #   branches: [ main ]
+  #   paths:
+  #     - 'docker/**'
+  #     - 'backend/**'
+  #     - 'frontend/**'
   workflow_dispatch:
 
 jobs:
@@ -54,6 +55,7 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+      continue-on-error: true
     
     - name: Create environment file
       run: |
@@ -147,18 +149,39 @@ jobs:
             sudo systemctl enable docker
           fi
           
-          # Docker Hub 로그인
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+          # Docker Hub 로그인 (선택사항)
+          if [ -n "${{ secrets.DOCKERHUB_TOKEN }}" ] && [ -n "${{ secrets.DOCKERHUB_USERNAME }}" ]; then
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin || echo "Docker Hub 로그인 실패, 계속 진행..."
+          else
+            echo "⚠️ Docker Hub 자격 증명이 없습니다. 로컬 빌드만 수행합니다."
+          fi
           
           # 기존 컨테이너 정리
-          sudo docker compose down --volumes --remove-orphans
+          sudo docker compose -f docker-compose.prod.yml down --volumes --remove-orphans
           
-          # 새 컨테이너 시작
-          sudo docker compose up -d
+          # 새 컨테이너 시작 (순서대로)
+          echo "🚀 새 컨테이너 시작..."
+          echo "1️⃣ MySQL 데이터베이스 시작..."
+          sudo docker compose -f docker-compose.prod.yml up -d mysql
+          
+          echo "⏳ MySQL 헬스체크 대기..."
+          timeout 60 bash -c 'until sudo docker compose -f docker-compose.prod.yml exec mysql mysqladmin ping -h localhost -u root -p1234 --silent; do sleep 2; done'
+          
+          echo "2️⃣ Spring Boot 백엔드 시작..."
+          sudo docker compose -f docker-compose.prod.yml up -d springboot
+          
+          echo "3️⃣ Python API 백엔드 시작..."
+          sudo docker compose -f docker-compose.prod.yml up -d python-api
+          
+          echo "4️⃣ React 프론트엔드 시작..."
+          sudo docker compose -f docker-compose.prod.yml up -d frontend
+          
+          echo "5️⃣ Nginx 프록시 시작..."
+          sudo docker compose -f docker-compose.prod.yml up -d nginx
           
           # 서비스 상태 확인
           sleep 10
-          sudo docker compose ps
+          sudo docker compose -f docker-compose.prod.yml ps
           
           echo "✅ AWS 배포 완료!"
           echo "🌐 서비스 URL: https://${{ secrets.DOMAIN_NAME }}"

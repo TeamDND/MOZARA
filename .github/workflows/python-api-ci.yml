@@ -2,11 +2,12 @@ name: Python FastAPI CI/CD
 
 on:
   push:
-    branches: [ main, dev ]
-    paths: [ 'backend/python/**' ]
-  pull_request:
     branches: [ main ]
     paths: [ 'backend/python/**' ]
+  # pull_request 비활성화 (dev 브랜치에서 실행 방지)
+  # pull_request:
+  #   branches: [ main ]
+  #   paths: [ 'backend/python/**' ]
 
 jobs:
   test:
