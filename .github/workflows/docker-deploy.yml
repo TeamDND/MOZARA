@@ -103,6 +103,7 @@ jobs:
     - name: Deploy to AWS EC2
       if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
       run: |
+        cd docker
         # EC2 인스턴스에 Docker 관련 파일들 복사
         echo "📁 파일을 ${{ secrets.LIVE_SERVER_IP }}에 복사합니다..."
         scp -i ~/.ssh/aws_key.pem -o StrictHostKeyChecking=no \
