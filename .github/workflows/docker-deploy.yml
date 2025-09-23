@@ -55,70 +55,29 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
       continue-on-error: true
     
-    - name: Create environment file
+    - name: Set environment variables
+      if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
       run: |
-        cd docker
-        # 환경변수 파일 생성 (특수문자 처리)
-        cat > .env << 'EOF'
-        # AI 서비스 API 키
-        GEMINI_API_KEY=${GEMINI_API_KEY}
-        OPENAI_API_KEY=${OPENAI_API_KEY}
-        YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
-        ELEVEN_ST_API_KEY=${ELEVEN_ST_API_KEY}
-        
-        # Pinecone 설정
-        PINECONE_API_KEY=${PINECONE_API_KEY}
-        PINECONE_ENVIRONMENT=${PINECONE_ENVIRONMENT}
-        PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME}
-        
-        # OAuth2 설정
-        GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-        GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-        KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
 
-        
-        # 데이터베이스 설정 (기본값 고정)
-        MYSQL_ROOT_PASSWORD=1234
-        MYSQL_DATABASE=mozara
-        MYSQL_USER=root
-        MYSQL_PASSWORD=1234
-        
-        # JWT 설정
-        JWT_SECRET_KEY=${JWT_SECRET_KEY}
-        
-        # Docker Hub 설정
-        DOCKERHUB_TOKEN=${DOCKERHUB_TOKEN}
-        DOCKERHUB_USERNAME=${DOCKERHUB_USERNAME}
-        
-        # AWS 배포 설정 (DuckDNS 도메인 또는 IP)
-        LIVE_SERVER_IP=${LIVE_SERVER_IP}
-        EC2_SSH_KEY=${EC2_SSH_KEY}
-        
-        # 배포 도메인 설정 (DuckDNS 도메인)
-
-        PROTOCOL=https
-        EOF
-        
-        # GitHub Secrets를 환경변수로 설정
-        echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
-        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
-        echo "YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}" >> .env
-        echo "ELEVEN_ST_API_KEY=${{ secrets.ELEVEN_ST_API_KEY }}" >> .env
-        echo "PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}" >> .env
-        echo "PINECONE_ENVIRONMENT=${{ secrets.PINECONE_ENVIRONMENT }}" >> .env
-        echo "PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}" >> .env
-        echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
-        echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-        echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
-
-        echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
-        echo "DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}" >> .env
-        echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> .env
-        echo "LIVE_SERVER_IP=${{ secrets.LIVE_SERVER_IP }}" >> .env
-        echo "EC2_SSH_KEY=${{ secrets.EC2_SSH_KEY }}" >> .env
+        echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> $GITHUB_ENV
+        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
+        echo "YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}" >> $GITHUB_ENV
+        echo "ELEVEN_ST_API_KEY=${{ secrets.ELEVEN_ST_API_KEY }}" >> $GITHUB_ENV
+        echo "PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}" >> $GITHUB_ENV
+        echo "PINECONE_ENVIRONMENT=${{ secrets.PINECONE_ENVIRONMENT }}" >> $GITHUB_ENV
+        echo "PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}" >> $GITHUB_ENV
+        echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> $GITHUB_ENV
+        echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> $GITHUB_ENV
+        echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> $GITHUB_ENV
+        echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> $GITHUB_ENV
+        echo "DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}" >> $GITHUB_ENV
+        echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
+        echo "LIVE_SERVER_IP=${{ secrets.LIVE_SERVER_IP }}" >> $GITHUB_ENV
+        echo "EC2_SSH_KEY=${{ secrets.EC2_SSH_KEY }}" >> $GITHUB_ENV
 
     
     - name: Create SSH key file
+      if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/aws_key.pem
@@ -135,10 +94,10 @@ jobs:
           exit 1
         fi
         
-        # 이미지가 정상적으로 빌드되는지 테스트
-        docker compose config
+        # PR에서는 환경변수 없이 설정 파일만 검증
+        echo "🔍 Docker Compose 설정 파일 검증 중..."
+        docker compose config --quiet
         
-        # 실제 빌드는 배포 시에만 수행 (시간 절약)
         echo "✅ Docker Compose 설정 검증 완료"
     
     - name: Deploy to AWS EC2
@@ -150,12 +109,24 @@ jobs:
           docker-compose.yml \
           docker-compose.prod.yml \
           nginx.conf \
-          .env \
           ubuntu@${{ secrets.LIVE_SERVER_IP }}:/home/ubuntu/mozara/
         
         # EC2에서 배포 실행
-        ssh -i ~/.ssh/aws_key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.LIVE_SERVER_IP }} << 'EOF'
+        ssh -i ~/.ssh/aws_key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.LIVE_SERVER_IP }} << EOF
           cd /home/ubuntu/mozara
+          
+          # 환경변수 설정
+          export GEMINI_API_KEY="$GEMINI_API_KEY"
+          export OPENAI_API_KEY="$OPENAI_API_KEY"
+          export YOUTUBE_API_KEY="$YOUTUBE_API_KEY"
+          export ELEVEN_ST_API_KEY="$ELEVEN_ST_API_KEY"
+          export PINECONE_API_KEY="$PINECONE_API_KEY"
+          export PINECONE_ENVIRONMENT="$PINECONE_ENVIRONMENT"
+          export PINECONE_INDEX_NAME="$PINECONE_INDEX_NAME"
+          export GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID"
+          export GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
+          export KAKAO_CLIENT_SECRET="$KAKAO_CLIENT_SECRET"
+          export JWT_SECRET_KEY="$JWT_SECRET_KEY"
           
           # Docker 설치 확인 및 설치
           if ! command -v docker &> /dev/null; then
