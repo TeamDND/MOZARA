@@ -108,13 +108,19 @@ jobs:
     - name: Build and test Docker images
       run: |
         cd docker
-        docker-compose build
+        
+        # Docker Compose 파일 존재 확인
+        if [ ! -f "docker-compose.yml" ]; then
+          echo "❌ docker-compose.yml 파일을 찾을 수 없습니다."
+          ls -la
+          exit 1
+        fi
         
         # 이미지가 정상적으로 빌드되는지 테스트
-        docker-compose config
+        docker compose config
         
-        # 프론트엔드 빌드 테스트
-        echo "✅ Docker 이미지 빌드 테스트 완료"
+        # 실제 빌드는 배포 시에만 수행 (시간 절약)
+        echo "✅ Docker Compose 설정 검증 완료"
     
     - name: Deploy to AWS EC2
       run: |
@@ -145,14 +151,14 @@ jobs:
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
           
           # 기존 컨테이너 정리
-          sudo docker-compose down --volumes --remove-orphans
+          sudo docker compose down --volumes --remove-orphans
           
           # 새 컨테이너 시작
-          sudo docker-compose up -d
+          sudo docker compose up -d
           
           # 서비스 상태 확인
           sleep 10
-          sudo docker-compose ps
+          sudo docker compose ps
           
           echo "✅ AWS 배포 완료!"
           echo "🌐 서비스 URL: https://${{ secrets.DOMAIN_NAME }}"

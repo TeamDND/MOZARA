@@ -20,27 +20,27 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-if ! command -v docker-compose &> /dev/null; then
+if ! command -v docker &> /dev/null || ! docker compose version &> /dev/null; then
     echo "❌ Docker Compose가 설치되지 않았습니다."
     exit 1
 fi
 
 # 기존 컨테이너 중지 및 제거
 echo "🛑 기존 컨테이너 중지 및 제거..."
-docker-compose down --volumes --remove-orphans
+docker compose down --volumes --remove-orphans
 
 # 이미지 빌드
 echo "🔨 Docker 이미지 빌드..."
-docker-compose build --no-cache
+docker compose build --no-cache
 
 # 서비스 시작
 echo "▶️ 서비스 시작..."
-docker-compose up -d
+docker compose up -d
 
 # 서비스 상태 확인
 echo "📊 서비스 상태 확인..."
 sleep 10
-docker-compose ps
+docker compose ps
 
 echo "✅ 배포 완료!"
 echo "🌐 프론트엔드: http://localhost:3000"
@@ -51,5 +51,5 @@ echo "🔍 Swagger UI: http://localhost:8080/swagger-ui.html"
 
 echo ""
 echo "📝 로그 확인 명령어:"
-echo "docker-compose logs -f [서비스명]"
-echo "예: docker-compose logs -f springboot"
+echo "docker compose logs -f [서비스명]"
+echo "예: docker compose logs -f springboot"
