@@ -1,7 +1,6 @@
 package com.example.springboot.oauth2.google;
 
 import com.example.springboot.jwt.JwtUtil;
-import com.example.springboot.service.oauth2.GoogleOAuth2UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,9 +18,6 @@ import java.util.Map;
 public class GoogleOAuth2Controller {
 
     @Autowired
-    private GoogleOAuth2UserService googleOAuth2UserService;
-
-    @Autowired
     private JwtUtil jwtUtil;
 
     @GetMapping("/success")
@@ -37,12 +33,9 @@ public class GoogleOAuth2Controller {
             String name = principal.getAttribute("name");
             String picture = principal.getAttribute("picture");
 
-            // 사용자 정보를 DB에 저장/업데이트
-            var user = googleOAuth2UserService.processGoogleOAuth2User(email, name, picture);
-
-            // JWT 토큰 생성
-            String accessToken = jwtUtil.createAccessToken(user.getUsername());
-            String refreshToken = jwtUtil.createRefreshToken(user.getUsername());
+            // JWT 토큰 생성 (이메일을 username으로 사용)
+            String accessToken = jwtUtil.createAccessToken(email);
+            String refreshToken = jwtUtil.createRefreshToken(email);
 
             // 응답 헤더에 토큰 설정
             response.setHeader("Authorization", "Bearer " + accessToken);
@@ -52,7 +45,7 @@ public class GoogleOAuth2Controller {
             responseData.put("message", "Google OAuth2 로그인 성공");
             responseData.put("provider", "google");
             responseData.put("user", Map.of(
-                "username", user.getUsername(),
+                "username", email,
                 "email", email,
                 "name", name,
                 "picture", picture != null ? picture : ""
