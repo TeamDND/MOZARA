@@ -137,19 +137,19 @@ jobs:
           cd /home/ubuntu/mozara/docker
           
           # .env 파일 생성 (GitHub Secrets에서 직접 전달)
-          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
-          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
-          echo "YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}" >> .env
-          echo "ELEVEN_ST_API_KEY=${{ secrets.ELEVEN_ST_API_KEY }}" >> .env
-          echo "PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}" >> .env
-          echo "PINECONE_ENVIRONMENT=${{ secrets.PINECONE_ENVIRONMENT }}" >> .env
-          echo "PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}" >> .env
-          echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
-          echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-          echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
-          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
-          echo "DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}" >> .env
-          echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> .env
+          echo "GEMINI_API_KEY=$GEMINI_API_KEY" > .env
+          echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env
+          echo "YOUTUBE_API_KEY=$YOUTUBE_API_KEY" >> .env
+          echo "ELEVEN_ST_API_KEY=$ELEVEN_ST_API_KEY" >> .env
+          echo "PINECONE_API_KEY=$PINECONE_API_KEY" >> .env
+          echo "PINECONE_ENVIRONMENT=$PINECONE_ENVIRONMENT" >> .env
+          echo "PINECONE_INDEX_NAME=$PINECONE_INDEX_NAME" >> .env
+          echo "GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID" >> .env
+          echo "GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> .env
+          echo "KAKAO_CLIENT_SECRET=$KAKAO_CLIENT_SECRET" >> .env
+          echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> .env
+          echo "DOCKERHUB_TOKEN=$DOCKERHUB_TOKEN" >> .env
+          echo "DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME" >> .env
           
           # .env 파일 권한 설정
           chmod 644 .env
