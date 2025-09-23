@@ -1,6 +1,6 @@
 package com.example.springboot.controller.ai;
 
-import com.example.springboot.service.HairChangeService;
+import com.example.springboot.service.ai.HairChangeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/hair-change")
+@RequestMapping("/api/ai/hair-change")
 @CrossOrigin(origins = "*")
 public class HairChangeController {
 
