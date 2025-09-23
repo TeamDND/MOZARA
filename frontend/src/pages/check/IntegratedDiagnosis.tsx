@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Progress } from '../../components/ui/progress';
@@ -17,6 +18,7 @@ interface IntegratedDiagnosisProps {
 
 function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: IntegratedDiagnosisProps = {}) {
   const navigate = useNavigate();
+  const user = useSelector((state: any) => state.user);
   const [currentStep, setCurrentStep] = useState(1);
   const [baspAnswers, setBaspAnswers] = useState({
     age: '',
@@ -65,6 +67,13 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
   };
 
   const handleComplete = () => {
+    // 로그인 상태 확인
+    if (!user || !user.isLoggedIn) {
+      alert('로그인 후 확인하실 수 있습니다');
+      navigate('/login');
+      return;
+    }
+
     const results = {
       basp: {
         score: 3.2,
@@ -493,34 +502,20 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
               </div>
             </div>
 
-            <div className="bg-green-50 p-4 rounded-xl">
+            {/* <div className="bg-green-50 p-4 rounded-xl">
               <h3 className="text-lg font-semibold text-green-800 mb-3">🎯 개인 맞춤 개선 계획</h3>
               <div className="space-y-2 text-sm text-green-700">
-                <p>✅ 3개월 내 15-25% 개선이 예상됩니다</p>
-                <p>✅ 우선순위: 두피 마사지 + 생활 습관 개선</p>
-                <p>✅ 주간 챌린지가 자동으로 설정됩니다</p>
+                <p>✅ 당신을 위한 맞춤 개선 가이드가 준비되었습니다</p>
               </div>
-            </div>
+            </div> */}
 
             <div className="space-y-3">
               <Button 
-                onClick={() => {
-                  if (setCurrentView) {
-                    setCurrentView('damage');
-                  } else {
-                    navigate('/hair-damage-analysis');
-                  }
-                }} 
-                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl active:scale-[0.98]"
-              >
-                모발 손상 분석 계속하기
-              </Button>
-              <Button 
                 onClick={handleComplete} 
                 variant="outline" 
-                className="w-full h-12 rounded-xl active:scale-[0.98]"
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl active:scale-[0.98]"
               >
-                결과만 먼저 확인하기
+                맞춤 솔루션 및 컨텐츠 확인하기
               </Button>
             </div>
           </div>
@@ -538,28 +533,12 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         
         {/* 헤더 (Mobile-First) */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4">
-          <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => {
-                if (setCurrentView) {
-                  setCurrentView('dashboard');
-                } else {
-                  navigate('/dashboard');
-                }
-              }}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              뒤로
-            </Button>
-            
+          <div className="flex items-center justify-center">           
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-600">
                 {currentStep} / {totalSteps}
               </span>
-              <Progress value={(currentStep / totalSteps) * 100} className="w-24 h-2" />
+              <Progress value={(currentStep / totalSteps) * 100} className="w-60 h-2" />
             </div>
           </div>
         </div>

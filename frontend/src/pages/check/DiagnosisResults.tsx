@@ -164,25 +164,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
       {/* Mobile-First 컨테이너 */}
       <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col">
         
-        {/* 헤더 (Mobile-First) */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 text-center">
-              <h1 className="text-lg font-bold text-gray-800">진단 결과 및 맞춤 추천</h1>
-              <p className="text-xs text-gray-600 mt-1">
-                AI 분석을 바탕으로 한 개인 맞춤형 솔루션
-              </p>
-            </div>
-            <Button 
-              onClick={() => {
-                  navigate('/daily-care');
-              }}
-              className="ml-3 h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl active:scale-[0.98]"
-            >
-              데일리 케어
-            </Button>
-          </div>
-        </div>
+        
 
         {/* 메인 컨텐츠 (Mobile-First) */}
         <div className="flex-1 p-4 overflow-y-auto space-y-4">
@@ -217,8 +199,28 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </div>
           </div>
 
+          {/* Mobile-First 데일리 케어 */}
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex-1 text-center">
+              <h1 className="text-lg font-bold text-gray-800">진단 결과 및 맞춤 추천</h1>
+              <p className="text-xs text-gray-600 mt-1">
+                AI 분석을 바탕으로 한 개인 맞춤형 솔루션
+              </p>
+            </div>
+            <Button 
+              onClick={() => {
+                  navigate('/daily-care');
+              }}
+              className="ml-3 h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl active:scale-[0.98]"
+            >
+              데일리 케어
+            </Button>
+          </div>
+        </div>
+
           {/* 맞춤 추천 탭 (Mobile-First) */}
-          <Tabs defaultValue="contents" className="space-y-4">
+          <Tabs defaultValue="hospitals" className="space-y-4">
             <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
               <TabsTrigger 
                 value="hospitals" 
