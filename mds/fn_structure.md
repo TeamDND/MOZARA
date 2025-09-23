@@ -71,6 +71,7 @@ export function Button({ children }) {
 
 라우팅될 페이지 단위의 컴포넌트를 저장합니다.\
 각 페이지는 자체 UI + 로직을 가질 수 있습니다.
+페이지 안에는 기능별로 check, hair_solutions, hair_contents 폴더로 나눠있습니다.
 
 -   `pages/index.tsx` (랜딩 페이지)\
 -   `pages/analysis.tsx` (분석 페이지)\
