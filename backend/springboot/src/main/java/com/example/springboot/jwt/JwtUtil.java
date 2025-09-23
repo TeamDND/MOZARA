@@ -43,4 +43,14 @@ public class JwtUtil {
     public boolean isExpired(String token) {
         return Jwts.parser().verifyWith(this.secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
+
+    // Access Token 생성 (15분)
+    public String createAccessToken(String username) {
+        return createToken("access", username, "ROLE_USER", 15 * 60 * 1000L);
+    }
+
+    // Refresh Token 생성 (7일)
+    public String createRefreshToken(String username) {
+        return createToken("refresh", username, "ROLE_USER", 7 * 24 * 60 * 60 * 1000L);
+    }
 }

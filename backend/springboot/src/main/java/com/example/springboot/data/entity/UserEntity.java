@@ -34,6 +34,9 @@ public class UserEntity {
     @Column(name = "createdat")
     private Instant createdat;
 
+    @Column(name = "updatedat")
+    private Instant updatedat;
+
     @Size(max = 100)
     @Column(name = "email", length = 100)
     private String email;
