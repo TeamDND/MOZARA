@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 백엔드 Hair Loss Analyzer 성능 테스트 스크립트
 """
@@ -22,12 +22,12 @@ from sklearn.metrics import (
 )
 
 # 백엔드 모듈 import를 위한 경로 추가
-backend_path = Path("C:/Users/301/Desktop/main_project/backend/hair_classification/hair_loss_rag_analyzer_v0/backend")
+backend_path = Path("C:/Users/301/Desktop/main_project/backend/hair_classification/hair_loss_rag_analyzer_v1/backend")
 sys.path.append(str(backend_path))
 
 # 하드코딩된 경로로 config 우회
 class HardcodedSettings:
-    UPLOAD_DIR = "C:/Users/301/Desktop/main_project/backend/hair_classification/hair_loss_rag_analyzer_v0/backend/uploads"
+    UPLOAD_DIR = "C:/Users/301/Desktop/main_project/backend/hair_classification/hair_loss_rag_analyzer_v1/backend/uploads"
     INDEX_NAME = "hair-loss-rag-analysis-convnext"
     EMBEDDING_DIMENSION = 1536
     MODEL_NAME = "convnext_large.fb_in22k_ft_in1k_384"
@@ -43,11 +43,8 @@ class HardcodedSettings:
     }
 
 # config를 직접 덮어쓰기
-import app.config
-app.config.settings = HardcodedSettings()
-
 from app.services.hair_loss_analyzer import HairLossAnalyzer
-settings = HardcodedSettings()
+
 
 
 def get_next_test_number(base_log_path: Path) -> int:
@@ -159,7 +156,8 @@ class BackendAnalyzerTester:
             start_time = time.time()
 
             # 분석 실행
-            result = await self.analyzer.analyze_image(image, image_path.name)
+            # LLM 비활성화: ConvNeXt+FAISS 전용 성능 측정
+            result = await self.analyzer.analyze_image(image, image_path.name, use_llm=False)
 
             # 분석 종료 시간
             end_time = time.time()
@@ -258,7 +256,8 @@ class BackendAnalyzerTester:
         class_report = classification_report(y_true, y_pred, output_dict=True)
 
         # 컨퓨전 메트릭스
-        cm = confusion_matrix(y_true, y_pred)
+        # 레벨 1을 제외하고 2~7만 평가 레이블로 고정
+        cm = confusion_matrix(y_true, y_pred, labels=[2,3,4,5,6,7])
 
         # 평균 분석 시간
         avg_analysis_time = np.mean([r['analysis_time'] for r in successful_results])
@@ -364,9 +363,11 @@ class BackendAnalyzerTester:
         with open(report_path, 'w', encoding='utf-8') as f:
             f.write("=" * 60 + "\n")
             f.write(f"백엔드 Hair Loss Analyzer 성능 테스트 리포트 (Test{self.test_number})\n")
+            f.write("(Male All Views 필터 적용)\n")
             f.write("=" * 60 + "\n")
             f.write(f"테스트 일시: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write(f"테스트 데이터: {self.test_data_path}\n")
+            f.write(f"RAG 검색 필터: male 이미지만 (모든 뷰 사이트 포함)\n")
             f.write("\n")
 
             f.write("📊 전체 결과\n")
@@ -417,7 +418,9 @@ class BackendAnalyzerTester:
 
 async def main():
     """메인 함수"""
-    print("백엔드 Hair Loss Analyzer 성능 테스트 시작")
+    print("백엔드 Hair Loss Analyzer 성능 테스트 시작 (Male All Views)")
+    print("=" * 60)
+    print("RAG 검색 대상: male 이미지만 (모든 뷰 사이트 포함)")
     print("=" * 60)
 
     # 경로 설정
@@ -459,3 +462,6 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+
+

@@ -137,6 +137,21 @@ class FAISSManager:
                         'path': meta['path']
                     })
 
+            # Filter out stage 1 and keep only stages 2..7 for consistency
+            try:
+                filtered = []
+                for img in similar_images:
+                    try:
+                        st = int(img.get('stage', 0))
+                    except Exception:
+                        st = img.get('stage')
+                    if isinstance(st, int) and (2 <= st <= 7):
+                        img['stage'] = st
+                        filtered.append(img)
+                similar_images = filtered
+            except Exception:
+                pass
+
             return similar_images
 
         except Exception as e:
@@ -149,8 +164,10 @@ class FAISSManager:
             similar_images = self.search_similar_images(query_embedding, top_k)
 
             if not similar_images:
+                # 모든 근접 이웃이 필터링(예: 레벨 1만)되어 비었을 때
+                # 보수적으로 2단계로 설정하고 신뢰도는 0으로 둠
                 return {
-                    'predicted_stage': None,
+                    'predicted_stage': 2,
                     'confidence': 0,
                     'stage_scores': {},
                     'similar_images': []
@@ -176,8 +193,28 @@ class FAISSManager:
                     stage_scores[stage] /= total_weight
 
             # 가장 높은 점수의 단계 선택
-            predicted_stage = max(stage_scores, key=stage_scores.get)
-            confidence = stage_scores[predicted_stage]
+            # 단계 범위 제한: 2~7만 허용하여 예측
+            allowed_scores = {int(s): v for s, v in stage_scores.items() if 2 <= int(s) <= 7}
+
+            if allowed_scores:
+                predicted_stage = max(allowed_scores, key=allowed_scores.get)
+                confidence = allowed_scores[predicted_stage]
+                stage_scores = allowed_scores
+            else:
+                # 허용 범위가 전혀 없으면 보수적으로 클램프
+                if stage_scores:
+                    raw_pred = max(stage_scores, key=stage_scores.get)
+                    try:
+                        raw_pred_int = int(raw_pred)
+                    except Exception:
+                        raw_pred_int = 2
+                    predicted_stage = min(7, max(2, raw_pred_int))
+                    confidence = stage_scores.get(raw_pred, 0)
+                    # stage_scores는 허용 구간이 없으므로 노이즈 제거
+                    stage_scores = {}
+                else:
+                    predicted_stage = 2
+                    confidence = 0
 
             return {
                 'predicted_stage': predicted_stage,

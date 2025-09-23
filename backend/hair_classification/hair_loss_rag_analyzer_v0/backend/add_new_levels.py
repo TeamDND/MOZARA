@@ -38,7 +38,8 @@ async def add_specific_levels(levels_to_add):
 
 if __name__ == "__main__":
     # 추가할 레벨 지정 (모든 레벨 1-7 다시 인덱싱)
-    levels_to_add = [1, 2, 3, 4, 5, 6, 7]
+    # 테스트/운영 일관성: 레벨 1 제외, 2~7만 인덱싱
+    levels_to_add = [2, 3, 4, 5, 6, 7]
 
     # 이벤트 루프를 생성하고 비동기 함수 실행
     asyncio.run(add_specific_levels(levels_to_add))
