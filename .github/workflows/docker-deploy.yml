@@ -103,7 +103,6 @@ jobs:
     - name: Deploy to AWS EC2
       if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
       run: |
-        cd docker
         # EC2 인스턴스에 전체 프로젝트 복사
         echo "📁 프로젝트를 ${{ secrets.LIVE_SERVER_IP }}에 복사합니다..."
         # LIVE_SERVER_IP 값 확인 및 검증
@@ -122,7 +121,7 @@ jobs:
           exit 1
         fi
         
-        # 전체 프로젝트를 EC2에 복사
+        # 전체 프로젝트를 EC2에 복사 (프로젝트 루트에서 실행)
         rsync -avz --progress -e "ssh -i ~/.ssh/aws_key.pem -o StrictHostKeyChecking=no" \
           --exclude='.git' \
           --exclude='node_modules' \
@@ -130,7 +129,7 @@ jobs:
           --exclude='.env' \
           --exclude='build' \
           --exclude='dist' \
-          ../ ubuntu@${{ secrets.LIVE_SERVER_IP }}:/home/ubuntu/mozara/
+          ./ ubuntu@${{ secrets.LIVE_SERVER_IP }}:/home/ubuntu/mozara/
         
         # EC2에서 배포 실행
         ssh -i ~/.ssh/aws_key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.LIVE_SERVER_IP }} << 'EOF'
@@ -149,6 +148,7 @@ jobs:
           echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
           echo "DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}" >> .env
           echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> .env
+          echo "JWT_SECRET_KEY=alaoskjovjcpovcjqawpjcxapsjcpaosjcpasocpoadasjdlakslaks" >> .env
           
           # 환경변수 설정
           export $(cat .env | xargs)

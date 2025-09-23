@@ -49,43 +49,27 @@ public class GoogleOAuth2UserService {
 
         // UsersInfoEntity 생성
         UsersInfoEntity userInfo = new UsersInfoEntity();
-        userInfo.setUserId(savedUser.getId());
+        userInfo.setUserEntityIdForeign(savedUser);
         userInfo.setNickname(name != null ? name : "구글사용자");
-        userInfo.setProfileImage(picture);
-        userInfo.setOauthProvider("GOOGLE");
-        userInfo.setOauthId(email);
-        userInfo.setCreatedat(java.time.Instant.now());
-        userInfo.setUpdatedat(java.time.Instant.now());
-        
+
         usersInfoRepository.save(userInfo);
 
         return savedUser;
     }
 
     private void updateGoogleUserInfo(UserEntity user, String name, String picture) {
-        Optional<UsersInfoEntity> userInfoOpt = usersInfoRepository.findByUserId(user.getId());
+        UsersInfoEntity userInfo = usersInfoRepository.findByUserEntityIdForeign_Id(user.getId());
         
-        if (userInfoOpt.isPresent()) {
-            UsersInfoEntity userInfo = userInfoOpt.get();
-            
-            // 프로필 이미지가 변경되었으면 업데이트
-            if (picture != null && !picture.equals(userInfo.getProfileImage())) {
-                userInfo.setProfileImage(picture);
-                userInfo.setUpdatedat(java.time.Instant.now());
-                usersInfoRepository.save(userInfo);
-            }
+        if (userInfo != null) {
+            // 사용자 정보 업데이트 (프로필 이미지는 현재 스키마에 없음)
+            usersInfoRepository.save(userInfo);
         } else {
             // UsersInfo가 없으면 생성
-            UsersInfoEntity userInfo = new UsersInfoEntity();
-            userInfo.setUserId(user.getId());
-            userInfo.setNickname(name != null ? name : "구글사용자");
-            userInfo.setProfileImage(picture);
-            userInfo.setOauthProvider("GOOGLE");
-            userInfo.setOauthId(user.getUsername());
-            userInfo.setCreatedat(java.time.Instant.now());
-            userInfo.setUpdatedat(java.time.Instant.now());
+            UsersInfoEntity newUserInfo = new UsersInfoEntity();
+            newUserInfo.setUserEntityIdForeign(user);
+            newUserInfo.setNickname(name != null ? name : "구글사용자");
             
-            usersInfoRepository.save(userInfo);
+            usersInfoRepository.save(newUserInfo);
         }
         
         user.setUpdatedat(java.time.Instant.now());
