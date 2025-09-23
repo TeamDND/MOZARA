@@ -49,11 +49,15 @@ public class ReissueController {
     }
     @DeleteMapping(value = "/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("로그아웃 요청 받음 - 쿠키 만료 처리 시작");
+        
         Cookie cookie = new Cookie("refresh", null);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setMaxAge(0);
         response.addCookie(cookie);
+        
+        System.out.println("Refresh Token 쿠키 만료 완료 (MaxAge: 0)");
         return ResponseEntity.status(HttpStatus.OK).body("Refresh token is expired. 로그아웃 성공");
     }
 }

@@ -17,4 +17,8 @@ public class UsersInfoDAO {
     public UsersInfoEntity addUserInfo(UsersInfoEntity usersInfoEntity) {
         return usersInfoRepository.save(usersInfoEntity);
     }
+
+    public UsersInfoEntity findByNickname(String nickname) {
+        return usersInfoRepository.findByNickname(nickname);
+    }
 }

@@ -1,2 +1,0 @@
-모발 손상 분석 요청 - 이미지: ㅋㅋㅋ.jpg, 텍스트: 내 모발 ㅈ댐?
-2025-09-06T15:00:29.092+09:00 ERROR 12664 --- [springboot] [nio-8080-exec-9] c.example.springboot.service.AIService   : Python 백엔드 통신 오류: 500 Internal Server Error on POST request for "http://localhost:8000/hair-damage/search/image-and-text": "{"detail":"모발 손상 분석 중 오류: name 'search_results' is not defined"}"
