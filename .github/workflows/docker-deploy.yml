@@ -194,7 +194,7 @@ jobs:
           sed -i 's|context: ../backend/springboot|context: ./backend/springboot|g' docker-compose.prod.yml
           sed -i 's|context: ../backend/python|context: ./backend/python|g' docker-compose.prod.yml
           sed -i 's|context: ../frontend|context: ./frontend|g' docker-compose.prod.yml
-          sed -i 's|- ../backend/springboot/db/mozara.sql|./backend/springboot/db/mozara.sql|g' docker-compose.prod.yml
+          sed -i 's|- \\.\\./backend/springboot/db/mozara\\.sql|- \\./backend/springboot/db/mozara\\.sql|g' docker-compose.prod.yml
           
           # 기존 컨테이너 정리
           sudo $DOCKER_COMPOSE -f docker-compose.prod.yml down --volumes --remove-orphans
