@@ -35,12 +35,13 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <Routes>
         <Route path="/" element={<MainLayout />}>
-          {/* <Route index element={<LandingPageV2 />} /> */}
-          {/* <Route index element={<LandingPage />} /> */}
+          
           <Route index element={<MainPage />} />
           
           {/* 메인 플로우 (Main Flow) - new_fn_flow.md */}
           {/* <Route path="main-page" element={<MainPage />} /> */}
+          <Route path="landing" element={<LandingPage />} />
+          <Route path="landing2" element={<LandingPageV2 />} />
           <Route path="login" element={<LogIn />} />
           <Route path="integrated-diagnosis" element={<IntegratedDiagnosis />} />
           <Route path="diagnosis-results" element={<DiagnosisResults />} />
