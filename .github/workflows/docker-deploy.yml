@@ -210,27 +210,27 @@ jobs:
           ls -la ../backend/springboot/
           
           # 기존 컨테이너 정리
-          sudo $DOCKER_COMPOSE -f docker-compose.prod.yml down --volumes --remove-orphans
+          sudo $DOCKER_COMPOSE --file docker-compose.prod.yml down --volumes --remove-orphans
           
           # 새 컨테이너 시작 (순서대로)
           echo "🚀 새 컨테이너 시작..."
           echo "1️⃣ MySQL 데이터베이스 시작..."
-          sudo $DOCKER_COMPOSE -f docker-compose.prod.yml up -d mysql
+          sudo $DOCKER_COMPOSE --file docker-compose.prod.yml up -d mysql
           
           echo "⏳ MySQL 컨테이너 시작 대기..."
           sleep 5
           
           # MySQL 컨테이너 상태 확인
-          if ! sudo $DOCKER_COMPOSE -f docker-compose.prod.yml ps mysql | grep -q "Up"; then
+          if ! sudo $DOCKER_COMPOSE --file docker-compose.prod.yml ps mysql | grep -q "Up"; then
             echo "❌ MySQL 컨테이너가 시작되지 않았습니다. 로그 확인:"
-            sudo $DOCKER_COMPOSE -f docker-compose.prod.yml logs mysql
+            sudo $DOCKER_COMPOSE --file docker-compose.prod.yml logs mysql
             exit 1
           fi
           echo "✅ MySQL 컨테이너가 시작되었습니다."
           
           echo "⏳ MySQL 헬스체크 대기..."
           for i in {1..30}; do
-            if sudo $DOCKER_COMPOSE -f docker-compose.prod.yml exec mysql mysqladmin ping -h localhost -u root -p1234 --silent; then
+            if sudo $DOCKER_COMPOSE --file docker-compose.prod.yml exec mysql mysqladmin ping -h localhost -u root -p1234 --silent; then
               echo "✅ MySQL이 준비되었습니다."
               break
             else
@@ -239,26 +239,26 @@ jobs:
             fi
             if [ $i -eq 30 ]; then
               echo "❌ MySQL 시작 실패. 컨테이너 로그 확인:"
-              sudo $DOCKER_COMPOSE -f docker-compose.prod.yml logs mysql
+              sudo $DOCKER_COMPOSE --file docker-compose.prod.yml logs mysql
               exit 1
             fi
           done
           
           echo "2️⃣ Spring Boot 백엔드 시작..."
-          sudo $DOCKER_COMPOSE -f docker-compose.prod.yml up -d springboot
+          sudo $DOCKER_COMPOSE --file docker-compose.prod.yml up -d springboot
           
           echo "3️⃣ Python API 백엔드 시작..."
-          sudo $DOCKER_COMPOSE -f docker-compose.prod.yml up -d python-api
+          sudo $DOCKER_COMPOSE --file docker-compose.prod.yml up -d python-api
           
           echo "4️⃣ React 프론트엔드 시작..."
-          sudo $DOCKER_COMPOSE -f docker-compose.prod.yml up -d frontend
+          sudo $DOCKER_COMPOSE --file docker-compose.prod.yml up -d frontend
           
           echo "5️⃣ Nginx 프록시 시작..."
-          sudo $DOCKER_COMPOSE -f docker-compose.prod.yml up -d nginx
+          sudo $DOCKER_COMPOSE --file docker-compose.prod.yml up -d nginx
           
           # 서비스 상태 확인
           sleep 10
-          sudo $DOCKER_COMPOSE -f docker-compose.prod.yml ps
+          sudo $DOCKER_COMPOSE --file docker-compose.prod.yml ps
           
           echo "✅ AWS 배포 완료!"
           echo "🌐 서비스 URL: https://mozaracare.duckdns.org"
