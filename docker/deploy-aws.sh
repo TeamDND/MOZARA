@@ -50,10 +50,10 @@ echo "🔨 Docker 이미지 빌드 및 푸시..."
 echo "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
 
 # 이미지 빌드 및 태깅
-docker-compose build
+docker compose build
 
 # 이미지 푸시 (선택사항 - 로컬에서 빌드한 이미지를 Docker Hub에 푸시하려면)
-# docker-compose push
+# docker compose push
 
 echo "📦 Docker 이미지 준비 완료"
 
@@ -85,14 +85,14 @@ ssh -i aws_key.pem -o StrictHostKeyChecking=no ubuntu@$LIVE_SERVER_IP << 'EOF'
     fi
     
     # 기존 컨테이너 정리
-    sudo docker-compose down --volumes --remove-orphans
+    sudo docker compose down --volumes --remove-orphans
     
     # 새 컨테이너 시작
-    sudo docker-compose up -d
+    sudo docker compose up -d
     
     # 서비스 상태 확인
     sleep 10
-    sudo docker-compose ps
+    sudo docker compose ps
     
     echo "✅ AWS 배포 완료!"
     echo "🌐 서비스 URL: http://$LIVE_SERVER_IP"
