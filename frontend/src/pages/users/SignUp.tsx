@@ -1,6 +1,15 @@
 import React, { useState, FormEvent, ChangeEvent } from 'react';
 import apiClient from '../../services/apiClient';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../utils/userSlice';
+import { setToken } from '../../utils/tokenSlice';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Separator } from '../../components/ui/separator';
+import { Checkbox } from '../../components/ui/checkbox';
+import { ArrowLeft, Sparkles, Lock, User, Phone, Mail, MapPin } from 'lucide-react';
 
 interface SignUpFormData {
   username: string;
@@ -25,6 +34,7 @@ interface ValidationErrors {
 
 const SignUp: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   
   const [formData, setFormData] = useState<SignUpFormData>({
     username: '',
@@ -61,6 +71,7 @@ const SignUp: React.FC = () => {
       setErrors(prev => ({ ...prev, nickname: undefined }));
     } else {
       setErrors(prev => ({ ...prev, [name]: undefined }));
+      
     }
   };
 
@@ -227,71 +238,84 @@ const SignUp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">회원가입</h2>
-            <p className="text-gray-600">새로운 계정을 만들어보세요</p>
-          </div>
-          
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile-First 컨테이너 */}
+      <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col items-center">
+        {/* 모바일 헤더 */}
+        <div className="flex items-center justify-between w-full p-4 border-b border-gray-100">
+          <button 
+            onClick={() => navigate('/login')}
+            className="p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg active:scale-95"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h1 className="text-lg font-semibold">회원가입</h1>
+          <div className="w-10"></div>
+        </div>
+
+        {/* 메인 컨텐츠 */}
+        <div className="w-full max-w-sm mx-auto px-6 py-6 space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             {/* 아이디 */}
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="space-y-2">
+              <Label htmlFor="username" className="text-sm font-medium text-gray-700">
                 아이디 <span className="text-red-500">*</span>
-              </label>
+              </Label>
               <div className="flex gap-2">
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  placeholder="6-18자 영문, 숫자만"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.username ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                <button
+                <div className="relative flex-1">
+                  <User className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="6-18자 영문, 숫자만"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    className={`pl-11 h-12 rounded-xl ${
+                      errors.username ? 'border-red-500' : 'border-gray-200'
+                    } focus:border-blue-500 focus:ring-blue-500`}
+                  />
+                </div>
+                <Button
                   type="button"
                   onClick={checkUsername}
                   disabled={!formData.username || usernameChecked}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  className={`min-w-[90px] h-12 rounded-xl ${
                     usernameChecked 
-                      ? 'bg-green-100 text-green-700 border border-green-300' 
+                      ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-50' 
                       : 'bg-blue-600 text-white hover:bg-blue-700'
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  } active:scale-[0.98] transition-all`}
                 >
-                  {usernameChecked ? '✓' : '중복확인'}
-                </button>
+                  {usernameChecked ? '✓ 확인됨' : '중복확인'}
+                </Button>
               </div>
               {errors.username && (
-                <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+                <p className="text-sm text-red-600">{errors.username}</p>
               )}
             </div>
 
             {/* 비밀번호 */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium text-gray-700">
                 비밀번호 <span className="text-red-500">*</span>
-              </label>
+              </Label>
               <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
+                <Lock className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                <Input
                   id="password"
                   name="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="8자 이상"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`pl-11 h-12 rounded-xl ${
+                    errors.password ? 'border-red-500' : 'border-gray-200'
+                  } focus:border-blue-500 focus:ring-blue-500`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600"
                 >
                   {showPassword ? (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -306,31 +330,32 @@ const SignUp: React.FC = () => {
                 </button>
               </div>
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                <p className="text-sm text-red-600">{errors.password}</p>
               )}
             </div>
 
             {/* 비밀번호 확인 */}
-            <div>
-              <label htmlFor="passwordCheck" className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="space-y-2">
+              <Label htmlFor="passwordCheck" className="text-sm font-medium text-gray-700">
                 비밀번호 확인 <span className="text-red-500">*</span>
-              </label>
+              </Label>
               <div className="relative">
-                <input
-                  type={showPasswordCheck ? "text" : "password"}
+                <Lock className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                <Input
                   id="passwordCheck"
                   name="passwordCheck"
+                  type={showPasswordCheck ? "text" : "password"}
                   placeholder="비밀번호를 다시 입력하세요"
                   value={formData.passwordCheck}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.passwordCheck ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`pl-11 h-12 rounded-xl ${
+                    errors.passwordCheck ? 'border-red-500' : 'border-gray-200'
+                  } focus:border-blue-500 focus:ring-blue-500`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPasswordCheck(!showPasswordCheck)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600"
                 >
                   {showPasswordCheck ? (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -345,98 +370,107 @@ const SignUp: React.FC = () => {
                 </button>
               </div>
               {errors.passwordCheck && (
-                <p className="mt-1 text-sm text-red-600">{errors.passwordCheck}</p>
+                <p className="text-sm text-red-600">{errors.passwordCheck}</p>
               )}
             </div>
 
             {/* 이메일 */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
                 이메일 <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="example@email.com"
-                value={formData.email}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="example@email.com"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className={`pl-11 h-12 rounded-xl ${
+                    errors.email ? 'border-red-500' : 'border-gray-200'
+                  } focus:border-blue-500 focus:ring-blue-500`}
+                />
+              </div>
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                <p className="text-sm text-red-600">{errors.email}</p>
               )}
             </div>
 
             {/* 주소 */}
-            <div>
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="space-y-2">
+              <Label htmlFor="address" className="text-sm font-medium text-gray-700">
                 주소 <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="address"
-                name="address"
-                placeholder="주소를 입력하세요"
-                value={formData.address}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.address ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
+              </Label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                <Input
+                  id="address"
+                  name="address"
+                  type="text"
+                  placeholder="주소를 입력하세요"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  className={`pl-11 h-12 rounded-xl ${
+                    errors.address ? 'border-red-500' : 'border-gray-200'
+                  } focus:border-blue-500 focus:ring-blue-500`}
+                />
+              </div>
               {errors.address && (
-                <p className="mt-1 text-sm text-red-600">{errors.address}</p>
+                <p className="text-sm text-red-600">{errors.address}</p>
               )}
             </div>
 
             {/* 닉네임 */}
-            <div>
-              <label htmlFor="nickname" className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="space-y-2">
+              <Label htmlFor="nickname" className="text-sm font-medium text-gray-700">
                 닉네임 <span className="text-red-500">*</span>
-              </label>
+              </Label>
               <div className="flex gap-2">
-                <input
-                  type="text"
-                  id="nickname"
-                  name="nickname"
-                  placeholder="한글 8자, 영문 14자까지"
-                  value={formData.nickname}
-                  onChange={handleInputChange}
-                  className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.nickname ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                <button
+                <div className="relative flex-1">
+                  <User className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="nickname"
+                    name="nickname"
+                    type="text"
+                    placeholder="한글 8자, 영문 14자까지"
+                    value={formData.nickname}
+                    onChange={handleInputChange}
+                    className={`pl-11 h-12 rounded-xl ${
+                      errors.nickname ? 'border-red-500' : 'border-gray-200'
+                    } focus:border-blue-500 focus:ring-blue-500`}
+                  />
+                </div>
+                <Button
                   type="button"
                   onClick={checkNickname}
                   disabled={!formData.nickname || nicknameChecked}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  className={`min-w-[90px] h-12 rounded-xl ${
                     nicknameChecked 
-                      ? 'bg-green-100 text-green-700 border border-green-300' 
+                      ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-50' 
                       : 'bg-blue-600 text-white hover:bg-blue-700'
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  } active:scale-[0.98] transition-all`}
                 >
-                  {nicknameChecked ? '✓' : '중복확인'}
-                </button>
+                  {nicknameChecked ? '✓ 확인됨' : '중복확인'}
+                </Button>
               </div>
               {errors.nickname && (
-                <p className="mt-1 text-sm text-red-600">{errors.nickname}</p>
+                <p className="text-sm text-red-600">{errors.nickname}</p>
               )}
             </div>
 
             {/* 성별 */}
-            <div>
-              <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="space-y-2">
+              <Label htmlFor="gender" className="text-sm font-medium text-gray-700">
                 성별 <span className="text-red-500">*</span>
-              </label>
+              </Label>
               <select
                 id="gender"
                 name="gender"
                 value={formData.gender}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full h-12 px-4 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
               >
                 <option value="남">남자</option>
                 <option value="여">여자</option>
@@ -444,51 +478,72 @@ const SignUp: React.FC = () => {
             </div>
 
             {/* 나이 */}
-            <div>
-              <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="space-y-2">
+              <Label htmlFor="age" className="text-sm font-medium text-gray-700">
                 나이 <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
+              </Label>
+              <Input
                 id="age"
                 name="age"
+                type="number"
                 placeholder="만 나이를 입력하세요"
                 min="1"
                 max="120"
                 value={formData.age}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.age ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`h-12 rounded-xl ${
+                  errors.age ? 'border-red-500' : 'border-gray-200'
+                } focus:border-blue-500 focus:ring-blue-500`}
               />
               {errors.age && (
-                <p className="mt-1 text-sm text-red-600">{errors.age}</p>
+                <p className="text-sm text-red-600">{errors.age}</p>
               )}
             </div>
 
             {/* 회원가입 버튼 */}
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? '회원가입 중...' : '회원가입'}
-            </button>
+              {isLoading ? '회원가입 중...' : '회원가입하고 진단 시작'}
+            </Button>
 
             {/* 로그인 링크 */}
             <div className="text-center">
-              <p className="text-gray-600">
-                이미 계정이 있으신가요?{' '}
-                <button
-                  type="button"
-                  onClick={() => navigate('/login')}
-                  className="text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  로그인하기
-                </button>
-              </p>
+              <Button
+                type="button"
+                variant="link"
+                onClick={() => navigate('/login')}
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                이미 계정이 있으신가요? 로그인하기
+              </Button>
             </div>
           </form>
+
+          {/* 혜택 안내 */}
+          <div className="mt-8 bg-blue-50 p-4 rounded-xl">
+            <h4 className="text-sm font-medium text-blue-900 mb-2">🎁 회원가입 혜택</h4>
+            <ul className="text-xs text-blue-700 space-y-1.5">
+              <li className="flex items-center">
+                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
+                무료 AI 진단 및 개인 맞춤 분석
+              </li>
+              <li className="flex items-center">
+                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
+                지속적인 진행 상황 추적
+              </li>
+              <li className="flex items-center">
+                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
+                주간 챌린지 및 포인트 적립
+              </li>
+              <li className="flex items-center">
+                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
+                미래 헤어스타일 시뮬레이션
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

@@ -36,10 +36,10 @@ function Dashboard({ currentView, setCurrentView, userProgress }: DashboardProps
   const getNextAction = () => {
     if (!progress.lastPhotoDate) {
       return {
-        title: "첫 통합 진단 시작하기",
+        title: "AI 탈모 분석",
         description: "AI 분석과 설문을 통한 종합적인 두피 상태 파악",
         action: "diagnosis",
-        buttonText: "진단 시작",
+        buttonText: "분석하기",
         urgent: true
       };
     }
@@ -97,7 +97,13 @@ function Dashboard({ currentView, setCurrentView, userProgress }: DashboardProps
               </p>
             </div>
             <Button 
-              onClick={() => setCurrentView?.(nextAction.action)}
+              onClick={() => {
+                if (nextAction.action === 'diagnosis') {
+                  navigate('/integrated-diagnosis');
+                } else {
+                  setCurrentView?.(nextAction.action);
+                }
+              }}
               variant={nextAction.urgent ? "default" : "outline"}
             >
               {nextAction.buttonText}
@@ -207,7 +213,7 @@ function Dashboard({ currentView, setCurrentView, userProgress }: DashboardProps
         <Button 
           variant="outline" 
           className="h-20 flex flex-col items-center gap-2"
-          onClick={() => setCurrentView?.('diagnosis')}
+          onClick={() => navigate('/integrated-diagnosis')}
         >
           <Target className="w-6 h-6" />
           재진단
