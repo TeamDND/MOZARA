@@ -128,19 +128,26 @@ jobs:
         
         # EC2에서 배포 실행
         ssh -i ~/.ssh/aws_key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.LIVE_SERVER_IP }} << 'EOF'
-          cd /home/ubuntu/mozara
+          cd /home/ubuntu/mozara/docker
           
-          # 환경변수 설정 (GitHub Secrets에서 직접 전달)
-          export GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}"
-          export OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}"
-          export YOUTUBE_API_KEY="${{ secrets.YOUTUBE_API_KEY }}"
-          export ELEVEN_ST_API_KEY="${{ secrets.ELEVEN_ST_API_KEY }}"
-          export PINECONE_API_KEY="${{ secrets.PINECONE_API_KEY }}"
-          export PINECONE_ENVIRONMENT="${{ secrets.PINECONE_ENVIRONMENT }}"
-          export PINECONE_INDEX_NAME="${{ secrets.PINECONE_INDEX_NAME }}"
-          export GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}"
-          export GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}"
-          export KAKAO_CLIENT_SECRET="${{ secrets.KAKAO_CLIENT_SECRET }}"
+          # .env 파일 생성 (GitHub Secrets에서 직접 전달)
+          cat > .env << EOF
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}
+          ELEVEN_ST_API_KEY=${{ secrets.ELEVEN_ST_API_KEY }}
+          PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}
+          PINECONE_ENVIRONMENT=${{ secrets.PINECONE_ENVIRONMENT }}
+          PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
+          DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+          EOF
+          
+          # 환경변수 설정
+          export \$(cat .env | xargs)
           
           # Docker 설치 확인 및 설치
           if ! command -v docker &> /dev/null; then
@@ -178,6 +185,12 @@ jobs:
           else
             DOCKER_COMPOSE="docker compose"
           fi
+          
+          # Docker Compose 파일의 빌드 경로 수정 (EC2 환경에 맞게)
+          sed -i 's|context: ../backend/springboot|context: ./backend/springboot|g' docker-compose.prod.yml
+          sed -i 's|context: ../backend/python|context: ./backend/python|g' docker-compose.prod.yml
+          sed -i 's|context: ../frontend|context: ./frontend|g' docker-compose.prod.yml
+          sed -i 's|- ../backend/springboot/db/mozara.sql|./backend/springboot/db/mozara.sql|g' docker-compose.prod.yml
           
           # 기존 컨테이너 정리
           sudo $DOCKER_COMPOSE -f docker-compose.prod.yml down --volumes --remove-orphans
