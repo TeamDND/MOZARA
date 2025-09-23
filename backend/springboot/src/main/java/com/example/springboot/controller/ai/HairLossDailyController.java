@@ -18,7 +18,7 @@ public class HairLossDailyController {
     private final HairLossDailyService hairLossDailyService;
 
     /**
-     * CNN + RAG 기반 머리사진 분석 요청
+     * Clip + RAG 기반 머리사진 분석 요청
      */
     @PostMapping("/analyze")
     public ResponseEntity<Map<String, Object>> analyzeHairImage(
