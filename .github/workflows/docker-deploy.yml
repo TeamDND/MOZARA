@@ -77,6 +77,7 @@ jobs:
         GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
         GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
         KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
+
         
         # 데이터베이스 설정 (기본값 고정)
         MYSQL_ROOT_PASSWORD=1234
@@ -96,6 +97,7 @@ jobs:
         EC2_SSH_KEY=${EC2_SSH_KEY}
         
         # 배포 도메인 설정 (DuckDNS 도메인)
+
         PROTOCOL=https
         EOF
         
@@ -110,11 +112,13 @@ jobs:
         echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
         echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
         echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
+
         echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
         echo "DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}" >> .env
         echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> .env
         echo "LIVE_SERVER_IP=${{ secrets.LIVE_SERVER_IP }}" >> .env
         echo "EC2_SSH_KEY=${{ secrets.EC2_SSH_KEY }}" >> .env
+
     
     - name: Create SSH key file
       run: |
