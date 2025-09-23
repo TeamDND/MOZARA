@@ -75,16 +75,21 @@ graph LR
 project/
 ├── frontend/                         # React (TypeScript)
 │   ├── src/
-│   │   ├── api/           # API 통신
-│   │   ├── components/    # 공통 컴포넌트
-│   │   ├── features/      # 기능별 모듈
-│   │   │   └── selfcheck/ # BASP 자가진단
-│   │   │       └── components/
-│   │   ├── page/          # 페이지 컴포넌트
-│   │   ├── service/       # API 서비스
-│   │   ├── store/         # Redux 상태 관리
-│   │   ├── style/         # 스타일 파일
-│   │   ├── user/          # 사용자 관련
+│   │   ├── assets/        # 정적 리소스 (이미지, 폰트, CSS)
+│   │   ├── components/    # 재사용 가능한 UI 컴포넌트
+│   │   │   ├── navigation/ # 네비게이션 컴포넌트
+│   │   │   ├── sections/   # 섹션별 컴포넌트
+│   │   │   └── ui/         # 기본 UI 컴포넌트
+│   │   ├── pages/         # 라우팅되는 페이지 단위
+│   │   │   ├── check/      # 모발 진단 관련 페이지 (HairCheck, HairDamageAnalysis 등)
+│   │   │   ├── hair_contents/ # 모발 콘텐츠 페이지 (HairChange, HairQuiz, YouTubeVideos 등)
+│   │   │   ├── hair_solutions/ # 모발 솔루션 페이지 (DailyCare, HairLossProducts, HairPT 등)
+│   │   │   └── users/      # 사용자 관련 페이지 (LogIn, SignUp 등)
+│   │   ├── services/      # API 통신 및 데이터 서비스
+│   │   ├── utils/         # 공통 함수 및 유틸리티
+│   │   │   └── data/      # 데이터 관련 유틸리티
+│   │   ├── hooks/         # 재사용 가능한 커스텀 훅
+│   │   ├── styles/        # 전역 스타일 관리
 │   │   └── ...
 │   └── package.json
 │
