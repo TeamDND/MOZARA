@@ -42,20 +42,20 @@ public class GoogleOAuth2UserService {
         user.setUsername(email);
         user.setPassword(""); // OAuth2 사용자는 패스워드 없음
         user.setRole("USER");
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
+        user.setCreatedat(java.time.Instant.now());
+        user.setUpdatedat(java.time.Instant.now());
         
         UserEntity savedUser = userRepository.save(user);
 
         // UsersInfoEntity 생성
         UsersInfoEntity userInfo = new UsersInfoEntity();
-        userInfo.setUserId(savedUser.getUserId());
+        userInfo.setUserId(savedUser.getId());
         userInfo.setNickname(name != null ? name : "구글사용자");
         userInfo.setProfileImage(picture);
         userInfo.setOauthProvider("GOOGLE");
         userInfo.setOauthId(email);
-        userInfo.setCreatedAt(LocalDateTime.now());
-        userInfo.setUpdatedAt(LocalDateTime.now());
+        userInfo.setCreatedat(java.time.Instant.now());
+        userInfo.setUpdatedat(java.time.Instant.now());
         
         usersInfoRepository.save(userInfo);
 
@@ -63,7 +63,7 @@ public class GoogleOAuth2UserService {
     }
 
     private void updateGoogleUserInfo(UserEntity user, String name, String picture) {
-        Optional<UsersInfoEntity> userInfoOpt = usersInfoRepository.findByUserId(user.getUserId());
+        Optional<UsersInfoEntity> userInfoOpt = usersInfoRepository.findByUserId(user.getId());
         
         if (userInfoOpt.isPresent()) {
             UsersInfoEntity userInfo = userInfoOpt.get();
@@ -71,24 +71,24 @@ public class GoogleOAuth2UserService {
             // 프로필 이미지가 변경되었으면 업데이트
             if (picture != null && !picture.equals(userInfo.getProfileImage())) {
                 userInfo.setProfileImage(picture);
-                userInfo.setUpdatedAt(LocalDateTime.now());
+                userInfo.setUpdatedat(java.time.Instant.now());
                 usersInfoRepository.save(userInfo);
             }
         } else {
             // UsersInfo가 없으면 생성
             UsersInfoEntity userInfo = new UsersInfoEntity();
-            userInfo.setUserId(user.getUserId());
+            userInfo.setUserId(user.getId());
             userInfo.setNickname(name != null ? name : "구글사용자");
             userInfo.setProfileImage(picture);
             userInfo.setOauthProvider("GOOGLE");
             userInfo.setOauthId(user.getUsername());
-            userInfo.setCreatedAt(LocalDateTime.now());
-            userInfo.setUpdatedAt(LocalDateTime.now());
+            userInfo.setCreatedat(java.time.Instant.now());
+            userInfo.setUpdatedat(java.time.Instant.now());
             
             usersInfoRepository.save(userInfo);
         }
         
-        user.setUpdatedAt(LocalDateTime.now());
+        user.setUpdatedat(java.time.Instant.now());
         userRepository.save(user);
     }
 }
