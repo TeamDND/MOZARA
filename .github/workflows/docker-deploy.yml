@@ -103,8 +103,8 @@ jobs:
       if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
       run: |
         cd docker
-        # EC2 인스턴스에 Docker 관련 파일들 복사
-        echo "📁 파일을 ${{ secrets.LIVE_SERVER_IP }}에 복사합니다..."
+        # EC2 인스턴스에 전체 프로젝트 복사
+        echo "📁 프로젝트를 ${{ secrets.LIVE_SERVER_IP }}에 복사합니다..."
         # LIVE_SERVER_IP 값 확인 및 검증
         echo "LIVE_SERVER_IP 값: '${{ secrets.LIVE_SERVER_IP }}'"
         echo "LIVE_SERVER_IP 길이: $(echo '${{ secrets.LIVE_SERVER_IP }}' | wc -c)"
@@ -120,11 +120,16 @@ jobs:
           echo "올바른 형식: your-domain.duckdns.org 또는 IP주소"
           exit 1
         fi
-        scp -i ~/.ssh/aws_key.pem -o StrictHostKeyChecking=no \
-          docker-compose.yml \
-          docker-compose.prod.yml \
-          nginx.conf \
-          ubuntu@${{ secrets.LIVE_SERVER_IP }}:/home/ubuntu/mozara/
+        
+        # 전체 프로젝트를 EC2에 복사
+        rsync -avz --progress -e "ssh -i ~/.ssh/aws_key.pem -o StrictHostKeyChecking=no" \
+          --exclude='.git' \
+          --exclude='node_modules' \
+          --exclude='__pycache__' \
+          --exclude='.env' \
+          --exclude='build' \
+          --exclude='dist' \
+          ../ ubuntu@${{ secrets.LIVE_SERVER_IP }}:/home/ubuntu/mozara/
         
         # EC2에서 배포 실행
         ssh -i ~/.ssh/aws_key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.LIVE_SERVER_IP }} << 'EOF'
