@@ -67,12 +67,24 @@ scp -i aws_key.pem -o StrictHostKeyChecking=no \
     docker-compose.prod.yml \
     nginx.conf \
     .env \
+    ubuntu@$LIVE_SERVER_IP:/home/ubuntu/mozara/docker/
+
+# 백엔드 소스코드도 복사
+echo "📁 백엔드 소스코드를 $LIVE_SERVER_IP에 복사합니다..."
+scp -i aws_key.pem -o StrictHostKeyChecking=no -r \
+    ../backend \
+    ubuntu@$LIVE_SERVER_IP:/home/ubuntu/mozara/
+
+# 프론트엔드 소스코드도 복사
+echo "📁 프론트엔드 소스코드를 $LIVE_SERVER_IP에 복사합니다..."
+scp -i aws_key.pem -o StrictHostKeyChecking=no -r \
+    ../frontend \
     ubuntu@$LIVE_SERVER_IP:/home/ubuntu/mozara/
 
 # EC2에서 배포 실행
 echo "🚀 $LIVE_SERVER_IP에서 배포를 실행합니다..."
 ssh -i aws_key.pem -o StrictHostKeyChecking=no ubuntu@$LIVE_SERVER_IP << 'EOF'
-    cd /home/ubuntu/mozara
+    cd /home/ubuntu/mozara/docker
     
     # Docker 설치 확인 및 설치
     if ! command -v docker &> /dev/null; then
@@ -84,10 +96,27 @@ ssh -i aws_key.pem -o StrictHostKeyChecking=no ubuntu@$LIVE_SERVER_IP << 'EOF'
         sudo systemctl enable docker
     fi
     
+    # 환경변수 로드
+    if [ -f .env ]; then
+        echo "📁 .env 파일에서 환경변수를 로드합니다..."
+        export $(grep -v '^#' .env | xargs)
+    fi
+    
+    # 필수 환경변수 확인
+    if [ -z "$JWT_SECRET_KEY" ]; then
+        echo "❌ JWT_SECRET_KEY가 설정되지 않았습니다."
+        echo "💡 .env 파일에 JWT_SECRET_KEY를 설정해주세요."
+        exit 1
+    fi
+    
+    echo "✅ 환경변수 확인 완료"
+    
     # 기존 컨테이너 정리
+    echo "🧹 기존 컨테이너 정리 중..."
     sudo docker compose down --volumes --remove-orphans
     
     # 새 컨테이너 시작
+    echo "🚀 새 컨테이너 시작 중..."
     sudo docker compose up -d
     
     # 서비스 상태 확인
@@ -103,4 +132,4 @@ rm -f aws_key.pem
 
 echo "✅ AWS 배포 스크립트 완료!"
 echo "🌐 서비스 URL: http://$LIVE_SERVER_IP"
-echo "📊 서비스 상태 확인: ssh -i your-key.pem ubuntu@$LIVE_SERVER_IP 'cd /home/ubuntu/mozara && sudo docker-compose ps'"
+echo "📊 서비스 상태 확인: ssh -i your-key.pem ubuntu@$LIVE_SERVER_IP 'cd /home/ubuntu/mozara/docker && sudo docker-compose ps'"

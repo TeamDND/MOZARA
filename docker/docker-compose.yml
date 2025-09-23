@@ -47,7 +47,7 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: 1234
       # JWT 설정
-      JWT_SECRET_KEY: alaoskjovjcpovcjqawpjcxapsjcpaosjcpasocpoadasjdlakslaks
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       # AI 백엔드 설정
       AI_PYTHON_BASE_URL: http://python-api:8000
       # API 키들
