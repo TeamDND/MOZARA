@@ -58,6 +58,7 @@ jobs:
     - name: Set environment variables
       if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
       run: |
+
         echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> $GITHUB_ENV
         echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
         echo "YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}" >> $GITHUB_ENV
@@ -73,6 +74,7 @@ jobs:
         echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
         echo "LIVE_SERVER_IP=${{ secrets.LIVE_SERVER_IP }}" >> $GITHUB_ENV
         echo "EC2_SSH_KEY=${{ secrets.EC2_SSH_KEY }}" >> $GITHUB_ENV
+
     
     - name: Create SSH key file
       if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
