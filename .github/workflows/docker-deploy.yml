@@ -7,19 +7,17 @@ on:
       - 'docker/**'
       - 'backend/**'
       - 'frontend/**'
-  # pull_request 비활성화 (dev 브랜치에서 실행 방지)
-  # pull_request:
-  #   branches: [ main ]
-  #   paths:
-  #     - 'docker/**'
-  #     - 'backend/**'
-  #     - 'frontend/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docker/**'
+      - 'backend/**'
+      - 'frontend/**'
   workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    # PR에서 테스트 실행
     if: github.event_name == 'pull_request'
     
     steps:
@@ -140,6 +138,7 @@ jobs:
         echo "✅ Docker Compose 설정 검증 완료"
     
     - name: Deploy to AWS EC2
+      if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
       run: |
         # EC2 인스턴스에 Docker 관련 파일들 복사
         echo "📁 파일을 ${{ secrets.LIVE_SERVER_IP }}에 복사합니다..."
@@ -203,6 +202,7 @@ jobs:
         EOF
     
     - name: Health check
+      if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
       run: |
         # 서비스 상태 확인
         sleep 30
