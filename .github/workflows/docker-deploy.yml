@@ -69,7 +69,6 @@ jobs:
         GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
         GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
-        JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
         DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         LIVE_SERVER_IP: ${{ secrets.LIVE_SERVER_IP }}
@@ -147,7 +146,6 @@ jobs:
           echo "GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID" >> .env
           echo "GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> .env
           echo "KAKAO_CLIENT_SECRET=$KAKAO_CLIENT_SECRET" >> .env
-          echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> .env
           echo "DOCKERHUB_TOKEN=$DOCKERHUB_TOKEN" >> .env
           echo "DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME" >> .env
           
@@ -203,12 +201,7 @@ jobs:
           
           # 필수 환경변수 확인
           echo "🔍 필수 환경변수 확인 중..."
-          if [ -z "$JWT_SECRET_KEY" ]; then
-            echo "❌ JWT_SECRET_KEY가 설정되지 않았습니다."
-            echo "💡 GitHub Secrets에 JWT_SECRET_KEY를 설정해주세요."
-            exit 1
-          fi
-          echo "✅ JWT_SECRET_KEY 확인됨"
+          echo "✅ JWT_SECRET_KEY는 application.properties에서 관리됩니다"
           
           # 디렉토리 구조 확인
           echo "📁 디렉토리 구조 확인:"
