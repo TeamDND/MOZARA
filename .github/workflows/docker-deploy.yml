@@ -347,48 +347,46 @@ jobs:
           
           echo "4️⃣ Nginx 프록시 시작..."
           # Nginx 설정 파일 생성
-          cat > nginx.conf << 'NGINX_EOF'
-server {
-    listen 80;
-    server_name mozaracare.duckdns.org;
-
-    client_max_body_size 10m;
-
-    # Frontend 프록시
-    location / {
-        proxy_pass http://172.17.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-
-    # API 프록시
-    location /api/ {
-        proxy_pass http://172.17.0.1:8080/api/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-    
-    # WebSocket 프록시
-    location /ws-game/ {
-        proxy_pass http://172.17.0.1:8080/ws-game/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "Upgrade";
-        proxy_set_header Host $host;
-    }
-    
-    # 파일 업로드 프록시
-    location /uploads/{
-        proxy_pass http://172.17.0.1:8080/uploads/;
-    }
-}
-NGINX_EOF
+          echo "server {" > nginx.conf
+          echo "    listen 80;" >> nginx.conf
+          echo "    server_name mozaracare.duckdns.org;" >> nginx.conf
+          echo "" >> nginx.conf
+          echo "    client_max_body_size 10m;" >> nginx.conf
+          echo "" >> nginx.conf
+          echo "    # Frontend 프록시" >> nginx.conf
+          echo "    location / {" >> nginx.conf
+          echo "        proxy_pass http://172.17.0.1:3000;" >> nginx.conf
+          echo "        proxy_http_version 1.1;" >> nginx.conf
+          echo "        proxy_set_header Upgrade \$http_upgrade;" >> nginx.conf
+          echo "        proxy_set_header Connection 'upgrade';" >> nginx.conf
+          echo "        proxy_set_header Host \$host;" >> nginx.conf
+          echo "        proxy_cache_bypass \$http_upgrade;" >> nginx.conf
+          echo "    }" >> nginx.conf
+          echo "" >> nginx.conf
+          echo "    # API 프록시" >> nginx.conf
+          echo "    location /api/ {" >> nginx.conf
+          echo "        proxy_pass http://172.17.0.1:8080/api/;" >> nginx.conf
+          echo "        proxy_http_version 1.1;" >> nginx.conf
+          echo "        proxy_set_header Upgrade \$http_upgrade;" >> nginx.conf
+          echo "        proxy_set_header Connection 'upgrade';" >> nginx.conf
+          echo "        proxy_set_header Host \$host;" >> nginx.conf
+          echo "        proxy_cache_bypass \$http_upgrade;" >> nginx.conf
+          echo "    }" >> nginx.conf
+          echo "" >> nginx.conf
+          echo "    # WebSocket 프록시" >> nginx.conf
+          echo "    location /ws-game/ {" >> nginx.conf
+          echo "        proxy_pass http://172.17.0.1:8080/ws-game/;" >> nginx.conf
+          echo "        proxy_http_version 1.1;" >> nginx.conf
+          echo "        proxy_set_header Upgrade \$http_upgrade;" >> nginx.conf
+          echo "        proxy_set_header Connection \"Upgrade\";" >> nginx.conf
+          echo "        proxy_set_header Host \$host;" >> nginx.conf
+          echo "    }" >> nginx.conf
+          echo "" >> nginx.conf
+          echo "    # 파일 업로드 프록시" >> nginx.conf
+          echo "    location /uploads/{" >> nginx.conf
+          echo "        proxy_pass http://172.17.0.1:8080/uploads/;" >> nginx.conf
+          echo "    }" >> nginx.conf
+          echo "}" >> nginx.conf
           
           # Nginx 컨테이너 실행
           sudo docker run -d \
