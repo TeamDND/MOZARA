@@ -7,12 +7,13 @@ on:
       - 'docker/**'
       - 'backend/**'
       - 'frontend/**'
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'docker/**'
-      - 'backend/**'
-      - 'frontend/**'
+  # pull_request 비활성화 (main 브랜치에서만 deploy 실행)
+  # pull_request:
+  #   branches: [ main ]
+  #   paths:
+  #     - 'docker/**'
+  #     - 'backend/**'
+  #     - 'frontend/**'
   workflow_dispatch:
 
 jobs:
@@ -136,7 +137,7 @@ jobs:
           cd /home/ubuntu/mozara/docker
           
           # .env 파일 생성 (GitHub Secrets에서 직접 전달)
-          cat > .env << EOF
+          cat > .env << 'ENVEOF'
           GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
           OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
           YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}
@@ -149,10 +150,10 @@ jobs:
           KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
           DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}
           DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
-          EOF
+          ENVEOF
           
           # 환경변수 설정
-          export \$(cat .env | xargs)
+          export $(cat .env | xargs)
           
           # Docker 설치 확인 및 설치
           if ! command -v docker &> /dev/null; then
