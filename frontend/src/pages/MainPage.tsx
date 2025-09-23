@@ -13,14 +13,14 @@ interface MainPageProps {
 
 export function MainPage({ setCurrentView }: MainPageProps = {}) {
   const navigate = useNavigate();
-  
+
   // Redux에서 사용자 정보와 토큰 가져오기
   const user = useSelector((state: RootState) => state.user);
   const token = useSelector((state: RootState) => state.token.jwtToken);
-  
+
   // 로그인 상태 확인
   const isLoggedIn = !!(user.username && token);
-  
+
   // 진단 시작 핸들러
   const handleDiagnosisStart = () => {
     if (isLoggedIn) {
@@ -39,30 +39,30 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
       }
     }
   };
-  
+
   const features = [
     {
       icon: <Brain className="w-8 h-8 text-blue-600" />,
-      title: "통합 AI 진단",
-      description: "BASP 설문과 모발 분석을 결합한 종합적인 두피 상태 파악",
-      highlight: "정확도 95%"
+      title: "AI 탈모 분석",
+      description: "이미지와 기본정보를 기반으로 쉽고 빠르게 AI 탈모 분석",
+      highlight: "정확도 75%"
     },
     {
       icon: <Camera className="w-8 h-8 text-green-600" />,
-      title: "변화 추적 시스템",
-      description: "주간별 사진 비교와 데이터 분석으로 개선 과정을 시각화",
-      highlight: "실시간 분석"
+      title: "데일리 케어 서비스",
+      description: "매일 모발 상태를 체크하고 관리",
+      highlight: "데일리 서비스"
     },
     {
       icon: <Award className="w-8 h-8 text-purple-600" />,
-      title: "게이미피케이션",
-      description: "새싹 포인트와 챌린지로 꾸준한 관리 동기부여",
+      title: "탈모 PT",
+      description: "새싹 키우기를 통한 생활습관 챌린지로 헤어 관리 동기부여",
       highlight: "참여율 3배 향상"
     },
     {
       icon: <Sparkles className="w-8 h-8 text-yellow-600" />,
-      title: "미래 헤어스타일 예측",
-      description: "AI가 예측하는 개선 후 모습으로 구체적인 목표 설정",
+      title: "그 밖에 특화된 컨텐츠",
+      description: "AI를 통한 내 머리에 가발생성, OX퀴즈 및 각종 유튜브 영상자료 등 컨텐츠 제공",
       highlight: "3D 시뮬레이션"
     }
   ];
@@ -77,7 +77,7 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
     },
     {
       name: "박진호",
-      age: "28세", 
+      age: "28세",
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
       content: "과학적인 분석과 개인 맞춤 계획이 정말 도움이 되었어요. 이제 자신감이 생겼습니다.",
       improvement: "두피 건강도 35% 개선"
@@ -85,7 +85,7 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
     {
       name: "이승우",
       age: "35세",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face", 
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
       content: "매주 변화를 눈으로 확인할 수 있어서 동기부여가 확실했어요. 포기하지 않게 해주는 서비스입니다.",
       improvement: "전체 점수 41% 개선"
     }
@@ -100,107 +100,108 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* 히어로 섹션 */}
-      <section className="py-20 px-6">
-        <div className="max-w-7xl mx-auto text-center">
-          <Badge variant="secondary" className="mb-6 px-4 py-2">
-            🚀 AI 기반 개인 맞춤형 탈모 개선 서비스
+      {/* Mobile-First 컨테이너: PC에서는 모바일 레이아웃을 중앙 정렬 */}
+      <div className="max-w-full md:max-w-md lg:max-w-lg mx-auto bg-white min-h-screen">
+        {/* 히어로 섹션 - 풀스크린 모바일 경험 */}
+        <section className="py-8 px-4 text-center">
+          <Badge variant="secondary" className="mb-4 px-3 py-1.5 text-xs bg-blue-50 text-blue-700">
+            AI 탈모 분석을 통한 맞춤 컨텐츠 및 솔루션 서비스
           </Badge>
-          
-          <h1 className="text-4xl md:text-6xl mb-6 max-w-4xl mx-auto">
-            탈모 개선의 새로운 기준
-            <br />
+
+          <h1 className="text-2xl mb-4 leading-tight font-bold">
             <span className="text-blue-600">MOZARA</span>
           </h1>
-          
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            단발성 도구가 아닌 완성된 개선 여정. AI 진단부터 지속적인 관리까지, 
-            당신의 탈모 개선을 위한 모든 것이 하나의 플랫폼에서.
+
+          <p className="text-sm text-gray-600 mb-6 px-2 leading-relaxed">
+          '혹시 나도 탈모일까?'
+          누구에게도 털어놓기 어려웠던 고민, 이제 AI와 함께 쉽고 빠르게 나만의 맞춤 솔루션을 제공받아보세요
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" onClick={handleDiagnosisStart} className="px-8 py-3 bg-gray-800 hover:bg-gray-700 text-white">
+          {/* 터치 우선 버튼 - 풀 너비 */}
+          <div className="space-y-3 mb-8">
+            <Button
+              onClick={handleDiagnosisStart}
+              className="w-full min-h-[48px] px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
+            >
               무료 AI 진단 시작하기
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
-            <Button variant="outline" size="lg" className="px-8 py-3 text-gray-600 border-gray-300 hover:bg-gray-50">
+            <Button
+              variant="outline"
+              className="w-full min-h-[48px] px-6 py-3 text-gray-700 border-2 border-gray-200 hover:bg-gray-50 text-base rounded-xl active:scale-[0.98] transition-all"
+              onClick={() => navigate('/main')}
+            >
               서비스 둘러보기
             </Button>
           </div>
 
-          {/* 히어로 이미지 */}
-          <div className="relative max-w-4xl mx-auto">
-            <div className="aspect-video rounded-2xl overflow-hidden bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center">
-              <ImageWithFallback 
+          {/* 모바일 히어로 이미지 - 카드 스타일 */}
+          <div className="relative mx-2 mb-6">
+            <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-blue-50 to-green-50 shadow-lg">
+              <ImageWithFallback
                 src="https://images.unsplash.com/photo-1666622833860-562f3a5caa59?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoYWlyJTIwbG9zcyUyMHNjYWxwJTIwdHJlYXRtZW50fGVufDF8fHx8MTc1ODA3NTYyOHww&ixlib=rb-4.1.0&q=80&w=1080"
                 alt="MOZARA 서비스 미리보기"
                 className="w-full h-full object-cover"
               />
             </div>
-            
-            {/* 플로팅 카드들 */}
-            <div className="absolute -top-4 -left-4 bg-white rounded-lg shadow-lg p-3 hidden md:block">
-              <div className="flex items-center gap-2 text-sm">
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                <span>AI 분석 완료</span>
+
+            {/* 모바일 성과 배지들 */}
+            <div className="flex justify-center gap-2 mt-4">
+              <div className="bg-green-100 rounded-full px-3 py-1.5 flex items-center gap-1.5">
+                <CheckCircle className="w-3 h-3 text-green-600" />
+                <span className="text-xs font-medium text-green-800">AI 분석 완료</span>
               </div>
-            </div>
-            
-            <div className="absolute -bottom-4 -right-4 bg-white rounded-lg shadow-lg p-3 hidden md:block">
-              <div className="flex items-center gap-2 text-sm">
-                <TrendingUp className="w-4 h-4 text-blue-500" />
-                <span>15% 개선됨</span>
+              <div className="bg-blue-100 rounded-full px-3 py-1.5 flex items-center gap-1.5">
+                <TrendingUp className="w-3 h-3 text-blue-600" />
+                <span className="text-xs font-medium text-blue-800">15% 개선됨</span>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* 통계 섹션 */}
-      <section className="py-16 px-6 bg-muted/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {/* 통계 섹션 - 모바일 카드 기반 */}
+        <section className="py-6 px-4 bg-gray-50">
+          <div className="grid grid-cols-2 gap-3">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="flex justify-center mb-3 text-blue-600">
+              <div key={index} className="bg-white rounded-xl p-4 text-center shadow-sm">
+                <div className="flex justify-center mb-2 text-blue-600">
                   {stat.icon}
                 </div>
-                <div className="text-3xl mb-1">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
+                <div className="text-lg font-bold mb-1">{stat.value}</div>
+                <div className="text-xs text-gray-600">{stat.label}</div>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* 주요 기능 섹션 */}
-      <section className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl mb-4">
+        {/* 주요 기능 섹션 - 모바일 카드 스크롤 */}
+        <section className="py-6 px-4">
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-bold mb-2">
               왜 MOZARA인가요?
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-sm text-gray-600 px-2">
               기존의 단발성 도구들과 달리, 진단부터 관리까지 연속적인 개선 여정을 제공합니다
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* 모바일 세로 카드 스택 */}
+          <div className="space-y-4">
             {features.map((feature, index) => (
-              <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
+              <Card key={index} className="p-4 border-0 shadow-md bg-white rounded-2xl active:scale-[0.98] transition-transform">
                 <CardContent className="p-0">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 mt-1">
                       {feature.icon}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3>{feature.title}</h3>
-                        <Badge variant="outline" className="text-xs">
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="text-base font-semibold text-gray-900">{feature.title}</h3>
+                        <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 ml-2">
                           {feature.highlight}
                         </Badge>
                       </div>
-                      <p className="text-muted-foreground">
+                      <p className="text-sm text-gray-600 leading-relaxed">
                         {feature.description}
                       </p>
                     </div>
@@ -209,76 +210,75 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
               </Card>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* 사용자 후기 섹션 */}
-      <section className="py-20 px-6 bg-muted/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl mb-4">
+        {/* 사용자 후기 섹션 - 모바일 스크롤 */}
+        <section className="py-6 px-4 bg-gray-50">
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-bold mb-2">
               실제 사용자들의 이야기
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-sm text-gray-600">
               MOZARA와 함께 변화를 경험한 사용자들의 솔직한 후기
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* 모바일 수평 스크롤 카드 */}
+          <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="p-6">
+              <Card key={index} className="min-w-[280px] p-4 bg-white rounded-2xl shadow-md snap-start">
                 <CardContent className="p-0">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-full overflow-hidden bg-muted">
-                      <ImageWithFallback 
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                      <ImageWithFallback
                         src={testimonial.image}
                         alt={testimonial.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div>
-                      <h4>{testimonial.name}</h4>
-                      <p className="text-sm text-muted-foreground">{testimonial.age}</p>
+                      <h4 className="font-semibold text-sm text-gray-900">{testimonial.name}</h4>
+                      <p className="text-xs text-gray-500">{testimonial.age}</p>
                     </div>
                   </div>
-                  
-                  <p className="text-muted-foreground mb-4">
+
+                  <p className="text-sm text-gray-700 mb-3 leading-relaxed">
                     "{testimonial.content}"
                   </p>
-                  
-                  <Badge variant="secondary" className="bg-green-100 text-green-700">
+
+                  <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs border-0">
                     {testimonial.improvement}
                   </Badge>
                 </CardContent>
               </Card>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA 섹션 */}
-      <section className="py-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl mb-6">
-            지금 시작하세요
-          </h2>
-          <p className="text-xl text-muted-foreground mb-8">
-            무료 AI 진단으로 나만의 탈모 개선 여정을 시작해보세요. 
-            <br />단 5분이면 개인 맞춤 분석 결과를 받아볼 수 있습니다.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" onClick={handleDiagnosisStart} className="px-8 py-3 bg-gray-800 hover:bg-gray-700 text-white">
+        {/* CTA 섹션 - 모바일 스티키 */}
+        <section className="py-8 px-4 bg-white border-t border-gray-100">
+          <div className="text-center">
+            <h2 className="text-xl font-bold mb-3">
+              지금 시작하세요
+            </h2>
+            <p className="text-sm text-gray-600 mb-6 px-2 leading-relaxed">
+              무료 AI 진단으로 나만의 탈모 개선 여정을 시작해보세요.
+              단 5분이면 개인 맞춤 분석 결과를 받아볼 수 있습니다.
+            </p>
+
+            {/* 모바일 풀 너비 CTA 버튼 */}
+            <Button
+              onClick={handleDiagnosisStart}
+              className="w-full min-h-[52px] px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-2xl shadow-lg active:scale-[0.98] transition-all"
+            >
               무료 진단 시작하기
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
+
+
           </div>
-          
-          <p className="text-sm text-muted-foreground mt-4">
-            * 신용카드 정보 불필요 · 5분 소요 · 즉시 결과 확인
-          </p>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   );
 }
