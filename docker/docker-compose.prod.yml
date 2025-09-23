@@ -33,7 +33,7 @@ services:
   # Spring Boot 백엔드 (사용자 관리, DB)
   springboot:
     build:
-      context: ../backend/springboot
+      context: ./backend/springboot
       dockerfile: Dockerfile
     container_name: mozara-springboot-prod
     restart: unless-stopped
@@ -57,12 +57,12 @@ services:
     networks:
       - mozara-prod-network
     volumes:
-      - ../uploads:/app/uploads
+      - ./uploads:/app/uploads
 
   # Python FastAPI 백엔드 (AI 서비스)
   python-api:
     build:
-      context: ../backend/python
+      context: ./backend/python
       dockerfile: Dockerfile
     container_name: mozara-python-api-prod
     restart: unless-stopped
@@ -78,7 +78,7 @@ services:
     networks:
       - mozara-prod-network
     volumes:
-      - ../backend/python/uploads:/app/uploads
+      - ./backend/python/uploads:/app/uploads
     deploy:
       resources:
         limits:
@@ -89,7 +89,7 @@ services:
   # React 프론트엔드
   frontend:
     build:
-      context: ../frontend
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: mozara-frontend-prod
     restart: unless-stopped
