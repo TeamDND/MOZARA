@@ -14,9 +14,12 @@ from dotenv import load_dotenv
 from datetime import datetime
 import os
 
-# .env 파일 로드 (프로젝트 루트의 .env 파일 사용)
-load_dotenv("../../.env")
-load_dotenv(".env")  # 현재 디렉토리도 확인
+# .env 파일 로드 (Docker 환경에서는 환경변수 직접 사용)
+try:
+    load_dotenv("../../.env")
+    load_dotenv(".env")
+except:
+    pass  # Docker 환경에서는 환경변수를 직접 사용
 
 # MOZARA Hair Change 모듈
 try:
