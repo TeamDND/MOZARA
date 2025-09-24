@@ -65,7 +65,7 @@ jobs:
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/mozara-frontend
     
     - name: Deploy to AWS EC2
-      if: steps.changes.outputs.db == 'true' || steps.changes.outputs.springboot == 'true' || steps.changes.outputs.python == 'true' || steps.changes.outputs.frontend == 'true'
+      if: steps.changes.outputs.db == 'true' || steps.changes.outputs.springboot == 'true' || steps.changes.outputs.python == 'true' || steps.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
       uses: appleboy/ssh-action@master
       with:
         username: ubuntu
