@@ -185,11 +185,16 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
     if (onDiagnosisComplete) {
       onDiagnosisComplete(results);
     }
-    // 결과 페이지로 이동
+    // 결과 페이지로 이동 (Gemini 분석 결과와 함께)
     if (setCurrentView) {
       setCurrentView('results');
     } else {
-      navigate('/diagnosis-results');
+      navigate('/diagnosis-results', {
+        state: {
+          geminiResult: analysisResult,
+          diagnosisData: results
+        }
+      });
     }
   };
 

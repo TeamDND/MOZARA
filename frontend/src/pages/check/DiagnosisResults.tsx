@@ -1,24 +1,27 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { ImageWithFallback } from '../../hooks/ImageWithFallback';
-import { 
-  CheckCircle, 
-  MapPin, 
-  Star, 
-  Clock, 
-  Phone, 
-  ExternalLink, 
-  Play, 
+import { getStageDescription, getStageColor } from '../../services/geminiAnalysisService';
+import apiClient from '../../services/apiClient';
+import {
+  CheckCircle,
+  MapPin,
+  Star,
+  Clock,
+  Phone,
+  ExternalLink,
+  Play,
   ShoppingCart,
   Calendar,
   Target,
   BookOpen,
   Heart,
-  Award
+  Award,
+  Brain
 } from 'lucide-react';
 
 interface DiagnosisResultsProps {
@@ -26,15 +29,128 @@ interface DiagnosisResultsProps {
   diagnosisData?: any;
 }
 
+interface Video {
+  videoId: string;
+  title: string;
+  channelName: string;
+  thumbnailUrl: string;
+}
+
+interface StageRecommendation {
+  title: string;
+  query: string;
+  description: string;
+}
+
 function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsProps = {}) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [selectedRegion, setSelectedRegion] = useState('서울');
   const [selectedCategory, setSelectedCategory] = useState('전체');
+  const [youtubeVideos, setYoutubeVideos] = useState<Video[]>([]);
+  const [videosLoading, setVideosLoading] = useState(false);
+  const [videosError, setVideosError] = useState<string | null>(null);
 
-  // 진단 결과에 따른 추천 데이터 생성 (기본값 제공)
+  // URL state 또는 props에서 Gemini 분석 결과 가져오기
+  const geminiResult = location.state?.geminiResult || diagnosisData?.photo?.geminiResult;
+
+  // Gemini 단계별 YouTube 영상 추천 설정
+  const stageRecommendations: Record<number, StageRecommendation> = {
+    0: {
+      title: '정상 - 예방 및 두피 관리',
+      query: '탈모 예방 두피 관리 샴푸',
+      description: '건강한 두피를 유지하기 위한 예방법과 관리 방법'
+    },
+    1: {
+      title: '초기 탈모 - 초기 증상 및 관리법',
+      query: '탈모 초기 증상 치료 샴푸 영양제',
+      description: '초기 탈모 단계에서의 적절한 대응 방법과 관리법'
+    },
+    2: {
+      title: '중등도 탈모 - 약물 치료 및 전문 관리',
+      query: '탈모 치료 미녹시딜 프로페시아 병원',
+      description: '중등도 탈모에 효과적인 치료법과 전문의 상담'
+    },
+    3: {
+      title: '심각한 탈모 - 모발이식 및 고급 시술',
+      query: '모발이식 두피문신 SMP 병원 후기',
+      description: '심각한 탈모 단계에서의 모발이식과 고급 치료법'
+    }
+  };
+
+  // YouTube 영상 가져오기
+  const fetchYouTubeVideos = useCallback(async (query: string) => {
+    setVideosLoading(true);
+    setVideosError(null);
+
+    try {
+      const response = await apiClient.get(`/ai/youtube/search?q=${encodeURIComponent(query)}&order=relevance&max_results=6`);
+      const data = response.data;
+
+      if (data.items && data.items.length > 0) {
+        const videoList: Video[] = data.items.map((item: any) => ({
+          videoId: item.id.videoId,
+          title: item.snippet.title,
+          channelName: item.snippet.channelTitle,
+          thumbnailUrl: item.snippet.thumbnails.high.url
+        }));
+        setYoutubeVideos(videoList);
+      } else {
+        throw new Error('검색 결과가 없습니다.');
+      }
+    } catch (error) {
+      console.error('YouTube API Error:', error);
+      setVideosError('YouTube 영상을 불러오는 중 오류가 발생했습니다.');
+
+      // 더미 데이터로 대체
+      const dummyVideos: Video[] = [
+        {
+          videoId: 'dummy1',
+          title: '탈모 예방을 위한 올바른 샴푸 사용법',
+          channelName: '헤어케어 전문가',
+          thumbnailUrl: 'https://placehold.co/300x168/4F46E5/FFFFFF?text=탈모+예방+가이드'
+        },
+        {
+          videoId: 'dummy2',
+          title: '두피 마사지로 혈액순환 개선하기',
+          channelName: '건강관리 채널',
+          thumbnailUrl: 'https://placehold.co/300x168/059669/FFFFFF?text=두피+마사지'
+        },
+        {
+          videoId: 'dummy3',
+          title: '탈모에 좋은 음식 vs 나쁜 음식',
+          channelName: '영양 정보',
+          thumbnailUrl: 'https://placehold.co/300x168/DC2626/FFFFFF?text=탈모+영양관리'
+        }
+      ];
+      setYoutubeVideos(dummyVideos);
+    } finally {
+      setVideosLoading(false);
+    }
+  }, []);
+
+  // 컴포넌트 마운트 시 Gemini 단계에 맞는 영상 로드
+  useEffect(() => {
+    if (geminiResult && geminiResult.stage !== undefined) {
+      const stage = geminiResult.stage;
+      const recommendation = stageRecommendations[stage];
+      if (recommendation) {
+        fetchYouTubeVideos(recommendation.query);
+      }
+    } else {
+      // 기본값으로 일반적인 탈모 관리 영상 로드
+      fetchYouTubeVideos('탈모 관리 예방 두피케어');
+    }
+  }, [geminiResult, fetchYouTubeVideos]);
+
+  // 진단 결과에 따른 추천 데이터 생성 (Gemini 결과 반영)
   const getRecommendations = () => {
-    const baspScore = diagnosisData?.basp?.score || 3.2;
+    // Gemini 결과가 있으면 우선 사용, 없으면 기본값
+    const geminiStage = geminiResult?.stage;
+    const baspScore = geminiStage !== undefined ? geminiStage : (diagnosisData?.basp?.score || 3.2);
     const scalpHealth = diagnosisData?.photo?.scalpHealth || 85;
+    const geminiTitle = geminiResult?.title || '';
+    const geminiDescription = geminiResult?.description || '';
     
     // 병원 추천 (BASP 점수와 지역에 따라)
     const hospitals = [
@@ -129,57 +245,43 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
       }
     ];
 
-    // 유튜브 추천
-    const youtubeVideos = [
-      {
-        title: "탈모 초기 단계, 이것만은 꼭 하세요!",
-        channel: "헤어닥터TV",
-        views: "124만회",
-        duration: "12:34",
-        thumbnail: "https://images.unsplash.com/photo-1637806631554-bcfe2c618058?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b3V0dWJlJTIwdmlkZW8lMjB0aHVtYm5haWxzfGVufDF8fHx8MTc1ODA3NjkxNnww&ixlib=rb-4.1.0&q=80&w=1080",
-        relevance: baspScore < 4 ? "초기 관리법" : "진행 단계 관리"
-      },
-      {
-        title: "두피 마사지 완벽 가이드 - 혈액순환 개선",
-        channel: "뷰티헬스",
-        views: "89만회",
-        duration: "8:45",
-        thumbnail: "https://images.unsplash.com/photo-1637806631554-bcfe2c618058?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b3V0dWJlJTIwdmlkZW8lMjB0aHVtYm5haWxzfGVufDF8fHx8MTc1ODA3NjkxNnww&ixlib=rb-4.1.0&q=80&w=1080",
-        relevance: "실용적인 관리법"
-      },
-      {
-        title: "탈모에 좋은 음식 vs 나쁜 음식",
-        channel: "건강한일상",
-        views: "156만회",
-        duration: "15:20",
-        thumbnail: "https://images.unsplash.com/photo-1637806631554-bcfe2c618058?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b3V0dWJlJTIwdmlkZW8lMjB0aHVtYm5haWxzfGVufDF8fHx8MTc1ODA3NjkxNnww&ixlib=rb-4.1.0&q=80&w=1080",
-        relevance: "영양 관리"
-      }
-    ];
+    // 생활습관 가이드 (Gemini 결과에 따라 조정)
+    const getLifestyleGuides = () => {
+      const baseGuides = [
+        {
+          title: "스트레스 관리법",
+          description: "명상, 요가, 규칙적인 운동으로 스트레스 해소",
+          icon: <Heart className="w-5 h-5 text-red-500" />,
+          tips: ["주 3회 이상 운동", "하루 10분 명상", "충분한 수면"]
+        },
+        {
+          title: "영양 관리",
+          description: "모발 건강에 필요한 영양소 섭취",
+          icon: <Target className="w-5 h-5 text-green-500" />,
+          tips: ["단백질 충분히 섭취", "비타민 B군 보충", "아연, 철분 섭취"]
+        },
+        {
+          title: "두피 케어",
+          description: "올바른 세정과 마사지 루틴",
+          icon: <BookOpen className="w-5 h-5 text-blue-500" />,
+          tips: ["미지근한 물로 세정", "부드러운 마사지", "자극적인 제품 피하기"]
+        }
+      ];
 
-    // 생활습관 가이드
-    const lifestyleGuides = [
-      {
-        title: "스트레스 관리법",
-        description: "명상, 요가, 규칙적인 운동으로 스트레스 해소",
-        icon: <Heart className="w-5 h-5 text-red-500" />,
-        tips: ["주 3회 이상 운동", "하루 10분 명상", "충분한 수면"]
-      },
-      {
-        title: "영양 관리",
-        description: "모발 건강에 필요한 영양소 섭취",
-        icon: <Target className="w-5 h-5 text-green-500" />,
-        tips: ["단백질 충분히 섭취", "비타민 B군 보충", "아연, 철분 섭취"]
-      },
-      {
-        title: "두피 케어",
-        description: "올바른 세정과 마사지 루틴",
-        icon: <BookOpen className="w-5 h-5 text-blue-500" />,
-        tips: ["미지근한 물로 세정", "부드러운 마사지", "자극적인 제품 피하기"]
+      // Gemini 조언이 있으면 추가
+      if (geminiResult && geminiResult.advice && geminiResult.advice.length > 0) {
+        baseGuides.push({
+          title: "🧠 AI 맞춤 가이드",
+          description: geminiDescription,
+          icon: <Brain className="w-5 h-5 text-purple-500" />,
+          tips: geminiResult.advice
+        });
       }
-    ];
 
-    return { hospitals, products, youtubeVideos, lifestyleGuides };
+      return baseGuides;
+    };
+
+    return { hospitals, products, lifestyleGuides: getLifestyleGuides() };
   };
 
   const recommendations = getRecommendations();
@@ -214,9 +316,17 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             
             <div className="grid grid-cols-3 gap-3">
               <div className="text-center p-3 bg-white rounded-lg">
-                <p className="text-xs text-gray-600">BASP 점수</p>
-                <p className="text-xl font-bold text-gray-800">{diagnosisData?.basp?.score || 3.2}</p>
-                <Badge variant="secondary" className="text-xs px-2 py-1">{diagnosisData?.basp?.stage || "초기 단계"}</Badge>
+                <p className="text-xs text-gray-600">🧠 Gemini AI 분석</p>
+                <p className="text-xl font-bold text-gray-800">
+                  {geminiResult ? `${geminiResult.stage}단계` : '분석 중'}
+                </p>
+                <Badge
+                  className={`text-xs px-2 py-1 ${
+                    geminiResult ? getStageColor(geminiResult.stage) : 'bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  {geminiResult ? getStageDescription(geminiResult.stage) : "분석 중"}
+                </Badge>
               </div>
               <div className="text-center p-3 bg-white rounded-lg">
                 <p className="text-xs text-gray-600">모발 밀도</p>
@@ -229,6 +339,17 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                 <Badge variant="default" className="text-xs px-2 py-1">우수</Badge>
               </div>
             </div>
+
+            {/* Gemini 분석 결과 요약 */}
+            {geminiResult && (
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Brain className="w-4 h-4 text-blue-600" />
+                  <h3 className="text-sm font-semibold text-blue-800">{geminiResult.title}</h3>
+                </div>
+                <p className="text-xs text-blue-700">{geminiResult.description}</p>
+              </div>
+            )}
           </div>
 
           {/* Mobile-First 데일리 케어 */}
@@ -410,43 +531,84 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
               </div>
             </TabsContent>
 
-            {/* 영상 가이드 (Mobile-First) */}
+            {/* 영상 가이드 (Mobile-First) - YouTube API 연동 */}
             <TabsContent value="videos" className="space-y-4">
               <div className="bg-white p-4 rounded-xl shadow-md">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">추천 영상 가이드</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <Brain className="w-5 h-5 text-blue-600" />
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    AI 맞춤 영상 추천
+                    {geminiResult && (
+                      <span className="text-sm font-normal text-gray-600">
+                        ({getStageDescription(geminiResult.stage)} 맞춤)
+                      </span>
+                    )}
+                  </h3>
+                </div>
                 <p className="text-sm text-gray-600 mb-4">
-                  전문가들이 추천하는 탈모 관리 영상들
+                  {geminiResult && stageRecommendations[geminiResult.stage]
+                    ? stageRecommendations[geminiResult.stage].description
+                    : '전문가들이 추천하는 탈모 관리 영상들'
+                  }
                 </p>
-                
+
+                {videosLoading && (
+                  <div className="text-center py-8">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+                    <p className="text-sm text-gray-600">맞춤 영상을 불러오는 중...</p>
+                  </div>
+                )}
+
+                {videosError && (
+                  <div className="bg-yellow-50 p-3 rounded-lg mb-4">
+                    <p className="text-sm text-yellow-800">⚠️ {videosError}</p>
+                    <p className="text-xs text-yellow-600 mt-1">샘플 영상을 표시합니다.</p>
+                  </div>
+                )}
+
                 <div className="space-y-4">
-                  {recommendations.youtubeVideos.map((video, index) => (
-                    <div key={index} className="bg-gray-50 p-4 rounded-xl">
+                  {youtubeVideos.map((video, index) => (
+                    <div key={video.videoId} className="bg-gray-50 p-4 rounded-xl">
                       <div className="aspect-video rounded-lg overflow-hidden mb-3 bg-gray-200 relative">
-                        <ImageWithFallback 
-                          src={video.thumbnail}
+                        <ImageWithFallback
+                          src={video.thumbnailUrl}
                           alt={video.title}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = 'https://placehold.co/300x168/E8E8E8/424242?text=YouTube+Video';
+                          }}
                         />
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
+                          <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors">
                             <Play className="w-6 h-6 text-white fill-white" />
                           </div>
                         </div>
-                        <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
-                          {video.duration}
-                        </div>
                       </div>
-                      
+
                       <h4 className="text-base font-semibold text-gray-800 mb-2 line-clamp-2">{video.title}</h4>
                       <p className="text-sm text-gray-600 mb-2">
-                        {video.channel} • {video.views}
+                        {video.channelName}
                       </p>
-                      
-                      <div className="bg-red-50 p-3 rounded-lg text-xs mb-3">
-                        🎯 {video.relevance}
-                      </div>
-                      
-                      <Button variant="outline" className="w-full h-10 rounded-lg active:scale-[0.98]">
+
+                      {geminiResult && (
+                        <div className="bg-blue-50 p-3 rounded-lg text-xs mb-3">
+                          🎯 {stageRecommendations[geminiResult.stage]?.title || '맞춤 추천'}
+                        </div>
+                      )}
+
+                      <Button
+                        variant="outline"
+                        className="w-full h-10 rounded-lg active:scale-[0.98]"
+                        onClick={() => {
+                          const url = video.videoId.startsWith('dummy')
+                            ? '#'  // 더미 데이터인 경우
+                            : `https://www.youtube.com/watch?v=${video.videoId}`;
+                          if (!video.videoId.startsWith('dummy')) {
+                            window.open(url, '_blank', 'noopener,noreferrer');
+                          }
+                        }}
+                      >
                         <ExternalLink className="w-4 h-4 mr-2" />
                         시청하기
                       </Button>
