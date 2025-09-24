@@ -23,7 +23,7 @@ const sidebarItems: SidebarItem[] = [
   { icon: Home, label: "홈", href: "/", active: true },
   { icon: Search, label: "분석 바로가기", href: "/hair-check" },
   { icon: Layers3, label: "도구모음", href: "/main" },
-  { icon: User, label: "마이페이지", href: "/profile" },
+  { icon: User, label: "마이페이지", href: "/mypage" },
   { icon: Settings, label: "관리자 설정", href: "#", requireRole: "admin" },
 ];
 
@@ -247,7 +247,7 @@ export default function Header() {
                       className="w-full flex items-center gap-3 p-3 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                     >
                       <UserPlus className="h-5 w-5" />
-                      <span className="font-medium">무료 회원가입</span>
+                      <span className="font-medium">회원가입</span>
                     </button>
                   </div>
                 </>

@@ -1,0 +1,104 @@
+package com.example.springboot.controller.user;
+
+import com.example.springboot.data.dto.user.AnalysisResultDTO;
+import com.example.springboot.service.user.MyPageService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
+public class MyPageController {
+
+    private final MyPageService myPageService;
+
+    /**
+     * 사용자 분석 결과 개수 조회
+     */
+    @GetMapping("/analysis-count/{userId}")
+    public ResponseEntity<?> getAnalysisCount(@PathVariable Integer userId) {
+        try {
+            long count = myPageService.getAnalysisCountByUserId(userId);
+            return ResponseEntity.ok("{\"count\": " + count + "}");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body("{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"분석 결과 개수 조회 중 오류가 발생했습니다.\"}");
+        }
+    }
+
+    /**
+     * 사용자 분석 결과 리스트 조회
+     */
+    @GetMapping("/analysis-results/{userId}")
+    public ResponseEntity<?> getAnalysisResults(@PathVariable Integer userId) {
+        try {
+            List<AnalysisResultDTO> results = myPageService.getAnalysisResultsByUserId(userId);
+            return ResponseEntity.ok(results);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body("{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"분석 결과 리스트 조회 중 오류가 발생했습니다.\"}");
+        }
+    }
+
+    /**
+     * 사용자명으로 분석 결과 리스트 조회
+     */
+    @GetMapping("/analysis-results/username/{username}")
+    public ResponseEntity<?> getAnalysisResultsByUsername(@PathVariable String username) {
+        try {
+            List<AnalysisResultDTO> results = myPageService.getAnalysisResultsByUsername(username);
+            return ResponseEntity.ok(results);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body("{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"분석 결과 리스트 조회 중 오류가 발생했습니다.\"}");
+        }
+    }
+
+    /**
+     * 분석 결과 ID로 개별 분석 결과 조회
+     */
+    @GetMapping("/analysis-result/{resultId}")
+    public ResponseEntity<?> getAnalysisResultById(@PathVariable Integer resultId) {
+        try {
+            AnalysisResultDTO result = myPageService.getAnalysisResultById(resultId);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body("{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"분석 결과 조회 중 오류가 발생했습니다.\"}");
+        }
+    }
+
+    /**
+     * 사용자 ID와 분석 결과 ID로 개별 분석 결과 조회 (본인 것만 조회 가능)
+     */
+    @GetMapping("/analysis-result/{userId}/{resultId}")
+    public ResponseEntity<?> getAnalysisResultByUserIdAndId(@PathVariable Integer userId, @PathVariable Integer resultId) {
+        try {
+            AnalysisResultDTO result = myPageService.getAnalysisResultByUserIdAndId(userId, resultId);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body("{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"분석 결과 조회 중 오류가 발생했습니다.\"}");
+        }
+    }
+}
