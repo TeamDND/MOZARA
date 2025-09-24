@@ -554,7 +554,7 @@ const HairPT: React.FC = () => {
     return iconMap[missionName] || { icon: 'fas fa-check', bgColor: 'bg-blue-100', textColor: 'text-blue-500' };
   };
 
-  // 미션 카드 렌더링 함수
+  // 미션 카드 렌더링 함수 (Mobile-First)
   const renderMissionCard = (mission: MissionInfo) => {
     // 백엔드에서 가져온 완료 상태를 우선 사용, 없으면 로컬 상태 사용
     const isCompleted = mission.completed !== undefined ? mission.completed : missionState[mission.key];
@@ -567,45 +567,41 @@ const HairPT: React.FC = () => {
       const isCounterCompleted = currentCount >= targetCount;
       
       return (
-        <div key={mission.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow h-full flex flex-col">
-          <div className="flex-1 flex flex-col">
-            <div className="flex items-center space-x-4 mb-3">
-              <div className={`w-14 h-14 flex items-center justify-center ${missionIcon.bgColor} rounded-lg`}>
-                <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
-              </div>
-              <div className="flex-1 min-h-[45px] flex flex-col justify-between">
-                <div>
-                  <h3 className="text-[1rem] font-semibold leading-tight">{mission.name}</h3>
-                  <p className="text-sm text-gray-500 mt-1 leading-tight">{mission.description}</p>
-                </div>
-                <div className="flex items-center mt-2">
-                  <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
-                    +{mission.rewardPoints} 포인트
-                  </span>
-                </div>
-              </div>
+        <div key={mission.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+          <div className="flex items-center space-x-4 mb-4">
+            <div className={`w-14 h-14 flex items-center justify-center ${missionIcon.bgColor} rounded-lg`}>
+              <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
             </div>
-            <div className="mb-3">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-gray-600">진행률</span>
-                <span className="text-sm font-medium text-gray-800">{currentCount}/{targetCount}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${Math.min((currentCount / targetCount) * 100, 100)}%` }}
-                ></div>
-              </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold">{mission.name}</h3>
+              <p className="text-sm text-gray-500">{mission.description}</p>
+              <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
+                +{mission.rewardPoints} 포인트
+              </span>
             </div>
           </div>
+          
+          <div className="mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm text-gray-600">진행률</span>
+              <span className="text-sm font-medium text-gray-800">{currentCount}/{targetCount}</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${Math.min((currentCount / targetCount) * 100, 100)}%` }}
+              ></div>
+            </div>
+          </div>
+          
           {isCounterCompleted ? (
-            <div className="w-full py-4 rounded-full font-bold bg-green-500 text-white text-center">
+            <div className="w-full py-4 rounded-xl font-bold bg-green-500 text-white text-center">
               미션완료
             </div>
           ) : (
             <div className="flex gap-3 justify-center">
               <button 
-                className="w-10 h-10 rounded-full font-bold bg-gray-400 hover:bg-gray-500 text-white transition-colors flex items-center justify-center"
+                className="w-12 h-12 rounded-xl font-bold bg-gray-400 hover:bg-gray-500 text-white transition-colors flex items-center justify-center active:scale-[0.95]"
                 onClick={() => {
                   const currentCount = counters[mission.key as keyof Counters];
                   if (currentCount > 0) {
@@ -620,7 +616,7 @@ const HairPT: React.FC = () => {
                 -1
               </button>
               <button 
-                className="w-10 h-10 rounded-full font-bold bg-blue-500 hover:bg-blue-600 text-white transition-colors flex items-center justify-center"
+                className="w-12 h-12 rounded-xl font-bold bg-blue-500 hover:bg-blue-600 text-white transition-colors flex items-center justify-center active:scale-[0.95]"
                 onClick={() => incrementCounter(mission.key as keyof Counters)}
               >
                 +1
@@ -631,32 +627,26 @@ const HairPT: React.FC = () => {
       );
     }
     
-    // 일반 미션들 (기존 로직)
+    // 일반 미션들 (Mobile-First)
     return (
-      <div key={mission.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow h-full flex flex-col">
-        <div className="flex-1 flex flex-col">
-          <div className="flex items-center space-x-4 mb-3">
-            <div className={`w-14 h-14 flex items-center justify-center ${missionIcon.bgColor} rounded-lg`}>
-              <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
-            </div>
-            <div className="flex-1 min-h-[45px] flex flex-col justify-between">
-              <div>
-                <h3 className="text-[1rem] font-semibold leading-tight">{mission.name}</h3>
-                <p className="text-sm text-gray-500 mt-1 leading-tight">{mission.description}</p>
-              </div>
-              <div className="flex items-center mt-2">
-                <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
-                  +{mission.rewardPoints} 포인트
-                </span>
-              </div>
-            </div>
+      <div key={mission.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className={`w-14 h-14 flex items-center justify-center ${missionIcon.bgColor} rounded-lg`}>
+            <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold">{mission.name}</h3>
+            <p className="text-sm text-gray-500">{mission.description}</p>
+            <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
+              +{mission.rewardPoints} 포인트
+            </span>
           </div>
         </div>
         <button 
-          className={`w-full py-4 rounded-full font-bold transition-colors mt-auto ${
+          className={`w-full py-4 rounded-xl font-bold transition-colors ${
             isCompleted 
               ? 'bg-green-500 text-white cursor-not-allowed' 
-              : 'bg-blue-500 hover:bg-blue-600 text-white'
+              : 'bg-blue-500 hover:bg-blue-600 text-white active:scale-[0.98]'
           }`}
           onClick={() => !isCompleted && toggleMission(mission.key)}
           disabled={isCompleted}
@@ -668,42 +658,159 @@ const HairPT: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen p-2 md:p-4">
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-        {/* Main Content */}
-        <div className="flex-1 bg-white min-h-screen flex flex-col shadow-lg rounded-2xl overflow-hidden">
-        {/* Header */}
-        <header className="p-4 md:p-6 pt-6 md:pt-8 bg-white">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center space-x-3">
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800">탈모 PT</h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile-First 컨테이너 */}
+      <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col">
+        
+        {/* Plant Display 영역 (상단 배치) */}
+        <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4">
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-bold">🌱</span>
+              {isEditingTitle ? (
+                <input
+                  type="text"
+                  value={plantTitle}
+                  onChange={(e) => {
+                    const newName = e.target.value;
+                    setPlantTitle(newName);
+                    setIsUserTyping(true);
+                    if (userId && seedlingId) {
+                      dispatch(setSeedling({
+                        seedlingId: seedlingId,
+                        seedlingName: newName,
+                        currentPoint: currentPoint || seedlingPoints || 0,
+                        userId: userId
+                      }));
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && isUserTyping) {
+                      const finalName = plantTitle.trim() || '새싹 키우기';
+                      setPlantTitle(finalName);
+                      if (originalTitle !== finalName) {
+                        handleSeedlingNameChange(finalName);
+                      }
+                      setIsEditingTitle(false);
+                    }
+                  }}
+                  placeholder="새싹 이름을 입력하세요"
+                  className="px-2 py-1 rounded-md text-gray-800"
+                  ref={titleInputRef}
+                />
+              ) : (
+                <h2 className="text-lg font-bold" onDoubleClick={startEditTitle}>
+                  {seedlingName || plantTitle || '새싹 키우기'}
+                </h2>
+              )}
+              {!isEditingTitle ? (
+                <button
+                  title="제목 편집"
+                  onClick={startEditTitle}
+                  disabled={seedlingLoading}
+                  className="ml-1 p-1 rounded-md bg-white/20 hover:bg-white/30 disabled:opacity-50 cursor-pointer"
+                  style={{ minWidth: '32px', minHeight: '32px' }}
+                >
+                  {seedlingLoading ? (
+                    <i className="fas fa-spinner fa-spin"></i>
+                  ) : (
+                    <i className="fas fa-pen"></i>
+                  )}
+                </button>
+              ) : (
+                <button
+                  title="저장"
+                  onMouseDown={(e) => { e.preventDefault(); }}
+                  onClick={() => {
+                    const finalName = plantTitle.trim() || '새싹 키우기';
+                    setPlantTitle(finalName);
+                    if (originalTitle !== finalName) {
+                      handleSeedlingNameChange(finalName);
+                    }
+                    setIsEditingTitle(false);
+                  }}
+                  disabled={seedlingLoading}
+                  className="ml-1 px-2 py-1 rounded-md bg-white text-indigo-600 font-semibold hover:bg-gray-100 disabled:opacity-50"
+                >
+                  {seedlingLoading ? '저장중...' : '저장'}
+                </button>
+              )}
             </div>
+          </div>
+          
+          {/* Plant Display */}
+          <div className="text-center mb-4">
+            <div className="text-6xl transition-transform duration-500 hover:scale-110 animate-bounce mb-3">
+              {plantStages[seedlingLevel as keyof typeof plantStages].emoji}
+            </div>
+            <div className="p-2 bg-white/90 rounded-xl text-xs text-gray-700">
+              {statusMessage}
+            </div>
+          </div>
+          
+          {/* Progress Bar */}
+          <div className="flex items-center bg-white/20 rounded-2xl p-3">
+            <span className="bg-white text-indigo-600 px-3 py-1 rounded-full text-sm font-bold">
+              Lv.{seedlingLevel}
+            </span>
+            <div className="flex-1 h-2 bg-white/30 rounded-full mx-3 overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full transition-all duration-500"
+                style={{ width: `${((currentPoint || seedlingPoints) % 50) * 2}%` }}
+              />
+            </div>
+            <span className="text-xs">{(currentPoint || seedlingPoints) % 50}/50</span>
+          </div>
+        </div>
+
+        {/* Header */}
+        <header className="p-4 bg-white border-b border-gray-200">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-xl font-bold text-gray-800">탈모 PT</h1>
             <div className="flex items-center space-x-2 text-sm text-gray-500">
-              <span className="hidden sm:inline">진행률</span>
+              <span>진행률</span>
               <span className="text-blue-500 font-bold">{progressPercentage}%</span>
             </div>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
             <div className="bg-blue-500 h-3 rounded-full transition-all duration-500" style={{ width: `${progressPercentage}%` }}></div>
           </div>
-          <p className="text-sm md:text-base text-center text-gray-600 mt-3">
+          <p className="text-sm text-center text-gray-600 mt-3">
             오늘의 미션 <span className="text-blue-500 font-bold">{progressPercentage}%</span> 완료했어요
           </p>
         </header>
 
+        {/* Statistics */}
+        <div className="p-4 bg-white border-b border-gray-200">
+          <div className="flex justify-around text-center">
+            <div>
+              <div className="text-lg font-bold text-indigo-600">0</div>
+              <div className="text-xs text-gray-600">연속일</div>
+            </div>
+            <div>
+              <div className="text-lg font-bold text-indigo-600">{currentPoint || seedlingPoints}</div>
+              <div className="text-xs text-gray-600">새싹 포인트</div>
+            </div>
+            <div>
+              <div className="text-lg font-bold text-indigo-600">{Math.round((Object.values(missionState).filter(v => v).length / Object.keys(missionState).length) * 100)}%</div>
+              <div className="text-xs text-gray-600">달성률</div>
+            </div>
+          </div>
+        </div>
+
         {/* Date Navigation */}
-        <nav className="bg-white py-3 md:py-4 px-3 md:px-4 shadow-sm">
-          <div className="flex justify-center md:justify-start gap-1 md:gap-2 lg:gap-4 text-center text-sm font-medium overflow-x-auto pb-2">
+        <nav className="bg-white py-3 px-4 shadow-sm">
+          <div className="flex justify-center gap-2 text-center text-sm font-medium overflow-x-auto pb-2">
             {dateData.map((dateInfo, index) => (
               <div 
                 key={index}
-                className={`flex-shrink-0 px-2 py-2 rounded-lg transition-colors min-w-[50px] md:min-w-[60px] ${
+                className={`flex-shrink-0 px-2 py-2 rounded-lg transition-colors min-w-[50px] ${
                   dateInfo.isToday 
                     ? 'text-blue-500 bg-blue-100' 
                     : 'text-gray-400 hover:bg-gray-50'
                 }`}
               >
-                <p className={`text-base md:text-lg ${dateInfo.isToday ? 'font-semibold' : ''}`}>
+                <p className={`text-base ${dateInfo.isToday ? 'font-semibold' : ''}`}>
                   {dateInfo.date}
                 </p>
                 <p className="text-xs">{dateInfo.day}</p>
@@ -713,32 +820,32 @@ const HairPT: React.FC = () => {
         </nav>
 
         {/* Main Content Tabs */}
-        <div className="flex items-center bg-white px-3 md:px-4 py-2 md:py-3 mt-2 space-x-1 md:space-x-2 lg:space-x-6 text-xs md:text-sm lg:text-base font-semibold text-gray-600 overflow-x-auto">
+        <div className="flex items-center bg-white px-4 py-3 space-x-2 text-sm font-semibold text-gray-600 overflow-x-auto">
           <div 
-            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-2 md:px-3 py-2 rounded-lg transition-colors ${activeTab === 'routine' ? 'text-blue-500 bg-blue-50' : 'text-gray-600 hover:bg-gray-50'}`}
+            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-3 py-2 rounded-lg transition-colors ${activeTab === 'routine' ? 'text-blue-500 bg-blue-50' : 'text-gray-600 hover:bg-gray-50'}`}
             onClick={() => showContent('routine')}
           >
-            <i className="fas fa-check-square text-green-500 text-xs md:text-sm"></i>
-            <span className="hidden sm:inline">루틴</span>
+            <i className="fas fa-check-square text-green-500 text-sm"></i>
+            <span>루틴</span>
           </div>
           <div 
-            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-2 md:px-3 py-2 rounded-lg transition-colors ${activeTab === 'nutrition' ? 'text-blue-500 bg-blue-50' : 'text-gray-600 hover:bg-gray-50'}`}
+            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-3 py-2 rounded-lg transition-colors ${activeTab === 'nutrition' ? 'text-blue-500 bg-blue-50' : 'text-gray-600 hover:bg-gray-50'}`}
             onClick={() => showContent('nutrition')}
           >
-            <i className="fas fa-pills text-red-500 text-xs md:text-sm"></i>
-            <span className="hidden sm:inline">영양</span>
+            <i className="fas fa-pills text-red-500 text-sm"></i>
+            <span>영양</span>
           </div>
           <div 
-            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-2 md:px-3 py-2 rounded-lg transition-colors ${activeTab === 'clean' ? 'text-blue-500 bg-blue-50' : 'text-gray-600 hover:bg-gray-50'}`}
+            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-3 py-2 rounded-lg transition-colors ${activeTab === 'clean' ? 'text-blue-500 bg-blue-50' : 'text-gray-600 hover:bg-gray-50'}`}
             onClick={() => showContent('clean')}
           >
-            <i className="fas fa-magnifying-glass text-blue-400 text-xs md:text-sm"></i>
-            <span className="hidden sm:inline">청결</span>
+            <i className="fas fa-magnifying-glass text-blue-400 text-sm"></i>
+            <span>청결</span>
           </div>
         </div>
 
         {/* Main Content (Tasks) */}
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-4 overflow-y-auto">
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <div className="text-center">
@@ -747,101 +854,91 @@ const HairPT: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 max-w-7xl mx-auto">
-          {/* Routine Content */}
-          {activeTab === 'routine' && (
-            <>
+            <div className="space-y-4">
+              {/* Routine Content */}
+              {activeTab === 'routine' && (
+                <>
+                  {/* 데이터 기반 미션 카드들 */}
+                  {getMissionsByCategory('routine').map(mission => renderMissionCard(mission))}
 
-              {/* 데이터 기반 미션 카드들 */}
-              {getMissionsByCategory('routine').map(mission => renderMissionCard(mission))}
+                  {/* 두피 사진 촬영 (특별 기능) */}
+                  <div className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                    <div className="flex items-center space-x-4 mb-4">
+                      <div className="w-14 h-14 flex items-center justify-center bg-purple-100 rounded-lg">
+                        <i className="fas fa-camera text-purple-500 text-lg"></i>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold">두피 사진 촬영</h3>
+                        <p className="text-sm text-gray-500">두피 상태 기록하기</p>
+                      </div>
+                    </div>
+                    <button 
+                      className="w-full py-4 rounded-xl font-bold transition-colors bg-purple-500 hover:bg-purple-600 text-white active:scale-[0.98]"
+                      onClick={takeScalpPhoto}
+                    >
+                      사진 촬영하기
+                    </button>
+                  </div>
+                </>
+              )}
 
-              {/* 두피 사진 촬영 (특별 기능) */}
-              <div className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow h-full flex flex-col">
-                <div className="flex-1 flex flex-col">
-                <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-14 h-14 flex items-center justify-center bg-purple-100 rounded-lg">
-                      <i className="fas fa-camera text-purple-500 text-lg"></i>
-                  </div>
-                    <div className="flex-1 min-h-[45px] flex flex-col justify-center">
-                      <h3 className="text-[1rem] font-semibold leading-tight">두피 사진 촬영</h3>
-                      <p className="text-sm text-gray-500 mt-1 leading-tight">두피 상태 기록하기</p>
-                  </div>
-                  </div>
-                </div>
-                <button 
-                  className="w-full py-4 rounded-full font-bold transition-colors bg-purple-500 hover:bg-purple-600 text-white mt-auto"
-                  onClick={takeScalpPhoto}
-                >
-                  사진 촬영하기
-                </button>
-              </div>
-            </>
-          )}
-
-          {/* Nutrition Content */}
-          {activeTab === 'nutrition' && (
-            <>
-              {getMissionsByCategory('nutrient').map(mission => renderMissionCard(mission))}
-            </>
-          )}
-          
-          {/* Clean Content */}
-          {activeTab === 'clean' && (
-            <>
-              {/* 데이터 기반 미션 카드들 */}
-              {getMissionsByCategory('cleanliness').map(mission => {
-                // 백회혈 마사지는 특별한 기능(비디오 모달)이 있으므로 별도 처리
-                if (mission.name === '백회혈/사신총혈 마사지') {
-                  const isCompleted = missionState[mission.key];
-                  const missionIcon = getMissionIcon(mission.name);
-                  
-                  return (
-                    <div key={mission.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow h-full flex flex-col">
-                      <div className="flex-1 flex flex-col">
-                        <div className="flex items-center space-x-4 mb-3">
-                          <div className={`w-14 h-14 flex items-center justify-center ${missionIcon.bgColor} rounded-lg`}>
-                            <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
-                          </div>
-                          <div className="flex-1 min-h-[45px] flex flex-col justify-between">
-                            <div>
-                              <h3 className="text-[1rem] font-semibold leading-tight">{mission.name}</h3>
-                              <p className="text-sm text-gray-500 mt-1 leading-tight">{mission.description}</p>
+              {/* Nutrition Content */}
+              {activeTab === 'nutrition' && (
+                <>
+                  {getMissionsByCategory('nutrient').map(mission => renderMissionCard(mission))}
+                </>
+              )}
+              
+              {/* Clean Content */}
+              {activeTab === 'clean' && (
+                <>
+                  {/* 데이터 기반 미션 카드들 */}
+                  {getMissionsByCategory('cleanliness').map(mission => {
+                    // 백회혈 마사지는 특별한 기능(비디오 모달)이 있으므로 별도 처리
+                    if (mission.name === '백회혈/사신총혈 마사지') {
+                      const isCompleted = missionState[mission.key];
+                      const missionIcon = getMissionIcon(mission.name);
+                      
+                      return (
+                        <div key={mission.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                          <div className="flex items-center space-x-4 mb-4">
+                            <div className={`w-14 h-14 flex items-center justify-center ${missionIcon.bgColor} rounded-lg`}>
+                              <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
                             </div>
-                            <div className="flex items-center mt-2">
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold">{mission.name}</h3>
+                              <p className="text-sm text-gray-500">{mission.description}</p>
                               <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
                                 +{mission.rewardPoints} 포인트
                               </span>
                             </div>
                           </div>
+                          <button 
+                            className={`w-full py-4 rounded-xl font-bold transition-colors ${
+                              isCompleted 
+                                ? 'bg-green-500 text-white cursor-not-allowed' 
+                                : 'bg-blue-500 hover:bg-blue-600 text-white active:scale-[0.98]'
+                            }`}
+                            onClick={() => {
+                              if (!isCompleted) {
+                                setShowVideoModal(true);
+                                toggleMission(mission.key);
+                              }
+                            }}
+                            disabled={isCompleted}
+                          >
+                            {isCompleted ? '완료됨' : '시작하기'}
+                          </button>
                         </div>
-                      </div>
-                      <button 
-                        className={`w-full py-4 rounded-full font-bold transition-colors mt-auto ${
-                          isCompleted 
-                            ? 'bg-green-500 text-white cursor-not-allowed' 
-                            : 'bg-blue-500 hover:bg-blue-600 text-white'
-                        }`}
-                        onClick={() => {
-                          if (!isCompleted) {
-                            setShowVideoModal(true);
-                            toggleMission(mission.key);
-                          }
-                        }}
-                        disabled={isCompleted}
-                      >
-                        {isCompleted ? '완료됨' : '시작하기'}
-                      </button>
-                    </div>
-                  );
-                }
-                
-                // 일반 미션들은 renderMissionCard 함수 사용
-                return renderMissionCard(mission);
-              })}
-            </>
-          )}
-          
-          </div>
+                      );
+                    }
+                    
+                    // 일반 미션들은 renderMissionCard 함수 사용
+                    return renderMissionCard(mission);
+                  })}
+                </>
+              )}
+            </div>
           )}
         </main>
 
@@ -893,166 +990,6 @@ const HairPT: React.FC = () => {
             </div>
           </>
         )}
-
-        </div>
-
-        {/* Mobile Overlay */}
-        {showSidebar && (
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-            onClick={() => setShowSidebar(false)}
-          />
-        )}
-
-        {/* Right Sidebar - Plant Game */}
-        <div className={`fixed lg:relative top-0 right-0 h-full lg:h-auto w-80 lg:w-80 bg-white shadow-lg rounded-2xl lg:rounded-2xl overflow-hidden transition-all duration-300 z-50 lg:z-auto ${
-          showSidebar ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
-        }`}>
-          {/* Plant Game Header */}
-          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4">
-            <div className="flex justify-between items-center mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-bold">🌱</span>
-                {isEditingTitle ? (
-                  <input
-                    type="text"
-                    value={plantTitle}
-                    onChange={(e) => {
-                      const newName = e.target.value;
-                      setPlantTitle(newName);
-                      setIsUserTyping(true); // 사용자가 타이핑하고 있음을 표시
-                      // Redux 상태도 업데이트
-                      if (userId && seedlingId) {
-                        dispatch(setSeedling({
-                          seedlingId: seedlingId,
-                          seedlingName: newName,
-                          currentPoint: currentPoint || seedlingPoints || 0,
-                          userId: userId
-                        }));
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && isUserTyping) {
-                        // 빈 값이면 기본값으로 설정
-                        const finalName = plantTitle.trim() || '새싹 키우기';
-                        setPlantTitle(finalName);
-                        
-                        // 백엔드에 저장
-                        if (originalTitle !== finalName) {
-                          handleSeedlingNameChange(finalName);
-                        }
-                        setIsEditingTitle(false);
-                      }
-                    }}
-                    placeholder="새싹 이름을 입력하세요"
-                    className="px-2 py-1 rounded-md text-gray-800"
-                    ref={titleInputRef}
-                  />
-                ) : (
-                  <h2 className="text-lg font-bold" onDoubleClick={startEditTitle}>
-                    {seedlingName || plantTitle || '새싹 키우기'}
-                  </h2>
-                )}
-                {!isEditingTitle ? (
-                  <button
-                    title="제목 편집"
-                    onClick={startEditTitle}
-                    disabled={seedlingLoading}
-                    className="ml-1 p-1 rounded-md bg-white/20 hover:bg-white/30 disabled:opacity-50 cursor-pointer"
-                    style={{ minWidth: '32px', minHeight: '32px' }}
-                  >
-                    {seedlingLoading ? (
-                      <i className="fas fa-spinner fa-spin"></i>
-                    ) : (
-                      <i className="fas fa-pen"></i>
-                    )}
-                  </button>
-                ) : (
-                  <button
-                    title="저장"
-                    onMouseDown={(e) => { e.preventDefault(); }}
-                    onClick={() => {
-                      // 빈 값이면 기본값으로 설정
-                      const finalName = plantTitle.trim() || '새싹 키우기';
-                      setPlantTitle(finalName);
-                      
-                      // 백엔드에 저장
-                      if (originalTitle !== finalName) {
-                        handleSeedlingNameChange(finalName);
-                      }
-                      setIsEditingTitle(false);
-                    }}
-                    disabled={seedlingLoading}
-                    className="ml-1 px-2 py-1 rounded-md bg-white text-indigo-600 font-semibold hover:bg-gray-100 disabled:opacity-50"
-                  >
-                    {seedlingLoading ? '저장중...' : '저장'}
-                  </button>
-                )}
-              </div>
-              <button
-                onClick={() => setShowSidebar(false)}
-                className="lg:hidden p-1 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
-              >
-                <i className="fas fa-times text-white"></i>
-              </button>
-            </div>
-            <div className="flex items-center bg-white/20 rounded-2xl p-3">
-              <span className="bg-white text-indigo-600 px-3 py-1 rounded-full text-sm font-bold">
-                Lv.{seedlingLevel}
-              </span>
-              <div className="flex-1 h-2 bg-white/30 rounded-full mx-3 overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full transition-all duration-500"
-                  style={{ width: `${((currentPoint || seedlingPoints) % 50) * 2}%` }}
-                />
-              </div>
-              <span className="text-xs">{(currentPoint || seedlingPoints) % 50}/50</span>
-            </div>
-          </div>
-
-          {/* Plant Display */}
-          <div className="bg-gradient-to-b from-sky-200 to-green-200 p-6 text-center">
-            <div className="relative inline-block">
-              <div className="text-6xl transition-transform duration-500 hover:scale-110 animate-bounce">
-                {plantStages[seedlingLevel as keyof typeof plantStages].emoji}
-              </div>
-            </div>
-            <div className="mt-3 p-2 bg-white/90 rounded-xl text-xs text-gray-700">
-              {statusMessage}
-            </div>
-          </div>
-
-          {/* Statistics */}
-          <div className="p-4 bg-white border-t border-gray-200">
-            <div className="flex justify-around text-center">
-              <div>
-                <div className="text-lg font-bold text-indigo-600">0</div>
-                <div className="text-xs text-gray-600">연속일</div>
-              </div>
-              <div>
-                <div className="text-lg font-bold text-indigo-600">{currentPoint || seedlingPoints}</div>
-                <div className="text-xs text-gray-600">새싹 포인트</div>
-              </div>
-              <div>
-                <div className="text-lg font-bold text-indigo-600">{Math.round((Object.values(missionState).filter(v => v).length / Object.keys(missionState).length) * 100)}%</div>
-                <div className="text-xs text-gray-600">달성률</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Floating Plant Button - Mobile Only */}
-        <button
-          onClick={() => setShowSidebar(!showSidebar)}
-          className="fixed bottom-6 right-6 lg:hidden w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-50 flex flex-col items-center justify-center relative"
-        >
-          <div className="text-2xl animate-bounce">
-            {plantStages[seedlingLevel as keyof typeof plantStages].emoji}
-          </div>
-          <div className="absolute -top-1 -right-1 w-5 h-5 bg-white text-indigo-600 rounded-full flex items-center justify-center text-xs font-bold">
-            {seedlingLevel}
-          </div>
-        </button>
 
         {/* Toast */}
         {toast.visible && (

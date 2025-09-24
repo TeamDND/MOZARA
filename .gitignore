@@ -1,6 +1,9 @@
 # Environment variables
 .env
 *.env
+backend/.env
+frontend/.env
+
 .env.local
 .env.development
 .env.production
@@ -34,7 +37,7 @@ __pycache__/
 env/
 venv/
 .venv/
-
+.cursor/
 # Build outputs
 build/
 dist/
@@ -58,6 +61,13 @@ keys/
 *.pem
 *.key
 
+# GitHub Actions (temporary - for development)
+# .github/workflows/
+# .github/
+
+#Docker
+# docker/
+# Dockerfile
 # Hair damage data (if contains sensitive info)
 hair_damage/
 *.jpg

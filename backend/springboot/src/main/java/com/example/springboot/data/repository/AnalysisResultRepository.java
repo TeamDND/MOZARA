@@ -7,3 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AnalysisResultRepository extends JpaRepository<AnalysisResultEntity, Integer> {
 }
+
+
