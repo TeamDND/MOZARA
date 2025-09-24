@@ -3,7 +3,7 @@ import axios, { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'ax
 
 // TypeScript: API 클라이언트 인스턴스 생성
 const apiClient = axios.create({
-    baseURL: 'http://localhost:8080/api', // 스프링 서버로 직접 호출
+    baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api', // 환경 변수에서 읽어오기
     headers: {
         'Content-Type': 'application/json',
     },
