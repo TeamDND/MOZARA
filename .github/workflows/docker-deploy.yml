@@ -142,7 +142,8 @@ jobs:
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-springboot
           fi
           if [ "${{ steps.changes.outputs.python }}" == "true" ]; then
-            echo "🔄 Python API 이미지 다운로드..."
+            echo "🔄 Python API 이미지 다운로드 (대용량 이미지)..."
+            # 대용량 이미지는 리소스 제한 없이 다운로드
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api
           fi
           if [ "${{ steps.changes.outputs.frontend }}" == "true" ]; then
@@ -151,8 +152,10 @@ jobs:
           fi
           echo "✅ 이미지 다운로드 완료"
           
-          # 1. MySQL 시작 (DB 변경시에만)
-          if [ "${{ steps.changes.outputs.db }}" == "true" ]; then
+          # 1. MySQL 시작
+          if [ "$(sudo docker ps -q -f name=mozara-mysql)" ]; then
+            echo "✅ MySQL 컨테이너 이미 실행 중"
+          else
             echo "🔄 MySQL 컨테이너 시작..."
             sudo docker run -d \
               --name mozara-mysql \
@@ -164,8 +167,6 @@ jobs:
               --cpus=0.5 \
               --restart unless-stopped \
               ${{ secrets.DOCKERHUB_USERNAME }}/mozara-db
-          else
-            echo "✅ MySQL 컨테이너 유지 (변경사항 없음)"
           fi
           
           # MySQL 대기 (초기화 시간 고려)
@@ -209,8 +210,8 @@ jobs:
             -e PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }} \
             -e PINECONE_ENVIRONMENT=${{ secrets.PINECONE_ENVIRONMENT }} \
             -e PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }} \
-            --memory=128m \
-            --cpus=0.2 \
+            --memory=256m \
+            --cpus=0.5 \
             --restart unless-stopped \
             ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api
           
@@ -260,7 +261,7 @@ jobs:
               ssl_prefer_server_ciphers off;
               
               location / {
-                  proxy_pass http://mozara-frontend:80;
+                  proxy_pass http://172.17.0.1:3000;
                   proxy_http_version 1.1;
                   proxy_set_header Upgrade $http_upgrade;
                   proxy_set_header Connection 'upgrade';
@@ -272,7 +273,7 @@ jobs:
               }
               
               location /api/ {
-                  proxy_pass http://mozara-springboot:8080/api/;
+                  proxy_pass http://172.17.0.1:8080/api/;
                   proxy_http_version 1.1;
                   proxy_set_header Upgrade $http_upgrade;
                   proxy_set_header Connection 'upgrade';
@@ -284,7 +285,7 @@ jobs:
               }
               
               location /ws-game/ {
-                  proxy_pass http://mozara-springboot:8080/ws-game/;
+                  proxy_pass http://172.17.0.1:8080/ws-game/;
                   proxy_http_version 1.1;
                   proxy_set_header Upgrade $http_upgrade;
                   proxy_set_header Connection "Upgrade";
@@ -295,7 +296,7 @@ jobs:
               }
               
               location /uploads/ {
-                  proxy_pass http://mozara-springboot:8080/uploads/;
+                  proxy_pass http://172.17.0.1:8080/uploads/;
                   proxy_set_header X-Real-IP $remote_addr;
                   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
                   proxy_set_header X-Forwarded-Proto $scheme;
