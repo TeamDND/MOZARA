@@ -73,6 +73,19 @@ jobs:
         timeout: 30m
         command_timeout: 30m
         script: |
+          # Docker 설치 확인 및 설치
+          if ! command -v docker &> /dev/null; then
+            echo "🔧 Docker 설치 중..."
+            sudo apt update
+            sudo apt install -y docker.io
+            sudo systemctl start docker
+            sudo systemctl enable docker
+            sudo usermod -aG docker ubuntu
+            echo "✅ Docker 설치 완료"
+          else
+            echo "✅ Docker 이미 설치됨"
+          fi
+          
           # 기존 컨테이너 정리
           if [ "$(sudo docker ps -a -q -f name=mozara-mysql)" ]; then
             sudo docker rm -f mozara-mysql
