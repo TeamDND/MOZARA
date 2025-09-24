@@ -173,6 +173,8 @@ export default function AiToolList() {
                         navigate('/basp-check');
                       } else if (tool.id === "hair-encyclopedia") {
                         navigate('/hair-encyclopedia');
+                      } else if (tool.id === "store-finder") {
+                        navigate('/store-finder');
                       }
                     }}
                   >

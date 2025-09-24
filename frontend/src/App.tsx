@@ -18,6 +18,7 @@ import HairDiagnosis from './pages/check/HairDiagnosis';
 import HairQuiz from './pages/hair_contents/HairQuiz';  
 import DailyCare from './pages/hair_solutions/DailyCare';
 import LandingPageV2 from './pages/LandingPageV2';
+import StoreFinder from './pages/StoreFinder';
 
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
@@ -42,6 +43,7 @@ const App: React.FC = () => {
           <Route path="signup" element={<SignUp />} />
           <Route path="login" element={<LogIn />} />
           <Route path="daily-care" element={<DailyCare />} />
+          <Route path="store-finder" element={<StoreFinder />} />
         </Route>
       </Routes>
     </>
