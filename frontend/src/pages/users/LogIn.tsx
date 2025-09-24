@@ -1,77 +1,72 @@
-import React, { useState, FormEvent, ChangeEvent } from 'react';
+import React, { useState, FormEvent } from 'react';
 import apiClient from '../../services/apiClient';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../utils/userSlice';
 import { setToken } from '../../utils/tokenSlice';
-
-const GoogleIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24">
-    <path
-      fill="#4285F4"
-      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-    />
-    <path
-      fill="#34A853"
-      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-    />
-    <path
-      fill="#FBBC05"
-      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-    />
-    <path
-      fill="#EA4335"
-      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-    />
-  </svg>
-)
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Separator } from '../../components/ui/separator';
+import { Sparkles, Lock, User } from 'lucide-react';
 
 const LogIn: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // TypeScript: 상태 타입 정의
-  const [id, setId] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  // UI 상태
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // TypeScript: 폼 제출 핸들러 (이벤트 타입 지정)
+  // 폼 데이터
+  const [formData, setFormData] = useState({
+    username: '',
+    password: ''
+  });
+
+  // 폼 입력 핸들러
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // 폼 제출 핸들러 (로그인)
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (id === '' || password === '') {
-      setError('아이디와 비밀번호를 입력해주세요.');
+    setError('');
+
+    // 유효성 검사
+    if (!formData.username || !formData.password) {
+      setError('사용자명과 비밀번호를 입력해주세요.');
       return;
     }
 
     setIsLoading(true);
-    setError('');
 
     try {
-      const res = await apiClient.post('/login', {
-        "username": id,
-        "password": password
+      // 로그인 로직
+      const loginRes = await apiClient.post('/login', {
+        username: formData.username,
+        password: formData.password
       });
 
-      console.log('로그인 성공:', res.data);
+      console.log('로그인 성공:', loginRes.data);
 
-      // JWT 토큰 저장 (Bearer 접두사 제거)
-      const token = res.headers['authorization'];
+      // JWT 토큰 저장
+      const token = loginRes.headers['authorization'];
       if (token) {
         const cleanToken = token.replace(/^Bearer\s+/i, '');
         dispatch(setToken(cleanToken));
       }
 
       // 사용자 정보 가져오기
-      const userResponse = await apiClient.get(`/userinfo/${id}`);
+      const userResponse = await apiClient.get(`/userinfo/${formData.username}`);
       console.log('사용자 정보:', userResponse.data);
 
-      // 사용자 정보 저장
       dispatch(setUser(userResponse.data));
-
-      alert('로그인 성공');
-      navigate('/'); // 메인페이지로 이동
-
+      navigate('/daily-care'); // 대시보드로 이동
     } catch (error: any) {
       console.error('로그인 오류:', error);
       const errorMessage = error.response?.data?.error || '로그인 중 오류가 발생했습니다.';
@@ -81,90 +76,153 @@ const LogIn: React.FC = () => {
     }
   };
 
-  // TypeScript: 입력 변경 핸들러들 (이벤트 타입 지정)
-  const handleIdChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setId(e.target.value);
+  // 소셜 로그인 핸들러
+  const handleSocialLogin = (provider: string) => {
+    // TODO: 소셜 로그인 API 구현
+    console.log(`${provider} 로그인 시도`);
+    // 데일리케어로 이동
+    navigate('/daily-care');
   };
 
-  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
+  // 게스트 로그인 핸들러
+  const handleGuestLogin = () => {
+    // 게스트 모드로 진단 페이지로 이동
+    navigate('/integrated-diagnosis');
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8" style={{ backgroundColor: "#F9FAFB" }}>
-      <h1 className="text-2xl font-bold text-black text-center mb-8">로그인</h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile-First 컨테이너 */}
+      <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col items-center">
+        {/* 모바일 헤더 */}
+        <h1 className="text-xl font-semibold text-center py-6">
+          로그인
+        </h1>
 
-      <div className="w-full max-w-md">
-        {/* 에러 메시지 */}
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-            {error}
-          </div>
-        )}
+        {/* 메인 컨텐츠 */}
+        <div className="w-full max-w-sm mx-auto px-6 space-y-6">
+          {/* 에러 메시지 */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+              {error}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="아이디 입력"
-            value={id}
-            onChange={handleIdChange}
-            className="w-full h-14 bg-white border border-gray-300 text-black placeholder:text-gray-500 rounded-xl focus:border-blue-400 focus:ring-blue-400 text-sm px-4"
-            required
-          />
+          {/* 일반 로그인 폼 */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="username" className="text-sm font-medium text-gray-700">아이디</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="아이디를 입력하세요"
+                  value={formData.username}
+                  onChange={(e) => handleInputChange('username', e.target.value)}
+                  className="pl-11 h-12 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+            </div>
 
-          <input
-            type="password"
-            placeholder="비밀번호 입력"
-            value={password}
-            onChange={handlePasswordChange}
-            className="w-full h-14 bg-white border border-gray-300 text-black placeholder:text-gray-500 rounded-xl focus:border-blue-400 focus:ring-blue-400 text-sm px-4 mt-2"
-            required
-          />
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium text-gray-700">비밀번호</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  className="pl-11 h-12 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+            </div>
 
-          <div className="flex justify-end space-x-2 text-sm mt-4">
-            <button
-              type="button"
-              onClick={() => navigate('/signup')}
-              className="text-gray-600 hover:text-black underline"
+            <Button
+              type="submit"
+              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
+              disabled={isLoading}
             >
-              회원가입하기
-            </button>
-            {/* <span className="text-gray-400">•</span>
-            <button type="button" className="text-gray-600 hover:text-black">
-              비밀번호 찾기
-            </button> */}
+              {isLoading ? '로그인 중...' : '로그인하고 진단 시작'}
+            </Button>
+          </form>
+
+          <div className="relative my-6">
+            <Separator />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="bg-white px-4 text-sm text-gray-500">
+                또는
+              </span>
+            </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors text-base disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+          {/* 소셜 로그인 */}
+          <div className="space-y-3">
+            <Button
+              variant="outline"
+              className="w-full h-12 border-2 border-gray-200 hover:bg-gray-50 rounded-xl active:scale-[0.98] transition-all"
+              onClick={() => handleSocialLogin('google')}
+            >
+              <img
+                src="https://developers.google.com/identity/images/g-logo.png"
+                alt="Google"
+                className="w-5 h-5 mr-3"
+              />
+              <span className="text-gray-700 font-medium">Google로 계속하기</span>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="w-full h-12 bg-[#FEE500] hover:bg-[#FDD800] border-[#FEE500] rounded-xl active:scale-[0.98] transition-all"
+              onClick={() => handleSocialLogin('kakao')}
+            >
+              <span className="w-5 h-5 mr-3 bg-black rounded-sm text-white text-xs flex items-center justify-center">
+                K
+              </span>
+              <span className="text-gray-900 font-medium">카카오로 계속하기</span>
+            </Button>
+          </div>
+
+          {/* 회원가입 링크 */}
+          <div className="text-center mt-6">
+            <Button
+              variant="link"
+              onClick={() => navigate('/signup')}
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              계정이 없으신가요? 회원가입하기
+            </Button>
+          </div>
+
+          {/* 게스트 로그인 */}
+          <div className="relative mt-6">
+            <Separator />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="bg-white px-4 text-sm text-gray-500">
+                빠른 체험
+              </span>
+            </div>
+          </div>
+
+          <Button
+            variant="outline"
+            className="w-full h-12 mt-6 border-2 border-gray-200 hover:bg-gray-50 rounded-xl active:scale-[0.98] transition-all"
+            onClick={handleGuestLogin}
           >
-            {isLoading ? '로그인 중...' : '로그인'}
-          </button>
-        </form>
+            <Sparkles className="w-5 h-5 mr-2 text-blue-500" />
+            회원가입 없이 분석 체험하기
+          </Button>
 
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-4 text-gray-500" style={{ backgroundColor: "#F9FAFB" }}>
-              OR
-            </span>
-          </div>
+          <p className="text-xs text-gray-500 text-center mt-2">
+            * 체험 모드에서는 분석 결과가 저장되지 않습니다
+          </p>
+
         </div>
-
-        <button
-          type="button"
-          className="w-full h-14 bg-white border border-gray-300 text-black hover:bg-gray-50 font-medium rounded-xl transition-colors text-base flex items-center justify-center"
-        >
-          <GoogleIcon />
-          <span className="ml-3">Google로 로그인하기</span>
-        </button>
       </div>
     </div>
-  )
+  );
 }
 
 export default LogIn;
