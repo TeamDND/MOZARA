@@ -75,7 +75,7 @@ const LogIn: React.FC = () => {
       setIsLoading(false);
     }
   };
-
+  
   // 소셜 로그인 핸들러
   const handleSocialLogin = (provider: string) => {
     // TODO: 소셜 로그인 API 구현
