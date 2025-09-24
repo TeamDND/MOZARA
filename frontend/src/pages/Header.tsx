@@ -21,7 +21,7 @@ interface SidebarItem {
 // 사이드바 메뉴 아이템 정의
 const sidebarItems: SidebarItem[] = [
   { icon: Home, label: "홈", href: "/", active: true },
-  { icon: Search, label: "진단 바로가기", href: "/hair-check" },
+  { icon: Search, label: "분석 바로가기", href: "/hair-check" },
   { icon: Layers3, label: "도구모음", href: "/main" },
   { icon: User, label: "마이페이지", href: "/profile" },
   { icon: Settings, label: "관리자 설정", href: "#", requireRole: "admin" },
@@ -96,6 +96,15 @@ export default function Header() {
 
   const handleLogoClick = () => {
     navigate('/');
+  };
+
+  const handleDiagnosisClick = () => {
+    setIsMenuOpen(false);
+    if (isLoggedIn) {
+      navigate('/integrated-diagnosis');
+    } else {
+      navigate('/login');
+    }
   };
 
   const handleLogout = async () => {
@@ -180,7 +189,9 @@ export default function Header() {
                       <li key={index}>
                         <button
                           onClick={() => {
-                            if (item.href !== "#") {
+                            if (item.label === "분석 바로가기") {
+                              handleDiagnosisClick();
+                            } else if (item.href !== "#") {
                               navigate(item.href!);
                               setIsMenuOpen(false);
                             }

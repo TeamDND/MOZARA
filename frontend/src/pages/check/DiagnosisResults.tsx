@@ -29,6 +29,7 @@ interface DiagnosisResultsProps {
 function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsProps = {}) {
   const navigate = useNavigate();
   const [selectedRegion, setSelectedRegion] = useState('서울');
+  const [selectedCategory, setSelectedCategory] = useState('전체');
 
   // 진단 결과에 따른 추천 데이터 생성 (기본값 제공)
   const getRecommendations = () => {
@@ -40,6 +41,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
       {
         name: "서울모발이식센터",
         specialty: "모발이식 전문",
+        category: "모발이식",
         rating: 4.8,
         reviews: 342,
         distance: "2.3km",
@@ -50,6 +52,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
       {
         name: "더마헤어클리닉",
         specialty: "피부과 전문의",
+        category: "탈모병원",
         rating: 4.6,
         reviews: 198,
         distance: "1.8km", 
@@ -60,12 +63,35 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
       {
         name: "프리미엄모발클리닉",
         specialty: "종합 탈모 관리",
+        category: "탈모클리닉",
         rating: 4.9,
         reviews: 521,
         distance: "3.1km",
         phone: "02-345-6789",
         image: "https://images.unsplash.com/photo-1690306815613-f839b74af330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkZXJtYXRvbG9neSUyMGNsaW5pYyUyMGhvc3BpdGFsfGVufDF8fHx8MTc1ODA3NjkxNXww&ixlib=rb-4.1.0&q=80&w=1080",
         matchReason: "개인 맞춤형 토털 케어"
+      },
+      {
+        name: "헤어라인클리닉",
+        specialty: "탈모 전문 클리닉",
+        category: "탈모클리닉",
+        rating: 4.7,
+        reviews: 289,
+        distance: "1.5km",
+        phone: "02-456-7890",
+        image: "https://images.unsplash.com/photo-1690306815613-f839b74af330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkZXJtYXRvbG9neSUyMGNsaW5pYyUyMGhvc3BpdGFsfGVufDF8fHx8MTc1ODA3NjkxNXww&ixlib=rb-4.1.0&q=80&w=1080",
+        matchReason: "비침습적 탈모 치료"
+      },
+      {
+        name: "가발전문샵 헤어스타일",
+        specialty: "가발 및 헤어피스",
+        category: "가발",
+        rating: 4.4,
+        reviews: 156,
+        distance: "2.7km",
+        phone: "02-567-8901",
+        image: "https://images.unsplash.com/photo-1690306815613-f839b74af330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkZXJtYXRvbG9neSUyMGNsaW5pYyUyMGhvc3BpdGFsfGVufDF8fHx8MTc1ODA3NjkxNXww&ixlib=rb-4.1.0&q=80&w=1080",
+        matchReason: "자연스러운 가발 제작 및 관리"
       }
     ];
 
@@ -158,31 +184,19 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
 
   const recommendations = getRecommendations();
   const regions = ['서울', '경기', '부산', '대구', '인천', '광주', '대전', '울산'];
+  const categories = ['전체', '탈모병원', '탈모클리닉', '모발이식', '가발'];
+
+  // 카테고리별 병원 필터링
+  const filteredHospitals = selectedCategory === '전체' 
+    ? recommendations.hospitals 
+    : recommendations.hospitals.filter(hospital => hospital.category === selectedCategory);
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile-First 컨테이너 */}
       <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col">
         
-        {/* 헤더 (Mobile-First) */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 text-center">
-              <h1 className="text-lg font-bold text-gray-800">진단 결과 및 맞춤 추천</h1>
-              <p className="text-xs text-gray-600 mt-1">
-                AI 분석을 바탕으로 한 개인 맞춤형 솔루션
-              </p>
-            </div>
-            <Button 
-              onClick={() => {
-                  navigate('/daily-care');
-              }}
-              className="ml-3 h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl active:scale-[0.98]"
-            >
-              데일리 케어
-            </Button>
-          </div>
-        </div>
+        
 
         {/* 메인 컨텐츠 (Mobile-First) */}
         <div className="flex-1 p-4 overflow-y-auto space-y-4">
@@ -217,8 +231,28 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </div>
           </div>
 
+          {/* Mobile-First 데일리 케어 */}
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex-1 text-center">
+              <h1 className="text-lg font-bold text-gray-800">진단 결과 및 맞춤 추천</h1>
+              <p className="text-xs text-gray-600 mt-1">
+                AI 분석을 바탕으로 한 개인 맞춤형 솔루션
+              </p>
+            </div>
+            <Button 
+              onClick={() => {
+                  navigate('/daily-care');
+              }}
+              className="ml-3 h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl active:scale-[0.98]"
+            >
+              데일리 케어
+            </Button>
+          </div>
+        </div>
+
           {/* 맞춤 추천 탭 (Mobile-First) */}
-          <Tabs defaultValue="contents" className="space-y-4">
+          <Tabs defaultValue="hospitals" className="space-y-4 flex items-center">
             <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
               <TabsTrigger 
                 value="hospitals" 
@@ -250,7 +284,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             <TabsContent value="hospitals" className="space-y-4">
               <div className="bg-white p-4 rounded-xl shadow-md">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800">내 주변 추천 병원</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">내 주변 탈모 맵</h3>
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-gray-600" />
                     <select 
@@ -264,9 +298,28 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                     </select>
                   </div>
                 </div>
+
+                {/* 이중 탭 - 카테고리 선택 */}
+                <div className="mb-4">
+                  <div className="flex overflow-x-auto space-x-1 pb-2">
+                    {categories.map((category) => (
+                      <button
+                        key={category}
+                        onClick={() => setSelectedCategory(category)}
+                        className={`flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                          selectedCategory === category
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 
                 <div className="space-y-4">
-                  {recommendations.hospitals.map((hospital, index) => (
+                  {filteredHospitals.map((hospital, index) => (
                     <div key={index} className="bg-gray-50 p-4 rounded-xl">
                       <div className="aspect-video rounded-lg overflow-hidden mb-3 bg-gray-200">
                         <ImageWithFallback 
@@ -297,16 +350,9 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                         💡 {hospital.matchReason}
                       </div>
                       
-                      <div className="flex gap-2">
-                        <Button size="sm" className="flex-1 h-10 rounded-lg">
-                          <Phone className="w-4 h-4 mr-1" />
-                          전화
-                        </Button>
-                        <Button variant="outline" size="sm" className="flex-1 h-10 rounded-lg">
-                          <Calendar className="w-4 h-4 mr-1" />
-                          예약
-                        </Button>
-                      </div>
+                      <Button className="w-full h-10 rounded-lg bg-blue-600 hover:bg-blue-700 text-white active:scale-[0.98]">
+                        자세히 보기
+                      </Button>
                     </div>
                   ))}
                 </div>
