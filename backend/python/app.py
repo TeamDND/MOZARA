@@ -16,7 +16,7 @@ import os
 
 # .env 파일 로드 (Docker 환경에서는 환경변수 직접 사용)
 try:
-load_dotenv("../../.env")
+    load_dotenv("../../.env")
     load_dotenv(".env")
 except:
     pass  # Docker 환경에서는 환경변수를 직접 사용
@@ -204,6 +204,109 @@ async def api_hair_gemini_check(file: Annotated[UploadFile, File(...)]):
 # def get_hair_gemini_check_ping():
 #     return {"status": "ok"}
 
+# --- 네이버 지역 검색 API 프록시 ---
+@app.get("/api/naver/local/search")
+async def search_naver_local(query: str):
+    """네이버 지역 검색 API 프록시"""
+    naver_client_id = os.getenv("NAVER_CLIENT_ID") or os.getenv("REACT_APP_NAVER_CLIENT_ID")
+    naver_client_secret = os.getenv("NAVER_CLIENT_SECRET") or os.getenv("REACT_APP_NAVER_CLIENT_SECRET")
+
+    if not naver_client_id or not naver_client_secret:
+        raise HTTPException(status_code=503, detail="네이버 API 키가 설정되지 않았습니다.")
+
+    try:
+        import requests
+        # 카테고리별로 다른 검색어 전략 사용
+        if "미용실" in query or "헤어살롱" in query or "탈모전용" in query:
+            # 탈모미용실 검색 시 더 광범위한 미용실 검색
+            search_query = "미용실 헤어살롱"
+        elif "가발" in query or "증모술" in query:
+            search_query = f"{query}"
+        elif "문신" in query or "smp" in query.lower():
+            search_query = f"{query} 문신"
+        else:
+            # 탈모병원 검색 시 더 광범위한 의료기관 검색
+            if "탈모병원" in query or "탈모" in query or "병원" in query:
+                search_query = "병원 의원 클리닉 피부과"
+            else:
+                search_query = f"{query} 병원"
+
+        api_url = f"https://openapi.naver.com/v1/search/local.json"
+        params = {
+            "query": search_query,
+            "display": 20,
+            "sort": "comment"
+        }
+
+        headers = {
+            "X-Naver-Client-Id": naver_client_id,
+            "X-Naver-Client-Secret": naver_client_secret
+        }
+
+        response = requests.get(api_url, params=params, headers=headers)
+        response.raise_for_status()
+
+        return response.json()
+
+    except Exception as e:
+        print(f"네이버 지역 검색 API 오류: {e}")
+        raise HTTPException(status_code=500, detail=f"네이버 API 호출 실패: {str(e)}")
+
+# --- 카카오 지역 검색 API 프록시 ---
+@app.get("/api/kakao/local/search")
+async def search_kakao_local(
+    query: str,
+    x: Optional[float] = None,
+    y: Optional[float] = None,
+    radius: Optional[int] = 5000
+):
+    """카카오 지역 검색 API 프록시"""
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY") or os.getenv("REACT_APP_KAKAO_REST_API_KEY")
+
+    if not kakao_api_key:
+        raise HTTPException(status_code=503, detail="카카오 API 키가 설정되지 않았습니다.")
+
+    try:
+        import requests
+        # 카테고리별로 다른 검색어 전략 사용
+        if "미용실" in query or "헤어살롱" in query or "탈모전용" in query:
+            # 탈모미용실 검색 시 더 광범위한 미용실 검색
+            search_query = "미용실 헤어살롱"
+        elif "가발" in query or "증모술" in query:
+            search_query = f"{query}"
+        elif "문신" in query or "smp" in query.lower():
+            search_query = f"{query} 문신"
+        else:
+            # 탈모병원 검색 시 더 광범위한 의료기관 검색
+            if "탈모병원" in query or "탈모" in query or "병원" in query:
+                search_query = "병원 의원 클리닉 피부과"
+            else:
+                search_query = f"{query} 병원"
+
+        api_url = f"https://dapi.kakao.com/v2/local/search/keyword.json"
+        params = {
+            "query": search_query,
+            "size": 15
+        }
+
+        if x is not None and y is not None:
+            params["x"] = x
+            params["y"] = y
+            params["radius"] = radius
+
+        headers = {
+            "Authorization": f"KakaoAK {kakao_api_key}"
+        }
+
+        response = requests.get(api_url, params=params, headers=headers)
+        response.raise_for_status()
+
+        return response.json()
+
+    except Exception as e:
+        print(f"카카오 지역 검색 API 오류: {e}")
+        raise HTTPException(status_code=500, detail=f"카카오 API 호출 실패: {str(e)}")
+
 # --- YouTube API 프록시 (조건부) ---
 @app.get("/youtube/search")
 async def search_youtube_videos(q: str, order: str = "viewCount", max_results: int = 12):
@@ -359,14 +462,14 @@ async def refresh_token():
             detail="토큰 갱신 중 오류가 발생했습니다."
         )
 
-@app.get("/config")
+@app.get("/api/config")
 async def get_config():
     """프론트엔드에서 필요한 환경변수 설정 조회"""
     try:
         youtube_api_key = os.getenv("YOUTUBE_API_KEY")
         eleven_st_api_key = os.getenv("ELEVEN_ST_API_KEY")
         api_base_url = os.getenv("API_BASE_URL", "http://localhost:8000/api")
-        
+
         return {
             "apiBaseUrl": api_base_url,
             "youtubeApiKey": youtube_api_key if youtube_api_key else None,
@@ -380,6 +483,20 @@ async def get_config():
             status_code=500,
             detail="설정 조회 중 오류가 발생했습니다."
         )
+
+@app.get("/api/location/status")
+async def get_location_status():
+    """위치 서비스 상태 확인 API"""
+    naver_client_id = os.getenv("NAVER_CLIENT_ID") or os.getenv("REACT_APP_NAVER_CLIENT_ID")
+    naver_client_secret = os.getenv("NAVER_CLIENT_SECRET") or os.getenv("REACT_APP_NAVER_CLIENT_SECRET")
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY") or os.getenv("REACT_APP_KAKAO_REST_API_KEY")
+
+    return {
+        "status": "ok",
+        "message": "Location API 서버가 정상적으로 동작 중입니다.",
+        "naverApiConfigured": bool(naver_client_id and naver_client_secret),
+        "kakaoApiConfigured": bool(kakao_api_key),
+    }
 
 
 # --- Gemini Hair Analysis API ---

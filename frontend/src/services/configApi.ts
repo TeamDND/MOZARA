@@ -54,13 +54,17 @@ export const configApi = {
       return response.data;
     } catch (error) {
       console.error('환경변수 설정 조회 중 오류:', error);
-      // 기본값 반환 - 스프링 서버 포트 사용
+      // 환경 변수에서 직접 읽어오기 (React 환경 변수는 REACT_APP_ 접두사 필요)
+      const youtubeApiKey = process.env.REACT_APP_YOUTUBE_API_KEY || null;
+      const elevenStApiKey = process.env.REACT_APP_ELEVEN_ST_API_KEY || null;
+      const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api';
+      
       return {
-        apiBaseUrl: 'http://localhost:8080/api',
-        youtubeApiKey: null,
-        hasYouTubeKey: false,
-        elevenStApiKey: null,
-        hasElevenStKey: false,
+        apiBaseUrl,
+        youtubeApiKey,
+        hasYouTubeKey: !!youtubeApiKey,
+        elevenStApiKey,
+        hasElevenStKey: !!elevenStApiKey,
       };
     }
   },
