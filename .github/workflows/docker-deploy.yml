@@ -204,37 +204,40 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/mozara-frontend
           
           # Nginx 설정 파일 생성
-          echo "server {" > /tmp/nginx.conf
-          echo "    listen 80;" >> /tmp/nginx.conf
-          echo "    server_name mozaracare.duckdns.org;" >> /tmp/nginx.conf
-          echo "    client_max_body_size 10m;" >> /tmp/nginx.conf
-          echo "    location / {" >> /tmp/nginx.conf
-          echo "        proxy_pass http://172.17.0.1:3000;" >> /tmp/nginx.conf
-          echo "        proxy_http_version 1.1;" >> /tmp/nginx.conf
-          echo "        proxy_set_header Upgrade \$http_upgrade;" >> /tmp/nginx.conf
-          echo "        proxy_set_header Connection 'upgrade';" >> /tmp/nginx.conf
-          echo "        proxy_set_header Host \$host;" >> /tmp/nginx.conf
-          echo "        proxy_cache_bypass \$http_upgrade;" >> /tmp/nginx.conf
-          echo "    }" >> /tmp/nginx.conf
-          echo "    location /api/ {" >> /tmp/nginx.conf
-          echo "        proxy_pass http://172.17.0.1:8080/api/;" >> /tmp/nginx.conf
-          echo "        proxy_http_version 1.1;" >> /tmp/nginx.conf
-          echo "        proxy_set_header Upgrade \$http_upgrade;" >> /tmp/nginx.conf
-          echo "        proxy_set_header Connection 'upgrade';" >> /tmp/nginx.conf
-          echo "        proxy_set_header Host \$host;" >> /tmp/nginx.conf
-          echo "        proxy_cache_bypass \$http_upgrade;" >> /tmp/nginx.conf
-          echo "    }" >> /tmp/nginx.conf
-          echo "    location /ws-game/ {" >> /tmp/nginx.conf
-          echo "        proxy_pass http://172.17.0.1:8080/ws-game/;" >> /tmp/nginx.conf
-          echo "        proxy_http_version 1.1;" >> /tmp/nginx.conf
-          echo "        proxy_set_header Upgrade \$http_upgrade;" >> /tmp/nginx.conf
-          echo "        proxy_set_header Connection \"Upgrade\";" >> /tmp/nginx.conf
-          echo "        proxy_set_header Host \$host;" >> /tmp/nginx.conf
-          echo "    }" >> /tmp/nginx.conf
-          echo "    location /uploads/ {" >> /tmp/nginx.conf
-          echo "        proxy_pass http://172.17.0.1:8080/uploads/;" >> /tmp/nginx.conf
-          echo "    }" >> /tmp/nginx.conf
-          echo "}" >> /tmp/nginx.conf
+          sudo rm -rf /tmp/nginx.conf
+          sudo cat > /tmp/nginx.conf << 'EOF'
+server {
+    listen 80;
+    server_name mozaracare.duckdns.org;
+    client_max_body_size 10m;
+    location / {
+        proxy_pass http://172.17.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+    location /api/ {
+        proxy_pass http://172.17.0.1:8080/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+    location /ws-game/ {
+        proxy_pass http://172.17.0.1:8080/ws-game/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host $host;
+    }
+    location /uploads/ {
+        proxy_pass http://172.17.0.1:8080/uploads/;
+    }
+}
+EOF
           
           # 5. Nginx 프록시 시작
           sudo docker run -d \
