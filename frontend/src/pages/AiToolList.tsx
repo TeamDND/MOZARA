@@ -88,10 +88,10 @@ export default function AiToolList() {
     },
     { 
       id: "store-finder", 
-      name: "상가찾기", 
+      name: "병원찾기", 
       icon: StoreIcon, 
       color: "bg-red-500",
-      description: "원하는 상가를 쉽게 찾아보세요.",
+      description: "주변 탈모 전문 병원을 쉽게 찾아보세요.",
       category: "utility"
     },
     { 
