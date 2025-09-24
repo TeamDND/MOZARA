@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Progress } from '../../components/ui/progress';
@@ -8,7 +9,8 @@ import { Label } from '../../components/ui/label';
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
 import { Textarea } from '../../components/ui/textarea';
 import { Badge } from '../../components/ui/badge';
-import { ArrowLeft, ArrowRight, Upload, CheckCircle, Brain, Camera } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Upload, CheckCircle, Brain, Camera, AlertCircle } from 'lucide-react';
+import { analyzeHairWithGemini, validateImageFile, getStageDescription, getStageColor, GeminiAnalysisResult, GeminiAnalysisResponse } from '../../services/geminiAnalysisService';
 
 interface IntegratedDiagnosisProps {
   setCurrentView?: (view: string) => void;
@@ -17,6 +19,8 @@ interface IntegratedDiagnosisProps {
 
 function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: IntegratedDiagnosisProps = {}) {
   const navigate = useNavigate();
+  const user = useSelector((state: any) => state.user);
+  const token = useSelector((state: any) => state.token.jwtToken);
   const [currentStep, setCurrentStep] = useState(1);
   const [baspAnswers, setBaspAnswers] = useState({
     age: '',
@@ -29,17 +33,32 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
     supplements: ''
   });
   const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
+  const [uploadedPhotoFile, setUploadedPhotoFile] = useState<File | null>(null);
   const [uploadedSidePhoto, setUploadedSidePhoto] = useState<string | null>(null);
+  const [uploadedSidePhotoFile, setUploadedSidePhotoFile] = useState<File | null>(null);
   const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [analysisSteps, setAnalysisSteps] = useState<string[]>([]);
+  const [analysisResult, setAnalysisResult] = useState<GeminiAnalysisResult | null>(null);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const totalSteps = 4;
 
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // 파일 유효성 검사
+      const validation = validateImageFile(file);
+      if (!validation.isValid) {
+        alert(validation.message);
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setUploadedPhoto(e.target?.result as string);
+        setUploadedPhotoFile(file);
       };
       reader.readAsDataURL(file);
     }
@@ -48,29 +67,101 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
   const handleSidePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // 파일 유효성 검사
+      const validation = validateImageFile(file);
+      if (!validation.isValid) {
+        alert(validation.message);
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setUploadedSidePhoto(e.target?.result as string);
+        setUploadedSidePhotoFile(file);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const simulateAnalysis = () => {
-    setAnalysisComplete(true);
-    // 3초 후 결과 페이지로 이동
-    setTimeout(() => {
-      setCurrentStep(4);
-    }, 3000);
+  const performRealAnalysis = async () => {
+    if (!uploadedPhotoFile) {
+      setAnalysisError('분석할 이미지가 없습니다.');
+      return;
+    }
+
+    setIsAnalyzing(true);
+    setAnalysisError(null);
+    setAnalysisProgress(0);
+    setAnalysisSteps([]);
+
+    try {
+      // 분석 단계 시뮬레이션
+      const steps = [
+        'BASP 설문 분석 완료',
+        '이미지 전처리 완료',
+        'Gemini AI 모발 분석 중...',
+        '탈모 진행도 측정 완료',
+        '헤어라인 분석 완료',
+        '개인 맞춤 계획 수립 완료'
+      ];
+
+      // 단계별 진행 시뮬레이션
+      for (let i = 0; i < steps.length; i++) {
+        setAnalysisSteps(prev => [...prev, steps[i]]);
+        setAnalysisProgress((i + 1) / steps.length * 100);
+
+        if (i === 2) {
+          // 실제 API 호출은 3번째 단계에서
+          console.log('🔄 실제 Gemini API 분석 시작');
+
+          const result = await analyzeHairWithGemini(
+            uploadedPhotoFile,
+            undefined, // 현재는 userId 없이 (로그인 구현 후 추가 가능)
+            undefined  // imageUrl 없이
+          );
+
+          console.log('✅ Gemini 분석 결과:', result);
+          setAnalysisResult(result.analysis);
+        }
+
+        // 각 단계 사이의 지연
+        await new Promise(resolve => setTimeout(resolve, i === 2 ? 2000 : 800));
+      }
+
+      setAnalysisComplete(true);
+
+      // 결과 화면으로 이동
+      setTimeout(() => {
+        setCurrentStep(4);
+      }, 1000);
+
+    } catch (error) {
+      console.error('❌ 분석 오류:', error);
+      setAnalysisError(
+        error instanceof Error
+          ? error.message
+          : '분석 중 오류가 발생했습니다. 다시 시도해주세요.'
+      );
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleComplete = () => {
+    // 로그인 상태 확인
+    const isLoggedIn = !!(user.username && token);
+    if (!isLoggedIn) {
+      alert('로그인 후 확인하실 수 있습니다');
+      navigate('/login');
+      return;
+    }
+
     const results = {
       basp: {
         score: 3.2,
-        stage: "초기 단계",
+        stage: analysisResult ? getStageDescription(analysisResult.stage) : "초기 단계",
         riskFactors: ['가족력', '스트레스'],
-        recommendations: [
+        recommendations: analysisResult ? analysisResult.advice : [
           '두피 마사지 루틴 시작',
           '규칙적인 운동',
           '충분한 수면',
@@ -81,15 +172,16 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         hairDensity: 72,
         scalpHealth: 85,
         improvementAreas: ['정수리 부분', '헤어라인'],
-        overallScore: 78
+        overallScore: 78,
+        geminiResult: analysisResult
       },
       integrated: {
-        priority: 'medium',
+        priority: analysisResult && analysisResult.stage <= 1 ? 'low' : analysisResult && analysisResult.stage >= 3 ? 'high' : 'medium',
         expectedImprovement: '3개월 내 15-25% 개선 가능',
         customPlan: true
       }
     };
-    
+
     if (onDiagnosisComplete) {
       onDiagnosisComplete(results);
     }
@@ -108,7 +200,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
           <div className="space-y-8">
             <div className="text-center space-y-3">
               <Brain className="w-12 h-12 text-blue-600 mx-auto" />
-              <h2 className="text-xl font-bold text-gray-800">BASP 자가진단 설문</h2>
+              <h2 className="text-xl font-bold text-gray-800">분석 전 자가체크</h2>
               <p className="text-sm text-gray-600">
                 생활 습관과 유전적 요인을 파악하여 정확한 진단을 도와드려요
               </p>
@@ -387,52 +479,86 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         return (
           <div className="space-y-8">
             <div className="text-center space-y-3">
-              <div className="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-              <h2 className="text-xl font-bold text-gray-800">AI 탈모 분석 중...</h2>
-              <p className="text-sm text-gray-600">
-                설문 응답과 사진을 종합하여 탈모 상태를 분석하고 있어요
-              </p>
+              {!analysisError ? (
+                <>
+                  <div className="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+                  <h2 className="text-xl font-bold text-gray-800">AI 탈모 분석 중...</h2>
+                  <p className="text-sm text-gray-600">
+                    설문 응답과 사진을 종합하여 탈모 상태를 분석하고 있어요
+                  </p>
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
+                  <h2 className="text-xl font-bold text-red-800">분석 오류</h2>
+                  <p className="text-sm text-red-600">
+                    {analysisError}
+                  </p>
+                </>
+              )}
             </div>
 
-            {!analysisComplete && (
+            {!analysisComplete && !analysisError && (
               <div className="space-y-6">
-                <Progress value={75} className="h-3" />
-                
+                <Progress value={analysisProgress} className="h-3" />
+
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-sm">BASP 설문 분석 완료</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-sm">탈모 진행도 측정 완료</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-sm">헤어라인 분석 완료</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-sm">개인 맞춤 계획 수립 중...</span>
-                  </div>
+                  {analysisSteps.map((step, index) => (
+                    <div key={index} className="flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-500" />
+                      <span className="text-sm">{step}</span>
+                    </div>
+                  ))}
+
+                  {isAnalyzing && (
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-sm">Gemini AI로 이미지 분석 중...</span>
+                    </div>
+                  )}
                 </div>
 
-                <div className="bg-yellow-50 p-4 rounded-xl">
-                  <p className="text-sm text-yellow-800">
-                    💡 <strong>잠깐!</strong> 분석 결과를 바탕으로 개인 맞춤형 개선 계획을 세우고 있어요. 
+                <div className="bg-blue-50 p-4 rounded-xl">
+                  <p className="text-sm text-blue-800">
+                    🧠 <strong>실제 AI 분석 진행 중!</strong> Google Gemini가 귀하의 두피 상태를 분석하고 있습니다.
                     잠시만 기다려주세요.
                   </p>
                 </div>
               </div>
             )}
 
-            {analysisComplete && (
+            {analysisComplete && !analysisError && (
               <div className="text-center space-y-4">
                 <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
                 <h3 className="text-lg font-semibold text-gray-800">분석이 완료되었습니다!</h3>
                 <p className="text-sm text-gray-600">
                   상세한 결과를 확인해보세요
                 </p>
+                {analysisResult && (
+                  <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStageColor(analysisResult.stage)}`}>
+                    {getStageDescription(analysisResult.stage)} (단계 {analysisResult.stage})
+                  </div>
+                )}
+              </div>
+            )}
+
+            {analysisError && (
+              <div className="space-y-4">
+                <div className="bg-red-50 p-4 rounded-xl">
+                  <p className="text-sm text-red-700">
+                    ❌ <strong>분석 실패</strong><br/>
+                    {analysisError}
+                  </p>
+                </div>
+                <Button
+                  onClick={() => {
+                    setAnalysisError(null);
+                    setCurrentStep(2);
+                  }}
+                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
+                >
+                  다시 시도하기
+                </Button>
               </div>
             )}
           </div>
@@ -451,76 +577,67 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
 
             <div className="space-y-4">
               <div className="bg-white p-4 rounded-xl border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">BASP 분석 결과</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">종합 점수</span>
-                    <Badge variant="outline" className="px-2 py-1">3.2 / 7</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">진행 단계</span>
-                    <Badge variant="secondary" className="px-2 py-1">초기 단계</Badge>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-2">주요 위험 요인</p>
-                    <div className="flex gap-2">
-                      <Badge variant="outline" className="text-xs px-2 py-1">가족력</Badge>
-                      <Badge variant="outline" className="text-xs px-2 py-1">스트레스</Badge>
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                  🧠 Gemini AI 분석 결과
+                </h3>
+                {analysisResult ? (
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">분석 단계</span>
+                      <Badge
+                        className={`px-2 py-1 ${getStageColor(analysisResult.stage)}`}
+                      >
+                        {getStageDescription(analysisResult.stage)} (단계 {analysisResult.stage})
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 mb-2">진단명</p>
+                      <p className="text-sm font-medium text-gray-800">{analysisResult.title}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 mb-2">상세 설명</p>
+                      <p className="text-sm text-gray-700">{analysisResult.description}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 mb-2">AI 추천 가이드</p>
+                      <div className="space-y-1">
+                        {analysisResult.advice.map((advice, index) => (
+                          <p key={index} className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                            • {advice}
+                          </p>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-4 rounded-xl border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">모발 분석 결과</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">모발 밀도</span>
-                    <Badge variant="outline" className="px-2 py-1">72%</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">두피 건강도</span>
-                    <Badge variant="secondary" className="px-2 py-1">85%</Badge>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-2">개선 필요 부위</p>
-                    <div className="flex gap-2">
-                      <Badge variant="outline" className="text-xs px-2 py-1">정수리</Badge>
-                      <Badge variant="outline" className="text-xs px-2 py-1">헤어라인</Badge>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">모발 밀도</span>
+                      <Badge variant="outline" className="px-2 py-1">분석 중...</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">두피 건강도</span>
+                      <Badge variant="secondary" className="px-2 py-1">분석 중...</Badge>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
 
-            <div className="bg-green-50 p-4 rounded-xl">
+            {/* <div className="bg-green-50 p-4 rounded-xl">
               <h3 className="text-lg font-semibold text-green-800 mb-3">🎯 개인 맞춤 개선 계획</h3>
               <div className="space-y-2 text-sm text-green-700">
-                <p>✅ 3개월 내 15-25% 개선이 예상됩니다</p>
-                <p>✅ 우선순위: 두피 마사지 + 생활 습관 개선</p>
-                <p>✅ 주간 챌린지가 자동으로 설정됩니다</p>
+                <p>✅ 당신을 위한 맞춤 개선 가이드가 준비되었습니다</p>
               </div>
-            </div>
+            </div> */}
 
             <div className="space-y-3">
               <Button 
-                onClick={() => {
-                  if (setCurrentView) {
-                    setCurrentView('damage');
-                  } else {
-                    navigate('/hair-damage-analysis');
-                  }
-                }} 
-                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl active:scale-[0.98]"
-              >
-                모발 손상 분석 계속하기
-              </Button>
-              <Button 
                 onClick={handleComplete} 
                 variant="outline" 
-                className="w-full h-12 rounded-xl active:scale-[0.98]"
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl active:scale-[0.98]"
               >
-                결과만 먼저 확인하기
+                맞춤 솔루션 및 컨텐츠 확인하기
               </Button>
             </div>
           </div>
@@ -538,28 +655,12 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         
         {/* 헤더 (Mobile-First) */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4">
-          <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => {
-                if (setCurrentView) {
-                  setCurrentView('dashboard');
-                } else {
-                  navigate('/dashboard');
-                }
-              }}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              뒤로
-            </Button>
-            
+          <div className="flex items-center justify-center">           
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-600">
                 {currentStep} / {totalSteps}
               </span>
-              <Progress value={(currentStep / totalSteps) * 100} className="w-24 h-2" />
+              <Progress value={(currentStep / totalSteps) * 100} className="w-60 h-2" />
             </div>
           </div>
         </div>
@@ -584,15 +685,25 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
               </Button>
               
               {currentStep === 2 && uploadedPhoto && (
-                <Button 
+                <Button
                   onClick={() => {
                     setCurrentStep(3);
-                    simulateAnalysis();
+                    performRealAnalysis();
                   }}
                   className="flex-1 h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98]"
+                  disabled={isAnalyzing}
                 >
-                  분석 시작
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  {isAnalyzing ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                      분석 중...
+                    </>
+                  ) : (
+                    <>
+                      🧠 AI 분석 시작
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </>
+                  )}
                 </Button>
               )}
               
