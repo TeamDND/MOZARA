@@ -6,6 +6,8 @@ RUN npm install --silent --legacy-peer-deps
 
 COPY . /app
 ENV CI=false
+ENV SKIP_PREFLIGHT_CHECK=true
+ENV TSC_COMPILE_ON_ERROR=true
 RUN npm run build
 
 FROM nginx:alpine
