@@ -161,14 +161,14 @@ jobs:
           sudo docker run -d \
             --name mozara-springboot \
             -p 8080:8080 \
-            -e SPRING_DATASOURCE_URL=jdbc:mysql://mozara-mysql:3306/mozara?useSSL=false&serverTimezone=UTC \
-            -e SPRING_DATASOURCE_USERNAME=root \
-            -e SPRING_DATASOURCE_PASSWORD=1234 \
-            -e AI_PYTHON_BASE_URL=http://mozara-python-api:8000 \
-            -e ELEVEN_ST_API_KEY=${{ secrets.ELEVEN_ST_API_KEY }} \
-            -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
-            -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
-            -e KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }} \
+            -e "SPRING_DATASOURCE_URL=jdbc:mysql://mozara-mysql:3306/mozara?useSSL=false&serverTimezone=UTC" \
+            -e "SPRING_DATASOURCE_USERNAME=root" \
+            -e "SPRING_DATASOURCE_PASSWORD=1234" \
+            -e "AI_PYTHON_BASE_URL=http://mozara-python-api:8000" \
+            -e "ELEVEN_ST_API_KEY=${{ secrets.ELEVEN_ST_API_KEY }}" \
+            -e "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" \
+            -e "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+            -e "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" \
             --memory=256m \
             --cpus=0.3 \
             --restart unless-stopped \
