@@ -22,6 +22,11 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     
+    - name: Build and push MySQL DB image
+      run: |
+        docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mozara-db ./backend/db
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/mozara-db
+    
     - name: Build and push Spring Boot image
       run: |
         docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mozara-springboot ./backend/springboot
@@ -62,6 +67,9 @@ jobs:
           fi
           
           # 기존 이미지 정리
+          if [ "$(sudo docker images -q ${{ secrets.DOCKERHUB_USERNAME }}/mozara-db)" ]; then
+            sudo docker rmi -f ${{ secrets.DOCKERHUB_USERNAME }}/mozara-db
+          fi
           if [ "$(sudo docker images -q ${{ secrets.DOCKERHUB_USERNAME }}/mozara-springboot)" ]; then
             sudo docker rmi -f ${{ secrets.DOCKERHUB_USERNAME }}/mozara-springboot
           fi
@@ -73,6 +81,7 @@ jobs:
           fi
           
           # Docker Hub에서 최신 이미지 pull
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-db
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-springboot
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-frontend
@@ -81,13 +90,9 @@ jobs:
           sudo docker run -d \
             --name mozara-mysql \
             -p 3306:3306 \
-            -e MYSQL_ROOT_PASSWORD=1234 \
-            -e MYSQL_DATABASE=mozara \
-            -e MYSQL_USER=root \
-            -e MYSQL_PASSWORD=1234 \
             -v mysql_data:/var/lib/mysql \
             --restart unless-stopped \
-            mysql:8.0 --default-authentication-plugin=mysql_native_password
+            ${{ secrets.DOCKERHUB_USERNAME }}/mozara-db
           
           # MySQL 대기
           sleep 10
