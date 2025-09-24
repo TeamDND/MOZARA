@@ -19,6 +19,21 @@ public class ConfigController {
     @Value("${eleven.st.api.key:}")
     private String elevenStApiKey;
 
+    @Value("${gemini.api.key:}")
+    private String geminiApiKey;
+
+    @Value("${google.api.key:}")
+    private String googleApiKey;
+
+    @Value("${pinecone.api.key:}")
+    private String pineconeApiKey;
+
+    @Value("${pinecone.index.name:}")
+    private String pineconeIndexName;
+
+    @Value("${pinecone.index.host:}")
+    private String pineconeIndexHost;
+
     /**
      * 환경변수 설정 조회
      * @return 환경변수 설정 정보
@@ -31,7 +46,15 @@ public class ConfigController {
         config.put("hasYouTubeKey", !youtubeApiKey.isEmpty());
         config.put("elevenStApiKey", elevenStApiKey);
         config.put("hasElevenStKey", !elevenStApiKey.isEmpty());
-        
+        config.put("geminiApiKey", geminiApiKey);
+        config.put("hasGeminiKey", !geminiApiKey.isEmpty());
+        config.put("googleApiKey", googleApiKey);
+        config.put("hasGoogleKey", !googleApiKey.isEmpty());
+        config.put("pineconeApiKey", pineconeApiKey);
+        config.put("hasPineconeKey", !pineconeApiKey.isEmpty());
+        config.put("pineconeIndexName", pineconeIndexName);
+        config.put("pineconeIndexHost", pineconeIndexHost);
+
         return ResponseEntity.ok(config);
     }
 }
