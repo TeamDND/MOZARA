@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Progress } from '../../components/ui/progress';
@@ -18,6 +19,8 @@ interface IntegratedDiagnosisProps {
 
 function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: IntegratedDiagnosisProps = {}) {
   const navigate = useNavigate();
+  const user = useSelector((state: any) => state.user);
+  const token = useSelector((state: any) => state.token.jwtToken);
   const [currentStep, setCurrentStep] = useState(1);
   const [baspAnswers, setBaspAnswers] = useState({
     age: '',
@@ -145,7 +148,14 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
   };
 
   const handleComplete = () => {
-    // 실제 분석 결과가 있으면 사용, 없으면 기본값
+    // 로그인 상태 확인
+    const isLoggedIn = !!(user.username && token);
+    if (!isLoggedIn) {
+      alert('로그인 후 확인하실 수 있습니다');
+      navigate('/login');
+      return;
+    }
+
     const results = {
       basp: {
         score: 3.2,
@@ -190,7 +200,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
           <div className="space-y-8">
             <div className="text-center space-y-3">
               <Brain className="w-12 h-12 text-blue-600 mx-auto" />
-              <h2 className="text-xl font-bold text-gray-800">BASP 자가진단 설문</h2>
+              <h2 className="text-xl font-bold text-gray-800">분석 전 자가체크</h2>
               <p className="text-sm text-gray-600">
                 생활 습관과 유전적 요인을 파악하여 정확한 진단을 도와드려요
               </p>
@@ -567,29 +577,6 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
 
             <div className="space-y-4">
               <div className="bg-white p-4 rounded-xl border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">BASP 분석 결과</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">종합 점수</span>
-                    <Badge variant="outline" className="px-2 py-1">3.2 / 7</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">진행 단계</span>
-                    <Badge variant="secondary" className="px-2 py-1">
-                      {analysisResult ? getStageDescription(analysisResult.stage) : "초기 단계"}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-2">주요 위험 요인</p>
-                    <div className="flex gap-2">
-                      <Badge variant="outline" className="text-xs px-2 py-1">가족력</Badge>
-                      <Badge variant="outline" className="text-xs px-2 py-1">스트레스</Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-4 rounded-xl border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-800 mb-3">
                   🧠 Gemini AI 분석 결과
                 </h3>
@@ -637,34 +624,20 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
               </div>
             </div>
 
-            <div className="bg-green-50 p-4 rounded-xl">
+            {/* <div className="bg-green-50 p-4 rounded-xl">
               <h3 className="text-lg font-semibold text-green-800 mb-3">🎯 개인 맞춤 개선 계획</h3>
               <div className="space-y-2 text-sm text-green-700">
-                <p>✅ 3개월 내 15-25% 개선이 예상됩니다</p>
-                <p>✅ 우선순위: 두피 마사지 + 생활 습관 개선</p>
-                <p>✅ 주간 챌린지가 자동으로 설정됩니다</p>
+                <p>✅ 당신을 위한 맞춤 개선 가이드가 준비되었습니다</p>
               </div>
-            </div>
+            </div> */}
 
             <div className="space-y-3">
               <Button 
-                onClick={() => {
-                  if (setCurrentView) {
-                    setCurrentView('damage');
-                  } else {
-                    navigate('/hair-damage-analysis');
-                  }
-                }} 
-                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl active:scale-[0.98]"
-              >
-                모발 손상 분석 계속하기
-              </Button>
-              <Button 
                 onClick={handleComplete} 
                 variant="outline" 
-                className="w-full h-12 rounded-xl active:scale-[0.98]"
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl active:scale-[0.98]"
               >
-                결과만 먼저 확인하기
+                맞춤 솔루션 및 컨텐츠 확인하기
               </Button>
             </div>
           </div>
@@ -682,28 +655,12 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         
         {/* 헤더 (Mobile-First) */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4">
-          <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => {
-                if (setCurrentView) {
-                  setCurrentView('dashboard');
-                } else {
-                  navigate('/dashboard');
-                }
-              }}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              뒤로
-            </Button>
-            
+          <div className="flex items-center justify-center">           
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-600">
                 {currentStep} / {totalSteps}
               </span>
-              <Progress value={(currentStep / totalSteps) * 100} className="w-24 h-2" />
+              <Progress value={(currentStep / totalSteps) * 100} className="w-60 h-2" />
             </div>
           </div>
         </div>

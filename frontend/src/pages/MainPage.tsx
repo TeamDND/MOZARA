@@ -123,7 +123,7 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
               onClick={handleDiagnosisStart}
               className="w-full min-h-[48px] px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
             >
-              무료 AI 진단 시작하기
+              AI 분석 시작하기
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             <Button
@@ -271,7 +271,7 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
               onClick={handleDiagnosisStart}
               className="w-full min-h-[52px] px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-2xl shadow-lg active:scale-[0.98] transition-all"
             >
-              무료 진단 시작하기
+              분석 시작하기
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
 
