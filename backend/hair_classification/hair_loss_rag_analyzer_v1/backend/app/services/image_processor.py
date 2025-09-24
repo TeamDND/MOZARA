@@ -1,37 +1,57 @@
 import cv2
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageEnhance
 import torch
 import torchvision.transforms as transforms
 import timm
 import os
 import base64
 import io
+import re
 from typing import List, Tuple, Dict, Optional
 import logging
 from ..config import settings
+from ..per_class_config import get_ensemble_config
 
 class ImageProcessor:
     def __init__(self):
-        """이미지 처리 및 특징 추출을 위한 클래스"""
+        """ConvNeXt + ViT-S/16 앙상블 이미지 처리 클래스"""
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.ensemble_config = get_ensemble_config()
 
-        # ConvNeXt-L 모델 로드
+        # ConvNeXt 모델 로드
         try:
-            self.model = timm.create_model(settings.MODEL_NAME, pretrained=True, num_classes=0)
-            self.model.eval()
-            self.model.to(self.device)
-            logging.info(f"ConvNeXt-L 모델 로드 완료: {settings.MODEL_NAME}")
+            self.conv_model = timm.create_model("convnext_large.fb_in22k_ft_in1k_384",
+                                              pretrained=True, num_classes=0, global_pool="avg")
+            self.conv_model.eval().to(self.device)
+            logging.info("ConvNeXt 모델 로드 완료")
         except Exception as e:
-            logging.error(f"ConvNeXt-L 모델 로드 실패: {e}")
+            logging.error(f"ConvNeXt 모델 로드 실패: {e}")
             raise
 
-        # ConvNeXt-L용 이미지 전처리 변환
-        self.transform = transforms.Compose([
-            transforms.Resize((384, 384)),  # ConvNeXt-L은 384x384 입력 크기 사용
+        # ViT-S/16 모델 로드
+        try:
+            self.vit_model = timm.create_model("vit_small_patch16_224",
+                                             pretrained=True, num_classes=0, global_pool="avg")
+            self.vit_model.eval().to(self.device)
+            logging.info("ViT-S/16 모델 로드 완료")
+        except Exception as e:
+            logging.error(f"ViT-S/16 모델 로드 실패: {e}")
+            raise
+
+        # 전처리 변환
+        self.transform_conv = transforms.Compose([
+            transforms.Resize(384, interpolation=transforms.InterpolationMode.BICUBIC),
+            transforms.CenterCrop(384),
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                               std=[0.229, 0.224, 0.225])
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+
+        self.transform_vit = transforms.Compose([
+            transforms.Resize(224, interpolation=transforms.InterpolationMode.BICUBIC),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
 
         self.logger = logging.getLogger(__name__)
@@ -60,26 +80,44 @@ class ImageProcessor:
             self.logger.error(f"이미지 전처리 실패: {e}")
             return None
 
-    def extract_clip_embedding(self, image: Image.Image) -> Optional[np.ndarray]:
-        """ConvNeXt-L 모델을 사용한 이미지 임베딩 추출"""
-        try:
-            # 이미지 전처리
-            if isinstance(image, Image.Image):
-                input_tensor = self.transform(image).unsqueeze(0).to(self.device)
-            else:
-                self.logger.error("입력이 PIL Image가 아닙니다")
-                return None
+    def enhance_image(self, img: Image.Image) -> Image.Image:
+        """이미지 향상"""
+        img = ImageEnhance.Sharpness(img).enhance(1.05)
+        img = ImageEnhance.Contrast(img).enhance(1.05)
+        img = ImageEnhance.Brightness(img).enhance(1.03)
+        img = ImageEnhance.Color(img).enhance(1.03)
+        return img
 
-            # ConvNeXt-L로 특징 추출 (그래디언트 계산 비활성화)
+    def extract_embedding(self, image: Image.Image, model, transform) -> Optional[np.ndarray]:
+        """단일 모델 임베딩 추출"""
+        try:
+            if image.mode != "RGB":
+                image = image.convert("RGB")
+            image = self.enhance_image(image)
+
+            input_tensor = transform(image).unsqueeze(0).to(self.device)
+
             with torch.no_grad():
-                features = self.model(input_tensor)
-                # CPU로 이동하고 numpy 배열로 변환
+                features = model(input_tensor)
                 embedding = features.squeeze().cpu().numpy()
 
+            # L2 정규화
+            embedding = embedding / (np.linalg.norm(embedding) + 1e-12)
             return embedding
         except Exception as e:
-            self.logger.error(f"ConvNeXt-L 임베딩 추출 실패: {e}")
+            self.logger.error(f"임베딩 추출 실패: {e}")
             return None
+
+    def extract_dual_embeddings(self, image: Image.Image) -> Tuple[Optional[np.ndarray], Optional[np.ndarray]]:
+        """ConvNeXt + ViT 듀얼 임베딩 추출"""
+        conv_embedding = self.extract_embedding(image, self.conv_model, self.transform_conv)
+        vit_embedding = self.extract_embedding(image, self.vit_model, self.transform_vit)
+        return conv_embedding, vit_embedding
+
+    def extract_clip_embedding(self, image: Image.Image) -> Optional[np.ndarray]:
+        """하위 호환성을 위한 메서드 (ConvNeXt 임베딩 반환)"""
+        conv_embedding, _ = self.extract_dual_embeddings(image)
+        return conv_embedding
 
     def extract_clip_embedding_from_path(self, image_path: str) -> Optional[np.ndarray]:
         """파일 경로에서 ConvNeXt-L 임베딩 추출"""
@@ -110,90 +148,76 @@ class ImageProcessor:
             # 폴더 내 모든 이미지 파일 처리
             processed_count = 0
             for filename in os.listdir(stage_folder):
-                if filename.lower().endswith(('.jpg', '.jpeg', '.png')):
+                if filename.lower().endswith(('.jpg', '.jpeg', '.png', '.bmp')):
                     image_path = os.path.join(stage_folder, filename)
 
-                    # ConvNeXt-L 임베딩 추출
-                    embedding = self.extract_clip_embedding_from_path(image_path)
-
-                    if embedding is not None:
-                        # 데이터 저장
-                        embeddings_data['embeddings'].append(embedding.tolist())
-                        embeddings_data['metadata'].append({
-                            'stage': stage,
-                            'filename': filename,
-                            'path': image_path
-                        })
-                        embeddings_data['ids'].append(f"level_{stage}_{filename}")
-                        processed_count += 1
-
-            self.logger.info(f"LEVEL_{stage} 완료: {processed_count}개 이미지 처리")
-
-        self.logger.info(f"총 {len(embeddings_data['embeddings'])}개 임베딩 생성 완료")
-        return embeddings_data
-
-    def save_uploaded_image(self, image: Image.Image, filename: str) -> str:
-        """업로드된 이미지를 저장"""
-        try:
-            # 업로드 디렉토리 생성
-            os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-
-            # 파일 경로 생성
-            file_path = os.path.join(settings.UPLOAD_DIR, filename)
-
-            # 이미지 저장
-            image.save(file_path)
-
-            return file_path
-        except Exception as e:
-            self.logger.error(f"이미지 저장 실패: {e}")
-            raise
-
-    def process_folder_dynamically(self, folder_path: str) -> Dict:
-        """지정된 폴더에서 동적으로 스테이지를 찾아 모든 이미지를 처리하여 임베딩을 생성합니다."""
-        import re
-
-        embeddings_data = {
-            'embeddings': [],
-            'metadata': [],
-            'ids': []
-        }
-
-        if not os.path.isdir(folder_path):
-            self.logger.error(f"Provided path is not a directory: {folder_path}")
-            return embeddings_data
-
-        self.logger.info(f"Processing folder dynamically: {folder_path}")
-
-        for item in os.listdir(folder_path):
-            subfolder_path = os.path.join(folder_path, item)
-            if os.path.isdir(subfolder_path):
-                # 폴더 이름에서 숫자(스테이지)를 찾습니다 (e.g., "level_1", "stage 2", "type3").
-                match = re.search(r'\d+', item)
-                if not match:
-                    self.logger.warning(f"Could not extract stage number from folder name: {item}. Skipping.")
-                    continue
-                
-                stage = int(match.group(0))
-                self.logger.info(f"Processing stage {stage} from folder {item}...")
-
-                processed_count = 0
-                for filename in os.listdir(subfolder_path):
-                    if filename.lower().endswith(('.jpg', '.jpeg', '.png')):
-                        image_path = os.path.join(subfolder_path, filename)
+                    try:
                         embedding = self.extract_clip_embedding_from_path(image_path)
-
                         if embedding is not None:
                             embeddings_data['embeddings'].append(embedding.tolist())
                             embeddings_data['metadata'].append({
                                 'stage': stage,
+                                'level': f'level_{stage}',
                                 'filename': filename,
                                 'path': image_path
                             })
                             embeddings_data['ids'].append(f"level_{stage}_{filename}")
                             processed_count += 1
-                
-                self.logger.info(f"Stage {stage} processing complete: {processed_count} images processed.")
 
-        self.logger.info(f"Total embeddings generated from folder: {len(embeddings_data['embeddings'])}")
+                    except Exception as e:
+                        self.logger.error(f"이미지 처리 실패 {image_path}: {e}")
+
+            self.logger.info(f"LEVEL_{stage}: {processed_count}개 이미지 처리 완료")
+
+        self.logger.info(f"총 {len(embeddings_data['embeddings'])}개 임베딩 생성 완료")
         return embeddings_data
+
+    def process_dual_dataset(self, dataset_path: str, stages: List[int] = [2, 3, 4, 5, 6, 7]) -> Tuple[Dict, Dict]:
+        """ConvNeXt + ViT 듀얼 임베딩 데이터셋 생성"""
+        conv_data = {'embeddings': [], 'metadata': [], 'ids': []}
+        vit_data = {'embeddings': [], 'metadata': [], 'ids': []}
+
+        for stage in stages:
+            stage_folder = os.path.join(dataset_path, f"LEVEL_{stage}")
+
+            if not os.path.exists(stage_folder):
+                self.logger.warning(f"폴더가 존재하지 않음: {stage_folder}")
+                continue
+
+            self.logger.info(f"LEVEL_{stage} 듀얼 임베딩 처리 중...")
+            processed_count = 0
+
+            for filename in os.listdir(stage_folder):
+                if filename.lower().endswith(('.jpg', '.jpeg', '.png', '.bmp')):
+                    image_path = os.path.join(stage_folder, filename)
+
+                    try:
+                        image = Image.open(image_path).convert('RGB')
+                        conv_emb, vit_emb = self.extract_dual_embeddings(image)
+
+                        if conv_emb is not None and vit_emb is not None:
+                            metadata = {
+                                'stage': stage,
+                                'level': f'level_{stage}',
+                                'filename': filename,
+                                'path': image_path
+                            }
+                            file_id = f"level_{stage}_{filename}"
+
+                            conv_data['embeddings'].append(conv_emb.tolist())
+                            conv_data['metadata'].append(metadata)
+                            conv_data['ids'].append(file_id)
+
+                            vit_data['embeddings'].append(vit_emb.tolist())
+                            vit_data['metadata'].append(metadata)
+                            vit_data['ids'].append(file_id)
+
+                            processed_count += 1
+
+                    except Exception as e:
+                        self.logger.error(f"듀얼 임베딩 처리 실패 {image_path}: {e}")
+
+            self.logger.info(f"LEVEL_{stage}: {processed_count}개 듀얼 임베딩 완료")
+
+        self.logger.info(f"ConvNeXt: {len(conv_data['embeddings'])}개, ViT: {len(vit_data['embeddings'])}개 임베딩 생성")
+        return conv_data, vit_data
