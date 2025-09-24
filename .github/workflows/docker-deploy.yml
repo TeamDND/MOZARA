@@ -114,6 +114,10 @@ jobs:
           sudo docker run -d \
             --name mozara-mysql \
             -p 3306:3306 \
+            -e MYSQL_ROOT_PASSWORD=1234 \
+            -e MYSQL_DATABASE=mozara \
+            -e MYSQL_USER=root \
+            -e MYSQL_PASSWORD=1234 \
             -v mysql_data:/var/lib/mysql \
             --restart unless-stopped \
             ${{ secrets.DOCKERHUB_USERNAME }}/mozara-db
@@ -121,6 +125,11 @@ jobs:
           # MySQL 대기 (초기화 시간 고려)
           echo "⏳ MySQL 초기화 대기 중..."
           sleep 30
+          
+          # MySQL 상태 확인
+          echo "🔍 MySQL 상태 확인..."
+          sudo docker ps | grep mozara-mysql || echo "❌ MySQL 컨테이너 문제 발생"
+          sudo docker logs mozara-mysql --tail 10 || echo "MySQL 로그 확인 실패"
           
           # 2. Spring Boot 시작
           sudo docker run -d \
