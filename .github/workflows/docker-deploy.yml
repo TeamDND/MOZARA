@@ -129,8 +129,6 @@ jobs:
             -p 3306:3306 \
             -e MYSQL_ROOT_PASSWORD=1234 \
             -e MYSQL_DATABASE=mozara \
-            -e MYSQL_USER=root \
-            -e MYSQL_PASSWORD=1234 \
             -v mysql_data:/var/lib/mysql \
             --restart unless-stopped \
             ${{ secrets.DOCKERHUB_USERNAME }}/mozara-db
