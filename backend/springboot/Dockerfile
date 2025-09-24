@@ -1,5 +1,5 @@
 # Spring Boot Dockerfile
-FROM openjdk:17-jdk-slim as build
+FROM openjdk:17-jdk-slim AS build
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ COPY src src
 RUN ./gradlew build -x test --no-daemon
 
 # 런타임 이미지
-FROM openjdk:17-jre-slim
+FROM openjdk:17-jdk-slim
 
 WORKDIR /app
 
