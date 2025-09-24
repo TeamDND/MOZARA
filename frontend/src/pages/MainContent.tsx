@@ -10,7 +10,7 @@ export default function Home() {
     { name: "제품추천", icon: "🛍️", badge: "NEW" },
     { name: "탈모 백과", icon: "📚", badge: "NEW" },
     { name: "데일리 케어", icon: "📅", badge: "NEW" },
-    { name: "상가찾기", icon: "🏪", badge: null },
+    { name: "병원찾기", icon: "🏥", badge: "NEW" },
     { name: "BASP 탈모 진단", icon: "🔍", badge: "자가진단" },
     { name: "탈모 OX 퀴즈", icon: "⭕❌", badge: null },
   ]
@@ -77,7 +77,7 @@ export default function Home() {
                       navigate('/hair-encyclopedia')
                     } else if(tool.name === "데일리 케어"){
                       navigate('/daily-care')
-                    } else if(tool.name === "상가찾기"){
+                    } else if(tool.name === "병원찾기"){
                       navigate('/store-finder')
                     }
                   }}
