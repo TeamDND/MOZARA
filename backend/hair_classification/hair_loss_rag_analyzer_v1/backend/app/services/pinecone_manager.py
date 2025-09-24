@@ -214,4 +214,115 @@ class PineconeManager:
             self.logger.error(f"Index existence check failed: {e}")
             return False
 
+    def search_vectors_by_prefix(self, prefix: str, limit: int = 10000) -> List[str]:
+        """
+        Prefix로 시작하는 벡터 ID들을 검색합니다.
+
+        Args:
+            prefix: 검색할 ID prefix (예: "37-Back_jpg")
+            limit: 최대 반환할 ID 수
+
+        Returns:
+            매칭되는 벡터 ID 리스트
+        """
+        try:
+            index = self.get_index()
+            matching_ids = []
+
+            # list() 메소드는 generator를 반환하므로 반복해서 수집
+            for ids_batch in index.list(prefix=prefix, limit=min(limit, 10000)):
+                matching_ids.extend(ids_batch)
+                if len(matching_ids) >= limit:
+                    break
+
+            self.logger.info(f"Found {len(matching_ids)} vectors with prefix '{prefix}'")
+            return matching_ids[:limit]
+
+        except Exception as e:
+            self.logger.error(f"Vector search by prefix failed: {e}")
+            return []
+
+    def delete_vectors_by_ids(self, vector_ids: List[str], batch_size: int = 1000) -> bool:
+        """
+        ID 리스트로 벡터들을 삭제합니다.
+
+        Args:
+            vector_ids: 삭제할 벡터 ID 리스트
+            batch_size: 배치 삭제 크기
+
+        Returns:
+            삭제 성공 여부
+        """
+        try:
+            if not vector_ids:
+                self.logger.warning("No vector IDs provided for deletion")
+                return True
+
+            index = self.get_index()
+            total_deleted = 0
+
+            # 배치 단위로 삭제
+            for i in range(0, len(vector_ids), batch_size):
+                batch_ids = vector_ids[i:i + batch_size]
+                index.delete(ids=batch_ids)
+                total_deleted += len(batch_ids)
+                self.logger.info(f"Deleted batch: {len(batch_ids)} vectors ({total_deleted}/{len(vector_ids)})")
+
+            self.logger.info(f"Successfully deleted {total_deleted} vectors")
+            return True
+
+        except Exception as e:
+            self.logger.error(f"Vector deletion failed: {e}")
+            return False
+
+    def delete_vectors_by_prefix(self, prefix: str, limit: int = 10000, confirm: bool = False) -> Dict:
+        """
+        Prefix로 매칭되는 벡터들을 찾아서 삭제합니다.
+
+        Args:
+            prefix: 삭제할 벡터 ID prefix
+            limit: 최대 삭제할 벡터 수
+            confirm: 삭제 확인 (안전장치)
+
+        Returns:
+            삭제 결과 정보
+        """
+        try:
+            # 먼저 매칭되는 ID들 찾기
+            matching_ids = self.search_vectors_by_prefix(prefix, limit)
+
+            if not matching_ids:
+                return {
+                    'success': True,
+                    'found_count': 0,
+                    'deleted_count': 0,
+                    'message': f"No vectors found with prefix '{prefix}'"
+                }
+
+            if not confirm:
+                return {
+                    'success': False,
+                    'found_count': len(matching_ids),
+                    'deleted_count': 0,
+                    'message': f"Found {len(matching_ids)} vectors. Set confirm=True to delete",
+                    'preview_ids': matching_ids[:10]  # 처음 10개만 미리보기
+                }
+
+            # 확인된 경우 삭제 실행
+            deletion_success = self.delete_vectors_by_ids(matching_ids)
+
+            return {
+                'success': deletion_success,
+                'found_count': len(matching_ids),
+                'deleted_count': len(matching_ids) if deletion_success else 0,
+                'message': f"Successfully deleted {len(matching_ids)} vectors" if deletion_success else "Deletion failed"
+            }
+
+        except Exception as e:
+            self.logger.error(f"Prefix deletion failed: {e}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
 

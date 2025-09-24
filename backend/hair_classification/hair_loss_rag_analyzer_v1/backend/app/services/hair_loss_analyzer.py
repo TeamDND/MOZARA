@@ -5,19 +5,21 @@ import logging
 from datetime import datetime
 from .image_processor import ImageProcessor
 from .pinecone_manager import PineconeManager
+from .dual_pinecone_manager import DualPineconeManager
 from .llm_analyzer import LLMHairAnalyzer
 from ..config import settings
 from PIL import Image
 
 class HairLossAnalyzer:
     def __init__(self):
-        """탈모 RAG 분석기 초기화"""
+        """탈모 RAG 분석기 초기화 (ConvNeXt + ViT-S/16 앙상블)"""
         try:
             self.image_processor = ImageProcessor()
-            self.vector_manager = PineconeManager()
+            self.vector_manager = PineconeManager()  # 하위 호환성
+            self.dual_manager = DualPineconeManager()  # 앙상블용
             self.llm_analyzer = LLMHairAnalyzer()
             self.logger = logging.getLogger(__name__)
-            self.logger.info("HairLossAnalyzer 초기화 완료 (LLM 통합)")
+            self.logger.info("HairLossAnalyzer 초기화 완료 (ConvNeXt+ViT 앙상블)")
         except Exception as e:
             self.logger.error(f"HairLossAnalyzer 초기화 실패: {e}")
             raise
@@ -107,24 +109,24 @@ class HairLossAnalyzer:
             }
 
     async def analyze_image(self, image: Image.Image, filename: str, top_k: int = 10, use_llm: bool = True, viewpoint: str = None) -> Dict:
-        """PIL Image 객체 분석"""
+        """PIL Image 객체 분석 (ConvNeXt + ViT-S/16 앙상블)"""
         try:
-            # 이미지 임베딩 추출
-            query_embedding = self.image_processor.extract_clip_embedding(image)
+            # 듀얼 임베딩 추출
+            conv_embedding, vit_embedding = self.image_processor.extract_dual_embeddings(image)
 
-            if query_embedding is None:
+            if conv_embedding is None or vit_embedding is None:
                 return {
                     'success': False,
                     'error': '이미지 임베딩 추출 실패',
                     'timestamp': datetime.now()
                 }
 
-            # FAISS 기반 탈모 단계 예측 (뷰포인트 필터 적용)
-            faiss_result = self.vector_manager.predict_hair_loss_stage(
-                query_embedding, top_k, viewpoint
+            # 앙상블 예측 수행
+            ensemble_result = self.dual_manager.predict_ensemble_stage(
+                conv_embedding, vit_embedding, top_k, viewpoint
             )
 
-            if faiss_result['predicted_stage'] is None:
+            if ensemble_result['predicted_stage'] is None:
                 return {
                     'success': False,
                     'error': '유사한 이미지를 찾을 수 없습니다',
@@ -134,10 +136,10 @@ class HairLossAnalyzer:
             # LLM 분석 수행 여부 결정
             if use_llm:
                 self.logger.info(f"LLM 분석 시작: {filename}")
-                llm_result = await self.llm_analyzer.analyze_with_llm(image, faiss_result)
+                llm_result = await self.llm_analyzer.analyze_with_llm(image, ensemble_result)
 
-                # FAISS와 LLM 결과 결합
-                combined_result = self.llm_analyzer.combine_results(faiss_result, llm_result)
+                # 앙상블과 LLM 결과 결합
+                combined_result = self.llm_analyzer.combine_results(ensemble_result, llm_result)
 
                 if combined_result['success']:
                     result = {
@@ -146,47 +148,48 @@ class HairLossAnalyzer:
                         'confidence': round(combined_result['confidence'], 3),
                         'stage_description': combined_result['stage_description'],
                         'stage_scores': {
-                            str(k): round(v, 3) for k, v in combined_result.get('faiss_results', {}).get('stage_scores', {}).items()
+                            str(k): round(v, 3) for k, v in combined_result.get('ensemble_results', {}).get('stage_scores', {}).items()
                         },
-                        'similar_images': combined_result.get('faiss_results', {}).get('similar_images', []),
+                        'similar_images': combined_result.get('ensemble_results', {}).get('similar_images', []),
                         'analysis_details': {
                             'filename': filename,
                             'method': combined_result['method'],
                             'llm_analysis': combined_result.get('analysis_details', {}),
                             'llm_reasoning': combined_result.get('analysis_details', {}).get('llm_reasoning', ''),
                             'token_usage': combined_result.get('analysis_details', {}).get('token_usage', {}),
-                            'embedding_dimension': len(query_embedding),
-                            'search_parameters': {'top_k': top_k, 'llm_enabled': True}
+                            'embedding_dimension': f"ConvNeXt: {len(conv_embedding)}, ViT: {len(vit_embedding)}",
+                            'search_parameters': {'top_k': top_k, 'llm_enabled': True, 'ensemble': True}
                         },
-                        'faiss_comparison': combined_result.get('faiss_results', {}),
+                        'ensemble_comparison': combined_result.get('ensemble_results', {}),
                         'timestamp': datetime.now()
                     }
-                    self.logger.info(f"LLM 분석 완료: 단계 {result['predicted_stage']} (신뢰도: {result['confidence']:.3f})")
+                    self.logger.info(f"LLM+앙상블 분석 완료: 단계 {result['predicted_stage']} (신뢰도: {result['confidence']:.3f})")
                 else:
-                    # LLM 실패 시 FAISS 결과만 사용
+                    # LLM 실패 시 앙상블 결과만 사용
                     use_llm = False
-                    self.logger.warning("LLM 분석 실패, FAISS 결과만 사용")
+                    self.logger.warning("LLM 분석 실패, 앙상블 결과만 사용")
 
             if not use_llm:
-                # FAISS 결과만 사용
+                # 앙상블 결과만 사용
                 result = {
                     'success': True,
-                    'predicted_stage': faiss_result['predicted_stage'],
-                    'confidence': round(faiss_result['confidence'], 3),
+                    'predicted_stage': ensemble_result['predicted_stage'],
+                    'confidence': round(ensemble_result['confidence'], 3),
                     'stage_description': settings.STAGE_DESCRIPTIONS.get(
-                        faiss_result['predicted_stage'],
+                        ensemble_result['predicted_stage'],
                         "알 수 없는 단계"
                     ),
                     'stage_scores': {
-                        str(k): round(v, 3) for k, v in faiss_result['stage_scores'].items()
+                        str(k): round(v, 3) for k, v in ensemble_result['stage_scores'].items()
                     },
-                    'similar_images': faiss_result['similar_images'],
+                    'similar_images': ensemble_result['similar_images'],
                     'analysis_details': {
                         'filename': filename,
-                        'method': 'faiss_only',
-                        'total_similar_found': len(faiss_result['similar_images']),
-                        'embedding_dimension': len(query_embedding),
-                        'search_parameters': {'top_k': top_k, 'llm_enabled': False}
+                        'method': 'ensemble_only',
+                        'total_similar_found': len(ensemble_result['similar_images']),
+                        'embedding_dimension': f"ConvNeXt: {len(conv_embedding)}, ViT: {len(vit_embedding)}",
+                        'search_parameters': {'top_k': top_k, 'llm_enabled': False, 'ensemble': True},
+                        'ensemble_details': ensemble_result.get('ensemble_details', {})
                     },
                     'timestamp': datetime.now()
                 }
@@ -203,17 +206,19 @@ class HairLossAnalyzer:
             }
 
     def get_database_info(self) -> Dict:
-        """데이터베이스 정보 조회"""
+        """데이터베이스 정보 조회 (듀얼 인덱스)"""
         try:
-            # 인덱스 존재 확인
-            if not self.vector_manager.index_exists():
+            # 듀얼 인덱스 존재 확인
+            conv_exists, vit_exists = self.dual_manager.indices_exist()
+
+            if not conv_exists or not vit_exists:
                 return {
                     'success': False,
-                    'error': 'FAISS 인덱스가 존재하지 않습니다. 먼저 데이터베이스를 설정하세요.',
+                    'error': f'인덱스 상태: ConvNeXt={conv_exists}, ViT={vit_exists}. 두 인덱스가 모두 필요합니다.',
                     'timestamp': datetime.now()
                 }
 
-            stats = self.vector_manager.get_index_stats()
+            stats = self.dual_manager.get_dual_index_stats()
 
             if not stats['success']:
                 return {
@@ -224,10 +229,10 @@ class HairLossAnalyzer:
 
             return {
                 'success': True,
-                'index_type': stats.get('index_type', 'FAISS'),
-                'total_vectors': stats.get('total_vector_count', 0),
-                'dimension': stats.get('dimension', 0),
-                'metadata_count': stats.get('metadata_count', 0),
+                'index_type': 'Dual Pinecone (ConvNeXt + ViT)',
+                'convnext_index': stats['convnext'],
+                'vit_index': stats['vit'],
+                'total_vectors': stats['convnext']['total_vectors'] + stats['vit']['total_vectors'],
                 'timestamp': datetime.now()
             }
         except Exception as e:
@@ -251,11 +256,16 @@ class HairLossAnalyzer:
                 'timestamp': datetime.now()
             }
 
-            # 벡터 저장소 연결 확인
+            # 벡터 저장소 연결 확인 (듀얼 인덱스)
             try:
-                health_status['services']['vector_storage'] = self.vector_manager.index_exists()
+                conv_exists, vit_exists = self.dual_manager.indices_exist()
+                health_status['services']['vector_storage'] = conv_exists and vit_exists
+                health_status['services']['convnext_index'] = conv_exists
+                health_status['services']['vit_index'] = vit_exists
             except:
                 health_status['services']['vector_storage'] = False
+                health_status['services']['convnext_index'] = False
+                health_status['services']['vit_index'] = False
 
             # 데이터셋 경로 확인
             health_status['services']['dataset'] = os.path.exists(settings.DATASET_PATH)
@@ -332,3 +342,4 @@ class HairLossAnalyzer:
                 'error': str(e),
                 'timestamp': datetime.now()
             }
+
