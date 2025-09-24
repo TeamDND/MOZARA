@@ -65,13 +65,14 @@ jobs:
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/mozara-frontend
     
     - name: Deploy to AWS EC2
+      if: steps.changes.outputs.db == 'true' || steps.changes.outputs.springboot == 'true' || steps.changes.outputs.python == 'true' || steps.changes.outputs.frontend == 'true'
       uses: appleboy/ssh-action@master
       with:
         username: ubuntu
         host: ${{ secrets.LIVE_SERVER_IP }}
         key: ${{ secrets.EC2_SSH_KEY }}
-        timeout: 30m
-        command_timeout: 30m
+        timeout: 60m
+        command_timeout: 60m
         script: |
           # Docker 설치 확인 및 설치
           if ! command -v docker &> /dev/null; then
@@ -130,23 +131,42 @@ jobs:
             sudo docker rmi -f ${{ secrets.DOCKERHUB_USERNAME }}/mozara-frontend
           fi
           
-          # Docker Hub에서 최신 이미지 pull
-          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-db
-          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-springboot
-          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api
-          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-frontend
+          # Docker Hub에서 최신 이미지 pull (변경된 것만)
+          echo "📥 Docker 이미지 다운로드 중..."
+          if [ "${{ steps.changes.outputs.db }}" == "true" ]; then
+            echo "🔄 DB 이미지 다운로드..."
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-db
+          fi
+          if [ "${{ steps.changes.outputs.springboot }}" == "true" ]; then
+            echo "🔄 Spring Boot 이미지 다운로드..."
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-springboot
+          fi
+          if [ "${{ steps.changes.outputs.python }}" == "true" ]; then
+            echo "🔄 Python API 이미지 다운로드..."
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api
+          fi
+          if [ "${{ steps.changes.outputs.frontend }}" == "true" ]; then
+            echo "🔄 Frontend 이미지 다운로드..."
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-frontend
+          fi
+          echo "✅ 이미지 다운로드 완료"
           
-          # 1. MySQL 시작
-          sudo docker run -d \
-            --name mozara-mysql \
-            -p 3306:3306 \
-            -e MYSQL_ROOT_PASSWORD=1234 \
-            -e MYSQL_DATABASE=mozara \
-            -v mysql_data:/var/lib/mysql \
-            --memory=512m \
-            --cpus=0.5 \
-            --restart unless-stopped \
-            ${{ secrets.DOCKERHUB_USERNAME }}/mozara-db
+          # 1. MySQL 시작 (DB 변경시에만)
+          if [ "${{ steps.changes.outputs.db }}" == "true" ]; then
+            echo "🔄 MySQL 컨테이너 시작..."
+            sudo docker run -d \
+              --name mozara-mysql \
+              -p 3306:3306 \
+              -e MYSQL_ROOT_PASSWORD=1234 \
+              -e MYSQL_DATABASE=mozara \
+              -v mysql_data:/var/lib/mysql \
+              --memory=512m \
+              --cpus=0.5 \
+              --restart unless-stopped \
+              ${{ secrets.DOCKERHUB_USERNAME }}/mozara-db
+          else
+            echo "✅ MySQL 컨테이너 유지 (변경사항 없음)"
+          fi
           
           # MySQL 대기 (초기화 시간 고려)
           echo "⏳ MySQL 초기화 대기 중..."
