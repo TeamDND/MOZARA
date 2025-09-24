@@ -74,6 +74,8 @@ export default function Home() {
                         navigate('/hair-encyclopedia')
                       } else if(tool.name === "데일리 케어"){
                         navigate('/daily-care')
+                      } else if(tool.name === "상가찾기"){
+                        navigate('/store-finder')
                       }
                     }}
                   >
