@@ -29,6 +29,8 @@ import WeeklyChallenges from './pages/hair_solutions/WeeklyChallenges';
 import VirtualHairstyle from './pages/hair_contents/VirtualHairstyle';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { PlantGrowth } from './components/PlantGrowth';
+import MyPage from './pages/MyPage';
+import MyReportPage from './pages/MyReportPage';
 
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
@@ -67,6 +69,8 @@ const App: React.FC = () => {
           <Route path="hair-quiz" element={<HairQuiz />} />
           <Route path="signup" element={<SignUp />} />
           <Route path="daily-care" element={<DailyCare />} />
+          <Route path="mypage" element={<MyPage />} />
+          <Route path="my-report" element={<MyReportPage />} />
           <Route path="store-finder" element={<StoreFinder />} />
         </Route>
       </Routes>
@@ -75,5 +79,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
-
