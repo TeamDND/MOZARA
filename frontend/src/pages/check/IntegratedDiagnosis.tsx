@@ -20,6 +20,7 @@ interface IntegratedDiagnosisProps {
 function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: IntegratedDiagnosisProps = {}) {
   const navigate = useNavigate();
   const user = useSelector((state: any) => state.user);
+  const token = useSelector((state: any) => state.token.jwtToken);
   const [currentStep, setCurrentStep] = useState(1);
   const [baspAnswers, setBaspAnswers] = useState({
     age: '',
@@ -148,7 +149,8 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
 
   const handleComplete = () => {
     // 로그인 상태 확인
-    if (!user || !user.isLoggedIn) {
+    const isLoggedIn = !!(user.username && token);
+    if (!isLoggedIn) {
       alert('로그인 후 확인하실 수 있습니다');
       navigate('/login');
       return;
@@ -198,7 +200,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
           <div className="space-y-8">
             <div className="text-center space-y-3">
               <Brain className="w-12 h-12 text-blue-600 mx-auto" />
-              <h2 className="text-xl font-bold text-gray-800">BASP 자가진단 설문</h2>
+              <h2 className="text-xl font-bold text-gray-800">분석 전 자가체크</h2>
               <p className="text-sm text-gray-600">
                 생활 습관과 유전적 요인을 파악하여 정확한 진단을 도와드려요
               </p>
@@ -574,29 +576,6 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
             </div>
 
             <div className="space-y-4">
-              <div className="bg-white p-4 rounded-xl border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">BASP 분석 결과</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">종합 점수</span>
-                    <Badge variant="outline" className="px-2 py-1">3.2 / 7</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">진행 단계</span>
-                    <Badge variant="secondary" className="px-2 py-1">
-                      {analysisResult ? getStageDescription(analysisResult.stage) : "초기 단계"}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-2">주요 위험 요인</p>
-                    <div className="flex gap-2">
-                      <Badge variant="outline" className="text-xs px-2 py-1">가족력</Badge>
-                      <Badge variant="outline" className="text-xs px-2 py-1">스트레스</Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               <div className="bg-white p-4 rounded-xl border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-800 mb-3">
                   🧠 Gemini AI 분석 결과
