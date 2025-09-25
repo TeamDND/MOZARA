@@ -17,6 +17,7 @@ import HairDiagnosis from './pages/check/HairDiagnosis';
 import HairQuiz from './pages/hair_contents/HairQuiz';  
 import DailyCare from './pages/hair_solutions/DailyCare';
 import LandingPageV2 from './pages/LandingPageV2';
+import StoreFinder from './pages/StoreFinder';
 
 // new_fn_flow.md에 따른 새로운 컴포넌트들
 import { MainPage } from './pages/MainPage';
@@ -28,6 +29,8 @@ import WeeklyChallenges from './pages/hair_solutions/WeeklyChallenges';
 import VirtualHairstyle from './pages/hair_contents/VirtualHairstyle';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { PlantGrowth } from './components/PlantGrowth';
+import MyPage from './pages/MyPage';
+import MyReportPage from './pages/MyReportPage';
 
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
@@ -35,12 +38,13 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <Routes>
         <Route path="/" element={<MainLayout />}>
-          {/* <Route index element={<LandingPageV2 />} /> */}
-          {/* <Route index element={<LandingPage />} /> */}
+          
           <Route index element={<MainPage />} />
           
           {/* 메인 플로우 (Main Flow) - new_fn_flow.md */}
           {/* <Route path="main-page" element={<MainPage />} /> */}
+          <Route path="landing" element={<LandingPage />} />
+          <Route path="landing2" element={<LandingPageV2 />} />
           <Route path="login" element={<LogIn />} />
           <Route path="integrated-diagnosis" element={<IntegratedDiagnosis />} />
           <Route path="diagnosis-results" element={<DiagnosisResults />} />
@@ -65,6 +69,9 @@ const App: React.FC = () => {
           <Route path="hair-quiz" element={<HairQuiz />} />
           <Route path="signup" element={<SignUp />} />
           <Route path="daily-care" element={<DailyCare />} />
+          <Route path="mypage" element={<MyPage />} />
+          <Route path="my-report" element={<MyReportPage />} />
+          <Route path="store-finder" element={<StoreFinder />} />
         </Route>
       </Routes>
     </ErrorBoundary>
@@ -72,4 +79,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
