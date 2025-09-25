@@ -5,7 +5,6 @@ import com.example.springboot.component.CustomAuthEntryPoint;
 import com.example.springboot.jwt.JwtFilter;
 import com.example.springboot.jwt.JwtLoginFilter;
 import com.example.springboot.jwt.JwtUtil;
-import com.example.springboot.oauth2.google.GoogleOAuth2UserService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +31,6 @@ public class SecurityConfig {
     private final CustomAuthEntryPoint customAuthEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final JwtUtil jwtUtil;
-    private final GoogleOAuth2UserService googleOAuth2UserService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -89,14 +87,6 @@ public class SecurityConfig {
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/api/oauth2/google/success", true)
-                        .failureUrl("/api/oauth2/google/failure")
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(googleOAuth2UserService)
-                        )
-                )
 
                 .addFilterBefore(new JwtFilter(jwtUtil), JwtLoginFilter.class)
                 .addFilterAt(new JwtLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),

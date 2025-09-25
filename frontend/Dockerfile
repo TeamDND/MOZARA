@@ -8,7 +8,9 @@ COPY . /app
 ENV CI=false
 ENV SKIP_PREFLIGHT_CHECK=true
 ENV TSC_COMPILE_ON_ERROR=true
-RUN npm run build
+RUN npm run build --verbose
+RUN ls -la /app/build/
+RUN cat /app/build/index.html | head -10
 
 FROM nginx:alpine
 COPY --from=build /app/build /usr/share/nginx/html

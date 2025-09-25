@@ -8,6 +8,7 @@ on:
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.modified, 'frontend/') || contains(github.event.head_commit.added, 'frontend/') || github.event_name == 'workflow_dispatch'
     
     steps:
       - name: Login to DockerHub
