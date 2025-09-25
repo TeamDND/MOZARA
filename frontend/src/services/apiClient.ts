@@ -5,7 +5,7 @@ import { clearUser } from '../utils/userSlice';
 
 // TypeScript: API 클라이언트 인스턴스 생성
 const apiClient = axios.create({
-    baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api', // 환경 변수에서 읽어오기
+    baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api', // 기본 포트 8000으로 정렬
     headers: {
         'Content-Type': 'application/json',
     },
@@ -60,7 +60,7 @@ apiClient.interceptors.response.use(
             originalRequest._retry = true;
             try{
                 console.log('토큰 갱신 시도 중...');
-                const res = await axios.post('http://localhost:8080/api/reissue', null, {
+                const res = await axios.post((process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api') + '/reissue', null, {
                     withCredentials: true,
                 });
                 const newAccessToken = res.headers['authorization'];
