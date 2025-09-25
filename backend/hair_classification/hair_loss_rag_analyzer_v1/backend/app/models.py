@@ -18,6 +18,8 @@ class AnalysisResult(BaseModel):
     predicted_stage: Optional[int] = None
     confidence: Optional[float] = None
     stage_description: Optional[str] = None
+    norwood_stage: Optional[int] = None
+    norwood_description: Optional[str] = None
     stage_scores: Optional[Dict[str, float]] = None
     stage_probabilities: Optional[Dict[str, float]] = None
     similar_images: Optional[List[SimilarImage]] = None
