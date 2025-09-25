@@ -231,8 +231,8 @@ const StoreFinder: React.FC = () => {
               </svg>
               <div className="ml-3">
                 <p className="text-sm text-blue-800">
-                  <strong>데모 모드:</strong> API 키가 설정되지 않아 샘플 데이터를 표시합니다. 
-                  실제 병원 검색을 위해서는 네이버/카카오 API 키를 설정해주세요.
+                  <strong>데모 모드:</strong> API 키가 설정되지 않아 샘플 데이터를 표시합니다.
+                  실제 병원 검색을 위해서는 프로젝트 루트의 .env 파일에 네이버/카카오 API 키를 설정해주세요.
                 </p>
               </div>
             </div>
