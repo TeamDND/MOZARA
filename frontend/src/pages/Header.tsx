@@ -62,12 +62,12 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showMenuText, setShowMenuText] = useState(false);
 
-  // Redux에서 사용자 정보와 토큰 가져오기
+  // Redux에서 사용자 정보 가져오기
   const user = useSelector((state: RootState) => state.user);
-  const token = useSelector((state: RootState) => state.token.jwtToken);
 
-  // 로그인 상태 확인
-  const isLoggedIn = !!(user.username && token);
+  // 로그인 상태 확인 (사용자명만으로 확인)
+  const isLoggedIn = !!(user.username && user.username.trim() !== '');
+ 
 
   // 메뉴 애니메이션 효과
   useEffect(() => {
@@ -191,6 +191,14 @@ export default function Header() {
                           onClick={() => {
                             if (item.label === "분석 바로가기") {
                               handleDiagnosisClick();
+                            } else if (item.label === "마이페이지") {
+                              if (isLoggedIn) {
+                                navigate('/mypage');
+                                setIsMenuOpen(false);
+                              } else {
+                                navigate('/login');
+                                setIsMenuOpen(false);
+                              }
                             } else if (item.href !== "#") {
                               navigate(item.href!);
                               setIsMenuOpen(false);

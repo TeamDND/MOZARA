@@ -37,7 +37,7 @@ const CategoryPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Mobile Header */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-3">
         <div className="flex items-center justify-between">
@@ -55,24 +55,22 @@ const CategoryPage = () => {
 
       {/* Main Content */}
       <div className="px-4 py-6">
-        <div className="bg-white rounded-xl p-4 shadow-sm border mb-6">
-          <div className="flex items-center mb-4">
-            <div className={`w-12 h-12 ${category.color} rounded-xl flex items-center justify-center mr-3`}>
-              <span className="text-white text-lg">{category.icon}</span>
+        <div className="bg-gray-50 rounded-xl p-4 border mb-4">
+          <div className="flex flex-col items-center text-center mb-4">
+            <div className={`w-16 h-16 ${category.color} rounded-xl flex items-center justify-center mb-3`}>
+              <span className="text-white text-2xl">{category.icon}</span>
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">{category.name}</h1>
-              <p className="text-gray-600 text-sm mt-1">{category.description}</p>
-            </div>
+            <h1 className="text-lg font-bold text-gray-900 mb-2">{category.name}</h1>
+            <p className="text-gray-600 text-sm leading-relaxed">{category.description}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             {category.subcategories.map((subcategory: string, index: number) => (
               <div
                 key={index}
-                className="p-3 bg-gray-50 rounded-lg text-center hover:bg-gray-100 transition-colors cursor-pointer"
+                className="p-3 bg-white rounded-lg text-center hover:bg-gray-100 transition-colors cursor-pointer active:scale-95 touch-manipulation shadow-sm"
               >
-                <div className="font-medium text-gray-900 text-sm">{subcategory}</div>
+                <div className="font-medium text-gray-900 text-xs">{subcategory}</div>
               </div>
             ))}
           </div>
@@ -96,10 +94,10 @@ const CategoryPage = () => {
                 <Link
                   key={article.id}
                   to={`/hair-encyclopedia/article/${article.id}`}
-                  className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200 active:scale-95 touch-manipulation border"
+                  className="bg-gray-50 rounded-xl p-4 border hover:bg-gray-100 transition-all duration-200 active:scale-95 touch-manipulation block"
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                  <div className="flex justify-between items-start mb-3">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full flex-shrink-0 ${
                       article.difficulty === 'beginner' ? 'bg-green-100 text-green-800' :
                       article.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-red-100 text-red-800'
@@ -107,18 +105,18 @@ const CategoryPage = () => {
                       {article.difficulty === 'beginner' ? '초급' :
                        article.difficulty === 'intermediate' ? '중급' : '고급'}
                     </span>
-                    <span className="text-xs text-gray-500">{article.subcategory}</span>
+                    <span className="text-xs text-gray-500 text-right flex-shrink-0 ml-2">{article.subcategory}</span>
                   </div>
 
-                  <h3 className="font-bold text-sm text-gray-900 mb-2 line-clamp-2">
+                  <h3 className="font-bold text-sm text-gray-900 mb-2 leading-tight">
                     {article.title}
                   </h3>
 
-                  <p className="text-gray-600 text-xs mb-3 line-clamp-2">
+                  <p className="text-gray-600 text-xs mb-3 leading-relaxed">
                     {article.summary}
                   </p>
 
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center justify-between text-xs text-gray-500 mt-3 pt-3 border-t border-gray-200">
                     <div className="flex items-center space-x-3">
                       <div className="flex items-center">
                         <Clock className="w-3 h-3 mr-1" />
@@ -136,7 +134,7 @@ const CategoryPage = () => {
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-1 mt-2">
+                  <div className="flex flex-wrap gap-1 mt-3">
                     {article.tags.slice(0, 2).map((tag: string, index: number) => (
                       <span
                         key={index}
@@ -154,7 +152,7 @@ const CategoryPage = () => {
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-xl p-8 shadow-sm border text-center">
+            <div className="bg-gray-50 rounded-xl p-8 border text-center">
               <div className="text-gray-400 mb-3">
                 <span className="text-3xl">{category.icon}</span>
               </div>
@@ -168,8 +166,8 @@ const CategoryPage = () => {
           )}
         </div>
 
-        <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 mt-6">
-          <h3 className="text-base font-bold text-gray-900 mb-3">다른 카테고리 둘러보기</h3>
+        <div className="bg-gradient-to-r from-gray-100 to-gray-200 rounded-xl p-4 mt-4 border">
+          <h3 className="text-sm font-bold text-gray-900 mb-3 text-center">다른 카테고리 둘러보기</h3>
           <div className="grid grid-cols-2 gap-2">
             {categories
               .filter(cat => cat.id !== categoryId)
@@ -178,12 +176,12 @@ const CategoryPage = () => {
                 <Link
                   key={cat.id}
                   to={`/hair-encyclopedia/category/${cat.id}`}
-                  className="flex items-center p-3 bg-white rounded-lg hover:shadow-sm transition-shadow"
+                  className="flex flex-col items-center p-3 bg-white rounded-lg hover:bg-gray-50 transition-all duration-200 active:scale-95 touch-manipulation shadow-sm"
                 >
-                  <div className={`w-6 h-6 ${cat.color} rounded-lg flex items-center justify-center mr-2`}>
-                    <span className="text-white text-xs">{cat.icon}</span>
+                  <div className={`w-8 h-8 ${cat.color} rounded-lg flex items-center justify-center mb-2`}>
+                    <span className="text-white text-sm">{cat.icon}</span>
                   </div>
-                  <span className="font-medium text-gray-900 text-xs">{cat.name}</span>
+                  <span className="font-medium text-gray-900 text-xs text-center">{cat.name}</span>
                 </Link>
               ))}
           </div>
