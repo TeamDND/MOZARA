@@ -8,7 +8,7 @@ on:
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.modified, 'backend/springboot/') || contains(github.event.head_commit.added, 'backend/springboot/') || contains(github.event.head_commit.message, 'backend')
+    if: contains(github.event.head_commit.modified, 'backend/springboot/') || contains(github.event.head_commit.added, 'backend/springboot/') || contains(github.event.head_commit.message, 'backend') || github.event_name == 'workflow_dispatch'
     
     steps:
       # 1.DockerHub login 코드
