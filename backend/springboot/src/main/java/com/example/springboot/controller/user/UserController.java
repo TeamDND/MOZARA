@@ -2,6 +2,7 @@ package com.example.springboot.controller.user;
 
 import com.example.springboot.data.dto.user.SignUpDTO;
 import com.example.springboot.data.dto.user.UserInfoDTO;
+import com.example.springboot.data.dto.user.UserAdditionalInfoDTO;
 import com.example.springboot.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -75,6 +76,23 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("{\"error\": \"사용자 정보 조회 중 오류가 발생했습니다.\"}");
+        }
+    }
+
+    /**
+     * 사용자 추가 정보 업데이트 (가족력, 탈모 여부, 스트레스)
+     */
+    @PutMapping("/userinfo/{username}")
+    public ResponseEntity<?> updateUserInfo(@PathVariable String username, @RequestBody UserAdditionalInfoDTO userAdditionalInfoDTO) {
+        try {
+            UserInfoDTO updatedUserInfo = userService.updateUserInfo(username, userAdditionalInfoDTO);
+            return ResponseEntity.ok(updatedUserInfo);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body("{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"사용자 정보 업데이트 중 오류가 발생했습니다.\"}");
         }
     }
 }

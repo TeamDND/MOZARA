@@ -14,10 +14,12 @@ public class UserInfoDTO {
     private Integer userId;
     private String username;
     private String email;
-    private String address;
     private String nickname;
     private String gender;
     private Integer age;
+    private Boolean familyHistory;
+    private Boolean isLoss;
+    private String stress;
     private SeedlingStatusDTO seedlingStatus;
 
 }
