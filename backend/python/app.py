@@ -13,6 +13,10 @@ import threading
 from dotenv import load_dotenv
 from datetime import datetime
 import os
+import urllib.parse
+import hashlib
+import json
+from datetime import datetime, timedelta
 
 # .env 파일 로드 (Docker 환경에서는 환경변수 직접 사용)
 try:
@@ -20,6 +24,174 @@ try:
     # load_dotenv(".env")
 except:
     pass  # Docker 환경에서는 환경변수를 직접 사용
+
+# 이미지 캐시 저장소 (메모리 기반)
+image_cache = {}
+
+def get_cache_key(place_name: str, address: str = None) -> str:
+    """캐시 키 생성"""
+    key_string = f"{place_name}_{address or ''}"
+    return hashlib.md5(key_string.encode()).hexdigest()
+
+def get_cached_image(place_name: str, address: str = None) -> str:
+    """캐시된 이미지 URL 가져오기"""
+    cache_key = get_cache_key(place_name, address)
+    
+    if cache_key in image_cache:
+        cached_data = image_cache[cache_key]
+        # 캐시 만료 시간 확인 (24시간)
+        if datetime.now() - cached_data['timestamp'] < timedelta(hours=24):
+            return cached_data['image_url']
+        else:
+            # 만료된 캐시 삭제
+            del image_cache[cache_key]
+    
+    return None
+
+def cache_image(place_name: str, address: str, image_url: str):
+    """이미지 URL 캐시 저장"""
+    cache_key = get_cache_key(place_name, address)
+    image_cache[cache_key] = {
+        'image_url': image_url,
+        'timestamp': datetime.now()
+    }
+
+def generate_default_image_url(category: str, name: str) -> str:
+    """카테고리와 이름을 기반으로 기본 이미지 URL 생성"""
+    # 카테고리별 색상과 아이콘 매핑
+    category_mapping = {
+        '탈모병원': {'color': 'blue', 'icon': 'hospital', 'unsplash_query': 'hospital+medical'},
+        '탈모미용실': {'color': 'purple', 'icon': 'scissors', 'unsplash_query': 'hair+salon'},
+        '가발전문점': {'color': 'green', 'icon': 'wig', 'unsplash_query': 'wig+hair'},
+        '두피문신': {'color': 'orange', 'icon': 'tattoo', 'unsplash_query': 'tattoo+studio'},
+    }
+    
+    # 카테고리 분류
+    category_lower = category.lower()
+    name_lower = name.lower()
+    
+    if '문신' in category_lower or '문신' in name_lower or 'smp' in name_lower:
+        selected_category = '두피문신'
+    elif '가발' in category_lower or '가발' in name_lower or '증모술' in name_lower:
+        selected_category = '가발전문점'
+    elif '미용' in category_lower or '미용' in name_lower or '헤어' in name_lower or '살롱' in name_lower:
+        selected_category = '탈모미용실'
+    else:
+        selected_category = '탈모병원'
+    
+    config = category_mapping.get(selected_category, category_mapping['탈모병원'])
+    
+    # 첫 글자 추출
+    first_letter = name[0].upper() if name else 'H'
+    
+    # Unsplash API를 사용한 실제 이미지 URL 생성 (더 실제적인 이미지)
+    # Unsplash Source API는 무료로 사용 가능하며, 300x200 크기의 이미지를 제공
+    unsplash_url = f"https://source.unsplash.com/300x200/?{config['unsplash_query']}"
+    
+    # fallback으로 placeholder 사용
+    placeholder_url = f"https://via.placeholder.com/300x200/{config['color']}/ffffff?text={urllib.parse.quote(first_letter)}"
+    
+    # 실제 이미지 URL을 우선 사용하되, 실패 시 placeholder 사용
+    return unsplash_url
+
+async def get_google_places_image(place_name: str, address: str = None) -> str:
+    """Google Places API를 사용하여 실제 병원 이미지 가져오기"""
+    # 캐시에서 먼저 확인
+    cached_image = get_cached_image(place_name, address)
+    if cached_image:
+        return cached_image
+    
+    google_api_key = os.getenv("GOOGLE_PLACES_API_KEY")
+    
+    if not google_api_key:
+        default_image = generate_default_image_url("", place_name)
+        cache_image(place_name, address, default_image)
+        return default_image
+    
+    try:
+        import requests
+        
+        # Google Places Text Search API로 장소 검색
+        search_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+        search_params = {
+            "query": f"{place_name} {address or ''}",
+            "key": google_api_key,
+            "type": "hospital|beauty_salon|hair_care"
+        }
+        
+        search_response = requests.get(search_url, params=search_params)
+        search_data = search_response.json()
+        
+        if search_data.get("status") == "OK" and search_data.get("results"):
+            place_id = search_data["results"][0]["place_id"]
+            
+            # Place Details API로 상세 정보 및 사진 참조 가져오기
+            details_url = "https://maps.googleapis.com/maps/api/place/details/json"
+            details_params = {
+                "place_id": place_id,
+                "fields": "photos",
+                "key": google_api_key
+            }
+            
+            details_response = requests.get(details_url, params=details_params)
+            details_data = details_response.json()
+            
+            if details_data.get("status") == "OK" and details_data.get("result", {}).get("photos"):
+                # 첫 번째 사진 사용
+                photo_reference = details_data["result"]["photos"][0]["photo_reference"]
+                photo_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={photo_reference}&key={google_api_key}"
+                # 캐시에 저장
+                cache_image(place_name, address, photo_url)
+                return photo_url
+        
+        # Google Places에서 이미지를 찾지 못한 경우 기본 이미지 반환
+        default_image = generate_default_image_url("", place_name)
+        cache_image(place_name, address, default_image)
+        return default_image
+        
+    except Exception as e:
+        print(f"Google Places API 오류: {e}")
+        return generate_default_image_url("", place_name)
+
+async def scrape_hospital_images(place_name: str, address: str = None) -> str:
+    """웹 스크래핑을 통한 병원 이미지 수집"""
+    try:
+        import requests
+        from bs4 import BeautifulSoup
+        
+        # 네이버 지도에서 병원 검색
+        search_query = f"{place_name} {address or ''}"
+        naver_map_url = f"https://map.naver.com/v5/search/{urllib.parse.quote(search_query)}"
+        
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        
+        response = requests.get(naver_map_url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # 네이버 지도에서 이미지 찾기
+            img_tags = soup.find_all('img', {'class': ['place_thumb', 'photo']})
+            
+            for img in img_tags:
+                src = img.get('src') or img.get('data-src')
+                if src and ('place' in src or 'photo' in src):
+                    # 상대 URL을 절대 URL로 변환
+                    if src.startswith('//'):
+                        src = 'https:' + src
+                    elif src.startswith('/'):
+                        src = 'https://map.naver.com' + src
+                    
+                    return src
+        
+        # 네이버에서 이미지를 찾지 못한 경우 기본 이미지 반환
+        return generate_default_image_url("", place_name)
+        
+    except Exception as e:
+        print(f"웹 스크래핑 오류: {e}")
+        return generate_default_image_url("", place_name)
 
 # MOZARA Hair Change 모듈
 try:
@@ -246,7 +418,27 @@ async def search_naver_local(query: str):
         response = requests.get(api_url, params=params, headers=headers)
         response.raise_for_status()
 
-        return response.json()
+        data = response.json()
+        
+        # 각 항목에 이미지 URL 추가 (Google Places API 우선 사용)
+        if 'items' in data:
+            for item in data['items']:
+                # Google Places API로 실제 이미지 시도, 실패 시 기본 이미지 사용
+                import asyncio
+                try:
+                    # 동기 함수에서 비동기 함수 호출
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    image_url = loop.run_until_complete(
+                        get_google_places_image(item.get('title', ''), item.get('address', ''))
+                    )
+                    loop.close()
+                    item['imageUrl'] = image_url
+                except:
+                    # Google Places API 실패 시 기본 이미지 사용
+                    item['imageUrl'] = generate_default_image_url(item.get('category', ''), item.get('title', ''))
+        
+        return data
 
     except Exception as e:
         print(f"네이버 지역 검색 API 오류: {e}")
@@ -301,7 +493,27 @@ async def search_kakao_local(
         response = requests.get(api_url, params=params, headers=headers)
         response.raise_for_status()
 
-        return response.json()
+        data = response.json()
+        
+        # 각 항목에 이미지 URL 추가 (Google Places API 우선 사용)
+        if 'documents' in data:
+            for doc in data['documents']:
+                # Google Places API로 실제 이미지 시도, 실패 시 기본 이미지 사용
+                import asyncio
+                try:
+                    # 동기 함수에서 비동기 함수 호출
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    image_url = loop.run_until_complete(
+                        get_google_places_image(doc.get('place_name', ''), doc.get('address_name', ''))
+                    )
+                    loop.close()
+                    doc['imageUrl'] = image_url
+                except:
+                    # Google Places API 실패 시 기본 이미지 사용
+                    doc['imageUrl'] = generate_default_image_url(doc.get('category_name', ''), doc.get('place_name', ''))
+        
+        return data
 
     except Exception as e:
         print(f"카카오 지역 검색 API 오류: {e}")
