@@ -114,6 +114,14 @@ class ImageProcessor:
         vit_embedding = self.extract_embedding(image, self.vit_model, self.transform_vit)
         return conv_embedding, vit_embedding
 
+    def get_convnext_embedding(self, image: Image.Image) -> Optional[np.ndarray]:
+        """ConvNeXt 단일 임베딩 추출"""
+        return self.extract_embedding(image, self.conv_model, self.transform_conv)
+
+    def get_vit_embedding(self, image: Image.Image) -> Optional[np.ndarray]:
+        """ViT 단일 임베딩 추출"""
+        return self.extract_embedding(image, self.vit_model, self.transform_vit)
+
     def extract_clip_embedding(self, image: Image.Image) -> Optional[np.ndarray]:
         """하위 호환성을 위한 메서드 (ConvNeXt 임베딩 반환)"""
         conv_embedding, _ = self.extract_dual_embeddings(image)

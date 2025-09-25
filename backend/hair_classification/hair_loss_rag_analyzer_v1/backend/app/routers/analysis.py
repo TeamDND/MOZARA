@@ -1,6 +1,6 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Form
 from fastapi.responses import JSONResponse
-from typing import Optional
+from typing import Optional, List
 import logging
 import os
 from datetime import datetime
@@ -160,4 +160,57 @@ async def add_folder_data(request: AddFolderRequest):
 
     except Exception as e:
         logging.error(f"폴더 데이터 추가 실패: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/analyze-dual-upload", response_model=AnalysisResult)
+async def analyze_dual_uploaded_images(
+    primary_file: UploadFile = File(..., description="Primary 이미지 (Top-down/Front)"),
+    secondary_file: UploadFile = File(..., description="Secondary 이미지 (Right/Left)"),
+    use_llm: bool = Form(default=True, description="LLM 분석 사용 여부")
+):
+    """듀얼 이미지 업로드 Late Fusion 분석"""
+    try:
+        # 파일 크기 확인
+        for file in [primary_file, secondary_file]:
+            if file.size > settings.MAX_FILE_SIZE:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"파일 크기가 너무 큽니다. 최대 {settings.MAX_FILE_SIZE // (1024*1024)}MB"
+                )
+
+            # 파일 확장자 확인
+            file_extension = os.path.splitext(file.filename)[1].lower()
+            if file_extension not in settings.ALLOWED_EXTENSIONS:
+                raise HTTPException(
+                    status_code=415,
+                    detail=f"지원하지 않는 파일 형식입니다. 지원 형식: {settings.ALLOWED_EXTENSIONS}"
+                )
+
+        # 이미지 읽기
+        from PIL import Image
+        import io
+
+        primary_contents = await primary_file.read()
+        secondary_contents = await secondary_file.read()
+
+        primary_image = Image.open(io.BytesIO(primary_contents)).convert('RGB')
+        secondary_image = Image.open(io.BytesIO(secondary_contents)).convert('RGB')
+
+        # 듀얼 이미지 분석 실행
+        analyzer = get_analyzer()
+        result = await analyzer.analyze_dual_images(
+            primary_image, secondary_image,
+            primary_file.filename, secondary_file.filename,
+            use_llm=use_llm
+        )
+
+        if result['success']:
+            return AnalysisResult(**result)
+        else:
+            raise HTTPException(status_code=400, detail=result['error'])
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"듀얼 이미지 분석 실패: {e}")
         raise HTTPException(status_code=500, detail=str(e))

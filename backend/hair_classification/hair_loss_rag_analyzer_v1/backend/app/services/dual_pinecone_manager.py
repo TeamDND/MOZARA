@@ -114,26 +114,13 @@ class DualPineconeManager:
         try:
             idx_conv, idx_vit = self.get_indices()
 
-            # 필터 구성
+            # 필터 구성 (test script처럼 viewpoint 필터 제거하여 RAG 성능 향상)
             search_filter = {
                 "gender": {"$eq": settings.DEFAULT_GENDER_FILTER}
             }
 
-            # 뷰포인트 필터 적용
-            if viewpoint:
-                viewpoint_mapping = {
-                    'top-down': ['Top-Down', 'top-down', 'top_down', 'top'],
-                    'front': ['Front', 'front'],
-                    'left': ['Left', 'left'],
-                    'right': ['Right', 'right'],
-                    'back': ['Back', 'back'],
-                    'side': ['Side', 'side']
-                }
-
-                if viewpoint.lower() in viewpoint_mapping:
-                    search_filter["pointview"] = {"$in": viewpoint_mapping[viewpoint.lower()]}
-                else:
-                    search_filter["pointview"] = {"$eq": viewpoint}
+            # NOTE: viewpoint 필터를 제거하여 test_dual_image_fusion.py와 동일한 방식으로 동작
+            # 모든 각도의 이미지를 참조하는 RAG 방식으로 성능 향상
 
             # ConvNeXt 검색
             res_conv = idx_conv.query(
@@ -197,10 +184,16 @@ class DualPineconeManager:
                 }
 
             # 앙상블 매니저로 예측
-            ensemble_manager = EnsembleManager()
-            result = ensemble_manager.predict_from_dual_results(conv_matches, vit_matches)
+            ensemble = EnsembleManager()
+            result = ensemble.predict_with_dual_search(conv_matches, vit_matches)
 
-            return result
+            return {
+                'predicted_stage': result['predicted_stage'],
+                'confidence': result['confidence'],
+                'stage_scores': result['stage_scores'],
+                'similar_images': result['similar_images'],
+                'ensemble_details': result.get('ensemble_details', {})
+            }
 
         except Exception as e:
             self.logger.error(f"Ensemble prediction failed: {e}")
@@ -212,36 +205,97 @@ class DualPineconeManager:
                 'error': str(e)
             }
 
-    def get_dual_index_stats(self) -> Dict:
-        """두 인덱스 통계 반환"""
+    async def dual_search_and_ensemble(self, primary_image, secondary_image,
+                                     top_k: int = 10,
+                                     primary_viewpoint: str = None,
+                                     secondary_viewpoint: str = None) -> Dict:
+        """듀얼 이미지 검색 및 Late Fusion을 위한 결과 반환"""
         try:
-            idx_conv, idx_vit = self.get_indices()
+            from .image_processor import ImageProcessor
 
-            stats_conv = idx_conv.describe_index_stats()
-            stats_vit = idx_vit.describe_index_stats()
+            # 이미지 프로세서 초기화
+            processor = ImageProcessor()
+
+            # Primary 이미지 임베딩
+            primary_conv_emb = processor.get_convnext_embedding(primary_image)
+            primary_vit_emb = processor.get_vit_embedding(primary_image)
+
+            # Secondary 이미지 임베딩
+            secondary_conv_emb = processor.get_convnext_embedding(secondary_image)
+            secondary_vit_emb = processor.get_vit_embedding(secondary_image)
+
+            # Primary 이미지 검색
+            primary_conv_matches, primary_vit_matches = self.dual_search(
+                primary_conv_emb, primary_vit_emb, top_k, primary_viewpoint
+            )
+
+            # Secondary 이미지 검색
+            secondary_conv_matches, secondary_vit_matches = self.dual_search(
+                secondary_conv_emb, secondary_vit_emb, top_k, secondary_viewpoint
+            )
 
             return {
                 'success': True,
-                'convnext': {
-                    'index_name': self.index_conv,
-                    'total_vectors': stats_conv.get('total_vector_count', 0),
-                    'dimension': stats_conv.get('dimension', 0),
-                    'fullness': stats_conv.get('index_fullness', 0)
-                },
-                'vit': {
-                    'index_name': self.index_vit,
-                    'total_vectors': stats_vit.get('total_vector_count', 0),
-                    'dimension': stats_vit.get('dimension', 0),
-                    'fullness': stats_vit.get('index_fullness', 0)
-                }
+                'primary_convnext_matches': primary_conv_matches,
+                'primary_vit_matches': primary_vit_matches,
+                'secondary_convnext_matches': secondary_conv_matches,
+                'secondary_vit_matches': secondary_vit_matches,
+                'primary_viewpoint': primary_viewpoint,
+                'secondary_viewpoint': secondary_viewpoint
             }
+
         except Exception as e:
-            self.logger.error(f"Dual stats retrieval failed: {e}")
-            return {'success': False, 'error': str(e)}
+            self.logger.error(f"Dual search and ensemble failed: {e}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
 
     def indices_exist(self) -> Tuple[bool, bool]:
         """두 인덱스 존재 여부 확인"""
         try:
+            existing = self.pc.list_indexes()
+            index_names = existing.names()
+            conv_exists = self.index_conv in index_names
+            vit_exists = self.index_vit in index_names
+            return conv_exists, vit_exists
+        except Exception as e:
+            self.logger.error(f"Check indices existence failed: {e}")
+            return False, False
+
+    def get_dual_index_stats(self) -> Dict:
+        """두 인덱스 통계 정보 조회"""
+        try:
+            idx_conv, idx_vit = self.get_indices()
+
+            # ConvNeXt 인덱스 통계
+            conv_stats = idx_conv.describe_index_stats()
+            conv_info = {
+                'name': self.index_conv,
+                'dimension': self.dim_conv,
+                'total_vectors': conv_stats.get('total_vector_count', 0)
+            }
+
+            # ViT 인덱스 통계
+            vit_stats = idx_vit.describe_index_stats()
+            vit_info = {
+                'name': self.index_vit,
+                'dimension': self.dim_vit,
+                'total_vectors': vit_stats.get('total_vector_count', 0)
+            }
+
+            return {
+                'success': True,
+                'convnext': conv_info,
+                'vit': vit_info
+            }
+
+        except Exception as e:
+            self.logger.error(f"Get dual index stats failed: {e}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
             existing = self.pc.list_indexes().names()
             conv_exists = self.index_conv in existing
             vit_exists = self.index_vit in existing
