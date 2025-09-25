@@ -47,9 +47,9 @@ const ArticlePage = () => {
       <div className="px-4 py-6">
         <article className="space-y-6">
           <header className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className={`w-6 h-6 ${article.category.color} rounded-lg flex items-center justify-center`}>
-                <span className="text-white text-xs">{article.category.icon}</span>
+            <div className="flex flex-wrap items-center gap-2 justify-center">
+              <div className={`w-8 h-8 ${article.category.color} rounded-lg flex items-center justify-center`}>
+                <span className="text-white text-sm">{article.category.icon}</span>
               </div>
               <span className="text-xs font-medium text-gray-600">{article.subcategory}</span>
               <span className={`px-2 py-1 text-xs font-medium rounded-full ${
@@ -62,11 +62,11 @@ const ArticlePage = () => {
               </span>
             </div>
 
-            <h1 className="text-xl font-bold text-gray-900 leading-tight">
+            <h1 className="text-lg font-bold text-gray-900 leading-tight text-center">
               {article.title}
             </h1>
 
-            <div className="flex flex-wrap items-center gap-3 py-3 border-y border-gray-200 text-xs text-gray-600">
+            <div className="flex flex-wrap items-center justify-center gap-3 py-3 border-y border-gray-200 text-xs text-gray-600">
               <div className="flex items-center">
                 <Clock className="w-3 h-3 mr-1" />
                 {article.readTime}분 읽기
@@ -128,13 +128,13 @@ const ArticlePage = () => {
             </div>
           )}
 
-          <div className="pt-6 border-t border-gray-200">
-            <h3 className="font-semibold text-gray-900 mb-2 text-sm">태그</h3>
-            <div className="flex flex-wrap gap-1">
+          <div className="pt-4 border-t border-gray-200">
+            <h3 className="font-semibold text-gray-900 mb-3 text-sm text-center">태그</h3>
+            <div className="flex flex-wrap gap-1 justify-center">
               {article.tags.map((tag: string, index: number) => (
                 <span
                   key={index}
-                  className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 hover:bg-blue-100 hover:text-blue-700 transition-colors cursor-pointer"
+                  className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 hover:bg-blue-100 hover:text-blue-700 transition-colors cursor-pointer active:scale-95 touch-manipulation"
                 >
                   <Tag className="w-2 h-2 mr-1" />
                   {tag}
@@ -144,27 +144,29 @@ const ArticlePage = () => {
           </div>
         </article>
 
-        <aside className="mt-8 pt-6 border-t border-gray-200">
-          <h3 className="font-semibold text-gray-900 mb-3 text-sm">관련 아티클</h3>
+        <aside className="mt-6 pt-4 border-t border-gray-200">
+          <h3 className="font-semibold text-gray-900 mb-4 text-sm text-center">관련 아티클</h3>
           <div className="space-y-3">
             {relatedArticles.map((relatedArticle) => (
               <Link
                 key={relatedArticle.id}
                 to={`/hair-encyclopedia/article/${relatedArticle.id}`}
-                className="bg-white rounded-xl p-3 shadow-sm hover:shadow-md transition-all duration-200 active:scale-95 touch-manipulation border"
+                className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200 active:scale-95 touch-manipulation border"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className={`px-2 py-1 text-xs font-medium text-white rounded ${relatedArticle.category.color}`}>
-                    {relatedArticle.subcategory}
-                  </span>
-                  <span className="text-xs text-gray-500">{relatedArticle.readTime}분</span>
-                </div>
-                <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm">
-                  {relatedArticle.title}
-                </h4>
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span>{relatedArticle.author}</span>
-                  <span>{relatedArticle.lastUpdated}</span>
+                <div className="flex flex-col items-center text-center">
+                  <div className="flex items-center justify-between w-full mb-2">
+                    <span className={`px-2 py-1 text-xs font-medium text-white rounded ${relatedArticle.category.color}`}>
+                      {relatedArticle.subcategory}
+                    </span>
+                    <span className="text-xs text-gray-500">{relatedArticle.readTime}분</span>
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm">
+                    {relatedArticle.title}
+                  </h4>
+                  <div className="flex items-center justify-between text-xs text-gray-500 w-full">
+                    <span>{relatedArticle.author}</span>
+                    <span>{relatedArticle.lastUpdated}</span>
+                  </div>
                 </div>
               </Link>
             ))}

@@ -207,7 +207,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
               <Brain className="w-12 h-12 text-blue-600 mx-auto" />
               <h2 className="text-xl font-bold text-gray-800">분석 전 자가체크</h2>
               <p className="text-sm text-gray-600">
-                생활 습관과 유전적 요인을 파악하여 정확한 진단을 도와드려요
+                생활 습관과 유전적 요인을 파악하여 정확한 분석을 도와드려요
               </p>
             </div>
 
@@ -468,7 +468,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
               
 
               <div className="bg-blue-50 p-4 rounded-xl">
-                <h4 className="font-semibold text-blue-800 mb-3">📸 탈모 진단 촬영 가이드</h4>
+                <h4 className="font-semibold text-blue-800 mb-3">📸 탈모 분석 촬영 가이드</h4>
                 <ul className="text-sm text-blue-700 space-y-2">
                   <li>• 밝은 곳에서 촬영해주세요</li>
                   <li>• 머리를 완전히 말린 상태로 촬영해주세요</li>
@@ -574,7 +574,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
           <div className="space-y-8">
             <div className="text-center space-y-3">
               <CheckCircle className="w-12 h-12 text-green-500 mx-auto" />
-              <h2 className="text-xl font-bold text-gray-800">통합 진단 결과</h2>
+              <h2 className="text-xl font-bold text-gray-800">통합 분석 결과</h2>
               <p className="text-sm text-gray-600">
                 AI가 분석한 종합적인 두피 상태입니다
               </p>
@@ -596,7 +596,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
                       </Badge>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600 mb-2">진단명</p>
+                      <p className="text-sm text-gray-600 mb-2">분석명</p>
                       <p className="text-sm font-medium text-gray-800">{analysisResult.title}</p>
                     </div>
                     <div>

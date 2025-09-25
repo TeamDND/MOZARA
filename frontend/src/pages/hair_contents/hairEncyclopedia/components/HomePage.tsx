@@ -33,13 +33,16 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Mobile Header */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-3">
+        <div className="flex items-center justify-center">
+          <h1 className="text-lg font-bold text-gray-900">탈모 지식백과</h1>
+        </div>
+      </div>
 
       {/* Main Content */}
-      <div className="px-4 py-6">
-        <section className="text-center py-8 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-3">
-            탈모 지식백과
-          </h1>
+      <div className="px-4 py-4">
+        <section className="text-center py-6 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl mb-4">
           <p className="text-sm text-gray-600 px-4">
             탈모에 대한 모든 것을 한 곳에서. 전문적이고 신뢰할 수 있는 정보를 제공합니다.
           </p>
@@ -158,17 +161,17 @@ const HomePage = () => {
                   to={`/hair-encyclopedia/category/${category.id}`}
                   className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200 active:scale-95 touch-manipulation border"
                 >
-                  <div className="flex items-center mb-2">
-                    <div className={`w-8 h-8 ${category.color} rounded-lg flex items-center justify-center mr-2`}>
-                      <span className="text-white text-sm">{category.icon}</span>
+                  <div className="flex flex-col items-center text-center">
+                    <div className={`w-12 h-12 ${category.color} rounded-xl flex items-center justify-center mb-3`}>
+                      <span className="text-white text-lg">{category.icon}</span>
                     </div>
-                    <h3 className="font-semibold text-gray-900 text-sm">{category.name}</h3>
-                  </div>
-                  <p className="text-gray-600 text-xs leading-relaxed mb-2">
-                    {category.description}
-                  </p>
-                  <div className="text-xs text-gray-500">
-                    {category.subcategories.length}개 항목
+                    <h3 className="font-semibold text-gray-900 text-sm mb-2">{category.name}</h3>
+                    <p className="text-gray-600 text-xs leading-relaxed mb-2 line-clamp-2">
+                      {category.description}
+                    </p>
+                    <div className="text-xs text-gray-500">
+                      {category.subcategories.length}개 항목
+                    </div>
                   </div>
                 </Link>
               ))}

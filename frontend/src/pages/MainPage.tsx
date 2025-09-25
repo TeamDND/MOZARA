@@ -69,23 +69,23 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
 
   const testimonials = [
     {
-      name: "김민수",
-      age: "32세",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+      name: "김대중",
+      age: "24세",
+      image: "/sam1.png",
       content: "3개월 만에 확실한 변화를 느꼈어요. 특히 챌린지 시스템이 재미있어서 꾸준히 할 수 있었습니다.",
       improvement: "모발 밀도 23% 개선"
     },
     {
-      name: "박진호",
-      age: "28세",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+      name: "박시현",
+      age: "33세",
+      image: "/sam2.png",
       content: "과학적인 분석과 개인 맞춤 계획이 정말 도움이 되었어요. 이제 자신감이 생겼습니다.",
       improvement: "두피 건강도 35% 개선"
     },
     {
-      name: "이승우",
-      age: "35세",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
+      name: "조정태",
+      age: "28세",
+      image: "/sam3.png",
       content: "매주 변화를 눈으로 확인할 수 있어서 동기부여가 확실했어요. 포기하지 않게 해주는 서비스입니다.",
       improvement: "전체 점수 41% 개선"
     }
@@ -139,7 +139,7 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
           <div className="relative mx-2 mb-6">
             <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-blue-50 to-green-50 shadow-lg">
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1666622833860-562f3a5caa59?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoYWlyJTIwbG9zcyUyMHNjYWxwJTIwdHJlYXRtZW50fGVufDF8fHx8MTc1ODA3NTYyOHww&ixlib=rb-4.1.0&q=80&w=1080"
+                src="/main-hero-image.jpg"
                 alt="MOZARA 서비스 미리보기"
                 className="w-full h-full object-cover"
               />
