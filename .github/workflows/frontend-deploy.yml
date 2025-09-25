@@ -41,11 +41,25 @@ jobs:
           timeout: 60m
           command_timeout: 60m
           script: |
+            echo "🔄 프론트엔드 컨테이너 업데이트 중..."
+            
+            # 기존 컨테이너 정리
             if [ "$(sudo docker ps -a -q -f name=mozara-frontend)" ]; then
               sudo docker rm -f mozara-frontend
             fi
+            
+            # 기존 이미지 정리
             if [ "$(sudo docker images -q ${{ secrets.DOCKERHUB_USERNAME }}/mozara-frontend)" ]; then
               sudo docker rmi -f ${{ secrets.DOCKERHUB_USERNAME }}/mozara-frontend
             fi          
+            
+            # 새 이미지 다운로드
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-frontend         
-            sudo docker run -d -p 80:80 --name mozara-frontend ${{ secrets.DOCKERHUB_USERNAME }}/mozara-frontend
+            
+            # SSL 인증서와 함께 컨테이너 실행
+            sudo docker run -d -p 80:80 -p 443:443 --name mozara-frontend \
+            -v /etc/letsencrypt:/etc/letsencrypt:ro \
+            ${{ secrets.DOCKERHUB_USERNAME }}/mozara-frontend
+            
+            echo "✅ 프론트엔드 배포 완료!"
+            sudo docker ps | grep mozara-frontend
