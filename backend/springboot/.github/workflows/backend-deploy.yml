@@ -1,0 +1,82 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1.DockerHub login 코드
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+        #2.checkout 코드
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+        #3. MYSQL Docker 이미지 빌드 및 푸쉬
+      - name: Build MySQL Docker image
+        working-directory: db #db 폴더로 이동
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mozara-db .
+
+      - name: Push MySQL Docker image
+        run: |
+          docker push ${{secrets.DOCKERHUB_USERNAME}}/mozara-db
+
+        #4.BACKEND DOCKER 이미지 빌드 및 푸쉬
+      - name: Build Backend Docker image
+        run: |
+          docker build -t ${{secrets.DOCKERHUB_USERNAME}}/mozara-springboot .
+      - name: Push Backend Docker image
+        run: |
+          docker push ${{secrets.DOCKERHUB_USERNAME}}/mozara-springboot
+  
+  deploy:
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Docker pull and run
+        uses: appleboy/ssh-action@master
+        with:
+          username: ubuntu
+          host: ${{secrets.LIVE_SERVER_IP}}
+          key: ${{secrets.EC2_SSH_KEY}}
+          script: |
+            if [ "$(sudo docker ps -a -q -f name=mozara-mysql)" ]; then
+              sudo docker rm -f mozara-mysql
+            fi
+            
+            if [ "$(sudo docker ps -a -q -f name=mozara-springboot)" ]; then
+              sudo docker rm -f mozara-springboot
+            fi
+
+            if [ "$(sudo docker volume ls -q -f name=mozara_mysql_volume)" ]; then
+              sudo docker volume rm mozara_mysql_volume
+            fi
+            
+            if [ "$(sudo docker images -q ${{secrets.DOCKERHUB_USERNAME}}/mozara-db)" ]; then
+              sudo docker rmi -f ${{secrets.DOCKERHUB_USERNAME}}/mozara-db
+            fi
+            
+            if [ "$(sudo docker images -q ${{secrets.DOCKERHUB_USERNAME}}/mozara-springboot)" ]; then
+              sudo docker rmi -f ${{secrets.DOCKERHUB_USERNAME}}/mozara-springboot
+            fi
+            
+            sudo docker pull ${{secrets.DOCKERHUB_USERNAME}}/mozara-db
+            sudo docker run -d -p 3306:3306 --name mozara-mysql -v mozara_mysql_volume:/var/lib/mysql ${{secrets.DOCKERHUB_USERNAME}}/mozara-db
+
+            sudo docker pull ${{secrets.DOCKERHUB_USERNAME}}/mozara-springboot
+            sudo docker run -d -p 8080:8080 --name mozara-springboot \
+            -e GOOGLE_CLIENT_ID=${{secrets.GOOGLE_CLIENT_ID}} \
+            -e GOOGLE_CLIENT_SECRET=${{secrets.GOOGLE_CLIENT_SECRET}} \
+            -e KAKAO_CLIENT_SECRET=${{secrets.KAKAO_CLIENT_SECRET}} \
+                ${{secrets.DOCKERHUB_USERNAME}}/mozara-springboot
