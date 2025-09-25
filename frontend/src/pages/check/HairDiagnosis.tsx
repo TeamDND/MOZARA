@@ -440,7 +440,7 @@ const HairDiagnosis: React.FC = () => {
                               <h5 className="font-semibold text-gray-900 mb-2">{video.title}</h5>
                               <p className="text-gray-600 text-sm mb-3">{video.description}</p>
                               <a 
-                                href="http://localhost:3000/youtube-videos" 
+                                href="/youtube-videos" 
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 className="text-red-600 hover:text-red-700 font-medium text-sm"
@@ -513,7 +513,7 @@ const HairDiagnosis: React.FC = () => {
                 <h3 className="text-2xl font-bold text-gray-900 mb-6">다른 서비스 이용하기</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <a
-                    href="http://localhost:3000/hair-pt"
+                    href="/hair-pt"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 text-center"
@@ -524,7 +524,7 @@ const HairDiagnosis: React.FC = () => {
                   </a>
 
                   <a
-                    href="http://localhost:3000/hair-encyclopedia"
+                    href="/hair-encyclopedia"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="bg-gradient-to-r from-blue-400 to-blue-500 text-white p-6 rounded-lg shadow-lg hover:from-blue-500 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 text-center"
@@ -535,7 +535,7 @@ const HairDiagnosis: React.FC = () => {
                   </a>
 
                   <a
-                    href="http://localhost:3000/hair-change"
+                    href="/hair-change"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="bg-gradient-to-r from-blue-300 to-blue-400 text-white p-6 rounded-lg shadow-lg hover:from-blue-400 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 text-center"
@@ -546,7 +546,7 @@ const HairDiagnosis: React.FC = () => {
                   </a>
 
                   <a
-                    href="http://localhost:3000/hair-quiz"
+                    href="/hair-quiz"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="bg-gradient-to-r from-blue-700 to-blue-800 text-white p-6 rounded-lg shadow-lg hover:from-blue-800 hover:to-blue-900 transition-all duration-300 transform hover:scale-105 text-center"
