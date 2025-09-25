@@ -23,9 +23,8 @@ jobs:
 
         #3. MYSQL Docker 이미지 빌드 및 푸쉬
       - name: Build MySQL Docker image
-        working-directory: db #db 폴더로 이동
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mozara-db .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mozara-db ./backend/springboot/db
 
       - name: Push MySQL Docker image
         run: |
@@ -34,7 +33,7 @@ jobs:
         #4.BACKEND DOCKER 이미지 빌드 및 푸쉬
       - name: Build Backend Docker image
         run: |
-          docker build -t ${{secrets.DOCKERHUB_USERNAME}}/mozara-springboot .
+          docker build -t ${{secrets.DOCKERHUB_USERNAME}}/mozara-springboot ./backend/springboot
       - name: Push Backend Docker image
         run: |
           docker push ${{secrets.DOCKERHUB_USERNAME}}/mozara-springboot

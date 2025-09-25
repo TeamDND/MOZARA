@@ -21,7 +21,7 @@ jobs:
 
       - name: Frontend Dockerfile build
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mozara-frontend .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mozara-frontend ./frontend
       - name: Push Frontend Docker image
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/mozara-frontend
