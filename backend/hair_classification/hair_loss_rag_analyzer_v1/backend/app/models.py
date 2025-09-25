@@ -19,8 +19,17 @@ class AnalysisResult(BaseModel):
     confidence: Optional[float] = None
     stage_description: Optional[str] = None
     stage_scores: Optional[Dict[str, float]] = None
+    stage_probabilities: Optional[Dict[str, float]] = None
     similar_images: Optional[List[SimilarImage]] = None
     analysis_details: Optional[Dict[str, Any]] = None
+    fusion_method: Optional[str] = None
+    fusion_weight: Optional[float] = None
+    primary_viewpoint: Optional[str] = None
+    secondary_viewpoint: Optional[str] = None
+    primary_filename: Optional[str] = None
+    secondary_filename: Optional[str] = None
+    llm_analysis: Optional[str] = None
+    detailed_explanation: Optional[str] = None
     error: Optional[str] = None
     timestamp: datetime
 
