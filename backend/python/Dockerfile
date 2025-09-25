@@ -12,10 +12,10 @@ RUN apt-get update && apt-get install -y \
 # Python 의존성 파일 복사
 COPY requirements.txt .
 
-# Python 의존성 설치
+# Python 의존성 설치 (캐시 최적화)
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 소스 코드 복사
+# 소스 코드 복사 (의존성 설치 후)
 COPY . .
 
 # 포트 8000 노출

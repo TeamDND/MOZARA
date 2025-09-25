@@ -49,6 +49,8 @@ jobs:
           username: ubuntu
           host: ${{secrets.LIVE_SERVER_IP}}
           key: ${{secrets.EC2_SSH_KEY}}
+          timeout: 60m
+          command_timeout: 60m
           script: |
             if [ "$(sudo docker ps -a -q -f name=mozara-mysql)" ]; then
               sudo docker rm -f mozara-mysql
