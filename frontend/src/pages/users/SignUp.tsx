@@ -9,17 +9,14 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Separator } from '../../components/ui/separator';
 import { Checkbox } from '../../components/ui/checkbox';
-import { ArrowLeft, Sparkles, Lock, User, Phone, Mail, MapPin } from 'lucide-react';
+import { ArrowLeft, Sparkles, Lock, User, Mail } from 'lucide-react';
 
 interface SignUpFormData {
   username: string;
   password: string;
   passwordCheck: string;
   email: string;
-  address: string;
-  gender: '남' | '여';
   nickname: string;
-  age: string;
 }
 
 interface ValidationErrors {
@@ -27,9 +24,7 @@ interface ValidationErrors {
   password?: string;
   passwordCheck?: string;
   email?: string;
-  address?: string;
   nickname?: string;
-  age?: string;
 }
 
 const SignUp: React.FC = () => {
@@ -41,10 +36,7 @@ const SignUp: React.FC = () => {
     password: '',
     passwordCheck: '',
     email: '',
-    address: '',
-    gender: '남',
-    nickname: '',
-    age: ''
+    nickname: ''
   });
 
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -192,19 +184,9 @@ const SignUp: React.FC = () => {
     const emailError = validateEmail(formData.email);
     if (emailError) newErrors.email = emailError;
     
-    if (!formData.address) {
-      newErrors.address = '주소를 입력해주세요.';
-    }
-    
     const nicknameError = validateNickname(formData.nickname);
     if (nicknameError) newErrors.nickname = nicknameError;
     else if (!nicknameChecked) newErrors.nickname = '닉네임 중복 확인을 해주세요.';
-    
-    if (!formData.age) {
-      newErrors.age = '나이를 입력해주세요.';
-    } else if (isNaN(Number(formData.age)) || Number(formData.age) < 1 || Number(formData.age) > 120) {
-      newErrors.age = '올바른 나이를 입력해주세요.';
-    }
     
     setErrors(newErrors);
     
@@ -219,10 +201,7 @@ const SignUp: React.FC = () => {
         username: formData.username,
         password: formData.password,
         email: formData.email,
-        address: formData.address,
-        gender: formData.gender,
-        nickname: formData.nickname,
-        age: parseInt(formData.age)
+        nickname: formData.nickname
       });
       
       console.log('회원가입 성공:', response.data);
@@ -398,29 +377,6 @@ const SignUp: React.FC = () => {
               )}
             </div>
 
-            {/* 주소 */}
-            <div className="space-y-2">
-              <Label htmlFor="address" className="text-sm font-medium text-gray-700">
-                주소 <span className="text-red-500">*</span>
-              </Label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
-                <Input
-                  id="address"
-                  name="address"
-                  type="text"
-                  placeholder="주소를 입력하세요"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  className={`pl-11 h-12 rounded-xl ${
-                    errors.address ? 'border-red-500' : 'border-gray-200'
-                  } focus:border-blue-500 focus:ring-blue-500`}
-                />
-              </div>
-              {errors.address && (
-                <p className="text-sm text-red-600">{errors.address}</p>
-              )}
-            </div>
 
             {/* 닉네임 */}
             <div className="space-y-2">
@@ -460,45 +416,6 @@ const SignUp: React.FC = () => {
               )}
             </div>
 
-            {/* 성별 */}
-            <div className="space-y-2">
-              <Label htmlFor="gender" className="text-sm font-medium text-gray-700">
-                성별 <span className="text-red-500">*</span>
-              </Label>
-              <select
-                id="gender"
-                name="gender"
-                value={formData.gender}
-                onChange={handleInputChange}
-                className="w-full h-12 px-4 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-              >
-                <option value="남">남자</option>
-                <option value="여">여자</option>
-              </select>
-            </div>
-
-            {/* 나이 */}
-            <div className="space-y-2">
-              <Label htmlFor="age" className="text-sm font-medium text-gray-700">
-                나이 <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="age"
-                name="age"
-                type="number"
-                placeholder="만 나이를 입력하세요"
-                min="1"
-                max="120"
-                value={formData.age}
-                onChange={handleInputChange}
-                className={`h-12 rounded-xl ${
-                  errors.age ? 'border-red-500' : 'border-gray-200'
-                } focus:border-blue-500 focus:ring-blue-500`}
-              />
-              {errors.age && (
-                <p className="text-sm text-red-600">{errors.age}</p>
-              )}
-            </div>
 
             {/* 회원가입 버튼 */}
             <Button
@@ -522,28 +439,7 @@ const SignUp: React.FC = () => {
             </div>
           </form>
 
-          {/* 혜택 안내 */}
-          <div className="mt-8 bg-blue-50 p-4 rounded-xl">
-            <h4 className="text-sm font-medium text-blue-900 mb-2">🎁 회원가입 혜택</h4>
-            <ul className="text-xs text-blue-700 space-y-1.5">
-              <li className="flex items-center">
-                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                무료 AI 진단 및 개인 맞춤 분석
-              </li>
-              <li className="flex items-center">
-                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                지속적인 진행 상황 추적
-              </li>
-              <li className="flex items-center">
-                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                주간 챌린지 및 포인트 적립
-              </li>
-              <li className="flex items-center">
-                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                미래 헤어스타일 시뮬레이션
-              </li>
-            </ul>
-          </div>
+          
         </div>
       </div>
     </div>
