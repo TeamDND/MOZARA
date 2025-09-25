@@ -17,6 +17,7 @@ import os
 # .env 파일 로드 (Docker 환경에서는 환경변수 직접 사용)
 try:
     load_dotenv("../../.env")
+    # load_dotenv(".env")
 except:
     pass  # Docker 환경에서는 환경변수를 직접 사용
 
