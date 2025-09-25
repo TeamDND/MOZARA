@@ -75,6 +75,34 @@ class LocationService {
     }
   }
 
+  // 좌표를 기반으로 지역 키워드 가져오기 (카카오 주소 변환 API 이용)
+  private async getLocationKeyword(location: Location): Promise<string | null> {
+    try {
+      const url = `${this.apiBaseUrl}/kakao/local/geo/coord2address?x=${location.longitude}&y=${location.latitude}`;
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      const data = await res.json();
+      const doc = (data.documents || [])[0];
+      if (!doc || !doc.address) return null;
+      
+      // 시/도와 구/군 정보 추출
+      const address = doc.address;
+      const region1DepthName = address.region_1depth_name; // 시/도
+      const region2DepthName = address.region_2depth_name; // 구/군
+      
+      if (region1DepthName && region2DepthName) {
+        return `${region1DepthName} ${region2DepthName}`;
+      } else if (region1DepthName) {
+        return region1DepthName;
+      }
+      
+      return null;
+    } catch (error) {
+      console.warn('지역 키워드 가져오기 실패:', error);
+      return null;
+    }
+  }
+
   private isValidKoreanCoord(lat?: number, lng?: number): boolean {
     if (typeof lat !== 'number' || typeof lng !== 'number' || !isFinite(lat) || !isFinite(lng)) return false;
     return lat >= 33 && lat <= 39 && lng >= 124 && lng <= 132; // 대략 한반도 영역
@@ -292,6 +320,7 @@ class LocationService {
           placeUrl: item.link,
           latitude: parseFloat(item.mapy) / 1000000,
           longitude: parseFloat(item.mapx) / 1000000,
+          imageUrl: item.imageUrl, // 백엔드에서 제공하는 이미지 URL 사용
         };
         return hospital;
       });
@@ -369,6 +398,7 @@ class LocationService {
           placeUrl: doc.place_url,
           latitude: parseFloat(doc.y),
           longitude: parseFloat(doc.x),
+          imageUrl: doc.imageUrl, // 백엔드에서 제공하는 이미지 URL 사용
         };
         return hospital;
       });
@@ -453,6 +483,7 @@ class LocationService {
         longitude: 127.0330,
         description: "20년 경력의 전문의가 직접 진료하는 탈모 전문 클리닉입니다.",
         category: "탈모병원",
+        imageUrl: "https://source.unsplash.com/300x200/?hospital+medical",
       },
       {
         id: 'sample_2',
@@ -465,6 +496,7 @@ class LocationService {
         longitude: 127.0473,
         description: "강남 지역 최고의 탈모 치료 전문 센터입니다.",
         category: "탈모병원",
+        imageUrl: "https://source.unsplash.com/300x200/?clinic+medical",
       },
       {
         id: 'sample_3',
@@ -503,6 +535,7 @@ class LocationService {
         longitude: 127.0286,
         description: "탈모 고객을 위한 전문 헤어살롱입니다.",
         category: "탈모미용실",
+        imageUrl: "https://source.unsplash.com/300x200/?hair+salon",
       },
       {
         id: 'sample_6',
@@ -553,6 +586,7 @@ class LocationService {
         longitude: 127.1218,
         description: "고품질 가발 제작과 수리를 제공하는 전문점입니다.",
         category: "가발전문점",
+        imageUrl: "https://source.unsplash.com/300x200/?wig+hair",
       },
       {
         id: 'sample_10',
@@ -603,6 +637,7 @@ class LocationService {
         longitude: 127.1218,
         description: "자연스러운 두피문신과 헤어라인 복원 전문 스튜디오입니다.",
         category: "두피문신",
+        imageUrl: "https://source.unsplash.com/300x200/?tattoo+studio",
       },
       {
         id: 'sample_14',
@@ -664,18 +699,46 @@ class LocationService {
         ...params,
         query: searchQuery || params.query,
       };
+
+      // 위치 정보가 없으면 현재 위치를 자동으로 가져오기 시도
+      let searchLocation = params.location;
+      if (!searchLocation) {
+        try {
+          searchLocation = await this.getCurrentLocation();
+          console.log('자동으로 현재 위치를 가져와서 검색합니다:', searchLocation);
+        } catch (error) {
+          console.warn('현재 위치를 가져올 수 없어 위치 정보 없이 검색합니다:', error);
+        }
+      }
+
+      // 위치 정보가 있으면 검색어에 지역 정보 추가
+      let enhancedQuery = normalizedParams.query;
+      if (searchLocation) {
+        // 검색어에 위치 기반 키워드 추가 (예: "두피문신 강남구")
+        const locationKeyword = await this.getLocationKeyword(searchLocation);
+        if (locationKeyword && !enhancedQuery.includes(locationKeyword)) {
+          enhancedQuery = `${enhancedQuery} ${locationKeyword}`;
+        }
+      }
+
+      const finalParams: SearchParams = {
+        ...normalizedParams,
+        query: enhancedQuery,
+        location: searchLocation,
+      };
+
       // 백엔드 서버 상태 확인
       const serverStatus = await this.checkBackendServer();
       
       if (!serverStatus) {
         console.warn('백엔드 서버가 연결되지 않아 샘플 데이터를 반환합니다.');
         // 샘플 데이터는 정규화된 카테고리를 우선 반영
-        return this.getFilteredSampleData({ ...normalizedParams, query: (canonicalCategory ?? normalizedParams.query) as string });
+        return this.getFilteredSampleData({ ...finalParams, query: (canonicalCategory ?? finalParams.query) as string });
       }
 
       const [naverResults, kakaoResults] = await Promise.allSettled([
-        this.searchHospitalsWithNaver(normalizedParams),
-        this.searchHospitalsWithKakao(normalizedParams),
+        this.searchHospitalsWithNaver(finalParams),
+        this.searchHospitalsWithKakao(finalParams),
       ]);
 
       const hospitals: Hospital[] = [];
@@ -691,7 +754,7 @@ class LocationService {
       // API 결과가 없으면 샘플 데이터 반환
       if (hospitals.length === 0) {
         console.warn('No API results, returning sample data');
-        return this.getFilteredSampleData({ ...normalizedParams, query: (canonicalCategory ?? normalizedParams.query) as string });
+        return this.getFilteredSampleData({ ...finalParams, query: (canonicalCategory ?? finalParams.query) as string });
       }
 
       // 중복 제거 (이름과 주소 기준)
@@ -705,14 +768,14 @@ class LocationService {
       if (uniqueHospitals.length > 0) {
         const filled = await Promise.all(uniqueHospitals.map(async (h) => {
           if (!this.isValidKoreanCoord(h.latitude, h.longitude)) {
-            const coords = await this.fetchCoordsByKeyword(h.roadAddress || h.address || h.name, params.location, params.radius ?? 5000);
+            const coords = await this.fetchCoordsByKeyword(h.roadAddress || h.address || h.name, searchLocation, params.radius ?? 5000);
             if (coords) {
               h.latitude = coords.lat;
               h.longitude = coords.lng;
-              if (params.location) {
+              if (searchLocation) {
                 h.distance = this.calculateDistance(
-                  params.location.latitude,
-                  params.location.longitude,
+                  searchLocation.latitude,
+                  searchLocation.longitude,
                   coords.lat,
                   coords.lng
                 );
@@ -725,15 +788,20 @@ class LocationService {
       }
 
       // 위치 기반 필터링(반경) + 거리순 정렬 강제
-      const radius = params.radius ?? 5000;
+      const radius = params.radius ?? 10000; // 기본 반경을 10km로 확대
       let locationBounded = uniqueHospitals;
-      if (params.location) {
+      if (searchLocation) {
         locationBounded = uniqueHospitals.filter(h =>
           typeof h.distance === 'number' && isFinite(h.distance) && h.distance <= radius
         );
       }
 
-      return locationBounded.sort((a, b) => a.distance - b.distance);
+      // 거리순 정렬 (위치 정보가 있는 경우)
+      if (searchLocation) {
+        locationBounded.sort((a, b) => a.distance - b.distance);
+      }
+
+      return locationBounded;
     } catch (error) {
       console.error('Hospital search error:', error);
       // 에러 시 샘플 데이터 반환
