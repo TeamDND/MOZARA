@@ -1,5 +1,6 @@
 import apiClient from './apiClient';
 import { configApi } from './configApi';
+import { elevenStApi } from './elevenStApi';
 
 // TypeScript: 탈모 제품 정보 인터페이스
 export interface HairProduct {
@@ -63,37 +64,43 @@ export const hairProductApi = {
       throw new Error('탈모 단계는 0-3 사이의 값이어야 합니다.');
     }
 
-    try {
-      console.log(`탈모 ${stage}단계 제품 조회 시작`);
-      
-      // 스프링을 통해 Python API 호출
-      const response = await apiClient.get<HairProductResponse>('/ai/products', {
-        params: { stage },
-        timeout: 10000, // 10초 타임아웃
-      });
-
-      console.log(`탈모 ${stage}단계 제품 ${response.data.products.length}개 조회 완료`);
-      return response.data;
-    } catch (error: any) {
-      console.error(`탈모 ${stage}단계 제품 조회 중 오류:`, error);
-      
-      // 에러 메시지 정제
-      let errorMessage = '제품을 불러오는 중 오류가 발생했습니다.';
-      
-      if (error.response?.status === 400) {
-        errorMessage = '잘못된 탈모 단계입니다. 1-6단계 중 선택해주세요.';
-      } else if (error.response?.status === 404) {
-        errorMessage = '해당 단계의 제품을 찾을 수 없습니다.';
-      } else if (error.response?.status >= 500) {
-        errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
-      } else if (error.code === 'ECONNABORTED') {
-        errorMessage = '요청 시간이 초과되었습니다. 네트워크 연결을 확인해주세요.';
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      throw new Error(errorMessage);
-    }
+    // 요구사항: 내부 추천/11번가 버튼 모두 11번가 결과만 사용
+    console.log(`탈모 ${stage}단계 제품 조회 시작(11번가)`);
+    const eleven = await elevenStApi.searchProductsByStage(stage);
+    // 방어적 매핑: 백엔드/11번가 응답 필드명이 다를 경우를 대비해 표준 필드로 변환
+    const normalizedProducts: HairProduct[] = (eleven.products || []).map((p: any): HairProduct => ({
+      productId: String(p.productId || p.id || p.prdNo || p.code || ''),
+      productName: p.productName || p.title || p.name || '',
+      productPrice: Number(
+        p.productPrice ?? p.price ?? p.salePrice ?? p.finalPrice ?? 0
+      ),
+      productRating: Number(p.productRating ?? p.rating ?? p.reviewScore ?? 0),
+      productReviewCount: Number(
+        p.productReviewCount ?? p.reviewCount ?? p.reviewCnt ?? 0
+      ),
+      productImage: p.productImage || p.imageUrl || p.image || p.imgUrl || '',
+      productUrl: p.productUrl || p.link || p.url || '',
+      mallName: p.mallName || p.sellerName || p.shopName || '11번가',
+      maker: p.maker || p.manufacturer || '',
+      brand: p.brand || p.brandName || '',
+      category1: p.category1 || p.cat1 || '',
+      category2: p.category2 || p.cat2 || '',
+      category3: p.category3 || p.cat3 || '',
+      category4: p.category4 || p.cat4 || '',
+      description: p.description || p.summary || '',
+      ingredients: p.ingredients || [],
+      suitableStages: p.suitableStages || p.stages || [stage],
+    }));
+    const mapped: HairProductResponse = {
+      products: normalizedProducts,
+      totalCount: eleven.totalCount,
+      stage,
+      stageDescription: `${stage}단계 탈모 관련 제품`,
+      recommendation: `11번가에서 ${stage}단계 관련 제품 ${eleven.totalCount}개를 찾았습니다.`,
+      disclaimer: '11번가 데이터 기반 결과입니다. 구매 전 상세정보를 확인하세요.',
+    } as HairProductResponse;
+    console.log(`탈모 ${stage}단계 제품 ${mapped.products.length}개 조회 완료(11번가)`);
+    return mapped;
   },
 
   /**

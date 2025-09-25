@@ -3,10 +3,11 @@ import axios, { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'ax
 
 // TypeScript: API 클라이언트 인스턴스 생성
 const apiClient = axios.create({
-    baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api', // 기본 포트 8000으로 정렬
+    baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api',
     headers: {
         'Content-Type': 'application/json',
     },
+    // 기본은 인증 필요 API에서만 사용하고, 공개 프록시는 각 호출부에서 false로 명시
     withCredentials: true,
     timeout: 120000,
 });

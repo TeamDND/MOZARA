@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { HairProduct, HairProductResponse, hairProductApi } from '../../services/hairProductApi';
-import { elevenStApi } from '../../services/elevenStApi';
-import { RootState } from '../../utils/store';
+// import { elevenStApi } from '../../services/elevenStApi';
+// import { RootState } from '../../utils/store';
 import {
   setSelectedStage,
   clearSelectedStage,
@@ -17,12 +17,13 @@ import StageSelector from '../check/StageSelector';
 import ProductList from '../hair_solutions/ProductList';
 import Header from '../Header';
 import Footer from '../Footer';
+import { STAGE_KEYWORDS_MAP, elevenStApi } from '../../services/elevenStApi';
 
 /**
  * 탈모 단계별 제품 추천 페이지
  * 
  * 이 페이지는 사용자의 탈모 단계에 따라 맞춤형 제품을 추천하는 서비스를 제공합니다.
- * BASP 진단 결과를 기반으로 하거나, 사용자가 직접 단계를 선택할 수 있습니다.
+ * 사용자가 직접 단계를 선택할 수 있습니다.
  */
 const HairLossProducts: React.FC = () => {
   // 페이지 로드 시 분석 이벤트 (Google Analytics 등)
@@ -44,7 +45,7 @@ const HairLossProducts: React.FC = () => {
     // 메타 설명 설정
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', '탈모 단계별 맞춤형 제품을 추천해드립니다. 1-6단계 탈모 상태에 따른 전문 제품과 관리 가이드를 제공합니다. BASP 진단 기반 정확한 추천으로 효과적인 탈모 관리가 가능합니다.');
+      metaDescription.setAttribute('content', '탈모 단계별 맞춤형 제품을 추천해드립니다. 1-6단계 탈모 상태에 따른 전문 제품과 관리 가이드를 제공합니다.');
     }
 
     // 구조화된 데이터 추가
@@ -57,7 +58,7 @@ const HairLossProducts: React.FC = () => {
       "mainEntity": {
         "@type": "Service",
         "name": "탈모 제품 추천 서비스",
-        "description": "BASP 진단 기반 탈모 단계별 맞춤형 제품 추천",
+        "description": "탈모 단계별 맞춤형 제품 추천",
         "provider": {
           "@type": "Organization",
           "name": "毛자라",
@@ -105,9 +106,11 @@ const HairLossProducts: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showProducts, setShowProducts] = useState(false);
-  const [searchMode, setSearchMode] = useState<'recommended' | '11st'>('recommended');
+  // 검색 모드 제거
+  const [searchKeyword, setSearchKeyword] = useState<string>('');
+  const [keywordSuggestions, setKeywordSuggestions] = useState<string[]>([]);
 
-  // URL 파라미터에서 단계 정보 가져오기 (BASP 진단 결과에서 넘어온 경우)
+  // URL 파라미터에서 단계 정보 가져오기
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const stageParam = urlParams.get('stage');
@@ -126,28 +129,31 @@ const HairLossProducts: React.FC = () => {
     setError(null);
     setIsLoading(true);
     setShowProducts(false);
+    const list = (STAGE_KEYWORDS_MAP[stage] || []).slice();
+    // 제일 앞 키워드를 기본값으로 사용
+    setKeywordSuggestions(list);
+    if (!searchKeyword && list.length > 0) {
+      setSearchKeyword(list[0]);
+    }
 
     try {
       console.log(`${stage}단계 제품 조회 시작`);
       
       let response: HairProductResponse;
-      
-      if (searchMode === 'recommended') {
-        // 추천 제품 조회
-        response = await hairProductApi.getProductsByStage(stage);
-      } else {
-        // 11번가 제품 검색
-        const elevenStResponse = await elevenStApi.searchProductsByStage(stage);
+      if (searchKeyword && searchKeyword.trim()) {
+        const r = await elevenStApi.searchProducts(searchKeyword.trim());
         response = {
-          products: elevenStResponse.products,
-          totalCount: elevenStResponse.totalCount,
-          stage: stage,
+          products: r.products,
+          totalCount: r.totalCount,
+          stage,
           stageDescription: `${stage}단계 탈모 관련 제품`,
-          recommendation: `11번가에서 ${stage}단계 탈모 관련 제품 ${elevenStResponse.totalCount}개를 찾았습니다.`,
-          disclaimer: "11번가에서 제공하는 제품 정보입니다. 구매 전 제품 상세 정보를 확인해주세요."
+          recommendation: `키워드 "${searchKeyword}" 기준으로 ${r.totalCount}개 검색` ,
+          disclaimer: '11번가에서 제공하는 제품 정보입니다. 구매 전 제품 상세 정보를 확인해주세요.'
         };
+      } else {
+        response = await hairProductApi.getProductsByStage(stage);
       }
-      
+
       setProducts(response.products);
       setStageInfo({
         stage: response.stage,
@@ -170,7 +176,8 @@ const HairLossProducts: React.FC = () => {
       console.log(`${stage}단계 제품 ${response.products.length}개 로드 완료`);
     } catch (error) {
       console.error('제품 조회 중 오류:', error);
-      setError('제품을 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.');
+      // 다른 페이지 영향 방지: 사용자 친화적 메시지 + UI 유지
+      setError('현재 제품 추천 서버 연결이 원활하지 않습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setIsLoading(false);
     }
@@ -191,10 +198,8 @@ const HairLossProducts: React.FC = () => {
     // 제품 상세 정보를 모달이나 새 페이지로 표시할 수 있음
   };
 
-  // BASP 진단으로 이동
-  const handleGoToBaspCheck = () => {
-    navigate('/basp-check');
-  };
+  // 불필요 기능 제거
+  const handleGoToBaspCheck = () => {};
 
   // 다시 선택하기
   const handleReset = () => {
@@ -203,6 +208,8 @@ const HairLossProducts: React.FC = () => {
     setStageInfo(null);
     setShowProducts(false);
     setError(null);
+    setSearchKeyword('');
+    setKeywordSuggestions([]);
   };
 
   return (
@@ -243,8 +250,7 @@ const HairLossProducts: React.FC = () => {
               제품 추천
             </h1>
             <p className="text-lg text-gray-700 mb-8 max-w-2xl mx-auto text-pretty">
-              현재 탈모 상태에 맞는 맞춤형 제품을 추천해드립니다. 
-              정확한 진단을 위해 BASP 자가진단을 먼저 진행해보세요.
+              현재 탈모 상태에 맞는 맞춤형 제품을 추천해드립니다.
             </p>
           </div>
 
@@ -280,39 +286,36 @@ const HairLossProducts: React.FC = () => {
           {/* 단계 선택 섹션 - 기존 패턴과 일치 */}
           {!showProducts && (
             <div className="bg-white/70 backdrop-blur rounded-2xl shadow-lg p-8 mb-8 border border-gray-200">
-              {/* 검색 모드 토글 */}
+              {/* 키워드 입력 및 추천 */}
               <div className="mb-6">
-                <div className="flex items-center justify-center gap-4">
-                  <span className="text-sm font-medium text-gray-700">검색 모드:</span>
-                  <div className="flex bg-gray-100 rounded-lg p-1">
-                    <button
-                      onClick={() => setSearchMode('recommended')}
-                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                        searchMode === 'recommended'
-                          ? 'bg-white text-blue-600 shadow-sm'
-                          : 'text-gray-600 hover:text-gray-800'
-                      }`}
-                    >
-                      추천 제품
-                    </button>
-                    <button
-                      onClick={() => setSearchMode('11st')}
-                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                        searchMode === '11st'
-                          ? 'bg-white text-blue-600 shadow-sm'
-                          : 'text-gray-600 hover:text-gray-800'
-                      }`}
-                    >
-                      11번가 검색
-                    </button>
-                  </div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">제품 검색 키워드</label>
+                <div className="flex gap-2">
+                  <input
+                    value={searchKeyword}
+                    onChange={(e) => setSearchKeyword(e.target.value)}
+                    placeholder="예: 탈모 방지 샴푸, 두피 앰플"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={() => selectedStage && handleStageSelect(selectedStage)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    검색
+                  </button>
                 </div>
-                <p className="text-xs text-gray-500 text-center mt-2">
-                  {searchMode === 'recommended' 
-                    ? '전문가가 선별한 탈모 단계별 추천 제품' 
-                    : '11번가에서 실시간 검색한 탈모 관련 제품'
-                  }
-                </p>
+                {keywordSuggestions.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {keywordSuggestions.slice(0, 10).map((k) => (
+                      <button
+                        key={k}
+                        onClick={() => setSearchKeyword(k)}
+                        className={`px-3 py-1 text-sm rounded-full border ${searchKeyword===k? 'bg-blue-600 text-white border-blue-600':'bg-white text-gray-700 border-gray-300 hover:border-blue-400'}`}
+                      >
+                        {k}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <StageSelector
@@ -321,31 +324,7 @@ const HairLossProducts: React.FC = () => {
                 disabled={isLoading}
               />
               
-              {/* BASP 진단 안내 - 기존 패턴과 일치 */}
-              <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center">
-                      <span className="text-blue-600 text-2xl">🔍</span>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-800 mb-1">
-                        정확한 탈모 단계를 모르시나요?
-                      </h3>
-                      <p className="text-gray-600">
-                        BASP 기준표 기반 자가진단으로 정확한 탈모 단계를 확인해보세요.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleGoToBaspCheck}
-                    className="px-6 py-3 text-white font-semibold rounded-lg hover:opacity-90 transition-colors whitespace-nowrap"
-                    style={{ backgroundColor: "rgb(0,115,255)" }}
-                  >
-                    BASP 진단하기
-                  </button>
-                </div>
-              </div>
+              {/* 안내 섹션 제거됨 */}
             </div>
           )}
 
@@ -366,14 +345,20 @@ const HairLossProducts: React.FC = () => {
                     {stageInfo.stage}단계 탈모 제품 추천
                   </div>
                 </div>
-                
-                <button
-                  onClick={handleGoToBaspCheck}
-                  className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition-colors"
-                  style={{ backgroundColor: "rgb(0,115,255)" }}
-                >
-                  BASP 진단하기
-                </button>
+                <div className="flex gap-2">
+                  <input
+                    value={searchKeyword}
+                    onChange={(e)=> setSearchKeyword(e.target.value)}
+                    placeholder="키워드 수정"
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={() => selectedStage && handleStageSelect(selectedStage)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    재검색
+                  </button>
+                </div>
               </div>
 
               {/* 제품 목록 */}

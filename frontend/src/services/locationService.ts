@@ -37,15 +37,12 @@ class LocationService {
     // 백엔드 API URL 설정 (프로젝트 루트의 .env 파일 참조)
     const envBase = (process.env.REACT_APP_API_BASE_URL || '').trim();
     let base = envBase || 'http://localhost:8000/api';
-    // 방어적 정규화: /api 누락 시 자동 보정
-    try {
-      const url = new URL(base);
-      if (!url.pathname.endsWith('/api')) {
-        url.pathname = (url.pathname.replace(/\/$/, '')) + '/api';
-      }
-      base = url.toString().replace(/\/$/, '');
-    } catch {
-      // 만약 URL 파싱 실패 시 안전 기본값 사용
+    if (!base.endsWith('/api')) {
+      base = `${base.replace(/\/?$/, '')}`;
+    }
+    console.log('REACT_APP_API_BASE_URL(raw):', process.env.REACT_APP_API_BASE_URL);
+    // 개발 편의: env 값이 없거나 공백이면 8000 고정
+    if (!envBase) {
       base = 'http://localhost:8000/api';
     }
 
@@ -53,7 +50,6 @@ class LocationService {
 
     console.log('LocationService 초기화 (프로젝트 루트 .env 참조):');
     console.log('API Base URL:', this.apiBaseUrl);
-    console.log('REACT_APP_API_BASE_URL(raw):', process.env.REACT_APP_API_BASE_URL);
     console.log('프로젝트 루트의 .env 파일에서 환경변수를 로드합니다.');
   }
   // 주소/키워드로 좌표 보정 (카카오 키워드 검색 이용)

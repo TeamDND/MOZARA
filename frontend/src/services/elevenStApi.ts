@@ -1,5 +1,6 @@
 import apiClient from './apiClient';
 import { configApi } from './configApi';
+import axios from 'axios';
 import { HairProduct } from './hairProductApi';
 
 // TypeScript: 11번가 제품 검색 요청 인터페이스
@@ -18,6 +19,80 @@ export interface ElevenStSearchResponse {
   keyword: string;
   source: string;
 }
+
+// 단계별 추천 검색 키워드 맵 (0~3단계)
+export const STAGE_KEYWORDS_MAP: Record<number, string[]> = {
+  0: [
+    '탈모 예방 샴푸',
+    '두피 클렌저',
+    '두피 스케일링',
+    '약산성 샴푸',
+    '두피 브러시',
+    // 사용자 추가 키워드 (예방/관리 위주)
+    '두피샴푸',
+    '비듬전용샴푸',
+    '두피팩',
+    '두피쿨링샴푸',
+    '두피각질샴푸',
+    '두피 가려움 샴푸',
+    '두피 가려움샴푸'
+  ],
+  1: [
+    '탈모 방지 샴푸',
+    '두피 토닉',
+    '비오틴 영양제',
+    '카페인 샴푸',
+    '탈모 앰플',
+    // 사용자 추가 키워드 (초기 탈모 중심)
+    '탈모샴푸',
+    '탈모방지샴푸',
+    '려 탈모샴푸',
+    '탈모삼퓨',
+    '탈모린스',
+    '탈모토닉',
+    // 가림(컨실러) 제품: 초기 단계에서도 사용 가능
+    '탈모 팡팡',
+    '헤어 팡팡',
+    '헤어파우더',
+    '헤어 섀도우',
+    '헤어 컨실러'
+  ],
+  2: [
+    '두피 앰플',
+    '미녹시딜',
+    '두피 에센스',
+    'LED 두피기기',
+    'DHT 차단 샴푸',
+    // 사용자 추가 키워드 (중등도, 적극 관리)
+    '탈모앰플',
+    '탈모약',
+    '두피 탈모',
+    // 가림(컨실러) 제품: 진행 단계 보조 사용
+    '탈모 팡팡',
+    '헤어 팡팡',
+    '헤어파우더',
+    '헤어 섀도우',
+    '헤어 컨실러'
+  ],
+  3: [
+    '가발 남성',
+    '가발 여성',
+    '부분 가발',
+    '두피 문신 SMP',
+    '모발이식 케어',
+    // 가림(컨실러) 제품: 고도 단계 임시커버
+    '탈모 팡팡',
+    '헤어 팡팡',
+    '헤어파우더',
+    '헤어 섀도우',
+    '헤어 컨실러'
+  ],
+};
+
+const getPrimaryStageKeyword = (stage: number): string => {
+  const list = STAGE_KEYWORDS_MAP[stage];
+  return (list && list.length > 0) ? list[0] : '탈모 제품';
+};
 
 /**
  * 11번가 제품 검색 API 클라이언트
@@ -42,14 +117,20 @@ export const elevenStApi = {
     try {
       console.log(`11번가 제품 검색 시작: keyword=${keyword}, page=${page}, pageSize=${pageSize}`);
       
-      // 스프링을 통해 Python API 호출
-      const response = await apiClient.get<ElevenStSearchResponse>('/ai/11st/products', {
-        params: { 
+      // 백엔드 프록시 호출 (자격 증명 비포함으로 CORS 문제 회피)
+      const base = await configApi.getApiBaseUrl();
+      // 백엔드 라우트는 "/11st/products" (루트) 이므로 /api 접미사가 있으면 제거
+      const serverRoot = base.replace(/\/?api\/?$/, '');
+      const url = `${serverRoot.replace(/\/$/, '')}/11st/products`;
+
+      const response = await axios.get<ElevenStSearchResponse>(url, {
+        params: {
           keyword: keyword.trim(),
           page,
-          pageSize 
+          pageSize,
         },
-        timeout: 15000, // 15초 타임아웃 (외부 API이므로 더 길게)
+        timeout: 15000,
+        withCredentials: false,
       });
 
       console.log(`11번가에서 ${response.data.products.length}개 제품 검색 완료`);
@@ -114,14 +195,7 @@ export const elevenStApi = {
     page: number = 1,
     pageSize: number = 20
   ): Promise<ElevenStSearchResponse> {
-    const stageKeywords = {
-      0: '탈모 예방 샴푸',
-      1: '탈모 방지 샴푸',
-      2: '두피 앰플',
-      3: '탈모 치료'
-    };
-    
-    const keyword = stageKeywords[stage as keyof typeof stageKeywords] || '탈모 제품';
+    const keyword = getPrimaryStageKeyword(stage);
     return this.searchProducts(keyword, page, pageSize);
   }
 };

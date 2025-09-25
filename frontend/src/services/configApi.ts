@@ -1,4 +1,5 @@
 import apiClient from './apiClient';
+import axios from 'axios';
 
 // TypeScript: 환경변수 설정 인터페이스
 export interface ConfigResponse {
@@ -49,16 +50,20 @@ export const configApi = {
    * 실제 API 호출
    */
   async fetchConfig(): Promise<ConfigResponse> {
+    // CORS 문제 회피: 절대 URL + 자격증명 미포함으로 호출
+    const fallbackApiBase = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
     try {
-      const response = await apiClient.get<ConfigResponse>('/config');
+      const response = await axios.get<ConfigResponse>(`${fallbackApiBase}/config`, {
+        withCredentials: false,
+        timeout: 5000,
+      });
       return response.data;
     } catch (error) {
       console.error('환경변수 설정 조회 중 오류:', error);
       // 환경 변수에서 직접 읽어오기 (React 환경 변수는 REACT_APP_ 접두사 필요)
       const youtubeApiKey = process.env.REACT_APP_YOUTUBE_API_KEY || null;
       const elevenStApiKey = process.env.REACT_APP_ELEVEN_ST_API_KEY || null;
-      const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
-      
+      const apiBaseUrl = fallbackApiBase;
       return {
         apiBaseUrl,
         youtubeApiKey,

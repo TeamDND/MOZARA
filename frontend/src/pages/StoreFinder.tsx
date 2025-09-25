@@ -435,8 +435,8 @@ const StoreFinder: React.FC = () => {
                 </div>
                 {!collapsedGroups[section.group] && (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
-                    {section.items.map((hospital) => (
-                      <div key={hospital.id} className={`bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-shadow relative ${
+                    {section.items.map((hospital, idx) => (
+                      <div key={`${hospital.id}_${idx}`} className={`bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-shadow relative ${
                         hospital.isRecommended ? 'ring-2 ring-blue-500 ring-opacity-50' : ''
                       }`}>
                         {/* Hospital Image */}

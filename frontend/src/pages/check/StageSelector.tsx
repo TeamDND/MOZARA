@@ -118,19 +118,7 @@ const StageSelector: React.FC<StageSelectorProps> = ({
         })}
       </div>
 
-      {/* 안내 메시지 */}
-      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <div className="flex items-start gap-3">
-          <div className="text-blue-600 text-lg">💡</div>
-          <div>
-            <h4 className="font-semibold text-blue-800 mb-1">단계 선택 안내</h4>
-            <p className="text-sm text-blue-700">
-              정확한 탈모 단계를 모르신다면 <strong>BASP 자가진단</strong>을 먼저 진행해보세요. 
-              전문의 상담을 통해 정확한 진단을 받으시는 것을 권장합니다.
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* 안내 메시지 섹션 삭제됨 */}
     </div>
   );
 };
