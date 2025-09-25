@@ -26,6 +26,8 @@ const StoreFinder: React.FC = () => {
   const [groupByCategory, setGroupByCategory] = useState<boolean>(true);
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [firstGroup, setFirstGroup] = useState<string>('탈모병원');
+  const [imageLoadErrors, setImageLoadErrors] = useState<Set<string>>(new Set());
+  const [imageCache, setImageCache] = useState<Map<string, string>>(new Map());
 
   const isValidKoreanCoord = (lat?: number, lng?: number) => {
     if (typeof lat !== 'number' || typeof lng !== 'number' || !isFinite(lat) || !isFinite(lng)) return false;
@@ -70,7 +72,7 @@ const StoreFinder: React.FC = () => {
         const searchParams = {
           query: searchTerm,
           location: currentLocation || undefined,
-          radius: 5000, // 기본 5km
+          radius: 10000, // 기본 10km로 확대
         };
 
         console.log('검색 시작:', searchParams);
@@ -127,6 +129,128 @@ const StoreFinder: React.FC = () => {
     return stars;
   };
 
+  // 이미지 URL 최적화 (크기 조정, 품질 최적화)
+  const optimizeImageUrl = (url: string, width: number = 400, height: number = 200): string => {
+    if (!url) return url;
+    
+    // Google Places API 이미지인 경우 크기 파라미터 추가
+    if (url.includes('maps.googleapis.com/maps/api/place/photo')) {
+      const urlObj = new URL(url);
+      urlObj.searchParams.set('maxwidth', width.toString());
+      urlObj.searchParams.set('maxheight', height.toString());
+      return urlObj.toString();
+    }
+    
+    // Unsplash 이미지인 경우 크기 조정
+    if (url.includes('unsplash.com')) {
+      return url.replace(/\/\d+x\d+\//, `/${width}x${height}/`);
+    }
+    
+    return url;
+  };
+
+  // 이미지 프리로딩
+  const preloadImage = (url: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(url);
+      img.onerror = () => reject(new Error('Image load failed'));
+      img.src = url;
+    });
+  };
+
+  // 카테고리별 기본 이미지 생성
+  const getDefaultImageContent = (hospital: Hospital) => {
+    const category = normalizeGroup(hospital);
+    const firstLetter = hospital.name.charAt(0).toUpperCase();
+    
+    const getCategoryConfig = (cat: string) => {
+      switch (cat) {
+        case '탈모병원':
+          return {
+            gradient: 'from-blue-50 to-blue-100',
+            iconColor: 'text-blue-500',
+            icon: (
+              <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            )
+          };
+        case '탈모미용실':
+          return {
+            gradient: 'from-purple-50 to-purple-100',
+            iconColor: 'text-purple-500',
+            icon: (
+              <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+              </svg>
+            )
+          };
+        case '가발전문점':
+          return {
+            gradient: 'from-green-50 to-green-100',
+            iconColor: 'text-green-500',
+            icon: (
+              <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            )
+          };
+        case '두피문신':
+          return {
+            gradient: 'from-orange-50 to-orange-100',
+            iconColor: 'text-orange-500',
+            icon: (
+              <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+              </svg>
+            )
+          };
+        default:
+          return {
+            gradient: 'from-gray-50 to-gray-100',
+            iconColor: 'text-gray-500',
+            icon: (
+              <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            )
+          };
+      }
+    };
+
+    const config = getCategoryConfig(category);
+    
+    return (
+      <div className={`w-full h-full bg-gradient-to-br ${config.gradient} flex flex-col items-center justify-center relative`}>
+        {/* 배경 패턴 */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="w-full h-full" style={{
+            backgroundImage: `radial-gradient(circle at 25% 25%, rgba(0,0,0,0.1) 1px, transparent 1px)`,
+            backgroundSize: '20px 20px'
+          }} />
+        </div>
+        
+        {/* 메인 아이콘 */}
+        <div className={`${config.iconColor} mb-2 relative z-10`}>
+          {config.icon}
+        </div>
+        
+        {/* 병원명 첫 글자 */}
+        <div className={`${config.iconColor} text-2xl font-bold relative z-10`}>
+          {firstLetter}
+        </div>
+        
+        {/* 카테고리 라벨 */}
+        <div className="absolute bottom-2 left-2 right-2">
+          <div className="bg-white/80 backdrop-blur-sm rounded-full px-2 py-1">
+            <span className="text-xs font-medium text-gray-700">{category}</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const normalizeGroup = (h: Hospital): string => {
     const cat = (h.category || '').toLowerCase();
     const name = (h.name || '').toLowerCase();
@@ -173,7 +297,10 @@ const StoreFinder: React.FC = () => {
               <h1 className="text-2xl font-bold text-gray-900">병원찾기</h1>
             </div>
             <div className="text-sm text-gray-500">
-              탈모 전문 병원 {filteredHospitals.length}개
+              {currentLocation 
+                ? `주변 10km 내 탈모 전문 병원 ${filteredHospitals.length}개`
+                : `탈모 전문 병원 ${filteredHospitals.length}개`
+              }
             </div>
           </div>
         </div>
@@ -231,8 +358,8 @@ const StoreFinder: React.FC = () => {
               </svg>
               <div className="ml-3">
                 <p className="text-sm text-blue-800">
-                  <strong>데모 모드:</strong> API 키가 설정되지 않아 샘플 데이터를 표시합니다. 
-                  실제 병원 검색을 위해서는 네이버/카카오 API 키를 설정해주세요.
+                  <strong>데모 모드:</strong> API 키가 설정되지 않아 샘플 데이터를 표시합니다.
+                  실제 병원 검색을 위해서는 프로젝트 루트의 .env 파일에 네이버/카카오 API 키를 설정해주세요.
                 </p>
               </div>
             </div>
@@ -246,9 +373,10 @@ const StoreFinder: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div className="ml-3">
-              <h4 className="text-sm font-medium text-gray-800 mb-1">위치 정보 사용 안내</h4>
+              <h4 className="text-sm font-medium text-gray-800 mb-1">위치 기반 검색 안내</h4>
               <ul className="text-xs text-gray-600 space-y-1">
-                <li>• 위치 권한을 허용하면 주변 병원을 더 정확하게 찾을 수 있습니다</li>
+                <li>• 검색어를 입력하면 자동으로 현재 위치를 기반으로 주변 병원을 찾습니다</li>
+                <li>• 위치 권한을 허용하면 주변 10km 내 병원을 거리순으로 정렬하여 보여줍니다</li>
                 <li>• 위치 정보 없이도 병원명이나 주소로 검색 가능합니다</li>
                 <li>• 브라우저 주소창의 자물쇠 아이콘에서 위치 권한을 관리할 수 있습니다</li>
               </ul>
@@ -292,7 +420,7 @@ const StoreFinder: React.FC = () => {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="병원명, 주소로 검색..."
+                placeholder="병원명, 주소로 검색... (위치 기반으로 자동 검색)"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -301,6 +429,17 @@ const StoreFinder: React.FC = () => {
                 </svg>
               </div>
             </div>
+            <div className="mt-2 flex items-center text-xs text-gray-500">
+              <svg className="h-4 w-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              {currentLocation ? (
+                <span>현재 위치를 기반으로 주변 10km 내 병원을 검색합니다</span>
+              ) : (
+                <span>위치 정보를 허용하면 더 정확한 검색이 가능합니다</span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -308,7 +447,17 @@ const StoreFinder: React.FC = () => {
         {isLoading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">병원 정보를 검색하는 중...</p>
+            <p className="text-gray-600">
+              {currentLocation 
+                ? `현재 위치를 기반으로 "${searchTerm}" 검색 중...`
+                : `"${searchTerm}" 검색 중...`
+              }
+            </p>
+            {currentLocation && (
+              <p className="text-sm text-gray-500 mt-2">
+                주변 10km 내 병원을 찾고 있습니다
+              </p>
+            )}
           </div>
         ) : !searchTerm.trim() ? (
           <div className="text-center py-12">
@@ -324,7 +473,29 @@ const StoreFinder: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
             <h3 className="mt-2 text-sm font-medium text-gray-900">검색 결과가 없습니다</h3>
-            <p className="mt-1 text-sm text-gray-500">다른 검색어로 다시 시도해보세요.</p>
+            <p className="mt-1 text-sm text-gray-500">
+              {currentLocation 
+                ? `현재 위치 주변 10km 내에서 "${searchTerm}"에 대한 검색 결과가 없습니다.`
+                : `"${searchTerm}"에 대한 검색 결과가 없습니다.`
+              }
+            </p>
+            <div className="mt-4 space-y-2">
+              <p className="text-xs text-gray-400">다른 검색어로 시도해보세요:</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {categories.map((category) => (
+                  <button
+                    key={category.name}
+                    onClick={() => {
+                      setSelectedCategory(category.category);
+                      setSearchTerm(category.searchTerm);
+                    }}
+                    className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors"
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         ) : (
           <div className="space-y-10">
@@ -357,11 +528,39 @@ const StoreFinder: React.FC = () => {
                   <div key={hospital.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-shadow">
                 {/* Hospital Image */}
                 <div className="relative">
-                  <div className="w-full h-48 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
-                    <svg className="w-16 h-16 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                  </div>
+                  {hospital.imageUrl && !hospital.imageUrl.includes('placeholder') && !imageLoadErrors.has(hospital.id) ? (
+                    <div className="w-full h-48 bg-gray-200 overflow-hidden relative">
+                      <img 
+                        src={optimizeImageUrl(hospital.imageUrl, 400, 200)} 
+                        alt={hospital.name}
+                        className="w-full h-full object-cover transition-opacity duration-300"
+                        loading="lazy"
+                        onError={() => {
+                          // 이미지 로드 실패 시 에러 상태에 추가
+                          setImageLoadErrors(prev => new Set(prev).add(hospital.id));
+                        }}
+                        onLoad={(e) => {
+                          // 이미지 로드 성공 시 부드러운 페이드인 효과
+                          const target = e.target as HTMLImageElement;
+                          target.style.opacity = '1';
+                          // 로딩 인디케이터 숨기기
+                          const loadingElement = document.getElementById(`loading-${hospital.id}`);
+                          if (loadingElement) {
+                            loadingElement.style.display = 'none';
+                          }
+                        }}
+                        style={{ opacity: 0 }}
+                      />
+                      {/* 로딩 인디케이터 */}
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100" id={`loading-${hospital.id}`}>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full h-48 overflow-hidden">
+                      {getDefaultImageContent(hospital)}
+                    </div>
+                  )}
                   <div className="absolute top-3 right-3">
                     <div className="flex items-center space-x-1 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full">
                       <span className="text-yellow-400">{renderStars(hospital.rating)}</span>
@@ -403,7 +602,12 @@ const StoreFinder: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
-                      <span>거리: {locationService.formatDistance(hospital.distance)}</span>
+                      <span>
+                        {currentLocation 
+                          ? `현재 위치에서 ${locationService.formatDistance(hospital.distance)}`
+                          : `거리: ${locationService.formatDistance(hospital.distance)}`
+                        }
+                      </span>
                     </div>
                   </div>
 
