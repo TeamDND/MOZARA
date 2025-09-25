@@ -19,6 +19,8 @@ export interface Hospital {
   placeUrl?: string;
   latitude?: number;
   longitude?: number;
+  priorityScore?: number; // 단계별 우선순위 점수
+  isRecommended?: boolean; // 추천 여부
 }
 
 export interface SearchParams {
@@ -77,30 +79,9 @@ class LocationService {
 
   // 좌표를 기반으로 지역 키워드 가져오기 (카카오 주소 변환 API 이용)
   private async getLocationKeyword(location: Location): Promise<string | null> {
-    try {
-      const url = `${this.apiBaseUrl}/kakao/local/geo/coord2address?x=${location.longitude}&y=${location.latitude}`;
-      const res = await fetch(url);
-      if (!res.ok) return null;
-      const data = await res.json();
-      const doc = (data.documents || [])[0];
-      if (!doc || !doc.address) return null;
-      
-      // 시/도와 구/군 정보 추출
-      const address = doc.address;
-      const region1DepthName = address.region_1depth_name; // 시/도
-      const region2DepthName = address.region_2depth_name; // 구/군
-      
-      if (region1DepthName && region2DepthName) {
-        return `${region1DepthName} ${region2DepthName}`;
-      } else if (region1DepthName) {
-        return region1DepthName;
-      }
-      
-      return null;
-    } catch (error) {
-      console.warn('지역 키워드 가져오기 실패:', error);
-      return null;
-    }
+    // 역지오코딩 실패로 인한 잦은 404를 방지하기 위해 위치 키워드 추가를 생략합니다.
+    // 위치기반은 카카오 검색 호출 시 x/y/radius 파라미터로 이미 적용됩니다.
+    return null;
   }
 
   private isValidKoreanCoord(lat?: number, lng?: number): boolean {
@@ -400,7 +381,9 @@ class LocationService {
           longitude: parseFloat(doc.x),
           imageUrl: doc.imageUrl, // 백엔드에서 제공하는 이미지 URL 사용
         };
-        return hospital;
+        // 카테고리 정규화 적용 (그룹핑 호환)
+        const normalizedCategory = this.normalizeGroup(hospital);
+        return { ...hospital, category: normalizedCategory };
       });
   }
 
@@ -469,6 +452,84 @@ class LocationService {
   }
 
   // 샘플 병원 데이터 (현재 위치 기반으로 거리 계산) - 4개 카테고리만
+  // 카테고리 정규화 메서드
+  private normalizeGroup(hospital: Hospital): string {
+    const category = hospital.category || '';
+    const name = hospital.name || '';
+    
+    // 카테고리 기반 정규화
+    if (category.includes('병원') || category.includes('의원') || category.includes('클리닉')) {
+      return '탈모병원';
+    }
+    if (category.includes('미용실') || category.includes('헤어') || category.includes('살롱')) {
+      return '탈모미용실';
+    }
+    if (category.includes('가발') || category.includes('증모술')) {
+      return '가발전문점';
+    }
+    if (category.includes('문신') || category.includes('SMP')) {
+      return '두피문신';
+    }
+    
+    // 이름 기반 정규화
+    if (name.includes('병원') || name.includes('의원') || name.includes('클리닉')) {
+      return '탈모병원';
+    }
+    if (name.includes('미용실') || name.includes('헤어') || name.includes('살롱')) {
+      return '탈모미용실';
+    }
+    if (name.includes('가발') || name.includes('증모술')) {
+      return '가발전문점';
+    }
+    if (name.includes('문신') || name.includes('SMP')) {
+      return '두피문신';
+    }
+    
+    return category || '기타';
+  }
+
+  // 단계별 솔루션 필터링 및 우선순위 계산
+  filterHospitalsByStage(hospitals: Hospital[], stage: number): Hospital[] {
+    const { STAGE_SOLUTION_MAPPING, CATEGORY_PRIORITY_SCORES } = require('../utils/hairLossStages');
+    
+    const stageMapping = STAGE_SOLUTION_MAPPING[stage as keyof typeof STAGE_SOLUTION_MAPPING];
+    if (!stageMapping) return hospitals;
+
+    return hospitals.map(hospital => {
+      const category = this.normalizeGroup(hospital);
+      const isPrimary = stageMapping.primary.some((primaryCat: string) => 
+        category.includes(primaryCat) || primaryCat.includes(category)
+      );
+      const isSecondary = stageMapping.secondary.some((secondaryCat: string) => 
+        category.includes(secondaryCat) || secondaryCat.includes(category)
+      );
+
+      // 우선순위 점수 계산
+      let priorityScore = CATEGORY_PRIORITY_SCORES[category as keyof typeof CATEGORY_PRIORITY_SCORES] || 0;
+      
+      if (isPrimary) {
+        priorityScore += 50; // 1순위 솔루션 보너스
+      } else if (isSecondary) {
+        priorityScore += 25; // 2순위 솔루션 보너스
+      }
+
+      // 추천 여부 결정
+      const isRecommended = isPrimary || isSecondary;
+
+      return {
+        ...hospital,
+        priorityScore,
+        isRecommended
+      };
+    }).sort((a, b) => {
+      // 추천 우선, 그 다음 우선순위 점수, 그 다음 거리순
+      if (a.isRecommended && !b.isRecommended) return -1;
+      if (!a.isRecommended && b.isRecommended) return 1;
+      if (a.priorityScore !== b.priorityScore) return (b.priorityScore || 0) - (a.priorityScore || 0);
+      return a.distance - b.distance;
+    });
+  }
+
   private getSampleHospitals(userLocation?: Location): Hospital[] {
     const sampleHospitals = [
       // 탈모병원
@@ -483,7 +544,7 @@ class LocationService {
         longitude: 127.0330,
         description: "20년 경력의 전문의가 직접 진료하는 탈모 전문 클리닉입니다.",
         category: "탈모병원",
-        imageUrl: "https://source.unsplash.com/300x200/?hospital+medical",
+        imageUrl: "https://source.unsplash.com/400x200/?hospital+medical&sig=123",
       },
       {
         id: 'sample_2',
@@ -496,7 +557,7 @@ class LocationService {
         longitude: 127.0473,
         description: "강남 지역 최고의 탈모 치료 전문 센터입니다.",
         category: "탈모병원",
-        imageUrl: "https://source.unsplash.com/300x200/?clinic+medical",
+        imageUrl: "https://source.unsplash.com/400x200/?clinic+medical&sig=456",
       },
       {
         id: 'sample_3',
@@ -519,11 +580,91 @@ class LocationService {
         rating: 4.9,
         latitude: 37.5563,
         longitude: 126.9226,
-        description: "FUE 기술을 활용한 고품질 모발이식 전문 병원입니다.",
+        description: "최신 FUE 기술을 사용한 프리미엄 모발이식 전문원입니다.",
         category: "탈모병원",
+        imageUrl: "https://source.unsplash.com/400x200/?hair+transplant&sig=789",
       },
-      
       // 탈모미용실
+      {
+        id: 'sample_5',
+        name: "헤어스타일링 살롱",
+        address: "서울특별시 서초구 서초동 303",
+        phone: "02-3456-7890",
+        specialties: ["헤어스타일링", "두피케어", "탈모예방"],
+        rating: 4.3,
+        latitude: 37.4946,
+        longitude: 127.0276,
+        description: "탈모 예방과 두피케어에 특화된 헤어 살롱입니다.",
+        category: "탈모미용실",
+        imageUrl: "https://source.unsplash.com/400x200/?hair+salon&sig=101",
+      },
+      {
+        id: 'sample_6',
+        name: "두피케어 전문 미용실",
+        address: "서울특별시 송파구 잠실동 404",
+        phone: "02-2345-6789",
+        specialties: ["두피케어", "탈모예방", "헤어케어"],
+        rating: 4.6,
+        latitude: 37.5133,
+        longitude: 127.1028,
+        description: "두피 건강에 특화된 전문 미용실입니다.",
+        category: "탈모미용실",
+        imageUrl: "https://source.unsplash.com/400x200/?hair+care&sig=202",
+      },
+      // 가발전문점
+      {
+        id: 'sample_7',
+        name: "프리미엄 가발 전문점",
+        address: "서울특별시 중구 명동 505",
+        phone: "02-1234-5678",
+        specialties: ["천연가발", "인조가발", "맞춤가발"],
+        rating: 4.7,
+        latitude: 37.5636,
+        longitude: 126.9826,
+        description: "최고급 천연가발과 맞춤 제작 서비스를 제공합니다.",
+        category: "가발전문점",
+        imageUrl: "https://source.unsplash.com/400x200/?wig+hair&sig=303",
+      },
+      {
+        id: 'sample_8',
+        name: "헤어피스 전문점",
+        address: "서울특별시 종로구 인사동 606",
+        phone: "02-9876-5432",
+        specialties: ["헤어피스", "가발수리", "스타일링"],
+        rating: 4.5,
+        latitude: 37.5735,
+        longitude: 126.9788,
+        description: "다양한 헤어피스와 가발 관리 서비스를 제공합니다.",
+        category: "가발전문점",
+        imageUrl: "https://source.unsplash.com/400x200/?hair+piece&sig=404",
+      },
+      // 두피문신
+      {
+        id: 'sample_9',
+        name: "SMP 두피문신 전문점",
+        address: "서울특별시 강남구 청담동 707",
+        phone: "02-8765-4321",
+        specialties: ["SMP", "두피문신", "모발시뮬레이션"],
+        rating: 4.8,
+        latitude: 37.5194,
+        longitude: 127.0473,
+        description: "최신 SMP 기술을 사용한 두피문신 전문점입니다.",
+        category: "두피문신",
+        imageUrl: "https://source.unsplash.com/400x200/?tattoo+scalp&sig=505",
+      },
+      {
+        id: 'sample_10',
+        name: "마이크로피그멘테이션 센터",
+        address: "서울특별시 서초구 반포동 808",
+        phone: "02-7654-3210",
+        specialties: ["마이크로피그멘테이션", "두피문신", "모발복원"],
+        rating: 4.6,
+        latitude: 37.5081,
+        longitude: 127.0119,
+        description: "전문적인 마이크로피그멘테이션 서비스를 제공합니다.",
+        category: "두피문신",
+        imageUrl: "https://source.unsplash.com/400x200/?micropigmentation&sig=606",
+      },
       {
         id: 'sample_5',
         name: "탈모전용 헤어살롱",
@@ -535,7 +676,7 @@ class LocationService {
         longitude: 127.0286,
         description: "탈모 고객을 위한 전문 헤어살롱입니다.",
         category: "탈모미용실",
-        imageUrl: "https://source.unsplash.com/300x200/?hair+salon",
+        imageUrl: "https://source.unsplash.com/400x200/?hair+salon&sig=789",
       },
       {
         id: 'sample_6',
@@ -586,7 +727,7 @@ class LocationService {
         longitude: 127.1218,
         description: "고품질 가발 제작과 수리를 제공하는 전문점입니다.",
         category: "가발전문점",
-        imageUrl: "https://source.unsplash.com/300x200/?wig+hair",
+        imageUrl: "https://source.unsplash.com/400x200/?wig+hair&sig=101",
       },
       {
         id: 'sample_10',
@@ -637,7 +778,7 @@ class LocationService {
         longitude: 127.1218,
         description: "자연스러운 두피문신과 헤어라인 복원 전문 스튜디오입니다.",
         category: "두피문신",
-        imageUrl: "https://source.unsplash.com/300x200/?tattoo+studio",
+        imageUrl: "https://source.unsplash.com/400x200/?tattoo+studio&sig=202",
       },
       {
         id: 'sample_14',
@@ -813,7 +954,7 @@ class LocationService {
   // 백엔드 서버 상태 확인
   private async checkBackendServer(): Promise<boolean> {
     try {
-      // 1차: 새로운 엔드포인트 (/location/status)
+      // 1차: 새로운 엔드포인트 (/api/location/status)
       let response = await fetch(`${this.apiBaseUrl}/location/status`, {
         method: 'GET',
         signal: AbortSignal.timeout(5000)
