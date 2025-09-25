@@ -82,6 +82,9 @@ public class SecurityConfig {
                     corsConfiguration.addAllowedHeader("*");
                     corsConfiguration.setExposedHeaders(List.of("Authorization"));
                     corsConfiguration.addAllowedOrigin("http://localhost:3000");
+                    corsConfiguration.addAllowedOrigin("http://15.165.239.48");
+                    corsConfiguration.addAllowedOrigin("https://mozaracare.duckdns.org");
+                    corsConfiguration.addAllowedOrigin("http://mozaracare.duckdns.org");
                     corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
                     return corsConfiguration;
                 }))
