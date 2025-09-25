@@ -34,7 +34,7 @@ class LocationService {
   constructor() {
     // 백엔드 API URL 설정 (프로젝트 루트의 .env 파일 참조)
     const envBase = (process.env.REACT_APP_API_BASE_URL || '').trim();
-    let base = envBase || 'http://localhost:8000/api';
+    let base = envBase || '/python/api';
     // 방어적 정규화: /api 누락 시 자동 보정
     try {
       const url = new URL(base);
@@ -44,7 +44,7 @@ class LocationService {
       base = url.toString().replace(/\/$/, '');
     } catch {
       // 만약 URL 파싱 실패 시 안전 기본값 사용
-      base = 'http://localhost:8000/api';
+      base = '/python/api';
     }
 
     this.apiBaseUrl = base;

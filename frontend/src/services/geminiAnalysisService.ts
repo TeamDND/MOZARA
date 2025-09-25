@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // API 기본 설정
-const SPRING_BOOT_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
+const SPRING_BOOT_BASE_URL = process.env.REACT_APP_API_BASE_URL || '';
 
 // Gemini 분석 결과 인터페이스
 export interface GeminiAnalysisResult {
