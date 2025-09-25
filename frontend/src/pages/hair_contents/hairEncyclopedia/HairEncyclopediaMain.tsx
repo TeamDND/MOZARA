@@ -9,8 +9,8 @@ import ThesisSearchPage from './components/ThesisSearchPage';
 const HairEncyclopediaMain: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile-First Container - PC에서도 모바일 레이아웃 중앙 정렬 */}
-      <div className="max-w-md mx-auto min-h-screen bg-white">
+      {/* Mobile-First Container - 모든 화면에서 모바일 레이아웃 사용 */}
+      <div className="max-w-md mx-auto min-h-screen bg-white shadow-lg">
         <Routes>
           <Route index element={<HomePage />} />
           <Route path="category/overview" element={<CategoryPage />} />
