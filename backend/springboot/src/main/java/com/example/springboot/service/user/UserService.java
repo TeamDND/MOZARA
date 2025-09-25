@@ -74,7 +74,7 @@ public class UserService {
      * 닉네임 중복 확인
      */
     public boolean checkNicknameAvailability(String nickname) {
-        return usersInfoDAO.findByNickname(nickname) == null;
+        return userDAO.findByNickname(nickname).isEmpty();
     }
 
 
