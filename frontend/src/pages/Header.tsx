@@ -141,9 +141,9 @@ export default function Header() {
           {/* 가운데 로고 */}
           <button 
             onClick={handleLogoClick}
-            className="text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors active:scale-95"
+            className="text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors active:scale-95 font-kaushan"
           >
-            毛자라
+            HairFit
           </button>
 
           {/* 우측 여백 (대칭성을 위해) */}

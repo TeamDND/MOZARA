@@ -31,6 +31,10 @@ module.exports = {
         background: '#ffffff', // 배경 색상
         foreground: '#0f172a', // 전경 텍스트 색상
       },
+      // 커스텀 폰트 패밀리
+      fontFamily: {
+        'kaushan': ['KaushanScript', 'cursive'],
+      },
       // 커스텀 폰트 크기
       fontSize: {
         'xs': ['0.75rem', { lineHeight: '1rem' }],
