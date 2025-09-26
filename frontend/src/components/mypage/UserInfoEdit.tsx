@@ -42,15 +42,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
           <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{userInfo.email}</div>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">주소</label>
-          <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{userInfo.address}</div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">회원 등급</label>
-          <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{userInfo.role}</div>
-        </div>
+        
 
         <Button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium">
           정보 수정하기
