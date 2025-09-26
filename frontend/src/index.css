@@ -3,6 +3,15 @@
 @tailwind components; /* 컴포넌트 스타일 */
 @tailwind utilities; /* 유틸리티 클래스들 */
 
+/* KaushanScript 폰트 정의 */
+@font-face {
+  font-family: 'KaushanScript';
+  src: url('../public/fonts/KaushanScript-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* 기존 커스텀 스타일 */
 body {
   margin: 0;
