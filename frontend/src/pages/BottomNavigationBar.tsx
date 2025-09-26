@@ -19,7 +19,7 @@ const BottomNavigationBar: React.FC = () => {
       id: 'features',
       label: '기능',
       icon: <img src="/assets/icons/features.png" alt="기능" className="w-5 h-5" />,
-      path: '/main'
+      path: '/main-contents'
     },
     {
       id: 'analysis',

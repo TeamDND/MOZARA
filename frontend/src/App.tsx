@@ -14,7 +14,7 @@ import MainContent from './pages/MainContent';
 import YouTubeVideos from './pages/hair_contents/YouTubeVideos';
 import HairEncyclopediaMain from './pages/hair_contents/hairEncyclopedia/HairEncyclopediaMain';
 import HairDiagnosis from './pages/check/HairDiagnosis';
-import HairQuiz from './pages/hair_contents/HairQuiz';  
+import HairQuiz from './pages/hair_contents/HairQuiz';
 import DailyCare from './pages/hair_solutions/DailyCare';
 import LandingPageV2 from './pages/LandingPageV2';
 import StoreFinder from './pages/StoreFinder';
@@ -38,9 +38,7 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <Routes>
         <Route path="/" element={<MainLayout />}>
-          
-          <Route index element={<MainPage />} />
-          
+          <Route index element={<LandingPage />} />
           {/* 메인 플로우 (Main Flow) - new_fn_flow.md */}
           {/* <Route path="main-page" element={<MainPage />} /> */}
           <Route path="landing" element={<LandingPage />} />
@@ -49,14 +47,14 @@ const App: React.FC = () => {
           <Route path="integrated-diagnosis" element={<IntegratedDiagnosis />} />
           <Route path="diagnosis-results" element={<DiagnosisResults />} />
           <Route path="dashboard" element={<Dashboard />} />
-          
+
           {/* 추가 기능 화면들 (Additional Features) */}
           <Route path="progress-tracking" element={<ProgressTracking />} />
           <Route path="weekly-challenges" element={<WeeklyChallenges />} />
           <Route path="virtual-hairstyle" element={<VirtualHairstyle />} />
-          
+
           {/* 기존 라우트들 (호환성 유지) */}
-          <Route path="main" element={<MainContent />} />
+          <Route path="main-contents" element={<MainContent />} />
           <Route path="hair-check" element={<HairCheck />} />
           <Route path="hair-change" element={<HairChange />} />
           <Route path="hair-pt" element={<HairPT />} />
