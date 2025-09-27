@@ -4,6 +4,7 @@ import com.example.springboot.data.dao.UserDAO;
 import com.example.springboot.data.dao.UsersInfoDAO;
 import com.example.springboot.data.dto.user.SignUpDTO;
 import com.example.springboot.data.dto.user.UserInfoDTO;
+import com.example.springboot.data.dto.user.UserAdditionalInfoDTO;
 import com.example.springboot.data.dto.seedling.SeedlingStatusDTO;
 import com.example.springboot.data.entity.UserEntity;
 import com.example.springboot.data.entity.UsersInfoEntity;
@@ -41,7 +42,7 @@ public class UserService {
                 .username(signUpDTO.getUsername())
                 .password(encodedPassword)
                 .email(signUpDTO.getEmail())
-                .address(signUpDTO.getAddress())
+                .nickname(signUpDTO.getNickname())
                 .role(signUpDTO.getRole() != null ? signUpDTO.getRole() : "ROLE_USER")
                 .createdat(Instant.now())
                 .build();
@@ -49,27 +50,15 @@ public class UserService {
         // 사용자 저장
         UserEntity savedUser = userDAO.addUser(userEntity);
 
-        // UsersInfoEntity 생성 및 저장
-        UsersInfoEntity usersInfoEntity = UsersInfoEntity.builder()
-                .gender(signUpDTO.getGender())
-                .age(signUpDTO.getAge())
-                .nickname(signUpDTO.getNickname())
-                .userEntityIdForeign(savedUser)
-                .build();
-        
-        UsersInfoEntity savedUserInfo = usersInfoDAO.addUserInfo(usersInfoEntity);
-
         // SeedlingService를 통해 새싹 생성
-        SeedlingStatusDTO seedlingStatusDTO = seedlingService.createSeedling(savedUser, savedUserInfo.getNickname());
+        SeedlingStatusDTO seedlingStatusDTO = seedlingService.createSeedling(savedUser, savedUser.getNickname());
 
         // UserInfoDTO로 변환하여 반환 (password, role 제외)
         return UserInfoDTO.builder()
+                .userId(savedUser.getId())
                 .username(savedUser.getUsername())
                 .email(savedUser.getEmail())
-                .address(savedUser.getAddress())
-                .nickname(savedUserInfo.getNickname())
-                .gender(savedUserInfo.getGender())
-                .age(savedUserInfo.getAge())
+                .nickname(savedUser.getNickname())
                 .seedlingStatus(seedlingStatusDTO)
                 .build();
     }
@@ -85,7 +74,7 @@ public class UserService {
      * 닉네임 중복 확인
      */
     public boolean checkNicknameAvailability(String nickname) {
-        return usersInfoDAO.findByNickname(nickname) == null;
+        return userDAO.findByNickname(nickname).isEmpty();
     }
 
 
@@ -106,10 +95,64 @@ public class UserService {
                 .userId(userEntity.getId())
                 .username(userEntity.getUsername())
                 .email(userEntity.getEmail())
-                .address(userEntity.getAddress())
-                .nickname(usersInfoEntity != null ? usersInfoEntity.getNickname() : null)
+                .nickname(userEntity.getNickname())
                 .gender(usersInfoEntity != null ? usersInfoEntity.getGender() : null)
                 .age(usersInfoEntity != null ? usersInfoEntity.getAge() : null)
+                .familyHistory(usersInfoEntity != null ? usersInfoEntity.getFamilyHistory() : null)
+                .isLoss(usersInfoEntity != null ? usersInfoEntity.getIsLoss() : null)
+                .stress(usersInfoEntity != null ? usersInfoEntity.getStress() : null)
+                .seedlingStatus(seedlingStatusDTO)
+                .build();
+    }
+
+    /**
+     * 사용자 추가 정보 업데이트 (가족력, 탈모 여부, 스트레스)
+     */
+    public UserInfoDTO updateUserInfo(String username, UserAdditionalInfoDTO userAdditionalInfoDTO) {
+        // 사용자 조회
+        UserEntity userEntity = userDAO.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // UsersInfoEntity 조회
+        UsersInfoEntity usersInfoEntity = usersInfoDAO.findByUserId(userEntity.getId());
+        if (usersInfoEntity == null) {
+            throw new RuntimeException("사용자 정보를 찾을 수 없습니다.");
+        }
+
+        // 정보 업데이트 (users_info 테이블의 모든 컬럼)
+        if (userAdditionalInfoDTO.getGender() != null) {
+            usersInfoEntity.setGender(userAdditionalInfoDTO.getGender());
+        }
+        if (userAdditionalInfoDTO.getAge() != null) {
+            usersInfoEntity.setAge(userAdditionalInfoDTO.getAge());
+        }
+        if (userAdditionalInfoDTO.getFamilyHistory() != null) {
+            usersInfoEntity.setFamilyHistory(userAdditionalInfoDTO.getFamilyHistory());
+        }
+        if (userAdditionalInfoDTO.getIsLoss() != null) {
+            usersInfoEntity.setIsLoss(userAdditionalInfoDTO.getIsLoss());
+        }
+        if (userAdditionalInfoDTO.getStress() != null) {
+            usersInfoEntity.setStress(userAdditionalInfoDTO.getStress());
+        }
+
+        // 업데이트된 정보 저장
+        UsersInfoEntity updatedUserInfo = usersInfoDAO.updateUserInfo(usersInfoEntity);
+
+        // SeedlingService를 통해 새싹 정보 조회
+        SeedlingStatusDTO seedlingStatusDTO = seedlingService.getSeedlingByUserId(userEntity.getId());
+
+        // UserInfoDTO로 변환하여 반환
+        return UserInfoDTO.builder()
+                .userId(userEntity.getId())
+                .username(userEntity.getUsername())
+                .email(userEntity.getEmail())
+                .nickname(userEntity.getNickname())
+                .gender(updatedUserInfo.getGender())
+                .age(updatedUserInfo.getAge())
+                .familyHistory(updatedUserInfo.getFamilyHistory())
+                .isLoss(updatedUserInfo.getIsLoss())
+                .stress(updatedUserInfo.getStress())
                 .seedlingStatus(seedlingStatusDTO)
                 .build();
     }
@@ -159,12 +202,6 @@ public class UserService {
         String email = signUpDTO.getEmail();
         if (email == null || !email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
             throw new RuntimeException("email을 다시 확인해주세요");
-        }
-
-        // 나이 검증
-        Integer age = signUpDTO.getAge();
-        if (age == null || age < 1 || age > 120) {
-            throw new RuntimeException("age를 다시 확인해주세요");
         }
     }
 

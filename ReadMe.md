@@ -5,30 +5,32 @@
 ### 📊 전체 구조도
 
 ```mermaid
-graph LR
-    A[Frontend<br/>TypeScript/React] --> B[Backend<br/>SpringBoot]
-    B --> C{AI 기능?}
-    C -->|Yes| D[Python Backend<br/>FastAPI + AI]
-    C -->|No| E[일반 처리]
-    D --> F[AI 처리 결과]
-    F --> B
-    E --> B
-    B --> G[Response]
-    G --> A
+graph TB
+    A[Frontend<br/>React/TypeScript<br/>Port: 3000] --> B[Nginx<br/>Reverse Proxy<br/>Port: 80/443]
+    B --> C[SpringBoot Backend<br/>User Management<br/>Port: 8080]
+    C --> D[Python FastAPI<br/>AI Services<br/>Port: 8000]
+    C --> E[MySQL Database<br/>Port: 3306]
+    D --> F[AI Services<br/>Gemini, CLIP, Pinecone]
+    E --> G[(User Data<br/>Analysis Results)]
+    F --> H[(Vector Database<br/>Pinecone)]
 ```
-#
 ### 🔄 요청 처리 흐름
 
+dd
 #### 1️⃣ **AI 기능 요청 시**
 ```
 [Frontend] 
-    ↓ (사용자 요청)
-[SpringBoot Backend] 
-    ↓ (AI 기능 판별)
-[Python Backend]
-    ↓ (AI 모델 처리)
+    ↓ (HTTPS 요청)
+[Nginx Proxy]
+    ↓ (/api/* 라우팅)
 [SpringBoot Backend]
-    ↓ (결과 수신)
+    ↓ (AI 기능 판별)
+[Python FastAPI]
+    ↓ (AI 모델 처리)
+[AI Services]
+    ↓ (결과 반환)
+[SpringBoot Backend]
+    ↓ (결과 수신 및 DB 저장)
 [Frontend]
     (결과 표시)
 ```
@@ -36,9 +38,13 @@ graph LR
 #### 2️⃣ **일반 기능 요청 시**
 ```
 [Frontend]
-    ↓ (사용자 요청)
+    ↓ (HTTPS 요청)
+[Nginx Proxy]
+    ↓ (/api/* 라우팅)
 [SpringBoot Backend]
-    ↓ (직접 처리)
+    ↓ (DB 처리)
+[MySQL Database]
+    ↓ (결과 반환)
 [Frontend]
     (결과 표시)
 ```
@@ -69,22 +75,36 @@ graph LR
 - **Architecture**: Microservice, API Gateway Pattern
 - **Containerization**: Docker
 
+### Infrastructure & DevOps
+- **Containerization**: Docker + Docker Compose
+- **Reverse Proxy**: Nginx (HTTPS, SSL/TLS)
+- **Database**: MySQL 8.0
+- **CI/CD**: GitHub Actions
+- **Deployment**: AWS EC2
+- **Domain**: DuckDNS (동적 DNS)
+- **SSL**: Let's Encrypt (Certbot)
+
 ## 📁 프로젝트 구조
 
 ```
 project/
 ├── frontend/                         # React (TypeScript)
 │   ├── src/
-│   │   ├── api/           # API 통신
-│   │   ├── components/    # 공통 컴포넌트
-│   │   ├── features/      # 기능별 모듈
-│   │   │   └── selfcheck/ # BASP 자가진단
-│   │   │       └── components/
-│   │   ├── page/          # 페이지 컴포넌트
-│   │   ├── service/       # API 서비스
-│   │   ├── store/         # Redux 상태 관리
-│   │   ├── style/         # 스타일 파일
-│   │   ├── user/          # 사용자 관련
+│   │   ├── assets/        # 정적 리소스 (이미지, 폰트, CSS)
+│   │   ├── components/    # 재사용 가능한 UI 컴포넌트
+│   │   │   ├── navigation/ # 네비게이션 컴포넌트
+│   │   │   ├── sections/   # 섹션별 컴포넌트
+│   │   │   └── ui/         # 기본 UI 컴포넌트
+│   │   ├── pages/         # 라우팅되는 페이지 단위
+│   │   │   ├── check/      # 모발 진단 관련 페이지 (HairCheck, HairDamageAnalysis 등)
+│   │   │   ├── hair_contents/ # 모발 콘텐츠 페이지 (HairChange, HairQuiz, YouTubeVideos 등)
+│   │   │   ├── hair_solutions/ # 모발 솔루션 페이지 (DailyCare, HairLossProducts, HairPT 등)
+│   │   │   └── users/      # 사용자 관련 페이지 (LogIn, SignUp 등)
+│   │   ├── services/      # API 통신 및 데이터 서비스
+│   │   ├── utils/         # 공통 함수 및 유틸리티
+│   │   │   └── data/      # 데이터 관련 유틸리티
+│   │   ├── hooks/         # 재사용 가능한 커스텀 훅
+│   │   ├── styles/        # 전역 스타일 관리
 │   │   └── ...
 │   └── package.json
 │
@@ -178,58 +198,103 @@ project/
 
 ## 🚀 실행 방법
 
-### Frontend
+### 🐳 Docker Compose (권장)
+```bash
+# 로컬 개발 환경
+cd docker
+cp env.docker .env  # 환경변수 설정
+docker compose up -d
+
+# 프로덕션 환경
+docker compose -f docker-compose.prod.yml up -d
+```
+
+### 🔧 개별 서비스 실행 (개발용)
+
+#### Frontend
 ```bash
 cd frontend
 npm install --legacy-peer-deps
 npm start
 ```
 
-### SpringBoot Backend
+#### SpringBoot Backend
 ```bash
 cd backend/springboot
 ./gradlew bootRun
 ```
 
-### Python Backend
+#### Python Backend
 ```bash
 cd backend/python
 pip install -r requirements.txt
 python app.py
 ```
 
-### Docker Compose (전체 실행)
+### ☁️ AWS 배포
 ```bash
-docker-compose up -d
+# GitHub Actions 자동 배포 (main 브랜치 푸시 시)
+git push origin main
+
+# 수동 배포
+./deploy-aws.sh
 ```
 
 ## 🔐 환경 변수
 
-### Backend 환경 변수 (`.env`)
+### Docker 환경 변수 (`docker/.env`)
 ```env
-# API Keys
-ELEVEN_ST_API_KEY=your_eleven_st_api_key_here
-YOUTUBE_API_KEY=your_youtube_api_key_here
+# AI 서비스 API 키
+GEMINI_API_KEY=your_gemini_api_key
+OPENAI_API_KEY=your_openai_api_key
+YOUTUBE_API_KEY=your_youtube_api_key
+ELEVEN_ST_API_KEY=your_eleven_st_api_key
 
-# API Configuration
-API_BASE_URL=http://localhost:8080/api
+# Pinecone 설정
+PINECONE_API_KEY=your_pinecone_api_key
+PINECONE_ENVIRONMENT=your_pinecone_environment
+PINECONE_INDEX_NAME=your_pinecone_index_name
 
-# Server Configuration
-HOST=0.0.0.0
-PORT=8000
+# OAuth2 설정
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+KAKAO_CLIENT_SECRET=your_kakao_client_secret
 
-# CORS Configuration
-CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001
+# JWT 설정 (application.properties에 하드코딩됨)
+# jwt.secret.key=alaoskjovjcpovcjqawpjcxapsjcpaosjcpasocpoadasjdlakslaks
 
-# AI Service Keys (if using AI features)
-PINECONE_API_KEY=your_pinecone_key
-GEMINI_API_KEY=your_gemini_key
+# Docker Hub 설정 (선택사항)
+DOCKERHUB_TOKEN=your_dockerhub_token
+DOCKERHUB_USERNAME=your_dockerhub_username
+
+# AWS 배포 설정
+LIVE_SERVER_IP=your_domain.duckdns.org
+EC2_SSH_KEY=your_ec2_ssh_private_key
+```
+
+### GitHub Secrets (CI/CD용)
+```
+GEMINI_API_KEY, OPENAI_API_KEY, YOUTUBE_API_KEY, ELEVEN_ST_API_KEY
+PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX_NAME
+GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, KAKAO_CLIENT_SECRET
+DOCKERHUB_TOKEN, DOCKERHUB_USERNAME, LIVE_SERVER_IP, EC2_SSH_KEY
 ```
 
 ### `application.properties` (SpringBoot)
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/mozara
-jwt.secret=your_jwt_secret
+# 데이터베이스 설정 (Docker Compose)
+spring.datasource.url=jdbc:mysql://mysql:3306/mozara?useSSL=false&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=1234
+
+# AI 백엔드 설정
+ai.python.base-url=http://python-api:8000
+
+# OAuth2 설정 (HTTPS)
+spring.security.oauth2.client.registration.google.client-id=${GOOGLE_CLIENT_ID:}
+spring.security.oauth2.client.registration.google.redirect-uri=https://${DOMAIN_NAME:mozaracare.duckdns.org}/login/oauth2/code/google
+spring.security.oauth2.client.registration.kakao.client-id=${KAKAO_CLIENT_ID:}
+spring.security.oauth2.client.registration.kakao.redirect-uri=https://${DOMAIN_NAME:mozaracare.duckdns.org}/login/oauth2/code/kakao
 ```
 
 ## 📡 API 엔드포인트

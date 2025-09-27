@@ -1,4 +1,3 @@
-drop schema mozara;
 CREATE DATABASE  IF NOT EXISTS `mozara` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `mozara`;
 -- MySQL dump 10.13  Distrib 8.0.42, for Win64 (x86_64)
@@ -36,17 +35,13 @@ CREATE TABLE `analysis_results` (
   PRIMARY KEY (`result_id`),
   KEY `user_id_foreign` (`user_id_foreign`),
   CONSTRAINT `analysis_results_ibfk_1` FOREIGN KEY (`user_id_foreign`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `analysis_results`
 --
 
-LOCK TABLES `analysis_results` WRITE;
-/*!40000 ALTER TABLE `analysis_results` DISABLE KEYS */;
-/*!40000 ALTER TABLE `analysis_results` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `daily_habits`
@@ -90,17 +85,13 @@ CREATE TABLE `seedling_status` (
   PRIMARY KEY (`seedling_id`),
   KEY `user_id_foreign` (`user_id_foreign`),
   CONSTRAINT `seedling_status_ibfk_1` FOREIGN KEY (`user_id_foreign`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `seedling_status`
 --
 
-LOCK TABLES `seedling_status` WRITE;
-/*!40000 ALTER TABLE `seedling_status` DISABLE KEYS */;
-/*!40000 ALTER TABLE `seedling_status` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `user_habit_log`
@@ -119,17 +110,12 @@ CREATE TABLE `user_habit_log` (
   KEY `user_id_foreign` (`user_id_foreign`),
   CONSTRAINT `user_habit_log_ibfk_1` FOREIGN KEY (`habit_id_foreign`) REFERENCES `daily_habits` (`habit_id`),
   CONSTRAINT `user_habit_log_ibfk_2` FOREIGN KEY (`user_id_foreign`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `user_habit_log`
 --
-
-LOCK TABLES `user_habit_log` WRITE;
-/*!40000 ALTER TABLE `user_habit_log` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user_habit_log` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `user_log`
@@ -160,34 +146,6 @@ LOCK TABLES `user_log` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `user_metrics`
---
-
-DROP TABLE IF EXISTS `user_metrics`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_metrics` (
-  `user_metrics_id` int NOT NULL AUTO_INCREMENT,
-  `type` varchar(255) DEFAULT NULL,
-  `value` varchar(255) DEFAULT NULL,
-  `record_date` datetime DEFAULT NULL,
-  `user_id_foreign` int DEFAULT NULL,
-  PRIMARY KEY (`user_metrics_id`),
-  KEY `user_id_foreign` (`user_id_foreign`),
-  CONSTRAINT `user_metrics_ibfk_1` FOREIGN KEY (`user_id_foreign`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user_metrics`
---
-
-LOCK TABLES `user_metrics` WRITE;
-/*!40000 ALTER TABLE `user_metrics` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user_metrics` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `users`
 --
 
@@ -198,12 +156,12 @@ CREATE TABLE `users` (
   `user_id` int NOT NULL AUTO_INCREMENT,
   `password` varchar(255) DEFAULT NULL,
   `role` varchar(50) DEFAULT NULL,
+  `nickname` varchar(100) DEFAULT NULL,
   `createdat` datetime DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
   `username` varchar(100) DEFAULT NULL,
-  `address` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -212,7 +170,6 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'$2a$10$yEq/Y7VSn/.VU4o17dfUYuKtw8nNe7DISyAYZl9iF1u6JtCgQ2kG.','ROLE_USER','2025-09-15 08:36:33','jeongtae9324@gmail.com','aaaaaa','서울시 성동구 송정동'),(2,'$2a$10$j.twxjJfOdgyArAT884G5.sPRVSTVpNf3JGrtB1BBDiM92E.Bv7qW','ROLE_USER','2025-09-15 08:47:32','test@test.com','testuser','???');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -227,12 +184,14 @@ CREATE TABLE `users_info` (
   `user_info_id` int NOT NULL AUTO_INCREMENT,
   `gender` varchar(50) DEFAULT NULL,
   `age` int DEFAULT NULL,
-  `nickname` varchar(100) DEFAULT NULL,
   `user_id_foreign` int DEFAULT NULL,
+  `family_history` tinyint DEFAULT NULL,
+  `is_loss` tinyint DEFAULT NULL,
+  `stress` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`user_info_id`),
   KEY `user_id_foreign` (`user_id_foreign`),
   CONSTRAINT `users_info_ibfk_1` FOREIGN KEY (`user_id_foreign`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -241,7 +200,6 @@ CREATE TABLE `users_info` (
 
 LOCK TABLES `users_info` WRITE;
 /*!40000 ALTER TABLE `users_info` DISABLE KEYS */;
-INSERT INTO `users_info` VALUES (1,'남',28,'정태',1),(2,'??',25,'?????',2);
 /*!40000 ALTER TABLE `users_info` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -254,4 +212,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-09-17 10:48:07
+-- Dump completed on 2025-09-25 17:39:27

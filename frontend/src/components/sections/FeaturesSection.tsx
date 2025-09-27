@@ -1,6 +1,6 @@
 import type React from "react"
 import { MapPin, Clock, Heart, Tv, Camera } from "../ui/icons"
-import { Button } from "../ui/Button"
+import { Button } from "../ui/button"
 
 interface FeaturesSectionProps {
   isVisible: boolean
