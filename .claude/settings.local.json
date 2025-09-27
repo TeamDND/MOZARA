@@ -21,7 +21,9 @@
       "Bash(dir \"C:\\Users\\301\\Desktop\\test_data_set\\test\\2\")",
       "Read(//c/**)",
       "Bash(dir:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(git reset:*)",
+      "Bash(del keys_to_remove.txt)"
     ],
     "deny": [],
     "ask": []
