@@ -41,7 +41,7 @@ jobs:
           echo "🚀 Runpod에 Python API 배포 중..."
           
           # Runpod API를 사용한 배포
-          curl -X POST "https://api.runpod.io/v2/${{ secrets.RUNPOD_ENDPOINT_ID }}/runsync" \
+          curl -X POST "https://api.runpod.io/v2/${{ secrets.RUNPOD_ENDPOINT_ID }}/run" \
             -H "Authorization: Bearer ${{ secrets.RUNPOD_API_KEY }}" \
             -H "Content-Type: application/json" \
             -d '{
