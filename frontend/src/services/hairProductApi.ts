@@ -1,5 +1,4 @@
 import apiClient from './apiClient';
-import { configApi } from './configApi';
 
 // TypeScript: 탈모 제품 정보 인터페이스
 export interface HairProduct {

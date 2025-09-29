@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { configApi } from '../../services/configApi';
 import Header from '../Header';
 import apiClient from '../../services/apiClient';
 import { useSelector } from 'react-redux';
