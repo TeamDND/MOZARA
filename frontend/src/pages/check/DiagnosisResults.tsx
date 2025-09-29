@@ -303,7 +303,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
         {/* 메인 컨텐츠 (Mobile-First) */}
         <div className="flex-1 p-4 overflow-y-auto space-y-4">
           {/* 진단 결과 요약 (Mobile-First) */}
-          <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-xl">
+              <div className="bg-gradient-to-r from-gray-50 to-green-50 p-4 rounded-xl">
             <div className="flex items-center gap-3 mb-4">
               <CheckCircle className="w-8 h-8 text-green-500" />
               <div>
@@ -342,12 +342,12 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
 
             {/* Gemini 분석 결과 요약 */}
             {geminiResult && (
-              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <div className="mt-4 p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
-                  <Brain className="w-4 h-4 text-blue-600" />
-                  <h3 className="text-sm font-semibold text-blue-800">{geminiResult.title}</h3>
+                  <Brain className="w-4 h-4 text-[#222222]" />
+                  <h3 className="text-sm font-semibold text-gray-800">{geminiResult.title}</h3>
                 </div>
-                <p className="text-xs text-blue-700">{geminiResult.description}</p>
+                <p className="text-xs text-gray-700">{geminiResult.description}</p>
               </div>
             )}
           </div>
@@ -365,7 +365,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
               onClick={() => {
                   navigate('/daily-care');
               }}
-              className="ml-3 h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl active:scale-[0.98]"
+              className="ml-3 h-10 px-4 bg-[#222222] hover:bg-[#333333] text-white rounded-xl active:scale-[0.98]"
             >
               데일리 케어
             </Button>
@@ -377,25 +377,25 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
               <TabsTrigger 
                 value="hospitals" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-blue-600 text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-blue-700 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-[#222222] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
               >
                 탈모 맵
               </TabsTrigger>
               <TabsTrigger 
                 value="products" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
                 제품 추천
               </TabsTrigger>
               <TabsTrigger 
                 value="videos" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
                 영상 컨텐츠
               </TabsTrigger>
               <TabsTrigger 
                 value="lifestyle" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
                 생활습관
               </TabsTrigger>
@@ -429,7 +429,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                         onClick={() => setSelectedCategory(category)}
                         className={`flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
                           selectedCategory === category
-                            ? 'bg-blue-600 text-white'
+                            ? 'bg-[#222222] text-white'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                       >
@@ -467,11 +467,11 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                         </div>
                       </div>
                       
-                      <div className="bg-blue-50 p-3 rounded-lg text-xs mb-3">
+                      <div className="bg-gray-50 p-3 rounded-lg text-xs mb-3">
                         💡 {hospital.matchReason}
                       </div>
                       
-                      <Button className="w-full h-10 rounded-lg bg-blue-600 hover:bg-blue-700 text-white active:scale-[0.98]">
+                      <Button className="w-full h-10 rounded-lg bg-[#222222] hover:bg-[#333333] text-white active:scale-[0.98]">
                         자세히 보기
                       </Button>
                     </div>
@@ -521,7 +521,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                         ✨ {product.matchReason}
                       </div>
                       
-                      <Button className="w-full h-10 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-[0.98]">
+                      <Button className="w-full h-10 rounded-lg bg-[#222222] hover:bg-[#333333] active:scale-[0.98]">
                         <ShoppingCart className="w-4 h-4 mr-2" />
                         구매하기
                       </Button>
@@ -535,7 +535,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             <TabsContent value="videos" className="space-y-4">
               <div className="bg-white p-4 rounded-xl shadow-md">
                 <div className="flex items-center gap-2 mb-2">
-                  <Brain className="w-5 h-5 text-blue-600" />
+                  <Brain className="w-5 h-5 text-[#222222]" />
                   <h3 className="text-lg font-semibold text-gray-800">
                     AI 맞춤 영상 추천
                     {geminiResult && (
@@ -554,7 +554,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
 
                 {videosLoading && (
                   <div className="text-center py-8">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#222222] mb-2"></div>
                     <p className="text-sm text-gray-600">맞춤 영상을 불러오는 중...</p>
                   </div>
                 )}
@@ -592,7 +592,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                       </p>
 
                       {geminiResult && (
-                        <div className="bg-blue-50 p-3 rounded-lg text-xs mb-3">
+                        <div className="bg-gray-50 p-3 rounded-lg text-xs mb-3">
                           🎯 {stageRecommendations[geminiResult.stage]?.title || '맞춤 추천'}
                         </div>
                       )}

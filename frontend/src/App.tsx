@@ -30,6 +30,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { PlantGrowth } from './components/PlantGrowth';
 import MyPage from './pages/MyPage';
 import MyReportPage from './pages/MyReportPage';
+import Chat from './pages/Chat';
 
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
@@ -68,6 +69,7 @@ const App: React.FC = () => {
           <Route path="mypage" element={<MyPage />} />
           <Route path="my-report" element={<MyReportPage />} />
           <Route path="store-finder" element={<StoreFinder />} />
+          <Route path="chat" element={<Chat />} />
         </Route>
       </Routes>
     </ErrorBoundary>

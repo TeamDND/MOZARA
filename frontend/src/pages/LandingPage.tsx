@@ -104,18 +104,13 @@ export default function HomePage() {
             <h1 className="text-6xl md:text-8xl font-bold text-white mb-4 font-serif">
               HairFit
             </h1>
-            <p className="text-white text-lg md:text-xl mb-8 opacity-90">
-              AI 분석 기반 맞춤형 솔루션 및 컨텐츠
-            </p>
-
-            <p className="text-white text-lg md:text-xl mb-8 opacity-90">
-              셀카로 쉽게 알아보는 내 탈모 진행 상태
-            </p>
-            <p  className="text-white text-lg md:text-xl mb-8 opacity-90">
-            나만의 탈모 로드맵을 받아보세요
+            <p className="text-white text-lg md:text-xl mt-16 mb-8 opacity-90">
+              AI 분석 기반 맞춤형 솔루션 및 컨텐츠 <br />
+              셀카로 쉽게 알아보는 내 탈모 진행 상태 <br />
+              나만의 탈모 로드맵을 받아보세요
             </p>
             <button
-              className="bg-[#222222] text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-[#333333] transition-colors"
+              className="bg-[#222222] text-white px-8 py-4 mt-8 rounded-lg text-lg font-medium hover:bg-[#333333] transition-colors"
               onClick={() => {
                 if (isLoggedIn) {
                   navigate('/daily-care')
@@ -159,18 +154,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* 슬라이더 인디케이터 */}
-            <div className="flex justify-center mt-6 space-x-2">
-              {Array.from({ length: Math.ceil(allServices.length / 3) }).map((_, index) => (
-                <button
-                  key={index}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    Math.floor(currentSlide / 3) === index ? 'bg-[#222222]' : 'bg-[#222222] opacity-30'
-                  }`}
-                  onClick={() => setCurrentSlide(index * 3)}
-                />
-              ))}
-            </div>
           </div>
         </div>
       </div>

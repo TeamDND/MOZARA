@@ -16,7 +16,7 @@ const MainLayout: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       {!isLandingPage && <Header />}
       {/* Tailwind CSS: 메인 콘텐츠 영역 - BottomNavigationBar 높이만큼 하단 여백 추가 */}
-      <main className={isLandingPage ? "" : "pt-16 pb-16"}>
+      <main className={isLandingPage ? "" : "pt-16 pb-24"}>
         <Outlet />
       </main>
       {!isLandingPage && <BottomNavigationBar />}
