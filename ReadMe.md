@@ -292,9 +292,9 @@ ai.python.base-url=http://python-api:8000
 
 # OAuth2 설정 (HTTPS)
 spring.security.oauth2.client.registration.google.client-id=${GOOGLE_CLIENT_ID:}
-spring.security.oauth2.client.registration.google.redirect-uri=https://${DOMAIN_NAME:mozaracare.duckdns.org}/login/oauth2/code/google
+spring.security.oauth2.client.registration.google.redirect-uri=https://${DOMAIN_NAME:hairfit.duckdns.org}/login/oauth2/code/google
 spring.security.oauth2.client.registration.kakao.client-id=${KAKAO_CLIENT_ID:}
-spring.security.oauth2.client.registration.kakao.redirect-uri=https://${DOMAIN_NAME:mozaracare.duckdns.org}/login/oauth2/code/kakao
+spring.security.oauth2.client.registration.kakao.redirect-uri=https://${DOMAIN_NAME:hairfit.duckdns.org}/login/oauth2/code/kakao
 ```
 
 ## 📡 API 엔드포인트
