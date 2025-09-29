@@ -32,7 +32,7 @@ def analyze_hair_with_gemini(image_data: bytes) -> Dict[str, Any]:
     Returns: {"stage": int, "title": str, "description": str, "advice": List[str]}
     """
     genai = _get_genai_client()
-    model = genai.GenerativeModel('gemini-2.0-flash-exp')
+    model = genai.GenerativeModel('gemini-1.5-pro')
 
     # 0~3 스케일로 강제하는 프롬프트
     prompt = (

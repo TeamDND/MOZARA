@@ -37,7 +37,7 @@ const SelfCheckStep: React.FC<SelfCheckStepProps> = ({ baspAnswers, setBaspAnswe
           <Label htmlFor="gender" className="text-base font-semibold text-gray-800">성별</Label>
           <RadioGroup 
             value={baspAnswers.gender} 
-            onValueChange={(value) => setBaspAnswers(prev => ({...prev, gender: value}))}
+            onValueChange={(value: string) => setBaspAnswers(prev => ({...prev, gender: value}))}
             className="space-y-3"
           >
             <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
@@ -72,7 +72,7 @@ const SelfCheckStep: React.FC<SelfCheckStepProps> = ({ baspAnswers, setBaspAnswe
           <Label htmlFor="familyHistory" className="text-base font-semibold text-gray-800">가족력이 있나요?</Label>
           <RadioGroup 
             value={baspAnswers.familyHistory} 
-            onValueChange={(value) => setBaspAnswers(prev => ({...prev, familyHistory: value}))}
+            onValueChange={(value: string) => setBaspAnswers(prev => ({...prev, familyHistory: value}))}
             className="space-y-3"
           >
             <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
@@ -90,7 +90,7 @@ const SelfCheckStep: React.FC<SelfCheckStepProps> = ({ baspAnswers, setBaspAnswe
           <Label htmlFor="recentHairLoss" className="text-base font-semibold text-gray-800">최근 머리 빠짐 증상이 있나요?</Label>
           <RadioGroup 
             value={baspAnswers.recentHairLoss} 
-            onValueChange={(value) => setBaspAnswers(prev => ({...prev, recentHairLoss: value}))}
+            onValueChange={(value: string) => setBaspAnswers(prev => ({...prev, recentHairLoss: value}))}
             className="space-y-3"
           >
             <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
@@ -108,7 +108,7 @@ const SelfCheckStep: React.FC<SelfCheckStepProps> = ({ baspAnswers, setBaspAnswe
           <Label htmlFor="stress" className="text-base font-semibold text-gray-800">최근 스트레스를 겪고 있나요?</Label>
           <RadioGroup 
             value={baspAnswers.stress} 
-            onValueChange={(value) => setBaspAnswers(prev => ({...prev, stress: value}))}
+            onValueChange={(value: string) => setBaspAnswers(prev => ({...prev, stress: value}))}
             className="space-y-3"
           >
             <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
