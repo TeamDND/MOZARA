@@ -44,7 +44,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
 
         
 
-        <Button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium">
+        <Button className="w-full mt-6 bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium">
           정보 수정하기
         </Button>
       </CardContent>
@@ -72,7 +72,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
           <div className={`p-3 rounded-lg text-sm font-medium ${
             userInfo.recentHairLoss 
               ? 'bg-red-50 text-red-800 border border-red-200' 
-              : 'bg-blue-50 text-blue-800 border border-blue-200'
+              : 'bg-gray-50 text-gray-800 border border-gray-200'
           }`}>
             {userInfo.recentHairLoss ? '예' : '아니오'}
           </div>
@@ -83,13 +83,13 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
           <div className={`p-3 rounded-lg text-sm font-medium ${
             userInfo.familyHistory 
               ? 'bg-red-50 text-red-800 border border-red-200' 
-              : 'bg-blue-50 text-blue-800 border border-blue-200'
+              : 'bg-gray-50 text-gray-800 border border-gray-200'
           }`}>
             {userInfo.familyHistory ? '예' : '아니오'}
           </div>
         </div>
 
-        <Button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium">
+        <Button className="w-full mt-6 bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium">
           분석 정보 수정하기
         </Button>
       </CardContent>
@@ -106,7 +106,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
           onClick={() => setActiveTab('basic')}
           className={`flex-1 py-3 px-4 text-sm font-medium text-center border-b-2 transition-colors ${
             activeTab === 'basic'
-              ? 'border-blue-500 text-blue-600'
+              ? 'border-[#222222] text-[#222222]'
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
@@ -119,7 +119,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
           onClick={() => setActiveTab('analysis')}
           className={`flex-1 py-3 px-4 text-sm font-medium text-center border-b-2 transition-colors ${
             activeTab === 'analysis'
-              ? 'border-blue-500 text-blue-600'
+              ? 'border-[#222222] text-[#222222]'
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >

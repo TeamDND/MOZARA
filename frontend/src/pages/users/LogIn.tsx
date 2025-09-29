@@ -120,7 +120,7 @@ const LogIn: React.FC = () => {
                   placeholder="아이디를 입력하세요"
                   value={formData.username}
                   onChange={(e) => handleInputChange('username', e.target.value)}
-                  className="pl-11 h-12 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  className="pl-11 h-12 rounded-xl border-gray-200 focus:border-[#222222] focus:ring-[#222222]"
                 />
               </div>
             </div>
@@ -135,14 +135,14 @@ const LogIn: React.FC = () => {
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className="pl-11 h-12 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  className="pl-11 h-12 rounded-xl border-gray-200 focus:border-[#222222] focus:ring-[#222222]"
                 />
               </div>
             </div>
 
             <Button
               type="submit"
-              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
+              className="w-full h-12 bg-[#222222] hover:bg-[#333333] text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
               disabled={isLoading}
             >
               {isLoading ? '로그인 중...' : '로그인하고 진단 시작'}
@@ -211,7 +211,7 @@ const LogIn: React.FC = () => {
             className="w-full h-12 mt-6 border-2 border-gray-200 hover:bg-gray-50 rounded-xl active:scale-[0.98] transition-all"
             onClick={handleGuestLogin}
           >
-            <Sparkles className="w-5 h-5 mr-2 text-blue-500" />
+            <Sparkles className="w-5 h-5 mr-2 text-[#222222]" />
             회원가입 없이 분석 체험하기
           </Button>
 

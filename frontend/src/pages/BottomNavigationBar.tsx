@@ -1,51 +1,16 @@
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-
-// TypeScript: BottomNavigationBar 컴포넌트 타입 정의
-interface NavigationItem {
-  id: string;
-  label: string;
-  icon: string | React.ReactNode;
-  path: string;
-}
+import type React from "react"
+import { Home, User, Bot, Search, Layers3 } from "lucide-react"
+import { useNavigate, useLocation } from "react-router-dom"
+import { useSelector } from "react-redux"
+import { RootState } from "../utils/store"
 
 const BottomNavigationBar: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // 모바일 네비게이션 아이템 정의
-  const navigationItems: NavigationItem[] = [
-    {
-      id: 'features',
-      label: '기능',
-      icon: <img src="/assets/icons/features.png" alt="기능" className="w-5 h-5" />,
-      path: '/main-contents'
-    },
-    {
-      id: 'analysis',
-      label: '분석',
-      icon: <img src="/assets/icons/analysis.png" alt="기능" className="w-5 h-5" />,
-      path: '/check'
-    },
-    {
-      id: 'home',
-      label: '홈',
-      icon: <img src="/assets/icons/home.png" alt="기능" className="w-5 h-5" />,
-      path: '/'
-    },
-    {
-      id: 'daily',
-      label: '데일리',
-      icon: <img src="/assets/icons/daily.png" alt="기능" className="w-5 h-5" />,
-      path: '/daily'
-    },
-    {
-      id: 'my',
-      label: '마이',
-      icon: <img src="/assets/icons/mypage.png" alt="기능" className="w-5 h-5" />,
-      path: '/mypage'
-    }
-  ];
+  const navigate = useNavigate()
+  const location = useLocation()
+  
+  // 로그인 상태 가져오기 (토큰 존재 여부로 판단)
+  const token = useSelector((state: RootState) => state.token.token)
+  const isLoggedIn = !!token
 
   // 현재 활성 탭 확인
   const isActive = (path: string) => {
@@ -55,66 +20,109 @@ const BottomNavigationBar: React.FC = () => {
     return location.pathname.startsWith(path);
   };
 
-  // 탭 클릭 핸들러
-  const handleTabClick = (path: string) => {
-    navigate(path);
-  };
-
   return (
-    // Tailwind CSS: 모바일 하단 네비게이션 바
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-      <div className="flex items-center justify-around h-16 px-2">
-        {navigationItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => handleTabClick(item.path)}
-            className={`
-              flex flex-col items-center justify-center 
-              min-w-0 flex-1 h-full
-              transition-colors duration-200
-              ${isActive(item.path) 
-                ? 'text-blue-600' 
-                : 'text-gray-500 hover:text-gray-700'
-              }
-            `}
-            aria-label={item.label}
-          >
-            {/* 아이콘 */}
-            <div className="mb-1">
-              {typeof item.icon === 'string' ? (
-                <div className={`
-                  text-xl
-                  ${isActive(item.path) ? 'text-blue-600' : 'text-gray-500'}
-                `}>
-                  {item.icon}
-                </div>
-              ) : (
-                <div className={`
-                  ${isActive(item.path) ? 'opacity-100' : 'opacity-60'}
-                  transition-opacity duration-200
-                `}>
-                  {item.icon}
-                </div>
-              )}
-            </div>
-            
-            {/* 라벨 */}
-            <span className={`
-              text-xs font-medium truncate
-              ${isActive(item.path) ? 'text-blue-600' : 'text-gray-500'}
-            `}>
-              {item.label}
-            </span>
-            
-            {/* 활성 상태 표시 */}
-            {isActive(item.path) && (
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-blue-600 rounded-full" />
-            )}
-          </button>
-        ))}
+    // 모바일 하단 네비게이션
+    <nav className="fixed bottom-0 left-0 right-0 z-50">
+      <div className="relative bg-white/90 backdrop-blur">
+        {/* 상단 둥근 모서리 */}
+        <div className="bg-white/90 backdrop-blur rounded-t-xl">
+
+          <div className="flex items-center justify-around pt-6 pb-4 px-4">
+            {/* 홈 */}
+            <button
+              onClick={() => {
+                if (isLoggedIn) {
+                  navigate('/daily-care')
+                } else {
+                  navigate('/')
+                }
+              }}
+              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
+                isActive('/') || (isLoggedIn && isActive('/daily-care'))
+                  ? 'text-[#222222]' 
+                  : 'text-gray-600'
+              }`}
+            >
+              <Home className={`h-5 w-5 mb-1 ${
+                isActive('/') || (isLoggedIn && isActive('/daily-care')) ? 'text-[#222222]' : 'text-gray-600'
+              }`} />
+              <span className={`text-xs font-medium ${
+                isActive('/') || (isLoggedIn && isActive('/daily-care')) ? 'text-[#222222]' : 'text-gray-600'
+              }`}>
+                홈
+              </span>
+            </button>
+
+            {/* 기능 */}
+            <button
+              onClick={() => navigate('/main-contents')}
+              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
+                isActive('/main-contents')
+                  ? 'text-[#222222]' 
+                  : 'text-gray-600'
+              }`}
+            >
+              <Layers3 className={`h-5 w-5 mb-1 ${
+                isActive('/main-contents') ? 'text-[#222222]' : 'text-gray-600'
+              }`} />
+              <span className={`text-xs font-medium ${
+                isActive('/main-contents') ? 'text-[#222222]' : 'text-gray-600'
+              }`}>
+                기능
+              </span>
+            </button>
+
+            {/* 챗봇 (아이콘만) */}
+            <button
+              onClick={() => navigate('/chat')}
+              className="flex flex-col items-center py-2 px-3 bg-[#222222] rounded-full w-12 h-12 justify-center transition-all hover:bg-[#333333]"
+            >
+              <Bot className="h-6 w-6 text-white" />
+            </button>
+
+            {/* 분석 */}
+            <button
+              onClick={() => navigate('/check')}
+              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
+                isActive('/check')
+                  ? 'text-[#222222]' 
+                  : 'text-gray-600'
+              }`}
+            >
+              <Search className={`h-5 w-5 mb-1 ${
+                isActive('/check') ? 'text-[#222222]' : 'text-gray-600'
+              }`} />
+              <span className={`text-xs font-medium ${
+                isActive('/check') ? 'text-[#222222]' : 'text-gray-600'
+              }`}>
+                분석
+              </span>
+            </button>
+
+
+            {/* 프로필 */}
+            <button
+              onClick={() => navigate('/mypage')}
+              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
+                isActive('/mypage')
+                  ? 'text-[#222222]' 
+                  : 'text-gray-600'
+              }`}
+            >
+              <User className={`h-5 w-5 mb-1 ${
+                isActive('/mypage') ? 'text-[#222222]' : 'text-gray-600'
+              }`} />
+              <span className={`text-xs font-medium ${
+                isActive('/mypage') ? 'text-[#222222]' : 'text-gray-600'
+              }`}>
+                마이
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
     </nav>
-  );
-};
+  )
+}
 
-export default BottomNavigationBar;
+export default BottomNavigationBar
