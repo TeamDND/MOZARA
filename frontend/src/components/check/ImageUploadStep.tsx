@@ -62,7 +62,7 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
   return (
     <div className="space-y-8">
       <div className="text-center space-y-3">
-        <Camera className="w-12 h-12 text-blue-600 mx-auto" />
+        <Camera className="w-12 h-12 text-[#222222] mx-auto" />
         <h2 className="text-xl font-bold text-gray-800">AI 탈모 분석</h2>
         <p className="text-sm text-gray-600">
           두피와 탈모 상태를 AI가 객관적으로 분석해드려요
@@ -84,7 +84,7 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
               {/* 샘플 이미지 */}
               <div className="w-48 h-48 mx-auto rounded-xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
                 <img 
-                  src="/assets/images/TopView.PNG" 
+                  src="/assets/images/check/TopView.PNG" 
                   alt="Top View 샘플 이미지" 
                   className="max-w-full max-h-full object-contain"
                 />
@@ -93,7 +93,7 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
                 <Button 
                   type="button" 
                   onClick={() => document.getElementById('top-photo-upload')?.click()}
-                  className="h-12 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-xl active:scale-[0.98]"
+                  className="h-12 px-6 bg-[#222222] hover:bg-[#333333] text-white rounded-xl active:scale-[0.98]"
                 >
                   Top View 사진 선택
                 </Button>
@@ -152,7 +152,7 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
               {/* 샘플 이미지 */}
               <div className="w-48 h-48 mx-auto rounded-xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
                 <img 
-                  src="/assets/images/SideView.PNG" 
+                  src="/assets/images/check/SideView.PNG" 
                   alt="Side View 샘플 이미지" 
                   className="max-w-full max-h-full object-contain"
                 />
@@ -161,7 +161,7 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
                 <Button 
                   type="button" 
                   onClick={() => document.getElementById('side-photo-upload')?.click()}
-                  className="h-12 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-xl active:scale-[0.98]"
+                  className="h-12 px-6 bg-[#222222] hover:bg-[#333333] text-white rounded-xl active:scale-[0.98]"
                 >
                   Side View 사진 선택
                 </Button>
@@ -204,21 +204,21 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
               </div>
               
               {/* 블러처리 버튼 - Side View 사진이 업로드된 후에만 표시 */}
-              <div className="pt-2">
+              {/* <div className="pt-2">
                 <Button 
                   type="button" 
-                  className="h-10 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg active:scale-[0.98]"
+                  className="h-10 px-4 bg-[#222222] hover:bg-[#333333] text-white rounded-lg active:scale-[0.98]"
                 >
                   🔒 블러처리하기
                 </Button>
-              </div>
+              </div> */}
             </div>
           )}
         </div>
 
-        <div className="bg-blue-50 p-4 rounded-xl">
-          <h4 className="font-semibold text-blue-800 mb-3">📸 탈모 분석 촬영 가이드</h4>
-          <ul className="text-sm text-blue-700 space-y-2">
+        <div className="bg-gray-50 p-4 rounded-xl">
+          <h4 className="font-semibold text-gray-800 mb-3">📸 탈모 분석 촬영 가이드</h4>
+          <ul className="text-sm text-gray-700 space-y-2">
             <li>• 밝은 곳에서 촬영해주세요</li>
             <li>• 머리를 완전히 말린 상태로 촬영해주세요</li>
             <li>• 정수리와 헤어라인이 모두 보이도록 해주세요</li>
