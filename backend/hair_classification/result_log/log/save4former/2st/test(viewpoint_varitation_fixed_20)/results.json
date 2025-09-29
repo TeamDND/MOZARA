@@ -1,0 +1,2192 @@
+{
+  "test_info": {
+    "test_type": "various_viewpoint_analyzer",
+    "test_number": 1,
+    "timestamp": "2025-09-23T14:50:27.866095",
+    "test_data_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview",
+    "samples_per_level": 20,
+    "total_images": 120,
+    "level_counts": {
+      "2": 20,
+      "3": 20,
+      "4": 20,
+      "5": 20,
+      "6": 20,
+      "7": 20
+    },
+    "viewpoint_counts": {
+      "top-down": 39,
+      "right": 17,
+      "front": 31,
+      "left": 19,
+      "back": 14
+    }
+  },
+  "metrics": {
+    "total_tests": 120,
+    "successful_tests": 120,
+    "failed_tests": 0,
+    "success_rate": 1.0,
+    "accuracy": 0.3333333333333333,
+    "precision": 0.3059976515858869,
+    "recall": 0.3333333333333333,
+    "f1_score": 0.3091830157831855,
+    "avg_analysis_time": 1.894148047765096,
+    "avg_confidence": 0.47565,
+    "confusion_matrix": [
+      [
+        12,
+        4,
+        0,
+        2,
+        1,
+        0
+      ],
+      [
+        10,
+        4,
+        3,
+        1,
+        2,
+        0
+      ],
+      [
+        5,
+        6,
+        0,
+        2,
+        6,
+        1
+      ],
+      [
+        4,
+        2,
+        3,
+        3,
+        5,
+        3
+      ],
+      [
+        2,
+        1,
+        4,
+        2,
+        9,
+        2
+      ],
+      [
+        1,
+        1,
+        0,
+        1,
+        5,
+        12
+      ]
+    ],
+    "class_report": {
+      "1.0": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      },
+      "2.0": {
+        "precision": 0.35294117647058826,
+        "recall": 0.6,
+        "f1-score": 0.4444444444444444,
+        "support": 20.0
+      },
+      "3.0": {
+        "precision": 0.2222222222222222,
+        "recall": 0.2,
+        "f1-score": 0.21052631578947367,
+        "support": 20.0
+      },
+      "4.0": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 20.0
+      },
+      "5.0": {
+        "precision": 0.2727272727272727,
+        "recall": 0.15,
+        "f1-score": 0.1935483870967742,
+        "support": 20.0
+      },
+      "6.0": {
+        "precision": 0.32142857142857145,
+        "recall": 0.45,
+        "f1-score": 0.375,
+        "support": 20.0
+      },
+      "7.0": {
+        "precision": 0.6666666666666666,
+        "recall": 0.6,
+        "f1-score": 0.631578947368421,
+        "support": 20.0
+      },
+      "accuracy": 0.3333333333333333,
+      "macro avg": {
+        "precision": 0.2622837013593316,
+        "recall": 0.2857142857142857,
+        "f1-score": 0.2650140135284448,
+        "support": 120.0
+      },
+      "weighted avg": {
+        "precision": 0.3059976515858869,
+        "recall": 0.3333333333333333,
+        "f1-score": 0.3091830157831855,
+        "support": 120.0
+      }
+    },
+    "unique_labels": [
+      1.0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "viewpoint_accuracy": {
+      "top-down": {
+        "accuracy": 0.41025641025641024,
+        "count": 39
+      },
+      "front": {
+        "accuracy": 0.22580645161290322,
+        "count": 31
+      },
+      "left": {
+        "accuracy": 0.42105263157894735,
+        "count": 19
+      },
+      "right": {
+        "accuracy": 0.29411764705882354,
+        "count": 17
+      },
+      "back": {
+        "accuracy": 0.2857142857142857,
+        "count": 14
+      }
+    }
+  },
+  "detailed_results": [
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\24-Top-Down_jpg.rf.a5ddf4dca8ab2f9dbbd61d958fad2e21.jpg",
+      "filename": "24-Top-Down_jpg.rf.a5ddf4dca8ab2f9dbbd61d958fad2e21.jpg",
+      "viewpoint": "top-down",
+      "true_level": 2,
+      "predicted_level": 3.0,
+      "confidence": 0.392,
+      "analysis_time": 3.3068904876708984,
+      "stage_scores": {
+        "5.0": 0.321,
+        "3.0": 0.392,
+        "1.0": 0.098,
+        "6.0": 0.096,
+        "2.0": 0.094
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\24-Right_jpg.rf.c4a4dffd8983d43e09039be4f35103d4.jpg",
+      "filename": "24-Right_jpg.rf.c4a4dffd8983d43e09039be4f35103d4.jpg",
+      "viewpoint": "right",
+      "true_level": 2,
+      "predicted_level": 2.0,
+      "confidence": 0.473,
+      "analysis_time": 1.829716682434082,
+      "stage_scores": {
+        "7.0": 0.214,
+        "6.0": 0.209,
+        "3.0": 0.104,
+        "2.0": 0.473
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\22-Front_jpg.rf.4519659c0bec5c66792bc5465de162b0.jpg",
+      "filename": "22-Front_jpg.rf.4519659c0bec5c66792bc5465de162b0.jpg",
+      "viewpoint": "front",
+      "true_level": 2,
+      "predicted_level": 2.0,
+      "confidence": 0.512,
+      "analysis_time": 2.4618687629699707,
+      "stage_scores": {
+        "2.0": 0.512,
+        "4.0": 0.293,
+        "7.0": 0.098,
+        "5.0": 0.098
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\1-Top-Down_jpg.rf.0e66e06d513256dad94cdf8584cdfd74.jpg",
+      "filename": "1-Top-Down_jpg.rf.0e66e06d513256dad94cdf8584cdfd74.jpg",
+      "viewpoint": "top-down",
+      "true_level": 2,
+      "predicted_level": 1.0,
+      "confidence": 0.904,
+      "analysis_time": 2.8430004119873047,
+      "stage_scores": {
+        "1.0": 0.904,
+        "2.0": 0.096
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\24-Right_jpg.rf.42d74a251bda8cf36b85dd15c89e7199.jpg",
+      "filename": "24-Right_jpg.rf.42d74a251bda8cf36b85dd15c89e7199.jpg",
+      "viewpoint": "right",
+      "true_level": 2,
+      "predicted_level": 6.0,
+      "confidence": 0.315,
+      "analysis_time": 2.0741307735443115,
+      "stage_scores": {
+        "6.0": 0.315,
+        "3.0": 0.2,
+        "7.0": 0.294,
+        "2.0": 0.192
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\21-Top-Down_jpg.rf.5e9f52d1b957ad591db8edac1b6774df.jpg",
+      "filename": "21-Top-Down_jpg.rf.5e9f52d1b957ad591db8edac1b6774df.jpg",
+      "viewpoint": "top-down",
+      "true_level": 2,
+      "predicted_level": 2.0,
+      "confidence": 0.4,
+      "analysis_time": 4.551110029220581,
+      "stage_scores": {
+        "5.0": 0.308,
+        "2.0": 0.4,
+        "6.0": 0.196,
+        "3.0": 0.097
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\24-Top-Down_jpg.rf.b79100f5b6aa9727defed892589f4ace.jpg",
+      "filename": "24-Top-Down_jpg.rf.b79100f5b6aa9727defed892589f4ace.jpg",
+      "viewpoint": "top-down",
+      "true_level": 2,
+      "predicted_level": 3.0,
+      "confidence": 0.317,
+      "analysis_time": 2.009481906890869,
+      "stage_scores": {
+        "3.0": 0.317,
+        "4.0": 0.202,
+        "5.0": 0.294,
+        "1.0": 0.094,
+        "2.0": 0.093
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\3-Left_jpg.rf.71bd5245375518d053cafe1e6d00b009.jpg",
+      "filename": "3-Left_jpg.rf.71bd5245375518d053cafe1e6d00b009.jpg",
+      "viewpoint": "left",
+      "true_level": 2,
+      "predicted_level": 2.0,
+      "confidence": 0.403,
+      "analysis_time": 2.396507501602173,
+      "stage_scores": {
+        "2.0": 0.403,
+        "3.0": 0.3,
+        "4.0": 0.201,
+        "7.0": 0.095
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\17-Right_jpg.rf.782c2bb91f35e43fb8eaf052b5574d8a.jpg",
+      "filename": "17-Right_jpg.rf.782c2bb91f35e43fb8eaf052b5574d8a.jpg",
+      "viewpoint": "right",
+      "true_level": 2,
+      "predicted_level": 2.0,
+      "confidence": 0.504,
+      "analysis_time": 2.1414384841918945,
+      "stage_scores": {
+        "2.0": 0.504,
+        "7.0": 0.1,
+        "3.0": 0.1,
+        "6.0": 0.296
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\22-Front_jpg.rf.1e3c0aca2be9e864cb6fe293c107f5a2.jpg",
+      "filename": "22-Front_jpg.rf.1e3c0aca2be9e864cb6fe293c107f5a2.jpg",
+      "viewpoint": "front",
+      "true_level": 2,
+      "predicted_level": 2.0,
+      "confidence": 0.506,
+      "analysis_time": 1.8044238090515137,
+      "stage_scores": {
+        "2.0": 0.506,
+        "5.0": 0.204,
+        "4.0": 0.097,
+        "7.0": 0.192
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\17-Front_jpg.rf.09d799a68cabda5c5cea7137eb29d1dd.jpg",
+      "filename": "17-Front_jpg.rf.09d799a68cabda5c5cea7137eb29d1dd.jpg",
+      "viewpoint": "front",
+      "true_level": 2,
+      "predicted_level": 2.0,
+      "confidence": 0.516,
+      "analysis_time": 1.7848553657531738,
+      "stage_scores": {
+        "2.0": 0.516,
+        "7.0": 0.097,
+        "3.0": 0.194,
+        "4.0": 0.192
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\28-Left_jpg.rf.0f5f08c481344c4d2075b9b0ae7ca510.jpg",
+      "filename": "28-Left_jpg.rf.0f5f08c481344c4d2075b9b0ae7ca510.jpg",
+      "viewpoint": "left",
+      "true_level": 2,
+      "predicted_level": 2.0,
+      "confidence": 0.621,
+      "analysis_time": 2.0312511920928955,
+      "stage_scores": {
+        "2.0": 0.621,
+        "3.0": 0.192,
+        "7.0": 0.096,
+        "6.0": 0.091
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\21-Top-Down_jpg.rf.8821d6908350ec245660af7133e6021f.jpg",
+      "filename": "21-Top-Down_jpg.rf.8821d6908350ec245660af7133e6021f.jpg",
+      "viewpoint": "top-down",
+      "true_level": 2,
+      "predicted_level": 5.0,
+      "confidence": 0.41,
+      "analysis_time": 1.9843764305114746,
+      "stage_scores": {
+        "5.0": 0.41,
+        "7.0": 0.208,
+        "4.0": 0.098,
+        "3.0": 0.095,
+        "6.0": 0.19
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\23-Back_jpg.rf.f5490e275ba15e6a18935f4634c5f0cc.jpg",
+      "filename": "23-Back_jpg.rf.f5490e275ba15e6a18935f4634c5f0cc.jpg",
+      "viewpoint": "back",
+      "true_level": 2,
+      "predicted_level": 2.0,
+      "confidence": 0.398,
+      "analysis_time": 2.0312483310699463,
+      "stage_scores": {
+        "3.0": 0.202,
+        "2.0": 0.398,
+        "5.0": 0.201,
+        "6.0": 0.199
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\1-Top-Down_jpg.rf.cf9def7d3b460ba1766b35487aca1214.jpg",
+      "filename": "1-Top-Down_jpg.rf.cf9def7d3b460ba1766b35487aca1214.jpg",
+      "viewpoint": "top-down",
+      "true_level": 2,
+      "predicted_level": 2.0,
+      "confidence": 0.801,
+      "analysis_time": 2.1117970943450928,
+      "stage_scores": {
+        "2.0": 0.801,
+        "5.0": 0.199
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\24-Top-Down_jpg.rf.925c0eda3995e78fef30b339daa8e617.jpg",
+      "filename": "24-Top-Down_jpg.rf.925c0eda3995e78fef30b339daa8e617.jpg",
+      "viewpoint": "top-down",
+      "true_level": 2,
+      "predicted_level": 5.0,
+      "confidence": 0.32,
+      "analysis_time": 1.9714384078979492,
+      "stage_scores": {
+        "3.0": 0.305,
+        "5.0": 0.32,
+        "6.0": 0.188,
+        "4.0": 0.186
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\2-Front_jpg.rf.3cc295bb9f1747820fb458bee70b9c08.jpg",
+      "filename": "2-Front_jpg.rf.3cc295bb9f1747820fb458bee70b9c08.jpg",
+      "viewpoint": "front",
+      "true_level": 2,
+      "predicted_level": 3.0,
+      "confidence": 0.395,
+      "analysis_time": 1.958099603652954,
+      "stage_scores": {
+        "2.0": 0.332,
+        "3.0": 0.395,
+        "4.0": 0.093,
+        "5.0": 0.18
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\31-Back_jpg.rf.d0c89a0f17187d8d068e9d202e4e49f4.jpg",
+      "filename": "31-Back_jpg.rf.d0c89a0f17187d8d068e9d202e4e49f4.jpg",
+      "viewpoint": "back",
+      "true_level": 2,
+      "predicted_level": 3.0,
+      "confidence": 0.391,
+      "analysis_time": 1.9218029975891113,
+      "stage_scores": {
+        "2.0": 0.218,
+        "3.0": 0.391,
+        "6.0": 0.196,
+        "5.0": 0.194
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\17-Front_jpg.rf.c168c07448f0283b292af97c9de2054c.jpg",
+      "filename": "17-Front_jpg.rf.c168c07448f0283b292af97c9de2054c.jpg",
+      "viewpoint": "front",
+      "true_level": 2,
+      "predicted_level": 2.0,
+      "confidence": 0.8,
+      "analysis_time": 1.811203956604004,
+      "stage_scores": {
+        "2.0": 0.8,
+        "3.0": 0.2
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_2\\LEVEL_2\\22-Front_jpg.rf.4eb63963f488e057de5a99bdefbb6863.jpg",
+      "filename": "22-Front_jpg.rf.4eb63963f488e057de5a99bdefbb6863.jpg",
+      "viewpoint": "front",
+      "true_level": 2,
+      "predicted_level": 2.0,
+      "confidence": 0.398,
+      "analysis_time": 1.8504152297973633,
+      "stage_scores": {
+        "5.0": 0.305,
+        "2.0": 0.398,
+        "4.0": 0.201,
+        "7.0": 0.096
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\38-Front_jpg.rf.f383f763c3f966e204b60ea97257d033.jpg",
+      "filename": "38-Front_jpg.rf.f383f763c3f966e204b60ea97257d033.jpg",
+      "viewpoint": "front",
+      "true_level": 3,
+      "predicted_level": 2.0,
+      "confidence": 0.513,
+      "analysis_time": 1.8623127937316895,
+      "stage_scores": {
+        "2.0": 0.513,
+        "6.0": 0.295,
+        "4.0": 0.096,
+        "5.0": 0.096
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\40-Back_jpg.rf.d44ad18a54c0f184792130cd8cafb033.jpg",
+      "filename": "40-Back_jpg.rf.d44ad18a54c0f184792130cd8cafb033.jpg",
+      "viewpoint": "back",
+      "true_level": 3,
+      "predicted_level": 2.0,
+      "confidence": 0.694,
+      "analysis_time": 1.8119990825653076,
+      "stage_scores": {
+        "2.0": 0.694,
+        "3.0": 0.107,
+        "4.0": 0.199
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\17-Front_jpg.rf.eefaab033d690dd5177ab049637d23b2.jpg",
+      "filename": "17-Front_jpg.rf.eefaab033d690dd5177ab049637d23b2.jpg",
+      "viewpoint": "front",
+      "true_level": 3,
+      "predicted_level": 6.0,
+      "confidence": 0.395,
+      "analysis_time": 1.8339011669158936,
+      "stage_scores": {
+        "4.0": 0.304,
+        "5.0": 0.101,
+        "6.0": 0.395,
+        "3.0": 0.2
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\14-Top-Down_jpg.rf.4b45c53745232f0d19c75e4d3d23a83d.jpg",
+      "filename": "14-Top-Down_jpg.rf.4b45c53745232f0d19c75e4d3d23a83d.jpg",
+      "viewpoint": "top-down",
+      "true_level": 3,
+      "predicted_level": 2.0,
+      "confidence": 0.409,
+      "analysis_time": 1.834183692932129,
+      "stage_scores": {
+        "2.0": 0.409,
+        "4.0": 0.2,
+        "3.0": 0.391
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\17-Front_jpg.rf.4572009f1e7ce5a229e4d1a677d2ef62.jpg",
+      "filename": "17-Front_jpg.rf.4572009f1e7ce5a229e4d1a677d2ef62.jpg",
+      "viewpoint": "front",
+      "true_level": 3,
+      "predicted_level": 6.0,
+      "confidence": 0.296,
+      "analysis_time": 1.7861659526824951,
+      "stage_scores": {
+        "6.0": 0.296,
+        "5.0": 0.205,
+        "7.0": 0.205,
+        "4.0": 0.101,
+        "3.0": 0.192
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\38-Front_jpg.rf.b9ae2b11964ea470c236dfd0abd352ff.jpg",
+      "filename": "38-Front_jpg.rf.b9ae2b11964ea470c236dfd0abd352ff.jpg",
+      "viewpoint": "front",
+      "true_level": 3,
+      "predicted_level": 2.0,
+      "confidence": 0.702,
+      "analysis_time": 1.7916502952575684,
+      "stage_scores": {
+        "2.0": 0.702,
+        "4.0": 0.101,
+        "5.0": 0.197
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\36-Right_jpg.rf.eb4fde08dab74780eec39c64e777ff78.jpg",
+      "filename": "36-Right_jpg.rf.eb4fde08dab74780eec39c64e777ff78.jpg",
+      "viewpoint": "right",
+      "true_level": 3,
+      "predicted_level": 4.0,
+      "confidence": 0.295,
+      "analysis_time": 1.8396570682525635,
+      "stage_scores": {
+        "6.0": 0.21,
+        "5.0": 0.205,
+        "4.0": 0.295,
+        "2.0": 0.29
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\14-Top-Down_jpg.rf.6b957da4a7dd73e8eac9170e95803c92.jpg",
+      "filename": "14-Top-Down_jpg.rf.6b957da4a7dd73e8eac9170e95803c92.jpg",
+      "viewpoint": "top-down",
+      "true_level": 3,
+      "predicted_level": 3.0,
+      "confidence": 0.706,
+      "analysis_time": 1.8272936344146729,
+      "stage_scores": {
+        "3.0": 0.706,
+        "4.0": 0.101,
+        "2.0": 0.193
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\57-Top-Down_jpg.rf.3b07eedb8f705c4b11494ff766873e81.jpg",
+      "filename": "57-Top-Down_jpg.rf.3b07eedb8f705c4b11494ff766873e81.jpg",
+      "viewpoint": "top-down",
+      "true_level": 3,
+      "predicted_level": 3.0,
+      "confidence": 0.405,
+      "analysis_time": 1.8837597370147705,
+      "stage_scores": {
+        "4.0": 0.201,
+        "3.0": 0.405,
+        "2.0": 0.197,
+        "5.0": 0.197
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\2-Front_jpg.rf.ae37cf05d05732bce5439cf7cf132170.jpg",
+      "filename": "2-Front_jpg.rf.ae37cf05d05732bce5439cf7cf132170.jpg",
+      "viewpoint": "front",
+      "true_level": 3,
+      "predicted_level": 5.0,
+      "confidence": 0.314,
+      "analysis_time": 1.7941877841949463,
+      "stage_scores": {
+        "5.0": 0.314,
+        "7.0": 0.293,
+        "4.0": 0.198,
+        "2.0": 0.196
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\48-Back_jpg.rf.91f76cfe9c32739456da36d7a0bcd942.jpg",
+      "filename": "48-Back_jpg.rf.91f76cfe9c32739456da36d7a0bcd942.jpg",
+      "viewpoint": "back",
+      "true_level": 3,
+      "predicted_level": 2.0,
+      "confidence": 0.695,
+      "analysis_time": 1.7609665393829346,
+      "stage_scores": {
+        "5.0": 0.104,
+        "2.0": 0.695,
+        "3.0": 0.2
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\57-Top-Down_jpg.rf.fd3d78f9ba0562db9f4c6d39330376c3.jpg",
+      "filename": "57-Top-Down_jpg.rf.fd3d78f9ba0562db9f4c6d39330376c3.jpg",
+      "viewpoint": "top-down",
+      "true_level": 3,
+      "predicted_level": 3.0,
+      "confidence": 0.496,
+      "analysis_time": 1.8231675624847412,
+      "stage_scores": {
+        "4.0": 0.209,
+        "3.0": 0.496,
+        "2.0": 0.295
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\14-Top-Down_jpg.rf.8e999527010751c5ede9fe141ea9bfe0.jpg",
+      "filename": "14-Top-Down_jpg.rf.8e999527010751c5ede9fe141ea9bfe0.jpg",
+      "viewpoint": "top-down",
+      "true_level": 3,
+      "predicted_level": 2.0,
+      "confidence": 0.5,
+      "analysis_time": 1.8338258266448975,
+      "stage_scores": {
+        "3.0": 0.401,
+        "2.0": 0.5,
+        "4.0": 0.099
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\48-Back_jpg.rf.e0aaccfcf91cbf2c8aa72ef7b2a06b29.jpg",
+      "filename": "48-Back_jpg.rf.e0aaccfcf91cbf2c8aa72ef7b2a06b29.jpg",
+      "viewpoint": "back",
+      "true_level": 3,
+      "predicted_level": 2.0,
+      "confidence": 0.496,
+      "analysis_time": 1.907609462738037,
+      "stage_scores": {
+        "5.0": 0.306,
+        "3.0": 0.1,
+        "2.0": 0.496,
+        "6.0": 0.098
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\23-Left_jpg.rf.bad5f473d56a0252a812237f2594cbf1.jpg",
+      "filename": "23-Left_jpg.rf.bad5f473d56a0252a812237f2594cbf1.jpg",
+      "viewpoint": "left",
+      "true_level": 3,
+      "predicted_level": 4.0,
+      "confidence": 0.397,
+      "analysis_time": 1.872436761856079,
+      "stage_scores": {
+        "7.0": 0.105,
+        "5.0": 0.101,
+        "6.0": 0.1,
+        "4.0": 0.397,
+        "3.0": 0.199,
+        "2.0": 0.098
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\36-Right_jpg.rf.2641ad12426912842633f1a4f8c37e88.jpg",
+      "filename": "36-Right_jpg.rf.2641ad12426912842633f1a4f8c37e88.jpg",
+      "viewpoint": "right",
+      "true_level": 3,
+      "predicted_level": 4.0,
+      "confidence": 0.505,
+      "analysis_time": 1.8818550109863281,
+      "stage_scores": {
+        "4.0": 0.505,
+        "5.0": 0.202,
+        "6.0": 0.293
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\40-Back_jpg.rf.0b70a389ac8dc8581e710fd6aacf16e0.jpg",
+      "filename": "40-Back_jpg.rf.0b70a389ac8dc8581e710fd6aacf16e0.jpg",
+      "viewpoint": "back",
+      "true_level": 3,
+      "predicted_level": 2.0,
+      "confidence": 0.494,
+      "analysis_time": 1.7929050922393799,
+      "stage_scores": {
+        "4.0": 0.203,
+        "3.0": 0.303,
+        "2.0": 0.494
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\23-Left_jpg.rf.53456665e57a2bb799e3deaab1f38340.jpg",
+      "filename": "23-Left_jpg.rf.53456665e57a2bb799e3deaab1f38340.jpg",
+      "viewpoint": "left",
+      "true_level": 3,
+      "predicted_level": 3.0,
+      "confidence": 0.298,
+      "analysis_time": 1.9353196620941162,
+      "stage_scores": {
+        "4.0": 0.204,
+        "3.0": 0.298,
+        "7.0": 0.202,
+        "5.0": 0.199,
+        "2.0": 0.098
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\4-Left_jpg.rf.891684e9f476f68a5ec1e451ca1421d0.jpg",
+      "filename": "4-Left_jpg.rf.891684e9f476f68a5ec1e451ca1421d0.jpg",
+      "viewpoint": "left",
+      "true_level": 3,
+      "predicted_level": 2.0,
+      "confidence": 0.394,
+      "analysis_time": 1.868473768234253,
+      "stage_scores": {
+        "4.0": 0.211,
+        "2.0": 0.394,
+        "7.0": 0.2,
+        "6.0": 0.195
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_3\\LEVEL_3\\34-Front_jpg.rf.c4e0b686ec9b0f1a9a5aac014084a799.jpg",
+      "filename": "34-Front_jpg.rf.c4e0b686ec9b0f1a9a5aac014084a799.jpg",
+      "viewpoint": "front",
+      "true_level": 3,
+      "predicted_level": 2.0,
+      "confidence": 0.503,
+      "analysis_time": 1.9105699062347412,
+      "stage_scores": {
+        "2.0": 0.503,
+        "4.0": 0.397,
+        "6.0": 0.1
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\37-Front_jpg.rf.7bc9747d319dac74eda1d8d43d48dc4b.jpg",
+      "filename": "37-Front_jpg.rf.7bc9747d319dac74eda1d8d43d48dc4b.jpg",
+      "viewpoint": "front",
+      "true_level": 4,
+      "predicted_level": 2.0,
+      "confidence": 0.4,
+      "analysis_time": 1.7542803287506104,
+      "stage_scores": {
+        "6.0": 0.301,
+        "2.0": 0.4,
+        "4.0": 0.199,
+        "3.0": 0.1
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\14-Top-Down_jpg.rf.187e34f31103c42d846c7413a2a02871.jpg",
+      "filename": "14-Top-Down_jpg.rf.187e34f31103c42d846c7413a2a02871.jpg",
+      "viewpoint": "top-down",
+      "true_level": 4,
+      "predicted_level": 3.0,
+      "confidence": 0.413,
+      "analysis_time": 1.7760498523712158,
+      "stage_scores": {
+        "3.0": 0.413,
+        "5.0": 0.394,
+        "4.0": 0.193
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\37-Front_jpg.rf.a2bdd9935cfcc136ff0630bcfc53f51e.jpg",
+      "filename": "37-Front_jpg.rf.a2bdd9935cfcc136ff0630bcfc53f51e.jpg",
+      "viewpoint": "front",
+      "true_level": 4,
+      "predicted_level": 3.0,
+      "confidence": 0.595,
+      "analysis_time": 1.8668785095214844,
+      "stage_scores": {
+        "5.0": 0.31,
+        "3.0": 0.595,
+        "4.0": 0.095
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\34-Top-Down_jpg.rf.ac5141837e97d5bc7886d5874b104fad.jpg",
+      "filename": "34-Top-Down_jpg.rf.ac5141837e97d5bc7886d5874b104fad.jpg",
+      "viewpoint": "top-down",
+      "true_level": 4,
+      "predicted_level": 2.0,
+      "confidence": 0.305,
+      "analysis_time": 1.7628943920135498,
+      "stage_scores": {
+        "4.0": 0.206,
+        "5.0": 0.201,
+        "2.0": 0.305,
+        "3.0": 0.288
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\14-Top-Down_jpg.rf.e2723f49054a0145202d57a1f2dc13e2.jpg",
+      "filename": "14-Top-Down_jpg.rf.e2723f49054a0145202d57a1f2dc13e2.jpg",
+      "viewpoint": "top-down",
+      "true_level": 4,
+      "predicted_level": 3.0,
+      "confidence": 0.571,
+      "analysis_time": 1.8174207210540771,
+      "stage_scores": {
+        "5.0": 0.332,
+        "4.0": 0.097,
+        "3.0": 0.571
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\30-Front_jpg.rf.30fa7089bccb058f1b170c36dbca2d85.jpg",
+      "filename": "30-Front_jpg.rf.30fa7089bccb058f1b170c36dbca2d85.jpg",
+      "viewpoint": "front",
+      "true_level": 4,
+      "predicted_level": 7.0,
+      "confidence": 0.302,
+      "analysis_time": 1.806370496749878,
+      "stage_scores": {
+        "7.0": 0.302,
+        "5.0": 0.302,
+        "4.0": 0.298,
+        "6.0": 0.098
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\15-Right_jpg.rf.5e85294873ec4911ce572abcc0750b63.jpg",
+      "filename": "15-Right_jpg.rf.5e85294873ec4911ce572abcc0750b63.jpg",
+      "viewpoint": "right",
+      "true_level": 4,
+      "predicted_level": 2.0,
+      "confidence": 0.498,
+      "analysis_time": 1.819282054901123,
+      "stage_scores": {
+        "3.0": 0.106,
+        "2.0": 0.498,
+        "5.0": 0.101,
+        "6.0": 0.1,
+        "4.0": 0.196
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\30-Front_jpg.rf.18a9954f76da1eca244d942955010575.jpg",
+      "filename": "30-Front_jpg.rf.18a9954f76da1eca244d942955010575.jpg",
+      "viewpoint": "front",
+      "true_level": 4,
+      "predicted_level": 5.0,
+      "confidence": 0.399,
+      "analysis_time": 1.8180501461029053,
+      "stage_scores": {
+        "7.0": 0.207,
+        "5.0": 0.399,
+        "3.0": 0.102,
+        "6.0": 0.099,
+        "2.0": 0.194
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\29-Left_jpg.rf.58ec6830e002ce7b7290212c68db2fdf.jpg",
+      "filename": "29-Left_jpg.rf.58ec6830e002ce7b7290212c68db2fdf.jpg",
+      "viewpoint": "left",
+      "true_level": 4,
+      "predicted_level": 6.0,
+      "confidence": 0.604,
+      "analysis_time": 1.8689320087432861,
+      "stage_scores": {
+        "6.0": 0.604,
+        "5.0": 0.101,
+        "4.0": 0.198,
+        "3.0": 0.098
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\10-Front_jpg.rf.a08b89f8825c8ecfce4f70092416da22.jpg",
+      "filename": "10-Front_jpg.rf.a08b89f8825c8ecfce4f70092416da22.jpg",
+      "viewpoint": "front",
+      "true_level": 4,
+      "predicted_level": 2.0,
+      "confidence": 0.389,
+      "analysis_time": 1.7779886722564697,
+      "stage_scores": {
+        "6.0": 0.209,
+        "5.0": 0.201,
+        "3.0": 0.202,
+        "2.0": 0.389
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\34-Top-Down_jpg.rf.ea452c5c5b850c34cb61bcf1b07ed689.jpg",
+      "filename": "34-Top-Down_jpg.rf.ea452c5c5b850c34cb61bcf1b07ed689.jpg",
+      "viewpoint": "top-down",
+      "true_level": 4,
+      "predicted_level": 3.0,
+      "confidence": 0.389,
+      "analysis_time": 1.7945702075958252,
+      "stage_scores": {
+        "7.0": 0.106,
+        "5.0": 0.307,
+        "4.0": 0.198,
+        "3.0": 0.389
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\10-Front_jpg.rf.5c9f551ab0edf72160c243035a10b217.jpg",
+      "filename": "10-Front_jpg.rf.5c9f551ab0edf72160c243035a10b217.jpg",
+      "viewpoint": "front",
+      "true_level": 4,
+      "predicted_level": 6.0,
+      "confidence": 0.322,
+      "analysis_time": 1.813356876373291,
+      "stage_scores": {
+        "6.0": 0.322,
+        "5.0": 0.298,
+        "3.0": 0.096,
+        "2.0": 0.285
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\34-Top-Down_jpg.rf.684ea2985256d8cfa3367bba76cb9918.jpg",
+      "filename": "34-Top-Down_jpg.rf.684ea2985256d8cfa3367bba76cb9918.jpg",
+      "viewpoint": "top-down",
+      "true_level": 4,
+      "predicted_level": 6.0,
+      "confidence": 0.303,
+      "analysis_time": 1.7810323238372803,
+      "stage_scores": {
+        "6.0": 0.303,
+        "5.0": 0.201,
+        "3.0": 0.197,
+        "4.0": 0.299
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\14-Top-Down_jpg.rf.1e5bc8fb61f881b86499411220318491.jpg",
+      "filename": "14-Top-Down_jpg.rf.1e5bc8fb61f881b86499411220318491.jpg",
+      "viewpoint": "top-down",
+      "true_level": 4,
+      "predicted_level": 3.0,
+      "confidence": 0.491,
+      "analysis_time": 1.810121774673462,
+      "stage_scores": {
+        "4.0": 0.406,
+        "5.0": 0.103,
+        "3.0": 0.491
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\29-Left_jpg.rf.8f92a49a4698d2856f05b9c2d41e5a8f.jpg",
+      "filename": "29-Left_jpg.rf.8f92a49a4698d2856f05b9c2d41e5a8f.jpg",
+      "viewpoint": "left",
+      "true_level": 4,
+      "predicted_level": 6.0,
+      "confidence": 0.619,
+      "analysis_time": 1.9080100059509277,
+      "stage_scores": {
+        "6.0": 0.619,
+        "4.0": 0.102,
+        "5.0": 0.095,
+        "3.0": 0.092,
+        "2.0": 0.092
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\10-Front_jpg.rf.8d5a525c907a916b48ca9cf936359734.jpg",
+      "filename": "10-Front_jpg.rf.8d5a525c907a916b48ca9cf936359734.jpg",
+      "viewpoint": "front",
+      "true_level": 4,
+      "predicted_level": 6.0,
+      "confidence": 0.408,
+      "analysis_time": 1.841463327407837,
+      "stage_scores": {
+        "6.0": 0.408,
+        "5.0": 0.308,
+        "4.0": 0.191,
+        "3.0": 0.093
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\29-Left_jpg.rf.d8361c6722279a23a3f44340eb3a4232.jpg",
+      "filename": "29-Left_jpg.rf.d8361c6722279a23a3f44340eb3a4232.jpg",
+      "viewpoint": "left",
+      "true_level": 4,
+      "predicted_level": 6.0,
+      "confidence": 0.522,
+      "analysis_time": 1.8323242664337158,
+      "stage_scores": {
+        "6.0": 0.522,
+        "5.0": 0.098,
+        "3.0": 0.097,
+        "4.0": 0.283
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\37-Front_jpg.rf.00c1330743ba92bbcba13fca829b8152.jpg",
+      "filename": "37-Front_jpg.rf.00c1330743ba92bbcba13fca829b8152.jpg",
+      "viewpoint": "front",
+      "true_level": 4,
+      "predicted_level": 3.0,
+      "confidence": 0.501,
+      "analysis_time": 1.777522087097168,
+      "stage_scores": {
+        "5.0": 0.107,
+        "3.0": 0.501,
+        "6.0": 0.103,
+        "7.0": 0.193,
+        "2.0": 0.096
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\15-Right_jpg.rf.e8bf40298a6f9d9920adf5e7f0e49147.jpg",
+      "filename": "15-Right_jpg.rf.e8bf40298a6f9d9920adf5e7f0e49147.jpg",
+      "viewpoint": "right",
+      "true_level": 4,
+      "predicted_level": 2.0,
+      "confidence": 0.697,
+      "analysis_time": 1.8252472877502441,
+      "stage_scores": {
+        "6.0": 0.203,
+        "2.0": 0.697,
+        "7.0": 0.1
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_4\\LEVEL_4\\30-Front_jpg.rf.8e755c527eea690936f98828e9d36968.jpg",
+      "filename": "30-Front_jpg.rf.8e755c527eea690936f98828e9d36968.jpg",
+      "viewpoint": "front",
+      "true_level": 4,
+      "predicted_level": 5.0,
+      "confidence": 0.507,
+      "analysis_time": 1.8635389804840088,
+      "stage_scores": {
+        "5.0": 0.507,
+        "4.0": 0.199,
+        "7.0": 0.099,
+        "6.0": 0.099,
+        "2.0": 0.096
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\25-Top-Down_jpg.rf.371351256bd3f201872bc162cb3aa64b.jpg",
+      "filename": "25-Top-Down_jpg.rf.371351256bd3f201872bc162cb3aa64b.jpg",
+      "viewpoint": "top-down",
+      "true_level": 5,
+      "predicted_level": 7.0,
+      "confidence": 0.301,
+      "analysis_time": 1.8250541687011719,
+      "stage_scores": {
+        "5.0": 0.207,
+        "7.0": 0.301,
+        "3.0": 0.1,
+        "6.0": 0.099,
+        "2.0": 0.196,
+        "1.0": 0.097
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\6-Back_jpg.rf.0d470c6b703d86356f8dd7938a2142fe.jpg",
+      "filename": "6-Back_jpg.rf.0d470c6b703d86356f8dd7938a2142fe.jpg",
+      "viewpoint": "back",
+      "true_level": 5,
+      "predicted_level": 2.0,
+      "confidence": 0.504,
+      "analysis_time": 1.782762050628662,
+      "stage_scores": {
+        "3.0": 0.201,
+        "2.0": 0.504,
+        "5.0": 0.099,
+        "6.0": 0.196
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\13-Top-Down_jpg.rf.67ee909dac063704c39bcef991f39377.jpg",
+      "filename": "13-Top-Down_jpg.rf.67ee909dac063704c39bcef991f39377.jpg",
+      "viewpoint": "top-down",
+      "true_level": 5,
+      "predicted_level": 6.0,
+      "confidence": 0.614,
+      "analysis_time": 1.8319799900054932,
+      "stage_scores": {
+        "6.0": 0.614,
+        "4.0": 0.201,
+        "5.0": 0.185
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\15-Left_jpg.rf.be7c5f7efbcbce26eb56fc6b80ca4f42.jpg",
+      "filename": "15-Left_jpg.rf.be7c5f7efbcbce26eb56fc6b80ca4f42.jpg",
+      "viewpoint": "left",
+      "true_level": 5,
+      "predicted_level": 5.0,
+      "confidence": 0.392,
+      "analysis_time": 1.8950614929199219,
+      "stage_scores": {
+        "6.0": 0.311,
+        "2.0": 0.297,
+        "5.0": 0.392
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\26-Right_jpg.rf.3df37130a97eb5493b62e4b0de2c79ba.jpg",
+      "filename": "26-Right_jpg.rf.3df37130a97eb5493b62e4b0de2c79ba.jpg",
+      "viewpoint": "right",
+      "true_level": 5,
+      "predicted_level": 2.0,
+      "confidence": 0.398,
+      "analysis_time": 1.8424961566925049,
+      "stage_scores": {
+        "4.0": 0.104,
+        "2.0": 0.398,
+        "6.0": 0.297,
+        "3.0": 0.1,
+        "5.0": 0.1
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\1-Front_jpg.rf.bf21f15d52b878a5878f74f984344731.jpg",
+      "filename": "1-Front_jpg.rf.bf21f15d52b878a5878f74f984344731.jpg",
+      "viewpoint": "front",
+      "true_level": 5,
+      "predicted_level": 2.0,
+      "confidence": 0.329,
+      "analysis_time": 1.909740686416626,
+      "stage_scores": {
+        "2.0": 0.329,
+        "6.0": 0.297,
+        "4.0": 0.188,
+        "7.0": 0.097,
+        "3.0": 0.089
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\17-Right_jpg.rf.b4aa9ff924fac0fc8127872698a342a8.jpg",
+      "filename": "17-Right_jpg.rf.b4aa9ff924fac0fc8127872698a342a8.jpg",
+      "viewpoint": "right",
+      "true_level": 5,
+      "predicted_level": 3.0,
+      "confidence": 0.598,
+      "analysis_time": 1.8500308990478516,
+      "stage_scores": {
+        "6.0": 0.105,
+        "3.0": 0.598,
+        "4.0": 0.297
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\13-Top-Down_jpg.rf.8ef37f523995335c0cca83f7fcfbc9f7.jpg",
+      "filename": "13-Top-Down_jpg.rf.8ef37f523995335c0cca83f7fcfbc9f7.jpg",
+      "viewpoint": "top-down",
+      "true_level": 5,
+      "predicted_level": 6.0,
+      "confidence": 0.412,
+      "analysis_time": 1.8169281482696533,
+      "stage_scores": {
+        "6.0": 0.412,
+        "7.0": 0.101,
+        "4.0": 0.294,
+        "5.0": 0.194
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\1-Front_jpg.rf.b6db8d0922087d143049a8386cf1a629.jpg",
+      "filename": "1-Front_jpg.rf.b6db8d0922087d143049a8386cf1a629.jpg",
+      "viewpoint": "front",
+      "true_level": 5,
+      "predicted_level": 2.0,
+      "confidence": 0.33,
+      "analysis_time": 1.789538860321045,
+      "stage_scores": {
+        "2.0": 0.33,
+        "4.0": 0.105,
+        "6.0": 0.3,
+        "5.0": 0.089,
+        "3.0": 0.176
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\6-Top-Down_jpg.rf.ddc24955e0afca570f1d28fe40351d03.jpg",
+      "filename": "6-Top-Down_jpg.rf.ddc24955e0afca570f1d28fe40351d03.jpg",
+      "viewpoint": "top-down",
+      "true_level": 5,
+      "predicted_level": 6.0,
+      "confidence": 0.407,
+      "analysis_time": 1.7993183135986328,
+      "stage_scores": {
+        "6.0": 0.407,
+        "4.0": 0.102,
+        "7.0": 0.198,
+        "5.0": 0.293
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\7-Back_jpg.rf.f592502d2a585b362e57b1603e1341f7.jpg",
+      "filename": "7-Back_jpg.rf.f592502d2a585b362e57b1603e1341f7.jpg",
+      "viewpoint": "back",
+      "true_level": 5,
+      "predicted_level": 3.0,
+      "confidence": 0.304,
+      "analysis_time": 1.862196445465088,
+      "stage_scores": {
+        "3.0": 0.304,
+        "7.0": 0.103,
+        "6.0": 0.197,
+        "5.0": 0.198,
+        "4.0": 0.198
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\8-Top-Down_jpg.rf.64eb924e3b25c504e6a195874d9b1b86.jpg",
+      "filename": "8-Top-Down_jpg.rf.64eb924e3b25c504e6a195874d9b1b86.jpg",
+      "viewpoint": "top-down",
+      "true_level": 5,
+      "predicted_level": 7.0,
+      "confidence": 0.792,
+      "analysis_time": 1.810896396636963,
+      "stage_scores": {
+        "4.0": 0.208,
+        "7.0": 0.792
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\6-Top-Down_jpg.rf.f46d82b2da9158d9f61e18922c9688a0.jpg",
+      "filename": "6-Top-Down_jpg.rf.f46d82b2da9158d9f61e18922c9688a0.jpg",
+      "viewpoint": "top-down",
+      "true_level": 5,
+      "predicted_level": 6.0,
+      "confidence": 0.605,
+      "analysis_time": 1.8111932277679443,
+      "stage_scores": {
+        "6.0": 0.605,
+        "5.0": 0.102,
+        "7.0": 0.293
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\14-Top-Down_jpg.rf.e82e6fecf17b4c84823da8e91d8dd554.jpg",
+      "filename": "14-Top-Down_jpg.rf.e82e6fecf17b4c84823da8e91d8dd554.jpg",
+      "viewpoint": "top-down",
+      "true_level": 5,
+      "predicted_level": 5.0,
+      "confidence": 0.495,
+      "analysis_time": 1.7794303894042969,
+      "stage_scores": {
+        "5.0": 0.495,
+        "2.0": 0.405,
+        "7.0": 0.1
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\20-Top-Down_jpg.rf.3aecea2c5bbe7cb410aa2ba293885d45.jpg",
+      "filename": "20-Top-Down_jpg.rf.3aecea2c5bbe7cb410aa2ba293885d45.jpg",
+      "viewpoint": "top-down",
+      "true_level": 5,
+      "predicted_level": 5.0,
+      "confidence": 0.405,
+      "analysis_time": 1.8658382892608643,
+      "stage_scores": {
+        "5.0": 0.405,
+        "4.0": 0.103,
+        "6.0": 0.198,
+        "3.0": 0.099,
+        "2.0": 0.196
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\22-Right_jpg.rf.a488f750bf506150627395d2fcfbc8ad.jpg",
+      "filename": "22-Right_jpg.rf.a488f750bf506150627395d2fcfbc8ad.jpg",
+      "viewpoint": "right",
+      "true_level": 5,
+      "predicted_level": 7.0,
+      "confidence": 0.504,
+      "analysis_time": 1.8119211196899414,
+      "stage_scores": {
+        "6.0": 0.109,
+        "7.0": 0.504,
+        "5.0": 0.198,
+        "3.0": 0.19
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\6-Back_jpg.rf.0efecc6ac0b69769379078787bd5a49c.jpg",
+      "filename": "6-Back_jpg.rf.0efecc6ac0b69769379078787bd5a49c.jpg",
+      "viewpoint": "back",
+      "true_level": 5,
+      "predicted_level": 6.0,
+      "confidence": 0.308,
+      "analysis_time": 1.8455615043640137,
+      "stage_scores": {
+        "6.0": 0.308,
+        "2.0": 0.298,
+        "4.0": 0.198,
+        "3.0": 0.196
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\12-Front_jpg.rf.b401e21f3952f499bc14d5e590eb900c.jpg",
+      "filename": "12-Front_jpg.rf.b401e21f3952f499bc14d5e590eb900c.jpg",
+      "viewpoint": "front",
+      "true_level": 5,
+      "predicted_level": 4.0,
+      "confidence": 0.4,
+      "analysis_time": 1.7972826957702637,
+      "stage_scores": {
+        "7.0": 0.207,
+        "4.0": 0.4,
+        "5.0": 0.197,
+        "6.0": 0.196
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\26-Right_jpg.rf.45329ef32fd3c12868e1b7ec9352ae0d.jpg",
+      "filename": "26-Right_jpg.rf.45329ef32fd3c12868e1b7ec9352ae0d.jpg",
+      "viewpoint": "right",
+      "true_level": 5,
+      "predicted_level": 4.0,
+      "confidence": 0.497,
+      "analysis_time": 1.824763298034668,
+      "stage_scores": {
+        "5.0": 0.102,
+        "2.0": 0.202,
+        "4.0": 0.497,
+        "6.0": 0.199
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_5\\LEVEL_5\\10-Top-Down_jpg.rf.cbedc260ae70ecbc19e13d8d09e1c3bc.jpg",
+      "filename": "10-Top-Down_jpg.rf.cbedc260ae70ecbc19e13d8d09e1c3bc.jpg",
+      "viewpoint": "top-down",
+      "true_level": 5,
+      "predicted_level": 4.0,
+      "confidence": 0.506,
+      "analysis_time": 1.7995412349700928,
+      "stage_scores": {
+        "4.0": 0.506,
+        "5.0": 0.298,
+        "6.0": 0.197
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\5-Left_jpg.rf.6c3fdd47d53b4dace72d78b20c5a68d9.jpg",
+      "filename": "5-Left_jpg.rf.6c3fdd47d53b4dace72d78b20c5a68d9.jpg",
+      "viewpoint": "left",
+      "true_level": 6,
+      "predicted_level": 2.0,
+      "confidence": 0.302,
+      "analysis_time": 1.7941303253173828,
+      "stage_scores": {
+        "6.0": 0.299,
+        "3.0": 0.101,
+        "2.0": 0.302,
+        "5.0": 0.1,
+        "7.0": 0.198
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\15-Front_jpg.rf.9e3f471168ba74e36ad1915902aabb79.jpg",
+      "filename": "15-Front_jpg.rf.9e3f471168ba74e36ad1915902aabb79.jpg",
+      "viewpoint": "front",
+      "true_level": 6,
+      "predicted_level": 5.0,
+      "confidence": 0.291,
+      "analysis_time": 1.8093376159667969,
+      "stage_scores": {
+        "7.0": 0.216,
+        "5.0": 0.291,
+        "4.0": 0.199,
+        "6.0": 0.099,
+        "3.0": 0.195
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\5-Left_jpg.rf.86c135046f9265cffd4f4d15e970b15a.jpg",
+      "filename": "5-Left_jpg.rf.86c135046f9265cffd4f4d15e970b15a.jpg",
+      "viewpoint": "left",
+      "true_level": 6,
+      "predicted_level": 6.0,
+      "confidence": 0.402,
+      "analysis_time": 1.812241554260254,
+      "stage_scores": {
+        "6.0": 0.402,
+        "4.0": 0.199,
+        "2.0": 0.3,
+        "7.0": 0.098
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\21-Top-Down_jpg.rf.d70576954371112622924065ca092293.jpg",
+      "filename": "21-Top-Down_jpg.rf.d70576954371112622924065ca092293.jpg",
+      "viewpoint": "top-down",
+      "true_level": 6,
+      "predicted_level": 5.0,
+      "confidence": 0.407,
+      "analysis_time": 1.819969654083252,
+      "stage_scores": {
+        "5.0": 0.407,
+        "6.0": 0.298,
+        "7.0": 0.197,
+        "4.0": 0.098
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\30-Right_jpg.rf.3d03b4e325865c798e8eb855471e0ff1.jpg",
+      "filename": "30-Right_jpg.rf.3d03b4e325865c798e8eb855471e0ff1.jpg",
+      "viewpoint": "right",
+      "true_level": 6,
+      "predicted_level": 6.0,
+      "confidence": 0.303,
+      "analysis_time": 1.79351806640625,
+      "stage_scores": {
+        "4.0": 0.298,
+        "6.0": 0.303,
+        "2.0": 0.301,
+        "5.0": 0.098
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\18-Top-Down_jpg.rf.4b492d220f19edb0446c77912fbecf35.jpg",
+      "filename": "18-Top-Down_jpg.rf.4b492d220f19edb0446c77912fbecf35.jpg",
+      "viewpoint": "top-down",
+      "true_level": 6,
+      "predicted_level": 7.0,
+      "confidence": 0.402,
+      "analysis_time": 1.8122045993804932,
+      "stage_scores": {
+        "7.0": 0.402,
+        "5.0": 0.399,
+        "6.0": 0.1,
+        "4.0": 0.099
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\2-Front_jpg.rf.4d90ec348ee41e091beddd2fd8a8545d.jpg",
+      "filename": "2-Front_jpg.rf.4d90ec348ee41e091beddd2fd8a8545d.jpg",
+      "viewpoint": "front",
+      "true_level": 6,
+      "predicted_level": 2.0,
+      "confidence": 0.411,
+      "analysis_time": 1.8184771537780762,
+      "stage_scores": {
+        "6.0": 0.205,
+        "2.0": 0.411,
+        "7.0": 0.288,
+        "4.0": 0.096
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\15-Front_jpg.rf.aed90f989d1e46c98f0be6d70256cba9.jpg",
+      "filename": "15-Front_jpg.rf.aed90f989d1e46c98f0be6d70256cba9.jpg",
+      "viewpoint": "front",
+      "true_level": 6,
+      "predicted_level": 6.0,
+      "confidence": 0.482,
+      "analysis_time": 1.8601295948028564,
+      "stage_scores": {
+        "5.0": 0.213,
+        "7.0": 0.106,
+        "3.0": 0.199,
+        "6.0": 0.482
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\19-Top-Down_jpg.rf.f7906d5c88f97486367e1b1557f774d3.jpg",
+      "filename": "19-Top-Down_jpg.rf.f7906d5c88f97486367e1b1557f774d3.jpg",
+      "viewpoint": "top-down",
+      "true_level": 6,
+      "predicted_level": 6.0,
+      "confidence": 0.4,
+      "analysis_time": 1.791471004486084,
+      "stage_scores": {
+        "4.0": 0.209,
+        "6.0": 0.4,
+        "7.0": 0.198,
+        "2.0": 0.194
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\18-Top-Down_jpg.rf.29ac333246b3d89a0e31eddcb4b6abf3.jpg",
+      "filename": "18-Top-Down_jpg.rf.29ac333246b3d89a0e31eddcb4b6abf3.jpg",
+      "viewpoint": "top-down",
+      "true_level": 6,
+      "predicted_level": 6.0,
+      "confidence": 0.704,
+      "analysis_time": 1.7852773666381836,
+      "stage_scores": {
+        "6.0": 0.704,
+        "7.0": 0.296
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\20-Back_jpg.rf.8f72a64acdcc031815fa1266094187e7.jpg",
+      "filename": "20-Back_jpg.rf.8f72a64acdcc031815fa1266094187e7.jpg",
+      "viewpoint": "back",
+      "true_level": 6,
+      "predicted_level": 4.0,
+      "confidence": 0.701,
+      "analysis_time": 1.8188927173614502,
+      "stage_scores": {
+        "4.0": 0.701,
+        "6.0": 0.203,
+        "3.0": 0.096
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\16-Left_jpg.rf.2bf885d2a121a8c3aa5f90bc68112c78.jpg",
+      "filename": "16-Left_jpg.rf.2bf885d2a121a8c3aa5f90bc68112c78.jpg",
+      "viewpoint": "left",
+      "true_level": 6,
+      "predicted_level": 4.0,
+      "confidence": 0.404,
+      "analysis_time": 1.7979049682617188,
+      "stage_scores": {
+        "4.0": 0.404,
+        "3.0": 0.397,
+        "7.0": 0.099,
+        "5.0": 0.099
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\19-Top-Down_jpg.rf.dc81ed490150745dfcfc96187177bfe1.jpg",
+      "filename": "19-Top-Down_jpg.rf.dc81ed490150745dfcfc96187177bfe1.jpg",
+      "viewpoint": "top-down",
+      "true_level": 6,
+      "predicted_level": 7.0,
+      "confidence": 0.412,
+      "analysis_time": 1.8116207122802734,
+      "stage_scores": {
+        "7.0": 0.412,
+        "5.0": 0.299,
+        "6.0": 0.288
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\20-Back_jpg.rf.f5dabda107aeaf04a8af0db4441ae4b1.jpg",
+      "filename": "20-Back_jpg.rf.f5dabda107aeaf04a8af0db4441ae4b1.jpg",
+      "viewpoint": "back",
+      "true_level": 6,
+      "predicted_level": 4.0,
+      "confidence": 0.602,
+      "analysis_time": 1.8967692852020264,
+      "stage_scores": {
+        "4.0": 0.602,
+        "3.0": 0.2,
+        "6.0": 0.198
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\18-Top-Down_jpg.rf.c6577990952636c5efdabefbe03968e2.jpg",
+      "filename": "18-Top-Down_jpg.rf.c6577990952636c5efdabefbe03968e2.jpg",
+      "viewpoint": "top-down",
+      "true_level": 6,
+      "predicted_level": 6.0,
+      "confidence": 0.497,
+      "analysis_time": 1.8932974338531494,
+      "stage_scores": {
+        "5.0": 0.104,
+        "7.0": 0.203,
+        "6.0": 0.497,
+        "4.0": 0.196
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\15-Front_jpg.rf.7419e05e1b0ee097c4a9536b83b9d515.jpg",
+      "filename": "15-Front_jpg.rf.7419e05e1b0ee097c4a9536b83b9d515.jpg",
+      "viewpoint": "front",
+      "true_level": 6,
+      "predicted_level": 3.0,
+      "confidence": 0.403,
+      "analysis_time": 1.8390586376190186,
+      "stage_scores": {
+        "5.0": 0.208,
+        "7.0": 0.105,
+        "3.0": 0.403,
+        "6.0": 0.096,
+        "4.0": 0.188
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\14-Right_jpg.rf.5755ea4784490b9ed9dc259d99cf4c98.jpg",
+      "filename": "14-Right_jpg.rf.5755ea4784490b9ed9dc259d99cf4c98.jpg",
+      "viewpoint": "right",
+      "true_level": 6,
+      "predicted_level": 6.0,
+      "confidence": 0.403,
+      "analysis_time": 1.8724033832550049,
+      "stage_scores": {
+        "6.0": 0.403,
+        "4.0": 0.3,
+        "5.0": 0.099,
+        "2.0": 0.198
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\21-Top-Down_jpg.rf.de50f6e0871193d5a8436ee2e2a35004.jpg",
+      "filename": "21-Top-Down_jpg.rf.de50f6e0871193d5a8436ee2e2a35004.jpg",
+      "viewpoint": "top-down",
+      "true_level": 6,
+      "predicted_level": 6.0,
+      "confidence": 0.595,
+      "analysis_time": 1.8090157508850098,
+      "stage_scores": {
+        "5.0": 0.405,
+        "6.0": 0.595
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\16-Left_jpg.rf.d4d027c8d5a7175e385cffc7b9e7f115.jpg",
+      "filename": "16-Left_jpg.rf.d4d027c8d5a7175e385cffc7b9e7f115.jpg",
+      "viewpoint": "left",
+      "true_level": 6,
+      "predicted_level": 4.0,
+      "confidence": 0.402,
+      "analysis_time": 1.824937343597412,
+      "stage_scores": {
+        "4.0": 0.402,
+        "5.0": 0.106,
+        "7.0": 0.299,
+        "2.0": 0.193
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_6\\LEVEL_6\\30-Right_jpg.rf.e2393044c2ee3946c37fca2d66eea301.jpg",
+      "filename": "30-Right_jpg.rf.e2393044c2ee3946c37fca2d66eea301.jpg",
+      "viewpoint": "right",
+      "true_level": 6,
+      "predicted_level": 6.0,
+      "confidence": 0.392,
+      "analysis_time": 1.796663761138916,
+      "stage_scores": {
+        "2.0": 0.31,
+        "3.0": 0.103,
+        "6.0": 0.392,
+        "4.0": 0.195
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\15-Left_jpg.rf.0b4bbb57f90e676bea5530cfba3f4146.jpg",
+      "filename": "15-Left_jpg.rf.0b4bbb57f90e676bea5530cfba3f4146.jpg",
+      "viewpoint": "left",
+      "true_level": 7,
+      "predicted_level": 6.0,
+      "confidence": 0.308,
+      "analysis_time": 1.874772548675537,
+      "stage_scores": {
+        "6.0": 0.308,
+        "4.0": 0.103,
+        "3.0": 0.101,
+        "2.0": 0.294,
+        "5.0": 0.194
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\17-Right_jpg.rf.845742f077d66719bb856bc2dcb04c4a.jpg",
+      "filename": "17-Right_jpg.rf.845742f077d66719bb856bc2dcb04c4a.jpg",
+      "viewpoint": "right",
+      "true_level": 7,
+      "predicted_level": 5.0,
+      "confidence": 0.509,
+      "analysis_time": 1.810520887374878,
+      "stage_scores": {
+        "5.0": 0.509,
+        "2.0": 0.198,
+        "6.0": 0.293
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\5-Back_jpg.rf.5b1157b45cb542eb4337e696ea5431b4.jpg",
+      "filename": "5-Back_jpg.rf.5b1157b45cb542eb4337e696ea5431b4.jpg",
+      "viewpoint": "back",
+      "true_level": 7,
+      "predicted_level": 7.0,
+      "confidence": 0.808,
+      "analysis_time": 1.8463878631591797,
+      "stage_scores": {
+        "7.0": 0.808,
+        "5.0": 0.097,
+        "6.0": 0.095
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\16-Top-Down_jpg.rf.28c109f61048165329897ff8e9cee266.jpg",
+      "filename": "16-Top-Down_jpg.rf.28c109f61048165329897ff8e9cee266.jpg",
+      "viewpoint": "top-down",
+      "true_level": 7,
+      "predicted_level": 7.0,
+      "confidence": 0.587,
+      "analysis_time": 1.7802176475524902,
+      "stage_scores": {
+        "6.0": 0.313,
+        "7.0": 0.587,
+        "4.0": 0.099
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\15-Left_jpg.rf.8e1e9bfe10f153b7d5b7a13b5732e673.jpg",
+      "filename": "15-Left_jpg.rf.8e1e9bfe10f153b7d5b7a13b5732e673.jpg",
+      "viewpoint": "left",
+      "true_level": 7,
+      "predicted_level": 7.0,
+      "confidence": 0.801,
+      "analysis_time": 1.7733886241912842,
+      "stage_scores": {
+        "7.0": 0.801,
+        "5.0": 0.101,
+        "3.0": 0.098
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\2-Left_jpg.rf.9700d1e1d22486b69df30cfdbd7ca19e.jpg",
+      "filename": "2-Left_jpg.rf.9700d1e1d22486b69df30cfdbd7ca19e.jpg",
+      "viewpoint": "left",
+      "true_level": 7,
+      "predicted_level": 7.0,
+      "confidence": 0.421,
+      "analysis_time": 1.8012769222259521,
+      "stage_scores": {
+        "7.0": 0.421,
+        "6.0": 0.103,
+        "5.0": 0.292,
+        "3.0": 0.094,
+        "4.0": 0.09
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\16-Top-Down_jpg.rf.4f16652706f19bbb0429722fa0bb3464.jpg",
+      "filename": "16-Top-Down_jpg.rf.4f16652706f19bbb0429722fa0bb3464.jpg",
+      "viewpoint": "top-down",
+      "true_level": 7,
+      "predicted_level": 7.0,
+      "confidence": 0.596,
+      "analysis_time": 1.8260645866394043,
+      "stage_scores": {
+        "7.0": 0.596,
+        "6.0": 0.404
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\5-Back_jpg.rf.c4b4aa12941587971c71ce5b5f8a6601.jpg",
+      "filename": "5-Back_jpg.rf.c4b4aa12941587971c71ce5b5f8a6601.jpg",
+      "viewpoint": "back",
+      "true_level": 7,
+      "predicted_level": 7.0,
+      "confidence": 0.506,
+      "analysis_time": 1.7955071926116943,
+      "stage_scores": {
+        "7.0": 0.506,
+        "5.0": 0.396,
+        "6.0": 0.099
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\2-Left_jpg.rf.a076e6c4f6c377855088653a97ea859f.jpg",
+      "filename": "2-Left_jpg.rf.a076e6c4f6c377855088653a97ea859f.jpg",
+      "viewpoint": "left",
+      "true_level": 7,
+      "predicted_level": 7.0,
+      "confidence": 0.402,
+      "analysis_time": 1.827073335647583,
+      "stage_scores": {
+        "7.0": 0.402,
+        "5.0": 0.101,
+        "2.0": 0.301,
+        "3.0": 0.196
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\4-Front_jpg.rf.a885b5c6a5b5ad3f9c96a7cf421d398c.jpg",
+      "filename": "4-Front_jpg.rf.a885b5c6a5b5ad3f9c96a7cf421d398c.jpg",
+      "viewpoint": "front",
+      "true_level": 7,
+      "predicted_level": 6.0,
+      "confidence": 0.7,
+      "analysis_time": 1.8410842418670654,
+      "stage_scores": {
+        "6.0": 0.7,
+        "7.0": 0.203,
+        "3.0": 0.097
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\16-Top-Down_jpg.rf.2b0f4ff7ee9b8db3296cf095958a1cc0.jpg",
+      "filename": "16-Top-Down_jpg.rf.2b0f4ff7ee9b8db3296cf095958a1cc0.jpg",
+      "viewpoint": "top-down",
+      "true_level": 7,
+      "predicted_level": 7.0,
+      "confidence": 0.797,
+      "analysis_time": 1.7814576625823975,
+      "stage_scores": {
+        "7.0": 0.797,
+        "6.0": 0.203
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\17-Right_jpg.rf.b996a5b38944a1c3cd53d24d77005fe2.jpg",
+      "filename": "17-Right_jpg.rf.b996a5b38944a1c3cd53d24d77005fe2.jpg",
+      "viewpoint": "right",
+      "true_level": 7,
+      "predicted_level": 2.0,
+      "confidence": 0.298,
+      "analysis_time": 1.8020679950714111,
+      "stage_scores": {
+        "7.0": 0.204,
+        "6.0": 0.201,
+        "3.0": 0.297,
+        "2.0": 0.298
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\4-Top-Down_jpg.rf.768be95b49ec2a0ed0e7aabbc9296166.jpg",
+      "filename": "4-Top-Down_jpg.rf.768be95b49ec2a0ed0e7aabbc9296166.jpg",
+      "viewpoint": "top-down",
+      "true_level": 7,
+      "predicted_level": 7.0,
+      "confidence": 0.602,
+      "analysis_time": 1.7900066375732422,
+      "stage_scores": {
+        "7.0": 0.602,
+        "6.0": 0.299,
+        "4.0": 0.099
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\4-Top-Down_jpg.rf.73b984803245d66549bdbcac8be9c8fa.jpg",
+      "filename": "4-Top-Down_jpg.rf.73b984803245d66549bdbcac8be9c8fa.jpg",
+      "viewpoint": "top-down",
+      "true_level": 7,
+      "predicted_level": 7.0,
+      "confidence": 0.408,
+      "analysis_time": 1.7966647148132324,
+      "stage_scores": {
+        "7.0": 0.408,
+        "4.0": 0.296,
+        "6.0": 0.296
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\2-Left_jpg.rf.52c422a59c8cd3ab43d09f5f2bfa1168.jpg",
+      "filename": "2-Left_jpg.rf.52c422a59c8cd3ab43d09f5f2bfa1168.jpg",
+      "viewpoint": "left",
+      "true_level": 7,
+      "predicted_level": 6.0,
+      "confidence": 0.397,
+      "analysis_time": 1.812695026397705,
+      "stage_scores": {
+        "7.0": 0.309,
+        "6.0": 0.397,
+        "5.0": 0.2,
+        "3.0": 0.093
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\17-Right_jpg.rf.518698383fd422b3a86750473b94eb12.jpg",
+      "filename": "17-Right_jpg.rf.518698383fd422b3a86750473b94eb12.jpg",
+      "viewpoint": "right",
+      "true_level": 7,
+      "predicted_level": 3.0,
+      "confidence": 0.3,
+      "analysis_time": 1.837388277053833,
+      "stage_scores": {
+        "5.0": 0.2,
+        "6.0": 0.201,
+        "4.0": 0.299,
+        "3.0": 0.3
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\4-Front_jpg.rf.9231a3b9adb03d54d2d66032c995a255.jpg",
+      "filename": "4-Front_jpg.rf.9231a3b9adb03d54d2d66032c995a255.jpg",
+      "viewpoint": "front",
+      "true_level": 7,
+      "predicted_level": 6.0,
+      "confidence": 0.516,
+      "analysis_time": 1.7965984344482422,
+      "stage_scores": {
+        "6.0": 0.516,
+        "4.0": 0.194,
+        "3.0": 0.194,
+        "7.0": 0.097
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\5-Back_jpg.rf.f7958df24dc025f3cdb6e39e3bc5e4bd.jpg",
+      "filename": "5-Back_jpg.rf.f7958df24dc025f3cdb6e39e3bc5e4bd.jpg",
+      "viewpoint": "back",
+      "true_level": 7,
+      "predicted_level": 7.0,
+      "confidence": 0.701,
+      "analysis_time": 1.7945315837860107,
+      "stage_scores": {
+        "5.0": 0.103,
+        "7.0": 0.701,
+        "6.0": 0.099,
+        "2.0": 0.096
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\15-Left_jpg.rf.2215c0cef818a7c01d98c2a37a74d346.jpg",
+      "filename": "15-Left_jpg.rf.2215c0cef818a7c01d98c2a37a74d346.jpg",
+      "viewpoint": "left",
+      "true_level": 7,
+      "predicted_level": 6.0,
+      "confidence": 0.494,
+      "analysis_time": 1.7995693683624268,
+      "stage_scores": {
+        "7.0": 0.407,
+        "6.0": 0.494,
+        "5.0": 0.099
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set_all_pointview\\level_7\\LEVEL_7\\4-Front_jpg.rf.e83a1aac35a377ac637479f10cc0c84a.jpg",
+      "filename": "4-Front_jpg.rf.e83a1aac35a377ac637479f10cc0c84a.jpg",
+      "viewpoint": "front",
+      "true_level": 7,
+      "predicted_level": 7.0,
+      "confidence": 0.393,
+      "analysis_time": 1.8590033054351807,
+      "stage_scores": {
+        "6.0": 0.304,
+        "3.0": 0.205,
+        "7.0": 0.393,
+        "5.0": 0.098
+      },
+      "success": true,
+      "error": null
+    }
+  ]
+}

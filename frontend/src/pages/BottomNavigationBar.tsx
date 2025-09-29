@@ -25,9 +25,9 @@ const BottomNavigationBar: React.FC = () => {
     <nav className="fixed bottom-0 left-0 right-0 z-50">
       <div className="relative bg-white/90 backdrop-blur">
         {/* 상단 둥근 모서리 */}
-        <div className="bg-white/90 backdrop-blur rounded-t-xl">
+        <div className="bg-white/90 backdrop-blur rounded-t-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
 
-          <div className="flex items-center justify-around pt-6 pb-4 px-4">
+          <div className="flex items-center justify-around pt-2 pb-2 px-4">
             {/* 홈 */}
             <button
               onClick={() => {

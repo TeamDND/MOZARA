@@ -6,9 +6,9 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 py-7">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-            M!
+            H!
           </div>
-          <span className="text-xl font-bold text-blue-600">毛자라</span>
+          <span className="text-xl font-bold text-blue-600">Hairfit</span>
         </div>
         <p className="text-gray-600 text-sm mb-4">
           AI 기반 모발 관리 및 분석 서비스로 건강한 모발을 위한 맞춤형 솔루션을 제공합니다.
@@ -21,7 +21,7 @@ export default function Footer() {
         </div>
         <div className="border-t border-gray-200 pt-4">
           <p className="text-sm text-gray-500">
-            © 2025 毛자라. All rights reserved.
+            © 2025 Hairfit. All rights reserved.
           </p>
         </div>
       </div>
