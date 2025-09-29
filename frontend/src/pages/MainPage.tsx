@@ -42,7 +42,7 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
 
   const features = [
     {
-      icon: <Brain className="w-8 h-8 text-blue-600" />,
+      icon: <Brain className="w-8 h-8 text-[#222222]" />,
       title: "AI 탈모 분석",
       description: "이미지와 기본정보를 기반으로 쉽고 빠르게 AI 탈모 분석",
       highlight: "정확도 75%"
@@ -69,23 +69,23 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
 
   const testimonials = [
     {
-      name: "김민수",
-      age: "32세",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+      name: "김대중",
+      age: "24세",
+      image: "/sam1.png",
       content: "3개월 만에 확실한 변화를 느꼈어요. 특히 챌린지 시스템이 재미있어서 꾸준히 할 수 있었습니다.",
       improvement: "모발 밀도 23% 개선"
     },
     {
-      name: "박진호",
-      age: "28세",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+      name: "박시현",
+      age: "33세",
+      image: "/sam2.png",
       content: "과학적인 분석과 개인 맞춤 계획이 정말 도움이 되었어요. 이제 자신감이 생겼습니다.",
       improvement: "두피 건강도 35% 개선"
     },
     {
-      name: "이승우",
-      age: "35세",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
+      name: "조정태",
+      age: "28세",
+      image: "/sam3.png",
       content: "매주 변화를 눈으로 확인할 수 있어서 동기부여가 확실했어요. 포기하지 않게 해주는 서비스입니다.",
       improvement: "전체 점수 41% 개선"
     }
@@ -104,12 +104,12 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
       <div className="max-w-full md:max-w-md lg:max-w-lg mx-auto bg-white min-h-screen">
         {/* 히어로 섹션 - 풀스크린 모바일 경험 */}
         <section className="py-8 px-4 text-center">
-          <Badge variant="secondary" className="mb-4 px-3 py-1.5 text-xs bg-blue-50 text-blue-700">
+          <Badge variant="secondary" className="mb-4 px-3 py-1.5 text-xs bg-gray-50 text-gray-700">
             AI 탈모 분석을 통한 맞춤 컨텐츠 및 솔루션 서비스
           </Badge>
 
           <h1 className="text-2xl mb-4 leading-tight font-bold">
-            <span className="text-blue-600">MOZARA</span>
+            <span className="text-[#222222]">MOZARA</span>
           </h1>
 
           <p className="text-sm text-gray-600 mb-6 px-2 leading-relaxed">
@@ -121,7 +121,7 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
           <div className="space-y-3 mb-8">
             <Button
               onClick={handleDiagnosisStart}
-              className="w-full min-h-[48px] px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
+              className="w-full min-h-[48px] px-6 py-3 bg-[#222222] hover:bg-[#333333] text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
             >
               AI 분석 시작하기
               <ArrowRight className="w-5 h-5 ml-2" />
@@ -139,7 +139,7 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
           <div className="relative mx-2 mb-6">
             <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-blue-50 to-green-50 shadow-lg">
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1666622833860-562f3a5caa59?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoYWlyJTIwbG9zcyUyMHNjYWxwJTIwdHJlYXRtZW50fGVufDF8fHx8MTc1ODA3NTYyOHww&ixlib=rb-4.1.0&q=80&w=1080"
+                src="/main-hero-image.jpg"
                 alt="MOZARA 서비스 미리보기"
                 className="w-full h-full object-cover"
               />
@@ -151,9 +151,9 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
                 <CheckCircle className="w-3 h-3 text-green-600" />
                 <span className="text-xs font-medium text-green-800">AI 분석 완료</span>
               </div>
-              <div className="bg-blue-100 rounded-full px-3 py-1.5 flex items-center gap-1.5">
-                <TrendingUp className="w-3 h-3 text-blue-600" />
-                <span className="text-xs font-medium text-blue-800">15% 개선됨</span>
+              <div className="bg-gray-100 rounded-full px-3 py-1.5 flex items-center gap-1.5">
+                <TrendingUp className="w-3 h-3 text-[#222222]" />
+                <span className="text-xs font-medium text-[#222222]">15% 개선됨</span>
               </div>
             </div>
           </div>
@@ -164,7 +164,7 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
           <div className="grid grid-cols-2 gap-3">
             {stats.map((stat, index) => (
               <div key={index} className="bg-white rounded-xl p-4 text-center shadow-sm">
-                <div className="flex justify-center mb-2 text-blue-600">
+                <div className="flex justify-center mb-2 text-[#222222]">
                   {stat.icon}
                 </div>
                 <div className="text-lg font-bold mb-1">{stat.value}</div>
@@ -197,7 +197,7 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-2">
                         <h3 className="text-base font-semibold text-gray-900">{feature.title}</h3>
-                        <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 ml-2">
+                        <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200 ml-2">
                           {feature.highlight}
                         </Badge>
                       </div>
@@ -269,7 +269,7 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
             {/* 모바일 풀 너비 CTA 버튼 */}
             <Button
               onClick={handleDiagnosisStart}
-              className="w-full min-h-[52px] px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-2xl shadow-lg active:scale-[0.98] transition-all"
+              className="w-full min-h-[52px] px-6 py-4 bg-[#222222] hover:bg-[#333333] text-white text-base font-semibold rounded-2xl shadow-lg active:scale-[0.98] transition-all"
             >
               분석 시작하기
               <ArrowRight className="w-5 h-5 ml-2" />

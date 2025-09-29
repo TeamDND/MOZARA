@@ -28,9 +28,15 @@ public class UsersInfoEntity {
     @Column(name = "age")
     private Integer age;
 
-    @Size(max = 100)
-    @Column(name = "nickname", length = 100)
-    private String nickname;
+    @Column(name = "family_history")
+    private Boolean familyHistory;
+
+    @Column(name = "is_loss")
+    private Boolean isLoss;
+
+    @Size(max = 50)
+    @Column(name = "stress", length = 50)
+    private String stress;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id_foreign")

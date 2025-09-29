@@ -1,9 +1,6 @@
 # Environment variables
 .env
 *.env
-backend/.env
-frontend/.env
-
 .env.local
 .env.development
 .env.production
@@ -18,7 +15,6 @@ docker-compose.override.yml
 *.swp
 *.swo
 *~
-
 # OS
 .DS_Store
 Thumbs.db
@@ -61,13 +57,6 @@ keys/
 *.pem
 *.key
 
-# GitHub Actions (temporary - for development)
-# .github/workflows/
-# .github/
-
-#Docker
-# docker/
-# Dockerfile
 # Hair damage data (if contains sensitive info)
 hair_damage/
 *.jpg
@@ -133,3 +122,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# IDE
+.claude/
+.mds/
