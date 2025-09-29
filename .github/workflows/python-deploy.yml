@@ -36,45 +36,27 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Deploy Python API to AWS EC2
-        uses: appleboy/ssh-action@master
-        with:
-          username: ubuntu
-          host: ${{ secrets.LIVE_SERVER_IP }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          timeout: 60m
-          command_timeout: 60m
-          script: |
-            echo "🔄 Python API 컨테이너 업데이트 중..."
-            
-            # 기존 컨테이너 정리
-            if [ "$(sudo docker ps -a -q -f name=mozara-python-api)" ]; then
-              sudo docker rm -f mozara-python-api
-            fi
-            
-            # 기존 이미지 정리
-            if [ "$(sudo docker images -q ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api)" ]; then
-              sudo docker rmi -f ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api
-            fi
-            
-            # 새 이미지 다운로드
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api
-            
-            # Python API 컨테이너 시작
-            sudo docker run -d \
-              --name mozara-python-api \
-              -p 8000:8000 \
-              -e GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} \
-              -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
-              -e YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }} \
-              -e ELEVEN_ST_API_KEY=${{ secrets.ELEVEN_ST_API_KEY }} \
-              -e PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }} \
-              -e PINECONE_ENVIRONMENT=${{ secrets.PINECONE_ENVIRONMENT }} \
-              -e PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }} \
-              --memory=256m \
-              --cpus=0.5 \
-              --restart unless-stopped \
-              ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api
-            
-            echo "✅ Python API 배포 완료!"
-            sudo docker ps | grep mozara-python-api
+      - name: Deploy Python API to Runpod
+        run: |
+          echo "🚀 Runpod에 Python API 배포 중..."
+          
+          # Runpod API를 사용한 배포
+          curl -X POST "https://api.runpod.io/v2/${{ secrets.RUNPOD_ENDPOINT_ID }}/runsync" \
+            -H "Authorization: Bearer ${{ secrets.RUNPOD_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "input": {
+                "docker_image": "${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest",
+                "env": {
+                  "GEMINI_API_KEY": "${{ secrets.GEMINI_API_KEY }}",
+                  "OPENAI_API_KEY": "${{ secrets.OPENAI_API_KEY }}",
+                  "YOUTUBE_API_KEY": "${{ secrets.YOUTUBE_API_KEY }}",
+                  "ELEVEN_ST_API_KEY": "${{ secrets.ELEVEN_ST_API_KEY }}",
+                  "PINECONE_API_KEY": "${{ secrets.PINECONE_API_KEY }}",
+                  "PINECONE_ENVIRONMENT": "${{ secrets.PINECONE_ENVIRONMENT }}",
+                  "PINECONE_INDEX_NAME": "${{ secrets.PINECONE_INDEX_NAME }}"
+                }
+              }
+            }'
+          
+          echo "✅ Runpod 배포 요청 완료!"
