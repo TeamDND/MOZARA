@@ -69,41 +69,46 @@ const HospitalMap: React.FC<HospitalMapProps> = ({ hospitals }) => {
         </div>
       </div>
       
-      <div className="space-y-4">
+      <div className="space-y-2">
         {filteredHospitals.map((hospital, index) => (
-          <div key={index} className="bg-gray-50 p-4 rounded-xl">
-            <div className="aspect-video rounded-lg overflow-hidden mb-3 bg-gray-200">
-              <ImageWithFallback 
-                src={hospital.image}
-                alt={hospital.name}
-                className="w-full h-full object-cover"
-              />
+          <div key={index} className="bg-white p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+            {/* 헤더: 제목만 좌측 정렬 */}
+            <div className="flex items-center justify-between mb-2 w-full">
+              <h4 className="text-base font-semibold text-gray-800 flex-1 min-w-0 truncate pr-2">{hospital.name}</h4>
             </div>
-            
-            <h4 className="text-base font-semibold text-gray-800 mb-2">{hospital.name}</h4>
-            <p className="text-sm text-gray-600 mb-2">
-              {hospital.specialty}
-            </p>
-            
-            <div className="flex items-center gap-4 text-sm mb-3">
-              <div className="flex items-center gap-1">
+
+            {/* 콘텐츠 블록 */}
+            <div>
+              <p className="text-sm text-gray-600 mb-2">
+                {hospital.specialty}
+              </p>
+              
+              <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  <span>{hospital.distance}</span>
+                </div>
+                <span>•</span>
+                <span className="text-xs">{hospital.matchReason}</span>
+              </div>
+
+              {/* 별점: 버튼 위 영역, 우측 정렬 */}
+              <div className="mb-2 flex justify-end items-center gap-1">
                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span>{hospital.rating}</span>
-                <span className="text-gray-500">({hospital.reviews})</span>
+                <span className="text-sm text-gray-600">{hospital.rating}</span>
+                <span className="text-xs text-gray-500">({hospital.reviews})</span>
               </div>
-              <div className="flex items-center gap-1">
-                <MapPin className="w-4 h-4 text-gray-500" />
-                <span>{hospital.distance}</span>
+
+              {/* 액션 버튼: 우측 정렬 */}
+              <div className="mt-2 flex justify-end gap-2">
+                <Button className="px-3 py-1 rounded bg-blue-500 hover:bg-blue-600 text-white text-xs">
+                  지도보기
+                </Button>
+                <Button className="px-3 py-1 rounded bg-green-500 hover:bg-green-600 text-white text-xs">
+                  전화
+                </Button>
               </div>
             </div>
-            
-            <div className="bg-gray-50 p-3 rounded-lg text-xs mb-3">
-              💡 {hospital.matchReason}
-            </div>
-            
-            <Button className="w-full h-10 rounded-lg bg-[#222222] hover:bg-[#333333] text-white active:scale-[0.98]">
-              자세히 보기
-            </Button>
           </div>
         ))}
       </div>
