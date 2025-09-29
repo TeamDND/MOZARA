@@ -277,7 +277,7 @@ const StoreFinder: React.FC = () => {
                 onClick={() => setShowStageSelector(!showStageSelector)}
                 className={`px-4 py-2 rounded-lg transition-colors ${
                   showStageSelector 
-                    ? 'bg-blue-600 text-white' 
+                    ? 'bg-[#1F0101] text-white' 
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
@@ -311,19 +311,19 @@ const StoreFinder: React.FC = () => {
         {/* 선택된 단계 정보 표시 */}
         {selectedStage !== null && (
           <div className="mb-6">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+            <div className="bg-[#1F0101]/5 border border-[#1F0101] rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-blue-900">
+                  <h3 className="text-lg font-semibold text-[#1F0101]">
                     {selectedStage}단계: {HAIR_LOSS_STAGES[selectedStage]?.name}
                   </h3>
-                  <p className="text-blue-700 text-sm mt-1">
+                  <p className="text-[#1F0101] text-sm mt-1 opacity-80">
                     {STAGE_RECOMMENDATIONS[selectedStage as keyof typeof STAGE_RECOMMENDATIONS]?.message}
                   </p>
                 </div>
                 <button
                   onClick={() => setSelectedStage(null)}
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  className="text-[#1F0101] hover:opacity-80 text-sm font-medium"
                 >
                   단계 초기화
                 </button>
@@ -368,7 +368,7 @@ const StoreFinder: React.FC = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="병원명, 주소로 검색... (위치 기반으로 자동 검색)"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1F0101] focus:border-transparent"
               />
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                 <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -386,7 +386,7 @@ const StoreFinder: React.FC = () => {
               <button
                 key={category.name}
                 onClick={() => setSearchTerm(category.searchTerm)}
-                className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200 hover:border-blue-300"
+                className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200 hover:border-[#1F0101]"
               >
                 <span className="text-2xl mb-2">{category.icon}</span>
                 <span className="text-sm font-medium text-gray-700">{category.name}</span>
@@ -398,7 +398,7 @@ const StoreFinder: React.FC = () => {
         {/* Loading State */}
         {isLoading && (
           <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1F0101]"></div>
             <span className="ml-3 text-gray-600">검색 중...</span>
           </div>
         )}
@@ -434,115 +434,49 @@ const StoreFinder: React.FC = () => {
                   <span className="text-sm text-gray-500">{section.items.length}개</span>
                 </div>
                 {!collapsedGroups[section.group] && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
+                  <div className="space-y-2 p-6">
                     {section.items.map((hospital) => (
-                      <div key={hospital.id} className={`bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-shadow relative ${
-                        hospital.isRecommended ? 'ring-2 ring-blue-500 ring-opacity-50' : ''
+                      <div key={hospital.id} className={`bg-white border-b border-gray-200 p-4 hover:bg-gray-50 transition-colors ${
+                        hospital.isRecommended ? 'border-l-4 border-l-[#1F0101]' : ''
                       }`}>
-                        {/* Hospital Image */}
-                        <div className="relative">
-                          {hospital.imageUrl && !hospital.imageUrl.includes('placeholder') && !imageLoadErrors.has(hospital.id) ? (
-                            <div className="w-full h-48 bg-gray-200 overflow-hidden relative group">
-                              <img 
-                                src={optimizeImageUrl(hospital.imageUrl, 400, 200)} 
-                                alt={hospital.name}
-                                className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
-                                loading="lazy"
-                                onError={() => {
-                                  console.log(`이미지 로드 실패: ${hospital.name} - ${hospital.imageUrl}`);
-                                  setImageLoadErrors(prev => new Set(prev).add(hospital.id));
-                                }}
-                                onLoad={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.opacity = '1';
-                                  const loadingElement = document.getElementById(`loading-${hospital.id}`);
-                                  if (loadingElement) {
-                                    loadingElement.style.display = 'none';
-                                  }
-                                  console.log(`이미지 로드 성공: ${hospital.name} - ${hospital.imageUrl}`);
-                                }}
-                                style={{ opacity: 0 }}
-                              />
-                              {/* 로딩 인디케이터 */}
-                              <div className="absolute inset-0 flex items-center justify-center bg-gray-100" id={`loading-${hospital.id}`}>
-                                <div className="flex flex-col items-center">
-                                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
-                                  <span className="text-xs text-gray-500">이미지 로딩 중...</span>
-                                </div>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            {/* 헤더: 병원명만 */}
+                            <div className="mb-2">
+                              <h3 className="text-base font-semibold text-gray-900">{hospital.name}</h3>
+                            </div>
+
+                            <div className="space-y-1 text-sm text-gray-600 mb-2">
+                              <div className="flex items-center gap-2">
+                                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>{hospital.address}</span>
                               </div>
                               
-                              {/* 이미지 소스 표시 (디버깅용) */}
-                              <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                {hospital.imageUrl.includes('naver.com') ? '네이버' : 
-                                 hospital.imageUrl.includes('kakao.com') ? '카카오' :
-                                 hospital.imageUrl.includes('google') ? '구글' :
-                                 hospital.imageUrl.includes('unsplash') ? 'Unsplash' : '기타'}
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="w-full h-48 overflow-hidden">
-                              {getDefaultImageContent(hospital)}
-                            </div>
-                          )}
-                          <div className="absolute top-3 right-3">
-                            <div className="flex items-center space-x-1 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full">
-                              <span className="text-yellow-400">{renderStars(hospital.rating)}</span>
-                              <span className="text-xs text-gray-600">({hospital.rating.toFixed(1)})</span>
-                            </div>
-                          </div>
-                          
-                          {/* 추천 배지 */}
-                          {hospital.isRecommended && (
-                            <div className="absolute top-3 left-3">
-                              <div className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                                추천
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Hospital Info */}
-                        <div className="p-4">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2 overflow-hidden" style={{
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical'
-                          }}>
-                            {hospital.name}
-                          </h3>
-                          
-                          <div className="space-y-2 text-sm text-gray-600">
-                            <div className="flex items-start space-x-2">
-                              <svg className="w-4 h-4 mt-0.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                              </svg>
-                              <span className="flex-1">{hospital.address}</span>
-                            </div>
-                            
-                            {hospital.phone && (
-                              <div className="flex items-center space-x-2">
+                              {hospital.phone && (
+                                <div className="flex items-center gap-2">
+                                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                  </svg>
+                                  <span>{hospital.phone}</span>
+                                </div>
+                              )}
+                              
+                              <div className="flex items-center gap-2">
                                 <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                <span>{hospital.phone}</span>
+                                <span>{locationService.formatDistance(hospital.distance)}</span>
                               </div>
-                            )}
-                            
-                            <div className="flex items-center space-x-2">
-                              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                              </svg>
-                              <span>{locationService.formatDistance(hospital.distance)}</span>
                             </div>
-                          </div>
 
-                          {hospital.specialties && hospital.specialties.length > 0 && (
-                            <div className="mt-3">
+                            {hospital.specialties && hospital.specialties.length > 0 && (
                               <div className="flex flex-wrap gap-1">
                                 {hospital.specialties.slice(0, 3).map((specialty, index) => (
-                                  <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                  <span key={index} className="px-2 py-1 bg-[#1F0101]/10 text-[#1F0101] text-xs rounded-full">
                                     {specialty}
                                   </span>
                                 ))}
@@ -552,26 +486,33 @@ const StoreFinder: React.FC = () => {
                                   </span>
                                 )}
                               </div>
-                            </div>
-                          )}
+                            )}
+                          </div>
 
-                          <div className="mt-4 flex space-x-2">
-                            <button
-                              onClick={() => setDirectionTarget(hospital)}
-                              className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                            >
-                              지도보기
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (hospital.phone) {
-                                  window.location.href = `tel:${hospital.phone}`;
-                                }
-                              }}
-                              className="px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
-                            >
-                              전화
-                            </button>
+                          {/* 오른쪽: 별점 + 버튼들 */}
+                          <div className="ml-4 flex flex-col items-end gap-2">
+                            <div className="flex items-center gap-1">
+                              <span className="text-yellow-400">{renderStars(hospital.rating)}</span>
+                              <span className="text-sm text-gray-600">({hospital.rating.toFixed(1)})</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => setDirectionTarget(hospital)}
+                                className="px-3 py-1 bg-[#1F0101] hover:bg-[#2A0202] text-white text-xs font-medium rounded transition-colors"
+                              >
+                                지도보기
+                              </button>
+                              <button
+                                onClick={() => {
+                                  if (hospital.phone) {
+                                    window.location.href = `tel:${hospital.phone}`;
+                                  }
+                                }}
+                                className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium rounded transition-colors"
+                              >
+                                전화
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
