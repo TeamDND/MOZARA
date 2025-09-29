@@ -39,7 +39,7 @@ const HairLossProducts: React.FC = () => {
   // 페이지 로드 시 메타데이터 설정
   useEffect(() => {
     // 페이지 제목 설정
-    document.title = '단계별 제품 추천 | 毛자라 - 맞춤형 탈모 관리 솔루션';
+    document.title = '단계별 제품 추천 | Hairfit - 맞춤형 탈모 관리 솔루션';
     
     // 메타 설명 설정
     const metaDescription = document.querySelector('meta[name="description"]');
@@ -60,7 +60,7 @@ const HairLossProducts: React.FC = () => {
         "description": "간단한 단계 선택을 기반으로 한 탈모 단계별 맞춤형 제품 추천",
         "provider": {
           "@type": "Organization",
-          "name": "毛자라",
+          "name": "Hairfit",
           "url": window.location.origin
         },
         "serviceType": "헬스케어",
