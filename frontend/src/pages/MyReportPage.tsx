@@ -157,7 +157,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
       {
         title: "두피 케어",
         description: "올바른 세정과 마사지 루틴",
-        icon: <BookOpen className="w-5 h-5 text-blue-500" />,
+        icon: <BookOpen className="w-5 h-5 text-[#222222]" />,
         tips: ["미지근한 물로 세정", "부드러운 마사지", "자극적인 제품 피하기"]
       }
     ];
@@ -202,7 +202,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
         {/* 메인 컨텐츠 (Mobile-First) */}
         <div className="flex-1 p-4 overflow-y-auto space-y-4">
           {/* 분석 결과 요약 (Mobile-First) */}
-          <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-xl">
+          <div className="bg-gradient-to-r from-gray-50 to-green-50 p-4 rounded-xl">
             <div className="flex items-center gap-3 mb-4">
               <CheckCircle className="w-8 h-8 text-green-500" />
               <div>
@@ -270,25 +270,25 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
             <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
               <TabsTrigger 
                 value="hospitals" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-blue-600 text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-blue-700 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-[#222222] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
               >
                 탈모 맵
               </TabsTrigger>
               <TabsTrigger 
                 value="products" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
                 제품 추천
               </TabsTrigger>
               <TabsTrigger 
                 value="videos" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
                 영상 컨텐츠
               </TabsTrigger>
               <TabsTrigger 
                 value="lifestyle" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
                 생활습관
               </TabsTrigger>
@@ -322,7 +322,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
                         onClick={() => setSelectedCategory(category)}
                         className={`flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
                           selectedCategory === category
-                            ? 'bg-blue-600 text-white'
+                            ? 'bg-[#222222] text-white'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                       >
@@ -360,11 +360,11 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
                         </div>
                       </div>
                       
-                      <div className="bg-blue-50 p-3 rounded-lg text-xs mb-3">
+                      <div className="bg-gray-50 p-3 rounded-lg text-xs mb-3">
                         💡 {hospital.matchReason}
                       </div>
                       
-                      <Button className="w-full h-10 rounded-lg bg-blue-600 hover:bg-blue-700 text-white active:scale-[0.98]">
+                      <Button className="w-full h-10 rounded-lg bg-[#222222] hover:bg-[#333333] text-white active:scale-[0.98]">
                         자세히 보기
                       </Button>
                     </div>
@@ -414,7 +414,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
                         ✨ {product.matchReason}
                       </div>
                       
-                      <Button className="w-full h-10 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-[0.98]">
+                      <Button className="w-full h-10 rounded-lg bg-[#222222] hover:bg-[#333333] active:scale-[0.98]">
                         <ShoppingCart className="w-4 h-4 mr-2" />
                         구매하기
                       </Button>
@@ -499,7 +499,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
               </div>
 
               {/* 맞춤형 루틴 제안 (Mobile-First) */}
-              <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-xl">
+              <div className="bg-gradient-to-r from-purple-50 to-gray-50 p-4 rounded-xl">
                 <div className="text-center space-y-4">
                   <Award className="w-12 h-12 text-purple-600 mx-auto" />
                   <h3 className="text-lg font-semibold text-gray-800">나만의 맞춤 루틴 시작하기</h3>

@@ -29,7 +29,7 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
       <div className="text-center space-y-3">
         {!analysisError ? (
           <>
-            <div className="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+            <div className="animate-spin w-12 h-12 border-4 border-[#222222] border-t-transparent rounded-full mx-auto"></div>
             <h2 className="text-xl font-bold text-gray-800">AI 탈모 분석 중...</h2>
             <p className="text-sm text-gray-600">
               설문 응답과 사진을 종합하여 탈모 상태를 분석하고 있어요
@@ -60,14 +60,14 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
 
             {isAnalyzing && (
               <div className="flex items-center gap-3">
-                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-[#222222] border-t-transparent rounded-full animate-spin"></div>
                 <span className="text-sm">Gemini AI로 이미지 분석 중...</span>
               </div>
             )}
           </div>
 
-          <div className="bg-blue-50 p-4 rounded-xl">
-            <p className="text-sm text-blue-800">
+          <div className="bg-gray-50 p-4 rounded-xl">
+            <p className="text-sm text-gray-800">
               🧠 <strong>실제 AI 분석 진행 중!</strong> Google Gemini가 귀하의 두피 상태를 분석하고 있습니다.
               잠시만 기다려주세요.
             </p>
@@ -100,7 +100,7 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
           </div>
           <Button
             onClick={onRetry}
-            className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
+            className="w-full h-12 bg-[#222222] hover:bg-[#333333] text-white rounded-xl"
           >
             다시 시도하기
           </Button>

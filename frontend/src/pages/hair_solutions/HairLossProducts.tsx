@@ -39,7 +39,7 @@ const HairLossProducts: React.FC = () => {
   // 페이지 로드 시 메타데이터 설정
   useEffect(() => {
     // 페이지 제목 설정
-    document.title = '탈모 단계별 제품 추천 | 毛자라 - 맞춤형 탈모 관리 솔루션';
+    document.title = '탈모 단계별 제품 추천 | 맞춤형 탈모 관리 솔루션';
     
     // 메타 설명 설정
     const metaDescription = document.querySelector('meta[name="description"]');
@@ -191,10 +191,6 @@ const HairLossProducts: React.FC = () => {
     // 제품 상세 정보를 모달이나 새 페이지로 표시할 수 있음
   };
 
-  // BASP 진단으로 이동
-  const handleGoToBaspCheck = () => {
-    navigate('/basp-check');
-  };
 
   // 다시 선택하기
   const handleReset = () => {
@@ -206,58 +202,29 @@ const HairLossProducts: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: "#f9f9f9" }}>
-      <Header />
-
-      {/* 배경 효과 - 기존 패턴과 일치 */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute top-20 left-10 w-32 h-32 rounded-full blur-xl"
-          style={{ backgroundColor: "rgba(0,115,255,0.2)" }}
-        ></div>
-        <div
-          className="absolute top-40 right-20 w-24 h-24 rounded-full blur-lg"
-          style={{ backgroundColor: "rgba(0,115,255,0.3)" }}
-        ></div>
-        <div
-          className="absolute bottom-40 left-1/4 w-40 h-40 rounded-full blur-2xl"
-          style={{ backgroundColor: "rgba(0,115,255,0.2)" }}
-        ></div>
-        <div
-          className="absolute bottom-20 right-1/3 w-28 h-28 rounded-full blur-xl"
-          style={{ backgroundColor: "rgba(0,115,255,0.25)" }}
-        ></div>
-        <div
-          className="absolute top-1/3 left-1/2 w-20 h-20 rounded-full blur-lg"
-          style={{ backgroundColor: "rgba(0,115,255,0.3)" }}
-        ></div>
-      </div>
-      
-      <div className="relative z-10 pt-20 pb-20">
-        <div className="max-w-7xl mx-auto px-8">
-          {/* 페이지 헤더 - 기존 패턴과 일치 */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 text-balance">
-              <span style={{ color: "rgb(0,115,255)" }}>탈모 단계별</span>
-              <br />
-              제품 추천
-            </h1>
-            <p className="text-lg text-gray-700 mb-8 max-w-2xl mx-auto text-pretty">
-              현재 탈모 상태에 맞는 맞춤형 제품을 추천해드립니다. 
-              정확한 진단을 위해 BASP 자가진단을 먼저 진행해보세요.
+    <div className="min-h-screen bg-gray-50">
+      <div className="relative z-10">
+        <div className="max-w-md mx-auto px-4 py-4">
+          {/* 모바일 헤더 */}
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              탈모 단계별 제품 추천
+            </h2>
+            <p className="text-sm text-gray-600">
+              상태에 맞는 맞춤형 제품을 추천해드립니다
             </p>
           </div>
 
-          {/* 에러 메시지 - 기존 패턴과 일치 */}
+          {/* 에러 메시지 */}
           {error && (
-            <div className="mb-8 bg-white/70 backdrop-blur rounded-2xl p-6 border border-red-200 shadow-lg">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-                  <span className="text-red-600 text-xl">⚠️</span>
+            <div className="mb-6 bg-white rounded-xl p-4 border border-red-200 shadow-md">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                  <span className="text-red-600 text-lg">⚠️</span>
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-red-800 text-lg mb-1">오류가 발생했습니다</h4>
-                  <p className="text-red-700">{error}</p>
+                  <h4 className="font-semibold text-red-800 text-sm mb-1">오류 발생</h4>
+                  <p className="text-red-700 text-sm">{error}</p>
                 </div>
               </div>
               <div className="mt-4 flex gap-3">
@@ -277,19 +244,19 @@ const HairLossProducts: React.FC = () => {
             </div>
           )}
 
-          {/* 단계 선택 섹션 - 기존 패턴과 일치 */}
+          {/* 단계 선택 섹션 */}
           {!showProducts && (
-            <div className="bg-white/70 backdrop-blur rounded-2xl shadow-lg p-8 mb-8 border border-gray-200">
+            <div className="bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-200">
               {/* 검색 모드 토글 */}
-              <div className="mb-6">
-                <div className="flex items-center justify-center gap-4">
-                  <span className="text-sm font-medium text-gray-700">검색 모드:</span>
-                  <div className="flex bg-gray-100 rounded-lg p-1">
+              <div className="mb-4">
+                <div className="text-center mb-3">
+                  <span className="text-sm font-medium text-gray-700">검색 모드</span>
+                  <div className="flex bg-gray-100 rounded-lg p-1 mx-auto max-w-xs">
                     <button
                       onClick={() => setSearchMode('recommended')}
                       className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                         searchMode === 'recommended'
-                          ? 'bg-white text-blue-600 shadow-sm'
+                          ? 'bg-white text-[#222222] shadow-sm'
                           : 'text-gray-600 hover:text-gray-800'
                       }`}
                     >
@@ -299,7 +266,7 @@ const HairLossProducts: React.FC = () => {
                       onClick={() => setSearchMode('11st')}
                       className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                         searchMode === '11st'
-                          ? 'bg-white text-blue-600 shadow-sm'
+                          ? 'bg-white text-[#222222] shadow-sm'
                           : 'text-gray-600 hover:text-gray-800'
                       }`}
                     >
@@ -321,59 +288,24 @@ const HairLossProducts: React.FC = () => {
                 disabled={isLoading}
               />
               
-              {/* BASP 진단 안내 - 기존 패턴과 일치 */}
-              <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center">
-                      <span className="text-blue-600 text-2xl">🔍</span>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-800 mb-1">
-                        정확한 탈모 단계를 모르시나요?
-                      </h3>
-                      <p className="text-gray-600">
-                        BASP 기준표 기반 자가진단으로 정확한 탈모 단계를 확인해보세요.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleGoToBaspCheck}
-                    className="px-6 py-3 text-white font-semibold rounded-lg hover:opacity-90 transition-colors whitespace-nowrap"
-                    style={{ backgroundColor: "rgb(0,115,255)" }}
-                  >
-                    BASP 진단하기
-                  </button>
-                </div>
-              </div>
             </div>
           )}
 
-          {/* 제품 목록 섹션 - 기존 패턴과 일치 */}
+          {/* 제품 목록 섹션 */}
           {showProducts && stageInfo && (
-            <div className="mb-8">
+            <div className="mb-6">
               {/* 상단 액션 버튼 */}
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={handleReset}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    <span>←</span>
-                    <span>다시 선택</span>
-                  </button>
-                  <div className="text-sm text-gray-500">
-                    {stageInfo.stage}단계 탈모 제품 추천
-                  </div>
-                </div>
-                
+              <div className="flex items-center justify-between mb-4">
                 <button
-                  onClick={handleGoToBaspCheck}
-                  className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition-colors"
-                  style={{ backgroundColor: "rgb(0,115,255)" }}
+                  onClick={handleReset}
+                  className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  BASP 진단하기
+                  <span>←</span>
+                  <span className="text-sm">다시 선택</span>
                 </button>
+                <div className="text-xs text-gray-500">
+                  {stageInfo.stage}단계 제품
+                </div>
               </div>
 
               {/* 제품 목록 */}
@@ -389,22 +321,22 @@ const HairLossProducts: React.FC = () => {
             </div>
           )}
 
-          {/* 로딩 상태 (전체 화면) - 기존 패턴과 일치 */}
+          {/* 로딩 상태 */}
           {isLoading && !showProducts && (
-            <div className="bg-white/70 backdrop-blur rounded-2xl shadow-lg p-8 border border-gray-200">
+            <div className="bg-white rounded-xl shadow-md p-4 border border-gray-200">
               <div className="animate-pulse">
-                <div className="h-8 bg-gray-200 rounded-lg w-1/3 mb-6"></div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {[...Array(6)].map((_, index) => (
-                    <div key={index} className="h-32 bg-gray-200 rounded-xl"></div>
+                <div className="h-6 bg-gray-200 rounded-lg w-1/2 mb-4"></div>
+                <div className="space-y-3">
+                  {[...Array(4)].map((_, index) => (
+                    <div key={index} className="h-24 bg-gray-200 rounded-lg"></div>
                   ))}
                 </div>
               </div>
             </div>
           )}
 
-          {/* 추가 정보 섹션 - 기존 패턴과 일치 */}
-          <div className="bg-white/70 backdrop-blur rounded-2xl shadow-lg p-8 border border-gray-200">
+          {/* 추가 정보 섹션 */}
+          <div className="bg-white rounded-xl shadow-md p-4 border border-gray-200">
             <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
               탈모 관리 가이드
             </h2>
@@ -423,8 +355,8 @@ const HairLossProducts: React.FC = () => {
 
               {/* 영양 관리 */}
               <div className="text-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <span className="text-blue-600 text-2xl">🥗</span>
+                <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <span className="text-[#222222] text-2xl">🥗</span>
                 </div>
                 <h3 className="font-semibold text-gray-800 mb-2">영양 관리</h3>
                 <p className="text-sm text-gray-600">
@@ -447,7 +379,6 @@ const HairLossProducts: React.FC = () => {
         </div>
       </div>
       
-      <Footer />
     </div>
   );
 };

@@ -115,7 +115,7 @@ const BottomNavigationBar: React.FC = () => {
               <span className={`text-xs font-medium ${
                 isActive('/mypage') ? 'text-[#222222]' : 'text-gray-600'
               }`}>
-                마이
+                MY
               </span>
             </button>
           </div>
