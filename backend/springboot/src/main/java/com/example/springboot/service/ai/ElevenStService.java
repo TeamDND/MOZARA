@@ -1,9 +1,6 @@
 package com.example.springboot.service.ai;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -15,14 +12,13 @@ import java.util.Map;
 @Service
 public class ElevenStService {
 
-    @Value("${eleven.st.api.key:${ELEVEN_ST_API_KEY:}}")
-    private String elevenStApiKey;
+    @Value("${ai.python.base-url:http://localhost:8000}")
+    private String pythonBaseUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String BASE_URL = "https://openapi.11st.co.kr/openapi/OpenApiService.tmall";
 
     /**
-     * 11번가 제품 검색
+     * 11번가 제품 검색 (Python API 통해 호출)
      * @param keyword 검색 키워드
      * @param page 페이지 번호
      * @param pageSize 페이지 크기
@@ -31,42 +27,22 @@ public class ElevenStService {
     public Map<String, Object> searchProducts(String keyword, int page, int pageSize) {
         try {
             String url = UriComponentsBuilder
-                    .fromHttpUrl(BASE_URL)
-                    .queryParam("key", elevenStApiKey)
-                    .queryParam("apiCode", "ProductSearch")
+                    .fromHttpUrl(pythonBaseUrl)
+                    .path("/11st/products")
                     .queryParam("keyword", keyword)
-                    .queryParam("pageNum", page)
+                    .queryParam("page", page)
                     .queryParam("pageSize", pageSize)
-                    .queryParam("sortCd", "CP")
                     .toUriString();
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Content-Type", "application/xml");
-            HttpEntity<String> entity = new HttpEntity<>(headers);
+            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
 
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    entity,
-                    String.class
-            );
-
-            // XML 응답을 파싱하여 JSON 형태로 변환
-            return parseXmlResponse(response.getBody());
+            return response.getBody();
         } catch (Exception e) {
-            // 실제 API 호출 실패 시 더미 데이터 반환
+            // Python API 호출 실패 시 더미 데이터 반환
             return createDummyProducts(keyword, pageSize);
         }
     }
 
-    /**
-     * XML 응답을 파싱하여 JSON 형태로 변환
-     */
-    private Map<String, Object> parseXmlResponse(String xmlResponse) {
-        // 실제 구현에서는 XML 파싱 로직이 필요하지만, 
-        // 현재는 더미 데이터를 반환
-        return createDummyProducts("검색어", 20);
-    }
 
     /**
      * 더미 제품 데이터 생성

@@ -1,0 +1,931 @@
+{
+  "test_info": {
+    "test_type": "gemini_analyzer",
+    "test_number": 7,
+    "timestamp": "2025-09-20T13:05:31.613180",
+    "test_data_path": "C:\\Users\\301\\Desktop\\test_data_set\\test",
+    "api_endpoint": "http://localhost:8080/api/ai/gemini-check/analyze",
+    "total_images": 42,
+    "level_counts": {
+      "2": 7,
+      "3": 7,
+      "4": 7,
+      "5": 7,
+      "6": 7,
+      "7": 7
+    }
+  },
+  "metrics": {
+    "total_tests": 42,
+    "successful_tests": 34,
+    "failed_tests": 8,
+    "success_rate": 0.8095238095238095,
+    "raw_metrics": {
+      "accuracy": 0.058823529411764705,
+      "precision": 0.027149321266968326,
+      "recall": 0.058823529411764705,
+      "f1_score": 0.03715170278637771,
+      "confusion_matrix": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          1,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          2,
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          3,
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          5,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "class_report": {
+        "0": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "1": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "2": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "3": {
+          "precision": 0.15384615384615385,
+          "recall": 0.3333333333333333,
+          "f1-score": 0.21052631578947367,
+          "support": 6.0
+        },
+        "4": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 7.0
+        },
+        "5": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 7.0
+        },
+        "6": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 7.0
+        },
+        "7": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 7.0
+        },
+        "accuracy": 0.058823529411764705,
+        "macro avg": {
+          "precision": 0.019230769230769232,
+          "recall": 0.041666666666666664,
+          "f1-score": 0.02631578947368421,
+          "support": 34.0
+        },
+        "weighted avg": {
+          "precision": 0.027149321266968326,
+          "recall": 0.058823529411764705,
+          "f1-score": 0.03715170278637771,
+          "support": 34.0
+        }
+      },
+      "unique_labels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "mapped_metrics": {
+      "accuracy": 0.29411764705882354,
+      "precision": 0.24502262443438916,
+      "recall": 0.29411764705882354,
+      "f1_score": 0.24031141868512115,
+      "confusion_matrix": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          1,
+          0,
+          0,
+          0,
+          2
+        ],
+        [
+          3,
+          0,
+          0,
+          2,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          0,
+          3,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          0,
+          5,
+          0,
+          1
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          6
+        ]
+      ],
+      "class_report": {
+        "2": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "3": {
+          "precision": 0.5,
+          "recall": 0.16666666666666666,
+          "f1-score": 0.25,
+          "support": 6.0
+        },
+        "4": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 7.0
+        },
+        "5": {
+          "precision": 0.3,
+          "recall": 0.42857142857142855,
+          "f1-score": 0.35294117647058826,
+          "support": 7.0
+        },
+        "6": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 7.0
+        },
+        "7": {
+          "precision": 0.46153846153846156,
+          "recall": 0.8571428571428571,
+          "f1-score": 0.6,
+          "support": 7.0
+        },
+        "accuracy": 0.29411764705882354,
+        "macro avg": {
+          "precision": 0.21025641025641026,
+          "recall": 0.24206349206349206,
+          "f1-score": 0.2004901960784314,
+          "support": 34.0
+        },
+        "weighted avg": {
+          "precision": 0.24502262443438916,
+          "recall": 0.29411764705882354,
+          "f1-score": 0.24031141868512115,
+          "support": 34.0
+        }
+      },
+      "unique_labels": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "avg_analysis_time": 1.8731669678407556,
+    "api_status_counts": {
+      "500": 8,
+      "200": 34
+    }
+  },
+  "detailed_results": [
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231109103954UbVvLx_jpg.rf.08bf8f0253ff6ec4a392e60407a7ca05.jpg",
+      "filename": "20231109103954UbVvLx_jpg.rf.08bf8f0253ff6ec4a392e60407a7ca05.jpg",
+      "true_level": 2,
+      "predicted_stage": null,
+      "analysis_time": 0.60355544090271,
+      "success": false,
+      "error": "HTTP 500: {\"error\":\"Gemini 분석 중 오류: Gemini 분석 서비스 연결 오류: 500 Internal Server Error on POST request for \\\"http://localhost:8000/hair_gemini_check\\\": \\\"{\\\"detail\\\":\\\"429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits.\\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 50\\\\nPlease retry in 40.472341177s. [violations {\\\\n  quota_metric: \\\\\\\"generativelanguage.googleapis.com/generate_content_free_tier_requests\\\\\\\"\\\\n  quota_id: \\\\\\\"GenerateRequestsPerDayPerProjectPerModel-FreeTier\\\\\\\"\\\\n  quota_dimensions {\\\\n    key: \\\\\\\"model\\\\\\\"\\\\n    value: \\\\\\\"gemini-2.0-flash-exp\\\\\\\"\\\\n  }\\\\n  quota_dimensions {\\\\n    key: \\\\\\\"location\\\\\\\"\\\\n    value: \\\\\\\"global\\\\\\\"\\\\n  }\\\\n  quota_value: 50\\\\n}\\\\n, links {\\\\n  description: \\\\\\\"Learn more about Gemini API quotas\\\\\\\"\\\\n  url: \\\\\\\"https://ai.google.dev/gemini-api/docs/rate-limits\\\\\\\"\\\\n}\\\\n, retry_delay {\\\\n  seconds: 40\\\\n}\\\\n]\\\"}\\\"\"}",
+      "api_status": 500
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231110070141qEi5wm_jpg.rf.20af76796b05405ce043227831af11b2.jpg",
+      "filename": "20231110070141qEi5wm_jpg.rf.20af76796b05405ce043227831af11b2.jpg",
+      "true_level": 2,
+      "predicted_stage": null,
+      "analysis_time": 0.6369328498840332,
+      "success": false,
+      "error": "HTTP 500: {\"error\":\"Gemini 분석 중 오류: Gemini 분석 서비스 연결 오류: 500 Internal Server Error on POST request for \\\"http://localhost:8000/hair_gemini_check\\\": \\\"{\\\"detail\\\":\\\"429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits.\\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 50\\\\nPlease retry in 29.827103934s. [violations {\\\\n  quota_metric: \\\\\\\"generativelanguage.googleapis.com/generate_content_free_tier_requests\\\\\\\"\\\\n  quota_id: \\\\\\\"GenerateRequestsPerDayPerProjectPerModel-FreeTier\\\\\\\"\\\\n  quota_dimensions {\\\\n    key: \\\\\\\"model\\\\\\\"\\\\n    value: \\\\\\\"gemini-2.0-flash-exp\\\\\\\"\\\\n  }\\\\n  quota_dimensions {\\\\n    key: \\\\\\\"location\\\\\\\"\\\\n    value: \\\\\\\"global\\\\\\\"\\\\n  }\\\\n  quota_value: 50\\\\n}\\\\n, links {\\\\n  description: \\\\\\\"Learn more about Gemini API quotas\\\\\\\"\\\\n  url: \\\\\\\"https://ai.google.dev/gemini-api/docs/rate-limits\\\\\\\"\\\\n}\\\\n, retry_delay {\\\\n  seconds: 29\\\\n}\\\\n]\\\"}\\\"\"}",
+      "api_status": 500
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231122070433psAfzt_jpg.rf.a7efa27e390c92f2fc5a03788ccc1b8d.jpg",
+      "filename": "20231122070433psAfzt_jpg.rf.a7efa27e390c92f2fc5a03788ccc1b8d.jpg",
+      "true_level": 2,
+      "predicted_stage": null,
+      "analysis_time": 0.5331721305847168,
+      "success": false,
+      "error": "HTTP 500: {\"error\":\"Gemini 분석 중 오류: Gemini 분석 서비스 연결 오류: 500 Internal Server Error on POST request for \\\"http://localhost:8000/hair_gemini_check\\\": \\\"{\\\"detail\\\":\\\"429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits.\\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 50\\\\nPlease retry in 19.286360354s. [violations {\\\\n  quota_metric: \\\\\\\"generativelanguage.googleapis.com/generate_content_free_tier_requests\\\\\\\"\\\\n  quota_id: \\\\\\\"GenerateRequestsPerDayPerProjectPerModel-FreeTier\\\\\\\"\\\\n  quota_dimensions {\\\\n    key: \\\\\\\"model\\\\\\\"\\\\n    value: \\\\\\\"gemini-2.0-flash-exp\\\\\\\"\\\\n  }\\\\n  quota_dimensions {\\\\n    key: \\\\\\\"location\\\\\\\"\\\\n    value: \\\\\\\"global\\\\\\\"\\\\n  }\\\\n  quota_value: 50\\\\n}\\\\n, links {\\\\n  description: \\\\\\\"Learn more about Gemini API quotas\\\\\\\"\\\\n  url: \\\\\\\"https://ai.google.dev/gemini-api/docs/rate-limits\\\\\\\"\\\\n}\\\\n, retry_delay {\\\\n  seconds: 19\\\\n}\\\\n]\\\"}\\\"\"}",
+      "api_status": 500
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231130095830aHEvMd_jpg.rf.d9b2f9314d2120498c24129616d8006c.jpg",
+      "filename": "20231130095830aHEvMd_jpg.rf.d9b2f9314d2120498c24129616d8006c.jpg",
+      "true_level": 2,
+      "predicted_stage": null,
+      "analysis_time": 0.6914157867431641,
+      "success": false,
+      "error": "HTTP 500: {\"error\":\"Gemini 분석 중 오류: Gemini 분석 서비스 연결 오류: 500 Internal Server Error on POST request for \\\"http://localhost:8000/hair_gemini_check\\\": \\\"{\\\"detail\\\":\\\"429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits.\\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 50\\\\nPlease retry in 8.586342564s. [violations {\\\\n  quota_metric: \\\\\\\"generativelanguage.googleapis.com/generate_content_free_tier_requests\\\\\\\"\\\\n  quota_id: \\\\\\\"GenerateRequestsPerDayPerProjectPerModel-FreeTier\\\\\\\"\\\\n  quota_dimensions {\\\\n    key: \\\\\\\"model\\\\\\\"\\\\n    value: \\\\\\\"gemini-2.0-flash-exp\\\\\\\"\\\\n  }\\\\n  quota_dimensions {\\\\n    key: \\\\\\\"location\\\\\\\"\\\\n    value: \\\\\\\"global\\\\\\\"\\\\n  }\\\\n  quota_value: 50\\\\n}\\\\n, links {\\\\n  description: \\\\\\\"Learn more about Gemini API quotas\\\\\\\"\\\\n  url: \\\\\\\"https://ai.google.dev/gemini-api/docs/rate-limits\\\\\\\"\\\\n}\\\\n, retry_delay {\\\\n  seconds: 8\\\\n}\\\\n]\\\"}\\\"\"}",
+      "api_status": 500
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231206043710OotqJs_jpg.rf.621d16a36fabb45a838cf73543a26577.jpg",
+      "filename": "20231206043710OotqJs_jpg.rf.621d16a36fabb45a838cf73543a26577.jpg",
+      "true_level": 2,
+      "predicted_stage": null,
+      "analysis_time": 0.6294212341308594,
+      "success": false,
+      "error": "HTTP 500: {\"error\":\"Gemini 분석 중 오류: Gemini 분석 서비스 연결 오류: 500 Internal Server Error on POST request for \\\"http://localhost:8000/hair_gemini_check\\\": \\\"{\\\"detail\\\":\\\"429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits.\\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 50\\\\nPlease retry in 57.949443857s. [violations {\\\\n  quota_metric: \\\\\\\"generativelanguage.googleapis.com/generate_content_free_tier_requests\\\\\\\"\\\\n  quota_id: \\\\\\\"GenerateRequestsPerDayPerProjectPerModel-FreeTier\\\\\\\"\\\\n  quota_dimensions {\\\\n    key: \\\\\\\"model\\\\\\\"\\\\n    value: \\\\\\\"gemini-2.0-flash-exp\\\\\\\"\\\\n  }\\\\n  quota_dimensions {\\\\n    key: \\\\\\\"location\\\\\\\"\\\\n    value: \\\\\\\"global\\\\\\\"\\\\n  }\\\\n  quota_value: 50\\\\n}\\\\n, links {\\\\n  description: \\\\\\\"Learn more about Gemini API quotas\\\\\\\"\\\\n  url: \\\\\\\"https://ai.google.dev/gemini-api/docs/rate-limits\\\\\\\"\\\\n}\\\\n, retry_delay {\\\\n  seconds: 57\\\\n}\\\\n]\\\"}\\\"\"}",
+      "api_status": 500
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231222075010HDRqwK_jpg.rf.4e412fcbb2778e7599376a1cdd92cc7b.jpg",
+      "filename": "20231222075010HDRqwK_jpg.rf.4e412fcbb2778e7599376a1cdd92cc7b.jpg",
+      "true_level": 2,
+      "predicted_stage": null,
+      "analysis_time": 0.5747058391571045,
+      "success": false,
+      "error": "HTTP 500: {\"error\":\"Gemini 분석 중 오류: Gemini 분석 서비스 연결 오류: 500 Internal Server Error on POST request for \\\"http://localhost:8000/hair_gemini_check\\\": \\\"{\\\"detail\\\":\\\"429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits.\\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 50\\\\nPlease retry in 47.371477088s. [violations {\\\\n  quota_metric: \\\\\\\"generativelanguage.googleapis.com/generate_content_free_tier_requests\\\\\\\"\\\\n  quota_id: \\\\\\\"GenerateRequestsPerDayPerProjectPerModel-FreeTier\\\\\\\"\\\\n  quota_dimensions {\\\\n    key: \\\\\\\"model\\\\\\\"\\\\n    value: \\\\\\\"gemini-2.0-flash-exp\\\\\\\"\\\\n  }\\\\n  quota_dimensions {\\\\n    key: \\\\\\\"location\\\\\\\"\\\\n    value: \\\\\\\"global\\\\\\\"\\\\n  }\\\\n  quota_value: 50\\\\n}\\\\n, links {\\\\n  description: \\\\\\\"Learn more about Gemini API quotas\\\\\\\"\\\\n  url: \\\\\\\"https://ai.google.dev/gemini-api/docs/rate-limits\\\\\\\"\\\\n}\\\\n, retry_delay {\\\\n  seconds: 47\\\\n}\\\\n]\\\"}\\\"\"}",
+      "api_status": 500
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231222094424akH8Au_jpg.rf.cb2c90ea14b4ec3aa056d435ea661e2b.jpg",
+      "filename": "20231222094424akH8Au_jpg.rf.cb2c90ea14b4ec3aa056d435ea661e2b.jpg",
+      "true_level": 2,
+      "predicted_stage": null,
+      "analysis_time": 0.005997896194458008,
+      "success": false,
+      "error": "HTTP 500: {\"error\":\"Gemini 분석 중 오류: Gemini 분석 서비스 연결 오류: I/O error on POST request for \\\"http://localhost:8000/hair_gemini_check\\\": Connection refused: connect\"}",
+      "api_status": 500
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231225073745O43Mc1_jpg.rf.473f35d0092686ccbb30cc3f15f4263b.jpg",
+      "filename": "20231225073745O43Mc1_jpg.rf.473f35d0092686ccbb30cc3f15f4263b.jpg",
+      "true_level": 3,
+      "predicted_stage": null,
+      "analysis_time": 0.004995822906494141,
+      "success": false,
+      "error": "HTTP 500: {\"error\":\"Gemini 분석 중 오류: Gemini 분석 서비스 연결 오류: I/O error on POST request for \\\"http://localhost:8000/hair_gemini_check\\\": Connection refused: connect\"}",
+      "api_status": 500
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231225074112vWHR6I_channeldrop_jpg.rf.5d016bb20ef061d01612c66e5eef5595.jpg",
+      "filename": "20231225074112vWHR6I_channeldrop_jpg.rf.5d016bb20ef061d01612c66e5eef5595.jpg",
+      "true_level": 3,
+      "predicted_stage": 0,
+      "gemini_title": "정상",
+      "gemini_description": "현재 이미지상으로는 탈모가 보이지 않습니다. 모발의 밀도와 분포가 비교적 균일하게 보입니다.",
+      "gemini_advice": [
+        "건강한 두피 관리를 유지하세요.",
+        "규칙적인 생활 습관과 균형 잡힌 식단을 유지하세요."
+      ],
+      "analysis_time": 1.5507619380950928,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231225074112vWHR6I_sepia_jpg.rf.ad16553c963cba58bbcadb968f941cb0.jpg",
+      "filename": "20231225074112vWHR6I_sepia_jpg.rf.ad16553c963cba58bbcadb968f941cb0.jpg",
+      "true_level": 3,
+      "predicted_stage": 0,
+      "gemini_title": "정상",
+      "gemini_description": "전반적으로 모발이 균일하게 분포되어 있으며, 두피가 건강한 상태로 보입니다.",
+      "gemini_advice": [
+        "건강한 두피와 모발 유지를 위해 꾸준한 관리를 해주세요.",
+        "균형 잡힌 식습관과 규칙적인 생활 습관을 유지하세요."
+      ],
+      "analysis_time": 1.9909050464630127,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231226062922lMCITq_gauss_jpg.rf.e38f6682d1d46806492cb6d6e5c2b0e7.jpg",
+      "filename": "20231226062922lMCITq_gauss_jpg.rf.e38f6682d1d46806492cb6d6e5c2b0e7.jpg",
+      "true_level": 3,
+      "predicted_stage": 0,
+      "gemini_title": "정상 두피",
+      "gemini_description": "두피와 모발 상태가 양호합니다. 탈모 징후는 보이지 않습니다.",
+      "gemini_advice": [
+        "건강한 두피 관리를 위해 규칙적인 생활 습관을 유지하세요.",
+        "균형 잡힌 식단과 충분한 수분 섭취를 하세요."
+      ],
+      "analysis_time": 1.8544917106628418,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231227181434cW11aN_gauss_jpg.rf.a74b86769ecc1003a4bbc0f385ec27bc.jpg",
+      "filename": "20231227181434cW11aN_gauss_jpg.rf.a74b86769ecc1003a4bbc0f385ec27bc.jpg",
+      "true_level": 3,
+      "predicted_stage": 3,
+      "gemini_title": "심각한 탈모",
+      "gemini_description": "정수리 부분의 모발이 현저히 가늘어지고 탈모 범위가 넓게 나타납니다. 두피가 광범위하게 노출되어 있으며, 모발 밀도가 매우 낮습니다.",
+      "gemini_advice": [
+        "전문의와 상담하여 적극적인 치료를 고려하세요.",
+        "탈모 진행을 늦추기 위한 약물 치료 및 모발 이식 등을 고려할 수 있습니다."
+      ],
+      "analysis_time": 2.3095414638519287,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231227181434cW11aN_rgbshift_jpg.rf.09f2e77b51512460a7224428cfb9069f.jpg",
+      "filename": "20231227181434cW11aN_rgbshift_jpg.rf.09f2e77b51512460a7224428cfb9069f.jpg",
+      "true_level": 3,
+      "predicted_stage": 3,
+      "gemini_title": "심각한 탈모",
+      "gemini_description": "두피가 넓게 드러나 보이며, 모발이 현저하게 가늘어지고 숱이 매우 적어진 상태입니다. 탈모가 상당히 진행된 것으로 보입니다.",
+      "gemini_advice": [
+        "전문가와 상담하여 정확한 원인을 파악하십시오.",
+        "약물 치료 및 모발 이식 등 적극적인 치료를 고려하십시오."
+      ],
+      "analysis_time": 2.1426808834075928,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231228093404CvWZPa_channeldrop_jpg.rf.41b22b1135ef967412292a51645fd0cf.jpg",
+      "filename": "20231228093404CvWZPa_channeldrop_jpg.rf.41b22b1135ef967412292a51645fd0cf.jpg",
+      "true_level": 3,
+      "predicted_stage": 1,
+      "gemini_title": "초기 탈모",
+      "gemini_description": "정수리 부위의 모발 밀도가 약간 감소한 것으로 보입니다.",
+      "gemini_advice": [
+        "두피 마사지를 꾸준히 해주세요.",
+        "탈모 방지 샴푸를 사용해보세요."
+      ],
+      "analysis_time": 1.6555070877075195,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20231103110433jYqnpE_channeldrop_jpg.rf.55df1e29070651c505ba314ce661fb47.jpg",
+      "filename": "20231103110433jYqnpE_channeldrop_jpg.rf.55df1e29070651c505ba314ce661fb47.jpg",
+      "true_level": 4,
+      "predicted_stage": 0,
+      "gemini_title": "정상",
+      "gemini_description": "현재 탈모 징후는 보이지 않습니다.",
+      "gemini_advice": [
+        "건강한 두피 관리를 유지하세요.",
+        "정기적인 두피 상태 확인을 권장합니다."
+      ],
+      "analysis_time": 1.5692944526672363,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20231103110433jYqnpE_gauss_jpg.rf.f4145207e07c2fcc133f0a8919f4d132.jpg",
+      "filename": "20231103110433jYqnpE_gauss_jpg.rf.f4145207e07c2fcc133f0a8919f4d132.jpg",
+      "true_level": 4,
+      "predicted_stage": 3,
+      "gemini_title": "심각한 탈모",
+      "gemini_description": "두피가 광범위하게 노출되어 있으며, 모발 밀도가 현저히 감소한 상태입니다.",
+      "gemini_advice": [
+        "전문의와 상담하여 정확한 진단 및 치료 계획을 수립하세요.",
+        "탈모 진행을 늦추기 위한 약물 치료를 고려하세요."
+      ],
+      "analysis_time": 1.8975911140441895,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20231103110433jYqnpE_jpg.rf.6df1bf4c341b60688d94e7cac1c11fa6.jpg",
+      "filename": "20231103110433jYqnpE_jpg.rf.6df1bf4c341b60688d94e7cac1c11fa6.jpg",
+      "true_level": 4,
+      "predicted_stage": 3,
+      "gemini_title": "심각한 탈모",
+      "gemini_description": "두피가 넓게 드러나 보이며 모발이 현저히 줄어든 상태입니다.",
+      "gemini_advice": [
+        "전문의와 상담하여 정확한 원인을 파악하세요.",
+        "적극적인 치료 및 관리가 필요합니다."
+      ],
+      "analysis_time": 1.604234218597412,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20231120052324RHCSvi_sepia_jpg.rf.462ac1a91366dd8ba6a6777945a6f593.jpg",
+      "filename": "20231120052324RHCSvi_sepia_jpg.rf.462ac1a91366dd8ba6a6777945a6f593.jpg",
+      "true_level": 4,
+      "predicted_stage": 0,
+      "gemini_title": "정상",
+      "gemini_description": "현재 이미지에서 탈모 징후는 보이지 않습니다. 모발 밀도와 두피 상태가 양호합니다.",
+      "gemini_advice": [
+        "건강한 식습관을 유지하세요.",
+        "두피를 청결하게 관리하세요."
+      ],
+      "analysis_time": 1.732616901397705,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20231120052355OcUjWk_sepia_jpg.rf.cdeb55dba21f10c580c3ebbfd01318db.jpg",
+      "filename": "20231120052355OcUjWk_sepia_jpg.rf.cdeb55dba21f10c580c3ebbfd01318db.jpg",
+      "true_level": 4,
+      "predicted_stage": 0,
+      "gemini_title": "정상",
+      "gemini_description": "현재 이미지로는 탈모 징후가 보이지 않습니다. 모발 밀도가 양호하며, 두피가 건강한 상태로 판단됩니다.",
+      "gemini_advice": [
+        "균형 잡힌 식단을 유지하세요",
+        "스트레스 관리를 생활화하세요"
+      ],
+      "analysis_time": 1.776756763458252,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\202311200849306GXBax_rgbshift_jpg.rf.f04336b9c68681e03c9ce9c3ed22c4a1.jpg",
+      "filename": "202311200849306GXBax_rgbshift_jpg.rf.f04336b9c68681e03c9ce9c3ed22c4a1.jpg",
+      "true_level": 4,
+      "predicted_stage": 2,
+      "gemini_title": "중등도 탈모",
+      "gemini_description": "정수리 부위의 모발이 가늘어지고 탈모 범위가 넓어지고 있습니다. 이마 라인도 후퇴하고 있는 것으로 보입니다.",
+      "gemini_advice": [
+        "두피 스케일링 및 영양 공급을 시작하세요.",
+        "탈모 치료 병원 방문을 고려해보세요."
+      ],
+      "analysis_time": 1.8845233917236328,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\202311200849306GXBax_sepia_jpg.rf.54351e78be88a32ca30c1ce8bcff546b.jpg",
+      "filename": "202311200849306GXBax_sepia_jpg.rf.54351e78be88a32ca30c1ce8bcff546b.jpg",
+      "true_level": 4,
+      "predicted_stage": 2,
+      "gemini_title": "중등도 탈모",
+      "gemini_description": "정수리 부위와 앞머리 라인에서 모발 밀도가 감소되어 두피가 비교적 넓게 보이는 상태입니다.",
+      "gemini_advice": [
+        "탈모 진행을 늦추는 약물 치료를 고려해보세요.",
+        "두피 건강을 위한 생활 습관 개선이 필요합니다."
+      ],
+      "analysis_time": 2.242309808731079,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20231224095810ANM3Tb_jpg.rf.2e895f5a0fcc7106ac9de2e4c74dc524.jpg",
+      "filename": "20231224095810ANM3Tb_jpg.rf.2e895f5a0fcc7106ac9de2e4c74dc524.jpg",
+      "true_level": 5,
+      "predicted_stage": 2,
+      "gemini_title": "중등도 탈모",
+      "gemini_description": "정수리 부위와 앞머리 라인에서 탈모가 뚜렷하게 진행되고 있으며, 두피가 넓게 드러나는 것이 관찰됩니다.",
+      "gemini_advice": [
+        "탈모 진행을 늦추기 위해 전문의와 상담 후 적절한 치료를 고려하세요.",
+        "두피 건강을 위한 규칙적인 생활 습관과 균형 잡힌 식단을 유지하세요."
+      ],
+      "analysis_time": 1.8288421630859375,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\202312280934398IF2Jt_rgbshift_jpg.rf.be5794ebb373999581757e8891273feb.jpg",
+      "filename": "202312280934398IF2Jt_rgbshift_jpg.rf.be5794ebb373999581757e8891273feb.jpg",
+      "true_level": 5,
+      "predicted_stage": 3,
+      "gemini_title": "심각한 탈모",
+      "gemini_description": "정수리 부위와 앞머리 라인에서 광범위한 탈모가 진행되어 두피가 많이 드러나 보이는 상태입니다. 모발의 밀도가 현저히 낮아졌습니다.",
+      "gemini_advice": [
+        "전문의와 상담하여 정확한 원인을 파악하고 적극적인 치료를 고려하세요.",
+        "탈모 진행을 늦추기 위한 약물 치료 및 모발 이식 등의 방법을 고려해 볼 수 있습니다."
+      ],
+      "analysis_time": 2.168152332305908,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\202312301914187GAyAD_jpg.rf.1e6a0b6194f23996e77b71643a6e2ff1.jpg",
+      "filename": "202312301914187GAyAD_jpg.rf.1e6a0b6194f23996e77b71643a6e2ff1.jpg",
+      "true_level": 5,
+      "predicted_stage": 3,
+      "gemini_title": "심각한 탈모",
+      "gemini_description": "두피가 광범위하게 드러나 보이며, 모발 밀도가 현저히 낮아진 상태입니다.",
+      "gemini_advice": [
+        "전문의와 상담 후 적극적인 치료를 고려하세요.",
+        "두피 건강을 위한 생활 습관 개선이 필요합니다."
+      ],
+      "analysis_time": 1.8371589183807373,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20240103132359Pv6csI_sepia_jpg.rf.58de9bceecf5d69148e0c6b455c866e8.jpg",
+      "filename": "20240103132359Pv6csI_sepia_jpg.rf.58de9bceecf5d69148e0c6b455c866e8.jpg",
+      "true_level": 5,
+      "predicted_stage": 0,
+      "gemini_title": "정상 두피",
+      "gemini_description": "현재 이미지상으로는 탈모 징후가 보이지 않습니다. 건강한 두피 상태를 유지하고 있습니다.",
+      "gemini_advice": [
+        "건강한 식습관과 규칙적인 생활 습관을 유지하세요.",
+        "스트레스를 효과적으로 관리하세요."
+      ],
+      "analysis_time": 1.8549554347991943,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20240103132430lj9ibM_sepia_jpg.rf.c3a0a3fd138996c250c888196ebeeab7.jpg",
+      "filename": "20240103132430lj9ibM_sepia_jpg.rf.c3a0a3fd138996c250c888196ebeeab7.jpg",
+      "true_level": 5,
+      "predicted_stage": 0,
+      "gemini_title": "정상",
+      "gemini_description": "현재 이미지 상으로는 탈모가 관찰되지 않습니다.",
+      "gemini_advice": [
+        "건강한 두피 관리 유지",
+        "정기적인 두피 상태 점검"
+      ],
+      "analysis_time": 1.566767930984497,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20240109072235tZP15F_channeldrop_jpg.rf.0069f5b9a4203155b81f8f591678aa06.jpg",
+      "filename": "20240109072235tZP15F_channeldrop_jpg.rf.0069f5b9a4203155b81f8f591678aa06.jpg",
+      "true_level": 5,
+      "predicted_stage": 2,
+      "gemini_title": "중등도 탈모",
+      "gemini_description": "정수리 부위의 모발이 가늘어지고 두피가 넓게 보이는 중등도 탈모가 관찰됩니다. 탈모 범위가 명확하게 드러나고 있습니다.",
+      "gemini_advice": [
+        "탈모 치료 전문의와 상담하여 정확한 진단 및 치료 계획을 수립하세요.",
+        "두피 건강을 위한 생활 습관 개선 (균형 잡힌 식단, 스트레스 관리, 충분한 수면)"
+      ],
+      "analysis_time": 2.226450204849243,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20240112074015kN7E4b_rgbshift_jpg.rf.8702ae66f53063a8a3ece4d473b15a37.jpg",
+      "filename": "20240112074015kN7E4b_rgbshift_jpg.rf.8702ae66f53063a8a3ece4d473b15a37.jpg",
+      "true_level": 5,
+      "predicted_stage": 2,
+      "gemini_title": "중등도 탈모",
+      "gemini_description": "정수리 부위의 모발 밀도가 상당히 감소되어 두피가 넓게 보입니다. 모발 가늘어짐이 뚜렷하게 나타납니다.",
+      "gemini_advice": [
+        "탈모 치료 전문의와 상담하세요.",
+        "두피 건강 개선을 위한 제품을 사용하세요."
+      ],
+      "analysis_time": 2.2249858379364014,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\20231224094540Ln5VZt_rgbshift_jpg.rf.126bb810c66904a4d298e9cd2fa4a512.jpg",
+      "filename": "20231224094540Ln5VZt_rgbshift_jpg.rf.126bb810c66904a4d298e9cd2fa4a512.jpg",
+      "true_level": 6,
+      "predicted_stage": 2,
+      "gemini_title": "중등도 탈모",
+      "gemini_description": "정수리 부위의 모발이 가늘어지고 탈모 범위가 넓어지고 있습니다. 초기 단계를 넘어선 중등도 탈모로 보입니다.",
+      "gemini_advice": [
+        "탈모 치료 전문의와 상담하여 정확한 진단 및 치료 계획을 수립하세요.",
+        "두피에 자극을 주는 헤어 제품 사용을 줄이고, 두피 마사지를 꾸준히 해주세요."
+      ],
+      "analysis_time": 2.0945017337799072,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\20240101073644Ddtc1n_jpg.rf.131abcc18de314e5a354df3a598b05c7.jpg",
+      "filename": "20240101073644Ddtc1n_jpg.rf.131abcc18de314e5a354df3a598b05c7.jpg",
+      "true_level": 6,
+      "predicted_stage": 2,
+      "gemini_title": "중등도 탈모",
+      "gemini_description": "정수리 부위의 모발 밀도가 상당히 감소되어 두피가 넓게 보이는 상태입니다. 초기 탈모 단계를 넘어 중등도 탈모로 진행되었으며, 모발 가늘어짐 현상도 관찰됩니다.",
+      "gemini_advice": [
+        "탈모 치료를 고려해보세요",
+        "두피 스케일링 및 영양 공급을 통해 두피 환경을 개선하세요"
+      ],
+      "analysis_time": 1.9949321746826172,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\20240202104730bdOOXO_rgbshift_jpg.rf.8714fafb11a7465db731431deefb9b79.jpg",
+      "filename": "20240202104730bdOOXO_rgbshift_jpg.rf.8714fafb11a7465db731431deefb9b79.jpg",
+      "true_level": 6,
+      "predicted_stage": 2,
+      "gemini_title": "중등도 탈모",
+      "gemini_description": "정수리 부위의 모발 밀도가 감소되었고, 이마 라인이 후퇴하는 징후가 보입니다.",
+      "gemini_advice": [
+        "탈모 진행 속도를 늦추기 위한 약물 치료를 고려해보세요.",
+        "두피 건강을 위한 생활 습관 개선이 필요합니다."
+      ],
+      "analysis_time": 1.894434928894043,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\20240202104800D2eUmA_sepia_jpg.rf.f17025a13c980527bd4274bf6b48f882.jpg",
+      "filename": "20240202104800D2eUmA_sepia_jpg.rf.f17025a13c980527bd4274bf6b48f882.jpg",
+      "true_level": 6,
+      "predicted_stage": 2,
+      "gemini_title": "중등도 탈모",
+      "gemini_description": "정수리 부위의 모발이 가늘어지고 숱이 상당히 줄어든 상태입니다. 이마 라인도 후퇴하고 있습니다.",
+      "gemini_advice": [
+        "두피 스케일링 및 영양 공급을 시작하세요.",
+        "전문의와 상담하여 약물 치료를 고려하세요."
+      ],
+      "analysis_time": 1.7832541465759277,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\20240218141722wm6DJk_channeldrop_jpg.rf.2308bcdb6f64f60c9a9dc3d7d6f77da0.jpg",
+      "filename": "20240218141722wm6DJk_channeldrop_jpg.rf.2308bcdb6f64f60c9a9dc3d7d6f77da0.jpg",
+      "true_level": 6,
+      "predicted_stage": 0,
+      "gemini_title": "정상",
+      "gemini_description": "현재 이미지상으로는 탈모가 관찰되지 않습니다.",
+      "gemini_advice": [
+        "건강한 두피 및 모발 관리를 유지하세요.",
+        "정기적인 두피 상태 확인을 권장합니다."
+      ],
+      "analysis_time": 1.6844522953033447,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\eu-b297419e-9967-4674-984b-c00848cd4d38_gauss_jpg.rf.7806dfa08790435edf41f0eb89139547.jpg",
+      "filename": "eu-b297419e-9967-4674-984b-c00848cd4d38_gauss_jpg.rf.7806dfa08790435edf41f0eb89139547.jpg",
+      "true_level": 6,
+      "predicted_stage": 2,
+      "gemini_title": "중등도 탈모",
+      "gemini_description": "정수리 부위와 앞머리 라인에서 탈모가 진행되고 있으며, 모발이 가늘어지는 현상이 관찰됩니다.",
+      "gemini_advice": [
+        "탈모 치료를 고려해보세요.",
+        "두피 건강에 좋은 생활 습관을 유지하세요."
+      ],
+      "analysis_time": 1.7395799160003662,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\exhibition_202210_0000123_gauss_jpg.rf.08f98d2d77921c25d6fd07e5969412ce.jpg",
+      "filename": "exhibition_202210_0000123_gauss_jpg.rf.08f98d2d77921c25d6fd07e5969412ce.jpg",
+      "true_level": 6,
+      "predicted_stage": 3,
+      "gemini_title": "심각한 탈모",
+      "gemini_description": "정수리 부위의 광범위한 탈모가 확인됩니다. 모발이 상당히 가늘어지고 두피가 넓게 노출되어 있습니다.",
+      "gemini_advice": [
+        "전문의와 상담하여 정확한 원인을 파악하세요.",
+        "약물 치료 또는 모발 이식 등 적극적인 치료를 고려하세요."
+      ],
+      "analysis_time": 2.093458414077759,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20231103164336CCVTLU_channeldrop_jpg.rf.e60e04c0532b9826ad4c57369512eedc.jpg",
+      "filename": "20231103164336CCVTLU_channeldrop_jpg.rf.e60e04c0532b9826ad4c57369512eedc.jpg",
+      "true_level": 7,
+      "predicted_stage": 3,
+      "gemini_title": "심각한 탈모",
+      "gemini_description": "두피의 상당 부분이 노출된 심각한 탈모 상태입니다. 헤어라인이 상당히 후퇴했으며, 정수리 부위의 모발 밀도도 매우 낮습니다.",
+      "gemini_advice": [
+        "전문의와 상담하여 적극적인 치료를 고려하십시오.",
+        "탈모 진행을 늦추기 위한 약물 치료를 고려하십시오."
+      ],
+      "analysis_time": 1.911280870437622,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20231103164336CCVTLU_rgbshift_jpg.rf.bf8d335bea55b970d93fcf07dc69d357.jpg",
+      "filename": "20231103164336CCVTLU_rgbshift_jpg.rf.bf8d335bea55b970d93fcf07dc69d357.jpg",
+      "true_level": 7,
+      "predicted_stage": 3,
+      "gemini_title": "심각한 탈모",
+      "gemini_description": "정수리 부위와 앞머리 라인에서 광범위한 탈모가 진행된 상태입니다.",
+      "gemini_advice": [
+        "전문의와 상담하여 적극적인 치료를 고려하세요.",
+        "두피 건강을 위한 생활 습관 개선이 필요합니다."
+      ],
+      "analysis_time": 2.02131986618042,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20231103164336CCVTLU_sepia_jpg.rf.e82a48b78c833b21701eabad99ee1456.jpg",
+      "filename": "20231103164336CCVTLU_sepia_jpg.rf.e82a48b78c833b21701eabad99ee1456.jpg",
+      "true_level": 7,
+      "predicted_stage": 3,
+      "gemini_title": "심각한 탈모",
+      "gemini_description": "정수리 및 전두부에서 광범위한 탈모가 관찰됩니다. 모발이 거의 남아있지 않은 상태입니다.",
+      "gemini_advice": [
+        "전문의와 상담하여 적극적인 치료를 고려하세요.",
+        "두피에 자극을 주는 행동을 피하고, 모발 이식 등 근본적인 해결책을 고려해 보세요."
+      ],
+      "analysis_time": 1.8432273864746094,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20231103164923CD3dOM_jpg.rf.baa9ef8cd8a8876c684144b1996723af.jpg",
+      "filename": "20231103164923CD3dOM_jpg.rf.baa9ef8cd8a8876c684144b1996723af.jpg",
+      "true_level": 7,
+      "predicted_stage": 1,
+      "gemini_title": "초기 탈모",
+      "gemini_description": "정수리 부위의 모발이 다소 가늘어지고, 두피가 약간 비쳐 보이는 초기 탈모 단계입니다.",
+      "gemini_advice": [
+        "두피 건강 관리에 신경 쓰세요.",
+        "탈모 진행 여부를 주기적으로 관찰하세요."
+      ],
+      "analysis_time": 1.7408604621887207,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20231226165040dWTttW_jpg.rf.82f39866ebd79b6d31d60db1daeca9ab.jpg",
+      "filename": "20231226165040dWTttW_jpg.rf.82f39866ebd79b6d31d60db1daeca9ab.jpg",
+      "true_level": 7,
+      "predicted_stage": 3,
+      "gemini_title": "심각한 탈모",
+      "gemini_description": "두피 전체에 걸쳐 모발이 거의 보이지 않는 심각한 탈모 상태입니다.",
+      "gemini_advice": [
+        "전문의와 상담하여 적극적인 치료를 고려하세요.",
+        "두피 관리에 더욱 신경쓰고 자외선 노출을 최소화하세요."
+      ],
+      "analysis_time": 1.6374328136444092,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20231226165040dWTttW_rgbshift_jpg.rf.3e9f2276cf95168a538838230856f5fb.jpg",
+      "filename": "20231226165040dWTttW_rgbshift_jpg.rf.3e9f2276cf95168a538838230856f5fb.jpg",
+      "true_level": 7,
+      "predicted_stage": 3,
+      "gemini_title": "심각한 탈모",
+      "gemini_description": "두피 전체에 걸쳐 모발이 거의 보이지 않는 심각한 탈모 상태입니다.",
+      "gemini_advice": [
+        "전문의와 상담하여 적절한 치료 방법을 모색하세요.",
+        "탈모 진행을 늦추기 위한 약물 치료를 고려해 보세요."
+      ],
+      "analysis_time": 1.715566873550415,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20231226165040dWTttW_sepia_jpg.rf.1ec1b93e4d8b9625305a9502bb06f55f.jpg",
+      "filename": "20231226165040dWTttW_sepia_jpg.rf.1ec1b93e4d8b9625305a9502bb06f55f.jpg",
+      "true_level": 7,
+      "predicted_stage": 3,
+      "gemini_title": "심각한 탈모",
+      "gemini_description": "두피 전체에 걸쳐 모발이 거의 보이지 않는 심각한 탈모 상태입니다.",
+      "gemini_advice": [
+        "전문의와 상담하여 적절한 치료 방법을 결정하세요.",
+        "모발 이식 등 적극적인 치료를 고려해 보세요."
+      ],
+      "analysis_time": 1.6148474216461182,
+      "success": true,
+      "error": null,
+      "api_status": 200
+    }
+  ]
+}

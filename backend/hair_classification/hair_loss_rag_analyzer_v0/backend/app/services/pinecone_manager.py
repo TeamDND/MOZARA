@@ -1,5 +1,5 @@
 import os
-from pinecone import Pinecone, ServerlessSpec
+import pinecone
 import numpy as np
 from typing import List, Dict, Any, Tuple
 import logging
@@ -14,7 +14,10 @@ class PineconeManager:
 
         # Pinecone 클라이언트 초기화
         try:
-            self.pc = Pinecone(api_key=settings.PINECONE_API_KEY)
+            pinecone.init(
+                api_key=settings.PINECONE_API_KEY,
+                environment=settings.PINECONE_ENVIRONMENT
+            )
             self.index_name = settings.INDEX_NAME
             self.dimension = settings.EMBEDDING_DIMENSION
             logging.info("Pinecone 클라이언트 초기화 완료")
@@ -28,12 +31,12 @@ class PineconeManager:
         """Pinecone 인덱스 생성"""
         try:
             # 기존 인덱스 확인
-            existing_indexes = self.pc.list_indexes().names()
+            existing_indexes = pinecone.list_indexes()
 
             if self.index_name in existing_indexes:
                 if delete_if_exists:
                     self.logger.info(f"기존 인덱스 {self.index_name} 삭제 중...")
-                    self.pc.delete_index(self.index_name)
+                    pinecone.delete_index(self.index_name)
                     time.sleep(10)  # 삭제 완료 대기
                 else:
                     self.logger.info(f"인덱스 {self.index_name}이 이미 존재합니다.")
@@ -41,18 +44,14 @@ class PineconeManager:
 
             # 새 인덱스 생성
             self.logger.info(f"인덱스 {self.index_name} 생성 중...")
-            self.pc.create_index(
+            pinecone.create_index(
                 name=self.index_name,
                 dimension=self.dimension,
-                metric='cosine',
-                spec=ServerlessSpec(
-                    cloud='aws',
-                    region='us-east-1'
-                )
+                metric='cosine'
             )
 
             # 인덱스가 준비될 때까지 대기
-            while not self.pc.describe_index(self.index_name).status['ready']:
+            while not pinecone.describe_index(self.index_name).status['ready']:
                 time.sleep(1)
 
             self.logger.info(f"인덱스 {self.index_name} 생성 완료")
@@ -65,7 +64,7 @@ class PineconeManager:
     def get_index(self):
         """인덱스 객체 반환"""
         try:
-            return self.pc.Index(self.index_name)
+            return pinecone.Index(self.index_name)
         except Exception as e:
             self.logger.error(f"인덱스 연결 실패: {e}")
             raise
@@ -207,7 +206,7 @@ class PineconeManager:
     def index_exists(self) -> bool:
         """인덱스 존재 여부 확인"""
         try:
-            existing_indexes = self.pc.list_indexes().names()
+            existing_indexes = pinecone.list_indexes()
             return self.index_name in existing_indexes
         except Exception as e:
             self.logger.error(f"인덱스 존재 확인 실패: {e}")

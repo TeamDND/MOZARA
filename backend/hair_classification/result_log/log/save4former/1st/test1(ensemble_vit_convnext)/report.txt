@@ -1,0 +1,42 @@
+================================================================================
+Ensemble ConvNeXt+ViT Test (test1)
+================================================================================
+Run Date        : 2025-09-23 20:04:48
+Validation Root : C:\Users\301\Desktop\test_data_set\test
+Test Root       : C:\Users\301\Desktop\classification _test
+Indices         : conv='hair-loss-rag-analyzer', vit='hair-loss-vit-s16'
+Parameters      : top_k=10, Tconv=0.15, Tvit=0.2, override=True
+
+[Overall Metrics]
+----------------------------------------
+Accuracy  : 0.575
+Precision : 0.620
+Recall    : 0.575
+F1-Score  : 0.570
+
+[Per-class Metrics]
+----------------------------------------
+class 1: precision=0.000, recall=0.000, f1=0.000
+class 2: precision=0.533, recall=0.800, f1=0.640
+class 3: precision=0.875, recall=0.350, f1=0.500
+class 4: precision=0.706, recall=0.600, f1=0.649
+class 5: precision=0.533, recall=0.400, f1=0.457
+class 6: precision=0.435, recall=0.500, f1=0.465
+class 7: precision=0.640, recall=0.800, f1=0.711
+
+Per-class weights (conv/vit)
+  class 1: 0.502 / 0.498
+  class 2: 0.529 / 0.471
+  class 3: 0.508 / 0.492
+  class 4: 0.498 / 0.502
+  class 5: 0.500 / 0.500
+  class 6: 0.522 / 0.478
+  class 7: 0.500 / 0.500
+
+Strong mask (conv/vit)
+  conv: [0, 1, 0, 0, 0, 1, 0]
+  vit : [0, 0, 0, 0, 0, 0, 0]
+
+Tau (conv/vit)
+  conv: [0.0, 0.7, 0.0, 0.0, 0.0, 0.55, 0.0]
+  vit : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
