@@ -36,24 +36,13 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Deploy Python API to Runpod
+      - name: Deploy Python API to Runpod Pod
         run: |
-          echo "🚀 Runpod에 Python API 배포 중..."
+          echo "🚀 Runpod Pod에 Python API 배포 중..."
           
-          # Runpod API를 사용한 배포 (환경변수 포함)
-          curl -X POST "https://api.runpod.ai/v2/${{ secrets.RUNPOD_ENDPOINT_ID }}/run" \
+          # Runpod Pod API를 사용한 배포
+          curl -X POST "https://api.runpod.io/v2/${{ secrets.RUNPOD_POD_ID }}/restart" \
             -H "Authorization: Bearer ${{ secrets.RUNPOD_API_KEY }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "input": {
-                "GEMINI_API_KEY": "${{ secrets.GEMINI_API_KEY }}",
-                "OPENAI_API_KEY": "${{ secrets.OPENAI_API_KEY }}",
-                "YOUTUBE_API_KEY": "${{ secrets.YOUTUBE_API_KEY }}",
-                "ELEVEN_ST_API_KEY": "${{ secrets.ELEVEN_ST_API_KEY }}",
-                "PINECONE_API_KEY": "${{ secrets.PINECONE_API_KEY }}",
-                "PINECONE_ENVIRONMENT": "${{ secrets.PINECONE_ENVIRONMENT }}",
-                "PINECONE_INDEX_NAME": "${{ secrets.PINECONE_INDEX_NAME }}"
-              }
-            }'
+            -H "Content-Type: application/json"
           
-          echo "✅ Runpod 배포 요청 완료!"
+          echo "✅ Runpod Pod 재시작 완료!"
