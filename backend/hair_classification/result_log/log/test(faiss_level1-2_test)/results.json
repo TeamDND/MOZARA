@@ -1,0 +1,5906 @@
+{
+  "full_top_k_10": {
+    "metrics": {
+      "accuracy": 0.14634146341463414,
+      "precision": 0.5331010452961673,
+      "recall": 0.14634146341463414,
+      "f1": 0.22964352720450282
+    },
+    "misclassification": {
+      "misclassified_cases": [
+        {
+          "filename": "202311090555509eWyUn_jpg.rf.f7825a587b498e9e211a2c37893d14ba.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "202311140507485YT3wv_jpg.rf.1031c59f7ddafa0c68ed7c43201ac687.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "202312240752033lv1EX_jpg.rf.3b65bd355cd4939f8730cde4e8576447.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20231224135435509UpD_jpg.rf.3092acf254489f0aeef597ce399e30bc.jpg",
+          "true_level": 1,
+          "pred_level": 4,
+          "confidence": 0.7369590078180556,
+          "stage_scores": {
+            "4": 0.7369590078180556,
+            "3": 0.26304099218194454
+          }
+        },
+        {
+          "filename": "202401020937479el5vT_jpg.rf.f4f73132c3d7d7b4ab713b6f866a36bf.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 1.0,
+          "stage_scores": {
+            "2": 1.0
+          }
+        },
+        {
+          "filename": "202401091258185i1XAv_jpg.rf.eb2174cd979011f9c7ec7c2b46330e0f.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "2024011005233346UTOo_jpg.rf.ff2dac6398422762c9e86892345c8eaf.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240111140530a1LmVw_jpg.rf.977fdf5e94ff6e2168273d5d7af7a34b.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240113100243cYsaPh_jpg.rf.4847e31d078360c9a021c95070015eb8.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240129090307iqpvZZ_jpg.rf.6dc3498c5b9d265f135165efe1d8fb03.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "202402090616121bPjaV_jpg.rf.666ced168b7c40072b72f427c1eaa436.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240209063754yo7GoV_jpg.rf.04378c69a6d17ae1e4d27a6f1217bc0b.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.45334765684383355,
+          "stage_scores": {
+            "3": 0.45334765684383355,
+            "2": 0.3876972929237636,
+            "5": 0.158955050232403
+          }
+        },
+        {
+          "filename": "20240211175131a0OZmc_jpg.rf.55ad5ce1f2beafff3d648b3b8b00f3cd.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.6060926690895784,
+          "stage_scores": {
+            "2": 0.39390733091042174,
+            "3": 0.6060926690895784
+          }
+        },
+        {
+          "filename": "20240214173337HZZSRn_jpg.rf.89faf2153da419d9450a2648f04fa754.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240217044736IcauP7_jpg.rf.630db56df4ba7c0261cbcc753a2631ea.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.7055892024036207,
+          "stage_scores": {
+            "3": 0.7055892024036207,
+            "2": 0.29441079759637934
+          }
+        },
+        {
+          "filename": "20240217170513PNFPeO_jpg.rf.9a121b7b79d8bea4d539cb98eb75c65a.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240218044142lbB0i6_jpg.rf.53af6e44e00919abeff4f36f77238303.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240218141519F8suN8_jpg.rf.4ee0062b8784949dfd98ff4d3e568664.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240219020903XzbXG9_jpg.rf.3d641d6c4f1ace341199f4b5b96f536f.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240223095436na6dmB_jpg.rf.96583789d668cfa0bfc35713683367ee.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.40974518600834614,
+          "stage_scores": {
+            "3": 0.40974518600834614,
+            "2": 0.39249552719320924,
+            "5": 0.19775928679844465
+          }
+        },
+        {
+          "filename": "20240223163801YZpMcS_jpg.rf.3d79b466613486d06c0d6982a2ee1de6.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240224071448axsdpv_jpg.rf.ad4f4fe40741b81e846c0d18fe5bce7c.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240224071656Xas5S2_jpg.rf.0d83396c67a8272323497bb3a4d0b97f.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240224090843fym4nC_jpg.rf.d80859e749828a596d682cc3280e4139.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240225041055uQZDPJ_jpg.rf.cb4ba32d2ca7c68ef47599ff4a232453.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240226133614PaLGlu_jpg.rf.07d91f12d48766a2592bbac5e45ac8ee.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240227180634PqmAJX_jpg.rf.21dd5ab62f7dbd2f9b892fc7c49d4a0e.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.5688441829933475,
+          "stage_scores": {
+            "4": 0.4311558170066525,
+            "2": 0.5688441829933475
+          }
+        },
+        {
+          "filename": "20240228022345jEcVL5_jpg.rf.b935edc8b3e971487f610c95ab6246dc.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240228110123IPYpYd_jpg.rf.3e5aba8d4c58a3d308e3ab123a79f16a.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240229041720rQ8l0p_jpg.rf.8bb5e8029c0de71c1ee6d481e1e027b8.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240305141825xPajgw_jpg.rf.6718ccc922e7f4069f17eb60dc65734d.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.7600609491220658,
+          "stage_scores": {
+            "3": 0.7600609491220658,
+            "5": 0.23993905087793413
+          }
+        },
+        {
+          "filename": "20231109103954UbVvLx_jpg.rf.08bf8f0253ff6ec4a392e60407a7ca05.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5329214601437947,
+          "stage_scores": {
+            "3": 0.5329214601437947,
+            "2": 0.46707853985620523
+          }
+        },
+        {
+          "filename": "20231110070141qEi5wm_jpg.rf.20af76796b05405ce043227831af11b2.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20231130095830aHEvMd_jpg.rf.d9b2f9314d2120498c24129616d8006c.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5035291229784389,
+          "stage_scores": {
+            "3": 0.5035291229784389,
+            "2": 0.4964708770215612
+          }
+        },
+        {
+          "filename": "20231206043710OotqJs_jpg.rf.621d16a36fabb45a838cf73543a26577.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6765443181492652,
+          "stage_scores": {
+            "3": 0.6765443181492652,
+            "4": 0.12124968383136488,
+            "2": 0.20220599801936992
+          }
+        },
+        {
+          "filename": "20231222075010HDRqwK_jpg.rf.4e412fcbb2778e7599376a1cdd92cc7b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4496637829847002,
+          "stage_scores": {
+            "3": 0.4496637829847002,
+            "5": 0.1764490385025352,
+            "4": 0.2504580326850504,
+            "2": 0.12342914582771407
+          }
+        },
+        {
+          "filename": "20231222094424akH8Au_jpg.rf.cb2c90ea14b4ec3aa056d435ea661e2b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6174161550515305,
+          "stage_scores": {
+            "3": 0.6174161550515305,
+            "2": 0.3825838449484694
+          }
+        },
+        {
+          "filename": "20231224074531ch8RvS_jpg.rf.a2bc429ffd23cfcbb137b75f037d0804.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5394947565401963,
+          "stage_scores": {
+            "3": 0.5394947565401963,
+            "2": 0.46050524345980387
+          }
+        },
+        {
+          "filename": "20231224145323tlJNT7_jpg.rf.a0f8b009f18cdca339276c7ea92fc5dd.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5832257863978888,
+          "stage_scores": {
+            "3": 0.5832257863978888,
+            "4": 0.22114672988927944,
+            "2": 0.19562748371283176
+          }
+        },
+        {
+          "filename": "20231225045824PLLwSq_rgbshift_jpg.rf.6f9be6c655b371b35e1053761d7b6626.jpg",
+          "true_level": 2,
+          "pred_level": 5,
+          "confidence": 0.2655326908461385,
+          "stage_scores": {
+            "5": 0.2655326908461385,
+            "6": 0.2504765370864715,
+            "7": 0.18891880801326771,
+            "4": 0.16046854256635928,
+            "2": 0.13460342148776305
+          }
+        },
+        {
+          "filename": "20231225045824PLLwSq_sepia_jpg.rf.2f8315ce1666177e6f761a2b847eee43.jpg",
+          "true_level": 2,
+          "pred_level": 7,
+          "confidence": 0.2627752863630797,
+          "stage_scores": {
+            "7": 0.2627752863630797,
+            "5": 0.22487994675570303,
+            "6": 0.23774725628735105,
+            "4": 0.07604651723464398,
+            "2": 0.13682241569819498,
+            "3": 0.06172857766102706
+          }
+        },
+        {
+          "filename": "20231229055019q8obL0_jpg.rf.a44525ef4b70ca5326c02e646751cdd8.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4560997623290015,
+          "stage_scores": {
+            "3": 0.4560997623290015,
+            "2": 0.40602633125820364,
+            "4": 0.13787390641279462
+          }
+        },
+        {
+          "filename": "20231229090549BKawsC_jpg.rf.3ff75220704f4b6878ab84b9432e8ea4.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20231229224733KEgsWh_jpg.rf.cd866c1c8965270a5f78e6324a115e6a.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4623583841668286,
+          "stage_scores": {
+            "3": 0.4623583841668286,
+            "4": 0.19851181585913458,
+            "2": 0.13382551352386593,
+            "7": 0.11355003034732254,
+            "5": 0.09175425610284811
+          }
+        },
+        {
+          "filename": "20231231043028Q46NRr_jpg.rf.0227684b9bed2f5914efa7465b14b7b1.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20231231054651z4VGer_jpg.rf.076b97375abd482fa8d551e0fc2a7b26.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5961021487849992,
+          "stage_scores": {
+            "3": 0.5961021487849992,
+            "4": 0.21935373203764189,
+            "6": 0.18454411917735888
+          }
+        },
+        {
+          "filename": "20231231065720iJVyYt_jpg.rf.01d1f87df50ab17878cfca7bc4677a88.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.37846499217341234,
+          "stage_scores": {
+            "3": 0.37846499217341234,
+            "2": 0.2648629164943896,
+            "4": 0.2548068469826214,
+            "5": 0.10186524434957667
+          }
+        },
+        {
+          "filename": "202401021640493dHvsP_jpg.rf.f4be72debbbdf68d5a828157d52c3537.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "202401041207296cmQVL_jpg.rf.69bff8742738d3e61393f3984ad7174a.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240106121506HtPoQC_jpg.rf.cadedd2a52e97a75ad530554d1a3a58e.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "202401080941003KIfb2_gauss_jpg.rf.408f53e8c1028b97f71e56081c5c7c41.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.31922377141611036,
+          "stage_scores": {
+            "2": 0.2292069648007758,
+            "3": 0.31922377141611036,
+            "5": 0.16565691079270717,
+            "4": 0.2859123529904067
+          }
+        },
+        {
+          "filename": "20240109072410jkB2Mo_sepia_jpg.rf.a4fdad46ce5f129b21dbe7bb6a14c3fe.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240110043329FdhNwV_jpg.rf.99fcefece4cc66515201f00abaeb8e48.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240110161423irhZYT_jpg.rf.f522d126d27f9556ef4aaebc36469a89.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240110181024v6RUKz_jpg.rf.efae00619ff24a8ed2845e9bde7e8a48.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6636958375620311,
+          "stage_scores": {
+            "3": 0.6636958375620311,
+            "2": 0.33630416243796896
+          }
+        },
+        {
+          "filename": "20240111080420FDIESU_jpg.rf.726526b79b4ce44fa1710e5739269238.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4360431005629353,
+          "stage_scores": {
+            "3": 0.4360431005629353,
+            "4": 0.2867131016340748,
+            "5": 0.09959387765668105,
+            "6": 0.09291089349049614,
+            "2": 0.08473902665581265
+          }
+        },
+        {
+          "filename": "20240111181117uMGlb4_jpg.rf.f0a0b23d47eafad99f379f672b37d1f8.jpg",
+          "true_level": 2,
+          "pred_level": 4,
+          "confidence": 0.42991650470774057,
+          "stage_scores": {
+            "4": 0.42991650470774057,
+            "3": 0.3422097723571817,
+            "2": 0.22787372293507768
+          }
+        },
+        {
+          "filename": "20240112041805zFsaoN_jpg.rf.049f78390a56c8312fe7ea79256a44eb.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5236733606019439,
+          "stage_scores": {
+            "3": 0.5236733606019439,
+            "2": 0.27015662622742487,
+            "4": 0.1189022536865285,
+            "5": 0.08726775948410277
+          }
+        },
+        {
+          "filename": "202401120735396rfKJL_jpg.rf.f587c7e6e7671abe29172f3da76c95c6.jpg",
+          "true_level": 2,
+          "pred_level": 4,
+          "confidence": 0.46572115731360825,
+          "stage_scores": {
+            "4": 0.46572115731360825,
+            "3": 0.3871736871407433,
+            "2": 0.14710515554564846
+          }
+        },
+        {
+          "filename": "20240130072349uniDRh_jpg.rf.f943e9a84d533634fab73140c6a126d5.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240202110316tKibKR_jpg.rf.2025d9adac2414f743f3a786b7769767.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5543677810647123,
+          "stage_scores": {
+            "3": 0.5543677810647123,
+            "2": 0.4456322189352876
+          }
+        },
+        {
+          "filename": "20240219045157mzVfj7_jpg.rf.c9b45d0874181d11613377e6b334a901.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.48293033408777286,
+          "stage_scores": {
+            "3": 0.48293033408777286,
+            "4": 0.38423874375060446,
+            "5": 0.13283092216162265
+          }
+        },
+        {
+          "filename": "20240224194300kOjsFD_jpg.rf.0c13fa04922a01749826cec6cc657c47.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240226191121Dv7z5w_jpg.rf.eb0c2f4b31aebe5bbeaa9a01fb3434aa.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3540396993510217,
+          "stage_scores": {
+            "3": 0.3540396993510217,
+            "4": 0.24327828632364154,
+            "6": 0.1362534294920761,
+            "2": 0.10865584571508952,
+            "5": 0.15777273911817108
+          }
+        },
+        {
+          "filename": "20240228100442mIw9Zu_jpg.rf.334b9eea8eecabd6e884c210e7ca5b8b.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240228154416jXyC0M_gauss_jpg.rf.ac2af1c17a0d641455bc43da325ded4c.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.629264550958948,
+          "stage_scores": {
+            "5": 0.37073544904105205,
+            "3": 0.629264550958948
+          }
+        },
+        {
+          "filename": "202403051419132qBmCp_jpg.rf.da793fe65f18a09d455e7614e3522eff.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5817489097690002,
+          "stage_scores": {
+            "3": 0.5817489097690002,
+            "4": 0.22120348505249116,
+            "5": 0.19704760517850872
+          }
+        },
+        {
+          "filename": "20240306093756Nxspmr_jpg.rf.520a1e540048254439e49edc6e72083d.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240422192617LNrK9O_jpg.rf.4efd92c9f17ab9391444755665005c57.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240426114804vEJvCL_jpg.rf.e8b208c0e3afd026da67dc6b206f33b1.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5863272937687222,
+          "stage_scores": {
+            "3": 0.5863272937687222,
+            "4": 0.41367270623127783
+          }
+        }
+      ],
+      "total_misclassified": 70,
+      "level_1_as_2": 2,
+      "level_2_as_1": 0
+    },
+    "elapsed_time": 60.866004943847656,
+    "total_images": 82
+  },
+  "full_top_k_20": {
+    "metrics": {
+      "accuracy": 0.1951219512195122,
+      "precision": 0.47386759581881527,
+      "recall": 0.1951219512195122,
+      "f1": 0.2764227642276422
+    },
+    "misclassification": {
+      "misclassified_cases": [
+        {
+          "filename": "202311090555509eWyUn_jpg.rf.f7825a587b498e9e211a2c37893d14ba.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "202311140507485YT3wv_jpg.rf.1031c59f7ddafa0c68ed7c43201ac687.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "202312240752033lv1EX_jpg.rf.3b65bd355cd4939f8730cde4e8576447.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20231224135435509UpD_jpg.rf.3092acf254489f0aeef597ce399e30bc.jpg",
+          "true_level": 1,
+          "pred_level": 4,
+          "confidence": 0.38719448258053235,
+          "stage_scores": {
+            "4": 0.38719448258053235,
+            "3": 0.2556737299720069,
+            "5": 0.18121045818678644,
+            "6": 0.17592132926067441
+          }
+        },
+        {
+          "filename": "202401020937479el5vT_jpg.rf.f4f73132c3d7d7b4ab713b6f866a36bf.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.5616416517989244,
+          "stage_scores": {
+            "2": 0.5616416517989244,
+            "3": 0.23004463055045501,
+            "4": 0.2083137176506206
+          }
+        },
+        {
+          "filename": "202401091258185i1XAv_jpg.rf.eb2174cd979011f9c7ec7c2b46330e0f.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 1.0,
+          "stage_scores": {
+            "2": 1.0
+          }
+        },
+        {
+          "filename": "2024011005233346UTOo_jpg.rf.ff2dac6398422762c9e86892345c8eaf.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240111140530a1LmVw_jpg.rf.977fdf5e94ff6e2168273d5d7af7a34b.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240113100243cYsaPh_jpg.rf.4847e31d078360c9a021c95070015eb8.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240129090307iqpvZZ_jpg.rf.6dc3498c5b9d265f135165efe1d8fb03.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.46440036971290527,
+          "stage_scores": {
+            "3": 0.46440036971290527,
+            "4": 0.19558089393399117,
+            "2": 0.3400187363531035
+          }
+        },
+        {
+          "filename": "202402090616121bPjaV_jpg.rf.666ced168b7c40072b72f427c1eaa436.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.4282686455727361,
+          "stage_scores": {
+            "2": 0.4282686455727361,
+            "3": 0.41375420738568947,
+            "4": 0.15797714704157453
+          }
+        },
+        {
+          "filename": "20240209063754yo7GoV_jpg.rf.04378c69a6d17ae1e4d27a6f1217bc0b.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.3440711627164879,
+          "stage_scores": {
+            "3": 0.3440711627164879,
+            "2": 0.29424539058390986,
+            "5": 0.1933588637032679,
+            "4": 0.16832458299633454
+          }
+        },
+        {
+          "filename": "20240211175131a0OZmc_jpg.rf.55ad5ce1f2beafff3d648b3b8b00f3cd.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.39047363931942836,
+          "stage_scores": {
+            "2": 0.36267780058848853,
+            "3": 0.39047363931942836,
+            "6": 0.24684856009208328
+          }
+        },
+        {
+          "filename": "20240214173337HZZSRn_jpg.rf.89faf2153da419d9450a2648f04fa754.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240217044736IcauP7_jpg.rf.630db56df4ba7c0261cbcc753a2631ea.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.36819101462605974,
+          "stage_scores": {
+            "3": 0.36819101462605974,
+            "2": 0.27565162065345145,
+            "6": 0.20203000128573137,
+            "5": 0.08270991946903428,
+            "4": 0.07141744396572315
+          }
+        },
+        {
+          "filename": "20240217170513PNFPeO_jpg.rf.9a121b7b79d8bea4d539cb98eb75c65a.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240218044142lbB0i6_jpg.rf.53af6e44e00919abeff4f36f77238303.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240218141519F8suN8_jpg.rf.4ee0062b8784949dfd98ff4d3e568664.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240219020903XzbXG9_jpg.rf.3d641d6c4f1ace341199f4b5b96f536f.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.6585199650775888,
+          "stage_scores": {
+            "3": 0.6585199650775888,
+            "2": 0.34148003492241125
+          }
+        },
+        {
+          "filename": "20240223095436na6dmB_jpg.rf.96583789d668cfa0bfc35713683367ee.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.32203450679371143,
+          "stage_scores": {
+            "3": 0.32203450679371143,
+            "2": 0.30847733624338003,
+            "5": 0.15542663236247523,
+            "4": 0.2140615246004334
+          }
+        },
+        {
+          "filename": "20240223163801YZpMcS_jpg.rf.3d79b466613486d06c0d6982a2ee1de6.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240224071448axsdpv_jpg.rf.ad4f4fe40741b81e846c0d18fe5bce7c.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.7372954150150554,
+          "stage_scores": {
+            "3": 0.7372954150150554,
+            "2": 0.26270458498494476
+          }
+        },
+        {
+          "filename": "20240224071656Xas5S2_jpg.rf.0d83396c67a8272323497bb3a4d0b97f.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240224090843fym4nC_jpg.rf.d80859e749828a596d682cc3280e4139.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.593673281848584,
+          "stage_scores": {
+            "3": 0.593673281848584,
+            "6": 0.4063267181514161
+          }
+        },
+        {
+          "filename": "20240225041055uQZDPJ_jpg.rf.cb4ba32d2ca7c68ef47599ff4a232453.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.41962903569445303,
+          "stage_scores": {
+            "3": 0.3981928730568427,
+            "2": 0.41962903569445303,
+            "4": 0.18217809124870435
+          }
+        },
+        {
+          "filename": "20240226133614PaLGlu_jpg.rf.07d91f12d48766a2592bbac5e45ac8ee.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 1.0,
+          "stage_scores": {
+            "2": 1.0
+          }
+        },
+        {
+          "filename": "20240227180634PqmAJX_jpg.rf.21dd5ab62f7dbd2f9b892fc7c49d4a0e.jpg",
+          "true_level": 1,
+          "pred_level": 4,
+          "confidence": 0.37363053071835156,
+          "stage_scores": {
+            "4": 0.37363053071835156,
+            "2": 0.36449636663226237,
+            "3": 0.261873102649386
+          }
+        },
+        {
+          "filename": "20240228022345jEcVL5_jpg.rf.b935edc8b3e971487f610c95ab6246dc.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.4748936391930457,
+          "stage_scores": {
+            "3": 0.4748936391930457,
+            "2": 0.35145869479712993,
+            "5": 0.17364766600982431
+          }
+        },
+        {
+          "filename": "20240228110123IPYpYd_jpg.rf.3e5aba8d4c58a3d308e3ab123a79f16a.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240229041720rQ8l0p_jpg.rf.8bb5e8029c0de71c1ee6d481e1e027b8.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240305141825xPajgw_jpg.rf.6718ccc922e7f4069f17eb60dc65734d.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.4468840196464759,
+          "stage_scores": {
+            "3": 0.4468840196464759,
+            "5": 0.23977418381473425,
+            "4": 0.20584040303455203,
+            "2": 0.10750139350423785
+          }
+        },
+        {
+          "filename": "20231109103954UbVvLx_jpg.rf.08bf8f0253ff6ec4a392e60407a7ca05.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5339310960387879,
+          "stage_scores": {
+            "3": 0.5339310960387879,
+            "2": 0.4660689039612121
+          }
+        },
+        {
+          "filename": "20231110070141qEi5wm_jpg.rf.20af76796b05405ce043227831af11b2.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20231130095830aHEvMd_jpg.rf.d9b2f9314d2120498c24129616d8006c.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5035291229784389,
+          "stage_scores": {
+            "3": 0.5035291229784389,
+            "2": 0.4964708770215612
+          }
+        },
+        {
+          "filename": "20231206043710OotqJs_jpg.rf.621d16a36fabb45a838cf73543a26577.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6765443181492652,
+          "stage_scores": {
+            "3": 0.6765443181492652,
+            "4": 0.12124968383136488,
+            "2": 0.20220599801936992
+          }
+        },
+        {
+          "filename": "20231222075010HDRqwK_jpg.rf.4e412fcbb2778e7599376a1cdd92cc7b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4099589606492321,
+          "stage_scores": {
+            "3": 0.4099589606492321,
+            "5": 0.16086878056291434,
+            "4": 0.22834286115790706,
+            "2": 0.1125304866704683,
+            "6": 0.08829891095947821
+          }
+        },
+        {
+          "filename": "20231222094424akH8Au_jpg.rf.cb2c90ea14b4ec3aa056d435ea661e2b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4411827924167022,
+          "stage_scores": {
+            "3": 0.4411827924167022,
+            "2": 0.273380292476793,
+            "4": 0.2024051237370204,
+            "5": 0.08303179136948426
+          }
+        },
+        {
+          "filename": "20231224074531ch8RvS_jpg.rf.a2bc429ffd23cfcbb137b75f037d0804.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4170360418518162,
+          "stage_scores": {
+            "3": 0.4170360418518162,
+            "2": 0.35597618263445474,
+            "4": 0.22698777551372912
+          }
+        },
+        {
+          "filename": "20231224145323tlJNT7_jpg.rf.a0f8b009f18cdca339276c7ea92fc5dd.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4466921007317919,
+          "stage_scores": {
+            "3": 0.4466921007317919,
+            "4": 0.16937607981005068,
+            "2": 0.2746475069034129,
+            "5": 0.10928431255474455
+          }
+        },
+        {
+          "filename": "20231225045824PLLwSq_rgbshift_jpg.rf.6f9be6c655b371b35e1053761d7b6626.jpg",
+          "true_level": 2,
+          "pred_level": 5,
+          "confidence": 0.2523345469003715,
+          "stage_scores": {
+            "5": 0.2523345469003715,
+            "6": 0.23802675027878972,
+            "7": 0.1795287113954972,
+            "4": 0.15249254941534854,
+            "2": 0.12791303874533216,
+            "3": 0.049704403264660926
+          }
+        },
+        {
+          "filename": "20231225045824PLLwSq_sepia_jpg.rf.2f8315ce1666177e6f761a2b847eee43.jpg",
+          "true_level": 2,
+          "pred_level": 7,
+          "confidence": 0.2359290437104543,
+          "stage_scores": {
+            "7": 0.2359290437104543,
+            "5": 0.20190525342791638,
+            "6": 0.21345798380429423,
+            "4": 0.11779052393924193,
+            "2": 0.12284405485996587,
+            "3": 0.10807314025812713
+          }
+        },
+        {
+          "filename": "20231229055019q8obL0_jpg.rf.a44525ef4b70ca5326c02e646751cdd8.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4560997623290015,
+          "stage_scores": {
+            "3": 0.4560997623290015,
+            "2": 0.40602633125820364,
+            "4": 0.13787390641279462
+          }
+        },
+        {
+          "filename": "20231229090549BKawsC_jpg.rf.3ff75220704f4b6878ab84b9432e8ea4.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.7077548676062015,
+          "stage_scores": {
+            "3": 0.7077548676062015,
+            "4": 0.29224513239379846
+          }
+        },
+        {
+          "filename": "20231229224733KEgsWh_jpg.rf.cd866c1c8965270a5f78e6324a115e6a.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.42841361210312795,
+          "stage_scores": {
+            "3": 0.42841361210312795,
+            "4": 0.18393775692121278,
+            "2": 0.12400050178311153,
+            "7": 0.10521357527273391,
+            "5": 0.0850179722677489,
+            "6": 0.07341658165206479
+          }
+        },
+        {
+          "filename": "20231231043028Q46NRr_jpg.rf.0227684b9bed2f5914efa7465b14b7b1.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20231231054651z4VGer_jpg.rf.076b97375abd482fa8d551e0fc2a7b26.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3778633964826731,
+          "stage_scores": {
+            "3": 0.3778633964826731,
+            "4": 0.2416975311576054,
+            "6": 0.11698073529074123,
+            "5": 0.0943380062012419,
+            "2": 0.16912033086773853
+          }
+        },
+        {
+          "filename": "20231231065720iJVyYt_jpg.rf.01d1f87df50ab17878cfca7bc4677a88.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3478080314661011,
+          "stage_scores": {
+            "3": 0.3478080314661011,
+            "2": 0.2434081130338047,
+            "4": 0.23416661959714943,
+            "5": 0.17461723590294473
+          }
+        },
+        {
+          "filename": "202401041207296cmQVL_jpg.rf.69bff8742738d3e61393f3984ad7174a.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4599473983770036,
+          "stage_scores": {
+            "3": 0.4599473983770036,
+            "2": 0.3855636880283897,
+            "4": 0.15448891359460676
+          }
+        },
+        {
+          "filename": "202401080941003KIfb2_gauss_jpg.rf.408f53e8c1028b97f71e56081c5c7c41.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.2935255413485984,
+          "stage_scores": {
+            "2": 0.29125753410867883,
+            "3": 0.2935255413485984,
+            "5": 0.15232115767213159,
+            "4": 0.2628957668705913
+          }
+        },
+        {
+          "filename": "20240110043329FdhNwV_jpg.rf.99fcefece4cc66515201f00abaeb8e48.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5817185956113566,
+          "stage_scores": {
+            "3": 0.5817185956113566,
+            "4": 0.22348955593996747,
+            "2": 0.19479184844867575
+          }
+        },
+        {
+          "filename": "20240110161423irhZYT_jpg.rf.f522d126d27f9556ef4aaebc36469a89.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6080890902666057,
+          "stage_scores": {
+            "2": 0.3919109097333943,
+            "3": 0.6080890902666057
+          }
+        },
+        {
+          "filename": "20240110181024v6RUKz_jpg.rf.efae00619ff24a8ed2845e9bde7e8a48.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6051162043006463,
+          "stage_scores": {
+            "3": 0.6051162043006463,
+            "2": 0.3066210253969714,
+            "4": 0.08826277030238235
+          }
+        },
+        {
+          "filename": "20240111080420FDIESU_jpg.rf.726526b79b4ce44fa1710e5739269238.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3824100971922782,
+          "stage_scores": {
+            "3": 0.3824100971922782,
+            "4": 0.25144758607724177,
+            "5": 0.1538271474821428,
+            "6": 0.137998984959231,
+            "2": 0.07431618428910619
+          }
+        },
+        {
+          "filename": "20240111181117uMGlb4_jpg.rf.f0a0b23d47eafad99f379f672b37d1f8.jpg",
+          "true_level": 2,
+          "pred_level": 4,
+          "confidence": 0.42991650470774057,
+          "stage_scores": {
+            "4": 0.42991650470774057,
+            "3": 0.3422097723571817,
+            "2": 0.22787372293507768
+          }
+        },
+        {
+          "filename": "20240112041805zFsaoN_jpg.rf.049f78390a56c8312fe7ea79256a44eb.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4322642582888628,
+          "stage_scores": {
+            "3": 0.4322642582888628,
+            "2": 0.22299979804927636,
+            "4": 0.13997264189709357,
+            "5": 0.1098348625664063,
+            "6": 0.09492843919836091
+          }
+        },
+        {
+          "filename": "202401120735396rfKJL_jpg.rf.f587c7e6e7671abe29172f3da76c95c6.jpg",
+          "true_level": 2,
+          "pred_level": 4,
+          "confidence": 0.46572115731360825,
+          "stage_scores": {
+            "4": 0.46572115731360825,
+            "3": 0.3871736871407433,
+            "2": 0.14710515554564846
+          }
+        },
+        {
+          "filename": "20240130072349uniDRh_jpg.rf.f943e9a84d533634fab73140c6a126d5.jpg",
+          "true_level": 2,
+          "pred_level": 4,
+          "confidence": 1.0,
+          "stage_scores": {
+            "4": 1.0
+          }
+        },
+        {
+          "filename": "20240219045157mzVfj7_jpg.rf.c9b45d0874181d11613377e6b334a901.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.31960329132673376,
+          "stage_scores": {
+            "3": 0.31960329132673376,
+            "4": 0.2542891976125545,
+            "5": 0.14666975116190717,
+            "2": 0.14042382107619555,
+            "6": 0.1390139388226091
+          }
+        },
+        {
+          "filename": "20240224194300kOjsFD_jpg.rf.0c13fa04922a01749826cec6cc657c47.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240226191121Dv7z5w_jpg.rf.eb0c2f4b31aebe5bbeaa9a01fb3434aa.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3163277526414795,
+          "stage_scores": {
+            "3": 0.3163277526414795,
+            "4": 0.21736453205754258,
+            "6": 0.12173985352470143,
+            "2": 0.14818928013443974,
+            "5": 0.14096694829654974,
+            "7": 0.055411633345287085
+          }
+        },
+        {
+          "filename": "20240228100442mIw9Zu_jpg.rf.334b9eea8eecabd6e884c210e7ca5b8b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240228154416jXyC0M_gauss_jpg.rf.ac2af1c17a0d641455bc43da325ded4c.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.2719423367906414,
+          "stage_scores": {
+            "5": 0.23346588640555735,
+            "3": 0.2719423367906414,
+            "2": 0.11871222424593704,
+            "4": 0.20301140114439148,
+            "6": 0.1728681514134728
+          }
+        },
+        {
+          "filename": "202403051419132qBmCp_jpg.rf.da793fe65f18a09d455e7614e3522eff.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.33940728357521205,
+          "stage_scores": {
+            "3": 0.33940728357521205,
+            "4": 0.22761866734371242,
+            "5": 0.1837264851633035,
+            "2": 0.17438927137314678,
+            "6": 0.07485829254462514
+          }
+        },
+        {
+          "filename": "20240306093756Nxspmr_jpg.rf.520a1e540048254439e49edc6e72083d.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.7446752033422773,
+          "stage_scores": {
+            "3": 0.7446752033422773,
+            "2": 0.2553247966577226
+          }
+        },
+        {
+          "filename": "20240422192617LNrK9O_jpg.rf.4efd92c9f17ab9391444755665005c57.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.7156725490967893,
+          "stage_scores": {
+            "3": 0.7156725490967893,
+            "4": 0.2843274509032107
+          }
+        },
+        {
+          "filename": "20240426114804vEJvCL_jpg.rf.e8b208c0e3afd026da67dc6b206f33b1.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5100403678045452,
+          "stage_scores": {
+            "3": 0.5100403678045452,
+            "4": 0.35984983383722163,
+            "2": 0.1301097983582331
+          }
+        }
+      ],
+      "total_misclassified": 66,
+      "level_1_as_2": 5,
+      "level_2_as_1": 0
+    },
+    "elapsed_time": 63.52700066566467,
+    "total_images": 82
+  },
+  "full_top_k_30": {
+    "metrics": {
+      "accuracy": 0.23170731707317074,
+      "precision": 0.40748528174936927,
+      "recall": 0.23170731707317074,
+      "f1": 0.29542682926829267
+    },
+    "misclassification": {
+      "misclassified_cases": [
+        {
+          "filename": "202311090555509eWyUn_jpg.rf.f7825a587b498e9e211a2c37893d14ba.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.511852972803821,
+          "stage_scores": {
+            "3": 0.4881470271961789,
+            "2": 0.511852972803821
+          }
+        },
+        {
+          "filename": "202311140507485YT3wv_jpg.rf.1031c59f7ddafa0c68ed7c43201ac687.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "202312240752033lv1EX_jpg.rf.3b65bd355cd4939f8730cde4e8576447.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20231224135435509UpD_jpg.rf.3092acf254489f0aeef597ce399e30bc.jpg",
+          "true_level": 1,
+          "pred_level": 4,
+          "confidence": 0.44306834610036666,
+          "stage_scores": {
+            "4": 0.44306834610036666,
+            "3": 0.26131546860233223,
+            "5": 0.09222823257822832,
+            "6": 0.16743485064638391,
+            "2": 0.035953102072688856
+          }
+        },
+        {
+          "filename": "202401020937479el5vT_jpg.rf.f4f73132c3d7d7b4ab713b6f866a36bf.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.5238170485556013,
+          "stage_scores": {
+            "2": 0.5238170485556013,
+            "3": 0.24951905140997116,
+            "4": 0.2266639000344277
+          }
+        },
+        {
+          "filename": "202401091258185i1XAv_jpg.rf.eb2174cd979011f9c7ec7c2b46330e0f.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.5305998637637055,
+          "stage_scores": {
+            "2": 0.5305998637637055,
+            "3": 0.3767879532834453,
+            "4": 0.09261218295284923
+          }
+        },
+        {
+          "filename": "2024011005233346UTOo_jpg.rf.ff2dac6398422762c9e86892345c8eaf.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.636849556564356,
+          "stage_scores": {
+            "3": 0.636849556564356,
+            "4": 0.36315044343564395
+          }
+        },
+        {
+          "filename": "20240111140530a1LmVw_jpg.rf.977fdf5e94ff6e2168273d5d7af7a34b.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.7786081025021065,
+          "stage_scores": {
+            "3": 0.7786081025021065,
+            "2": 0.22139189749789348
+          }
+        },
+        {
+          "filename": "20240113100243cYsaPh_jpg.rf.4847e31d078360c9a021c95070015eb8.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.6326833860488064,
+          "stage_scores": {
+            "3": 0.24324169398851922,
+            "2": 0.6326833860488064,
+            "5": 0.12407491996267453
+          }
+        },
+        {
+          "filename": "20240129090307iqpvZZ_jpg.rf.6dc3498c5b9d265f135165efe1d8fb03.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.462512204759728,
+          "stage_scores": {
+            "3": 0.462512204759728,
+            "4": 0.23741740822768487,
+            "2": 0.3000703870125872
+          }
+        },
+        {
+          "filename": "202402090616121bPjaV_jpg.rf.666ced168b7c40072b72f427c1eaa436.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.464978679240747,
+          "stage_scores": {
+            "2": 0.464978679240747,
+            "3": 0.35693517337630865,
+            "4": 0.10654079833014443,
+            "5": 0.07154534905279995
+          }
+        },
+        {
+          "filename": "20240209063754yo7GoV_jpg.rf.04378c69a6d17ae1e4d27a6f1217bc0b.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.32851695179945384,
+          "stage_scores": {
+            "3": 0.32851695179945384,
+            "2": 0.3213944634166011,
+            "5": 0.1700308108394274,
+            "4": 0.1530637219029974,
+            "7": 0.02699405204152032
+          }
+        },
+        {
+          "filename": "20240211175131a0OZmc_jpg.rf.55ad5ce1f2beafff3d648b3b8b00f3cd.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.3570503756726759,
+          "stage_scores": {
+            "2": 0.2621817808921356,
+            "3": 0.3570503756726759,
+            "6": 0.1513950511498507,
+            "4": 0.15679155386227375,
+            "7": 0.04180999763522529,
+            "5": 0.030771240787838938
+          }
+        },
+        {
+          "filename": "20240214173337HZZSRn_jpg.rf.89faf2153da419d9450a2648f04fa754.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240217044736IcauP7_jpg.rf.630db56df4ba7c0261cbcc753a2631ea.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.3503032434192657,
+          "stage_scores": {
+            "3": 0.3503032434192657,
+            "2": 0.3092935544490201,
+            "6": 0.10843307769337857,
+            "5": 0.10338034929785928,
+            "4": 0.12858977514047623
+          }
+        },
+        {
+          "filename": "20240217170513PNFPeO_jpg.rf.9a121b7b79d8bea4d539cb98eb75c65a.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240218044142lbB0i6_jpg.rf.53af6e44e00919abeff4f36f77238303.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.6796334192714664,
+          "stage_scores": {
+            "3": 0.6796334192714664,
+            "2": 0.22507075409714114,
+            "4": 0.09529582663139259
+          }
+        },
+        {
+          "filename": "20240218141519F8suN8_jpg.rf.4ee0062b8784949dfd98ff4d3e568664.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.7802621107575964,
+          "stage_scores": {
+            "3": 0.7802621107575964,
+            "2": 0.21973788924240345
+          }
+        },
+        {
+          "filename": "20240219020903XzbXG9_jpg.rf.3d641d6c4f1ace341199f4b5b96f536f.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.5464975877570649,
+          "stage_scores": {
+            "3": 0.5464975877570649,
+            "2": 0.3761112529632015,
+            "4": 0.07739115927973375
+          }
+        },
+        {
+          "filename": "20240223095436na6dmB_jpg.rf.96583789d668cfa0bfc35713683367ee.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.3494173003991048,
+          "stage_scores": {
+            "3": 0.3072652346747047,
+            "2": 0.3494173003991048,
+            "5": 0.15746634036074025,
+            "4": 0.1858511245654503
+          }
+        },
+        {
+          "filename": "20240223163801YZpMcS_jpg.rf.3d79b466613486d06c0d6982a2ee1de6.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240224071448axsdpv_jpg.rf.ad4f4fe40741b81e846c0d18fe5bce7c.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.4820116293529689,
+          "stage_scores": {
+            "3": 0.4820116293529689,
+            "2": 0.19314947811232458,
+            "6": 0.0691035654602492,
+            "4": 0.2079864664951091,
+            "5": 0.04774886057934821
+          }
+        },
+        {
+          "filename": "20240224071656Xas5S2_jpg.rf.0d83396c67a8272323497bb3a4d0b97f.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.5172515940372122,
+          "stage_scores": {
+            "3": 0.5172515940372122,
+            "5": 0.12452798615216767,
+            "4": 0.19545873384463197,
+            "6": 0.0869368142727272,
+            "2": 0.07582487169326106
+          }
+        },
+        {
+          "filename": "20240224090843fym4nC_jpg.rf.d80859e749828a596d682cc3280e4139.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.38098574940073193,
+          "stage_scores": {
+            "3": 0.38098574940073193,
+            "6": 0.20525075030426185,
+            "5": 0.08973916490142698,
+            "2": 0.14524094608288082,
+            "4": 0.17878338931069826
+          }
+        },
+        {
+          "filename": "20240225041055uQZDPJ_jpg.rf.cb4ba32d2ca7c68ef47599ff4a232453.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.4856595061134265,
+          "stage_scores": {
+            "3": 0.39153912445421074,
+            "2": 0.4856595061134265,
+            "4": 0.12280136943236292
+          }
+        },
+        {
+          "filename": "20240226133614PaLGlu_jpg.rf.07d91f12d48766a2592bbac5e45ac8ee.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.6148922040154613,
+          "stage_scores": {
+            "2": 0.6148922040154613,
+            "3": 0.3851077959845386
+          }
+        },
+        {
+          "filename": "20240227180634PqmAJX_jpg.rf.21dd5ab62f7dbd2f9b892fc7c49d4a0e.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.387090025534326,
+          "stage_scores": {
+            "4": 0.2709260598856531,
+            "2": 0.387090025534326,
+            "3": 0.3419839145800209
+          }
+        },
+        {
+          "filename": "20240228022345jEcVL5_jpg.rf.b935edc8b3e971487f610c95ab6246dc.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.4196344760445053,
+          "stage_scores": {
+            "3": 0.4196344760445053,
+            "2": 0.3128729027642866,
+            "5": 0.08617825873963944,
+            "6": 0.14209325571446718,
+            "4": 0.03922110673710151
+          }
+        },
+        {
+          "filename": "20240228110123IPYpYd_jpg.rf.3e5aba8d4c58a3d308e3ab123a79f16a.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 1.0,
+          "stage_scores": {
+            "2": 1.0
+          }
+        },
+        {
+          "filename": "20240229041720rQ8l0p_jpg.rf.8bb5e8029c0de71c1ee6d481e1e027b8.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.5315889748513494,
+          "stage_scores": {
+            "3": 0.5315889748513494,
+            "4": 0.31673588851933815,
+            "2": 0.1516751366293125
+          }
+        },
+        {
+          "filename": "20240305141825xPajgw_jpg.rf.6718ccc922e7f4069f17eb60dc65734d.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.4958615399902022,
+          "stage_scores": {
+            "3": 0.4958615399902022,
+            "5": 0.13985161239500146,
+            "4": 0.21505295938461372,
+            "2": 0.10388630767530509,
+            "6": 0.04534758055487756
+          }
+        },
+        {
+          "filename": "20231110070141qEi5wm_jpg.rf.20af76796b05405ce043227831af11b2.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.8328735212565715,
+          "stage_scores": {
+            "3": 0.8328735212565715,
+            "2": 0.1671264787434285
+          }
+        },
+        {
+          "filename": "20231206043710OotqJs_jpg.rf.621d16a36fabb45a838cf73543a26577.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.57130089851844,
+          "stage_scores": {
+            "3": 0.57130089851844,
+            "4": 0.17633254137365273,
+            "2": 0.2523665601079075
+          }
+        },
+        {
+          "filename": "20231222075010HDRqwK_jpg.rf.4e412fcbb2778e7599376a1cdd92cc7b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4064649383086288,
+          "stage_scores": {
+            "3": 0.4064649383086288,
+            "5": 0.1176526482869062,
+            "4": 0.20009151899099123,
+            "2": 0.16719431387614536,
+            "6": 0.1085965805373286
+          }
+        },
+        {
+          "filename": "20231222094424akH8Au_jpg.rf.cb2c90ea14b4ec3aa056d435ea661e2b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.44663800308394563,
+          "stage_scores": {
+            "3": 0.44663800308394563,
+            "2": 0.24011324136534212,
+            "4": 0.18066667981512058,
+            "5": 0.1027342853254341,
+            "6": 0.0298477904101574
+          }
+        },
+        {
+          "filename": "20231224074531ch8RvS_jpg.rf.a2bc429ffd23cfcbb137b75f037d0804.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4493760198938507,
+          "stage_scores": {
+            "3": 0.4493760198938507,
+            "2": 0.343741972685576,
+            "4": 0.20688200742057333
+          }
+        },
+        {
+          "filename": "20231224145323tlJNT7_jpg.rf.a0f8b009f18cdca339276c7ea92fc5dd.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4162797232308913,
+          "stage_scores": {
+            "3": 0.4162797232308913,
+            "4": 0.19725950764507522,
+            "2": 0.26476257221876853,
+            "5": 0.049027869435725964,
+            "6": 0.0726703274695392
+          }
+        },
+        {
+          "filename": "20231225045824PLLwSq_rgbshift_jpg.rf.6f9be6c655b371b35e1053761d7b6626.jpg",
+          "true_level": 2,
+          "pred_level": 6,
+          "confidence": 0.25467793985608084,
+          "stage_scores": {
+            "5": 0.22159144862837138,
+            "6": 0.25467793985608084,
+            "7": 0.19141539077284128,
+            "4": 0.13664145657161597,
+            "2": 0.11806538830527274,
+            "3": 0.07760837586581754
+          }
+        },
+        {
+          "filename": "20231225045824PLLwSq_sepia_jpg.rf.2f8315ce1666177e6f761a2b847eee43.jpg",
+          "true_level": 2,
+          "pred_level": 7,
+          "confidence": 0.26410846787144227,
+          "stage_scores": {
+            "7": 0.26410846787144227,
+            "5": 0.20736851202813716,
+            "6": 0.22147430771670779,
+            "4": 0.10149907278298088,
+            "2": 0.11374112507021572,
+            "3": 0.09180851453051604
+          }
+        },
+        {
+          "filename": "20231229090549BKawsC_jpg.rf.3ff75220704f4b6878ab84b9432e8ea4.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5880172593938633,
+          "stage_scores": {
+            "3": 0.5880172593938633,
+            "4": 0.14402336291005538,
+            "2": 0.2679593776960814
+          }
+        },
+        {
+          "filename": "20231229224733KEgsWh_jpg.rf.cd866c1c8965270a5f78e6324a115e6a.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.46314217081243,
+          "stage_scores": {
+            "3": 0.46314217081243,
+            "4": 0.17694919964203654,
+            "2": 0.12371357143043736,
+            "7": 0.1013504866023733,
+            "5": 0.06743854862701235,
+            "6": 0.06740602288571032
+          }
+        },
+        {
+          "filename": "20231231043028Q46NRr_jpg.rf.0227684b9bed2f5914efa7465b14b7b1.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6717506818399005,
+          "stage_scores": {
+            "3": 0.6717506818399005,
+            "2": 0.32824931816009945
+          }
+        },
+        {
+          "filename": "20231231054651z4VGer_jpg.rf.076b97375abd482fa8d551e0fc2a7b26.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.40756632055913233,
+          "stage_scores": {
+            "3": 0.40756632055913233,
+            "4": 0.1976269406428922,
+            "6": 0.1460552937705632,
+            "5": 0.07599264271106881,
+            "2": 0.1727588023163435
+          }
+        },
+        {
+          "filename": "20231231065720iJVyYt_jpg.rf.01d1f87df50ab17878cfca7bc4677a88.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.37621213672247494,
+          "stage_scores": {
+            "3": 0.37621213672247494,
+            "2": 0.20293748416680119,
+            "4": 0.22482575435370894,
+            "5": 0.1401929923878896,
+            "6": 0.055831632369125306
+          }
+        },
+        {
+          "filename": "202401080941003KIfb2_gauss_jpg.rf.408f53e8c1028b97f71e56081c5c7c41.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.273152897309638,
+          "stage_scores": {
+            "2": 0.22875144786622933,
+            "3": 0.273152897309638,
+            "5": 0.1384554789580559,
+            "4": 0.2507030899106663,
+            "6": 0.10893708595541035
+          }
+        },
+        {
+          "filename": "20240110043329FdhNwV_jpg.rf.99fcefece4cc66515201f00abaeb8e48.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.44156968097116855,
+          "stage_scores": {
+            "3": 0.44156968097116855,
+            "4": 0.38525635391764207,
+            "2": 0.1025351167244113,
+            "6": 0.0706388483867779
+          }
+        },
+        {
+          "filename": "20240110161423irhZYT_jpg.rf.f522d126d27f9556ef4aaebc36469a89.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6497455388770311,
+          "stage_scores": {
+            "2": 0.2320493778467465,
+            "3": 0.6497455388770311,
+            "4": 0.11820508327622262
+          }
+        },
+        {
+          "filename": "20240110181024v6RUKz_jpg.rf.efae00619ff24a8ed2845e9bde7e8a48.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5652297851529202,
+          "stage_scores": {
+            "3": 0.5652297851529202,
+            "2": 0.37548986064620865,
+            "4": 0.059280354200871105
+          }
+        },
+        {
+          "filename": "20240111080420FDIESU_jpg.rf.726526b79b4ce44fa1710e5739269238.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3860446291690149,
+          "stage_scores": {
+            "3": 0.3860446291690149,
+            "4": 0.2964287506998642,
+            "5": 0.14971319684164497,
+            "6": 0.07392291858079997,
+            "2": 0.0938905047086759
+          }
+        },
+        {
+          "filename": "20240111181117uMGlb4_jpg.rf.f0a0b23d47eafad99f379f672b37d1f8.jpg",
+          "true_level": 2,
+          "pred_level": 4,
+          "confidence": 0.36389414761643685,
+          "stage_scores": {
+            "4": 0.36389414761643685,
+            "3": 0.33843283413371833,
+            "2": 0.25752898375307,
+            "5": 0.0401440344967748
+          }
+        },
+        {
+          "filename": "20240112041805zFsaoN_jpg.rf.049f78390a56c8312fe7ea79256a44eb.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4317505076236429,
+          "stage_scores": {
+            "3": 0.4317505076236429,
+            "2": 0.23060205422599656,
+            "4": 0.13020954011116023,
+            "5": 0.09765544809846974,
+            "6": 0.08342481973478683,
+            "7": 0.02635763020594368
+          }
+        },
+        {
+          "filename": "202401120735396rfKJL_jpg.rf.f587c7e6e7671abe29172f3da76c95c6.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.40270972817993855,
+          "stage_scores": {
+            "4": 0.38587963165159883,
+            "3": 0.40270972817993855,
+            "2": 0.21141064016846253
+          }
+        },
+        {
+          "filename": "20240130072349uniDRh_jpg.rf.f943e9a84d533634fab73140c6a126d5.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5314809353858888,
+          "stage_scores": {
+            "4": 0.25313650381436137,
+            "2": 0.2153825607997497,
+            "3": 0.5314809353858888
+          }
+        },
+        {
+          "filename": "20240207051218k0Ayjg_jpg.rf.5ca21e5a6187c36f86f823b532009587.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3933137672041388,
+          "stage_scores": {
+            "2": 0.38426275919555875,
+            "3": 0.3933137672041388,
+            "4": 0.1572449653607384,
+            "5": 0.03565286439996327,
+            "7": 0.02952564383960099
+          }
+        },
+        {
+          "filename": "20240219045157mzVfj7_jpg.rf.c9b45d0874181d11613377e6b334a901.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3396823660298533,
+          "stage_scores": {
+            "3": 0.3396823660298533,
+            "4": 0.2793087970444041,
+            "5": 0.10428041754027988,
+            "2": 0.13158969270184154,
+            "6": 0.14513872668362102
+          }
+        },
+        {
+          "filename": "20240224194300kOjsFD_jpg.rf.0c13fa04922a01749826cec6cc657c47.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.7381480026064616,
+          "stage_scores": {
+            "3": 0.7381480026064616,
+            "4": 0.13598828387421877,
+            "2": 0.12586371351931963
+          }
+        },
+        {
+          "filename": "20240226191121Dv7z5w_jpg.rf.eb0c2f4b31aebe5bbeaa9a01fb3434aa.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.32530164154314056,
+          "stage_scores": {
+            "3": 0.32530164154314056,
+            "4": 0.21571429170946765,
+            "6": 0.14796425094686003,
+            "2": 0.14439066035118683,
+            "5": 0.11478243271488517,
+            "7": 0.051846722734459776
+          }
+        },
+        {
+          "filename": "20240228100442mIw9Zu_jpg.rf.334b9eea8eecabd6e884c210e7ca5b8b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5641770765662883,
+          "stage_scores": {
+            "3": 0.5641770765662883,
+            "2": 0.3224991088214501,
+            "4": 0.11332381461226139
+          }
+        },
+        {
+          "filename": "20240228154416jXyC0M_gauss_jpg.rf.ac2af1c17a0d641455bc43da325ded4c.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.2688757300761193,
+          "stage_scores": {
+            "5": 0.16572536247508482,
+            "3": 0.2688757300761193,
+            "2": 0.16791178097160375,
+            "4": 0.21148820581011324,
+            "6": 0.18599892066707893
+          }
+        },
+        {
+          "filename": "202403051419132qBmCp_jpg.rf.da793fe65f18a09d455e7614e3522eff.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.39340547033309897,
+          "stage_scores": {
+            "3": 0.39340547033309897,
+            "4": 0.24021507868349176,
+            "5": 0.10490883765215193,
+            "2": 0.19029704837004985,
+            "6": 0.07117356496120768
+          }
+        },
+        {
+          "filename": "20240306093756Nxspmr_jpg.rf.520a1e540048254439e49edc6e72083d.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5922755126761511,
+          "stage_scores": {
+            "3": 0.5922755126761511,
+            "2": 0.3421228017015713,
+            "4": 0.06560168562227783
+          }
+        },
+        {
+          "filename": "20240422192617LNrK9O_jpg.rf.4efd92c9f17ab9391444755665005c57.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5848915289501647,
+          "stage_scores": {
+            "3": 0.5848915289501647,
+            "4": 0.3045892310311014,
+            "2": 0.11051924001873381
+          }
+        },
+        {
+          "filename": "20240426114804vEJvCL_jpg.rf.e8b208c0e3afd026da67dc6b206f33b1.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5262917899453063,
+          "stage_scores": {
+            "3": 0.5262917899453063,
+            "4": 0.3524567718528848,
+            "2": 0.1212514382018088
+          }
+        }
+      ],
+      "total_misclassified": 63,
+      "level_1_as_2": 10,
+      "level_2_as_1": 0
+    },
+    "elapsed_time": 69.96265172958374,
+    "total_images": 82
+  },
+  "full_top_k_50": {
+    "metrics": {
+      "accuracy": 0.1951219512195122,
+      "precision": 0.4146341463414634,
+      "recall": 0.1951219512195122,
+      "f1": 0.2653658536585366
+    },
+    "misclassification": {
+      "misclassified_cases": [
+        {
+          "filename": "202311090555509eWyUn_jpg.rf.f7825a587b498e9e211a2c37893d14ba.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.46498977085282867,
+          "stage_scores": {
+            "3": 0.46498977085282867,
+            "2": 0.4589271469070081,
+            "4": 0.07608308224016323
+          }
+        },
+        {
+          "filename": "202311140507485YT3wv_jpg.rf.1031c59f7ddafa0c68ed7c43201ac687.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.7024527157058358,
+          "stage_scores": {
+            "2": 0.7024527157058358,
+            "3": 0.29754728429416405
+          }
+        },
+        {
+          "filename": "202312240752033lv1EX_jpg.rf.3b65bd355cd4939f8730cde4e8576447.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.7254119119274637,
+          "stage_scores": {
+            "3": 0.7254119119274637,
+            "2": 0.2745880880725364
+          }
+        },
+        {
+          "filename": "20231224135435509UpD_jpg.rf.3092acf254489f0aeef597ce399e30bc.jpg",
+          "true_level": 1,
+          "pred_level": 4,
+          "confidence": 0.4227203455700892,
+          "stage_scores": {
+            "4": 0.4227203455700892,
+            "3": 0.2272242180098709,
+            "5": 0.10911879430232178,
+            "6": 0.14721099522611394,
+            "2": 0.0937256468916042
+          }
+        },
+        {
+          "filename": "202401020937479el5vT_jpg.rf.f4f73132c3d7d7b4ab713b6f866a36bf.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.39229860903125224,
+          "stage_scores": {
+            "2": 0.39208152244577676,
+            "3": 0.39229860903125224,
+            "4": 0.21561986852297102
+          }
+        },
+        {
+          "filename": "202401091258185i1XAv_jpg.rf.eb2174cd979011f9c7ec7c2b46330e0f.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.44764110461753953,
+          "stage_scores": {
+            "2": 0.44764110461753953,
+            "3": 0.3894185581032867,
+            "4": 0.1629403372791738
+          }
+        },
+        {
+          "filename": "2024011005233346UTOo_jpg.rf.ff2dac6398422762c9e86892345c8eaf.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.49251857395333076,
+          "stage_scores": {
+            "3": 0.49251857395333076,
+            "4": 0.29954438953607804,
+            "2": 0.20793703651059142
+          }
+        },
+        {
+          "filename": "20240111140530a1LmVw_jpg.rf.977fdf5e94ff6e2168273d5d7af7a34b.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.6388273160295141,
+          "stage_scores": {
+            "3": 0.6388273160295141,
+            "2": 0.27136899108543094,
+            "4": 0.08980369288505524
+          }
+        },
+        {
+          "filename": "20240113100243cYsaPh_jpg.rf.4847e31d078360c9a021c95070015eb8.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.45024700447481136,
+          "stage_scores": {
+            "3": 0.3514924657605065,
+            "2": 0.45024700447481136,
+            "5": 0.11729301590356699,
+            "4": 0.08096751386111485
+          }
+        },
+        {
+          "filename": "20240129090307iqpvZZ_jpg.rf.6dc3498c5b9d265f135165efe1d8fb03.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.44538679370865264,
+          "stage_scores": {
+            "3": 0.44538679370865264,
+            "4": 0.246282872956733,
+            "2": 0.2859070470205792,
+            "5": 0.02242328631403521
+          }
+        },
+        {
+          "filename": "202402090616121bPjaV_jpg.rf.666ced168b7c40072b72f427c1eaa436.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.3323145123421598,
+          "stage_scores": {
+            "2": 0.3323145123421598,
+            "3": 0.29863142638789203,
+            "4": 0.20014218133564926,
+            "5": 0.07279230336664383,
+            "6": 0.059277902387155884,
+            "7": 0.03684167418049913
+          }
+        },
+        {
+          "filename": "20240209063754yo7GoV_jpg.rf.04378c69a6d17ae1e4d27a6f1217bc0b.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.32327256096755275,
+          "stage_scores": {
+            "3": 0.32327256096755275,
+            "2": 0.29486700142696504,
+            "5": 0.16092981720306676,
+            "4": 0.1460359788531058,
+            "7": 0.015250505866759873,
+            "6": 0.05964413568254988
+          }
+        },
+        {
+          "filename": "20240211175131a0OZmc_jpg.rf.55ad5ce1f2beafff3d648b3b8b00f3cd.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.3677248445242882,
+          "stage_scores": {
+            "2": 0.21375753754761206,
+            "3": 0.3677248445242882,
+            "6": 0.14470146079656956,
+            "4": 0.14813499586271517,
+            "7": 0.025360092742655525,
+            "5": 0.10032106852615973
+          }
+        },
+        {
+          "filename": "20240214173337HZZSRn_jpg.rf.89faf2153da419d9450a2648f04fa754.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.5615687812366205,
+          "stage_scores": {
+            "2": 0.5615687812366205,
+            "3": 0.4384312187633795
+          }
+        },
+        {
+          "filename": "20240217044736IcauP7_jpg.rf.630db56df4ba7c0261cbcc753a2631ea.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.3329383905033374,
+          "stage_scores": {
+            "3": 0.3329383905033374,
+            "2": 0.29421533274715994,
+            "6": 0.14049965315063684,
+            "5": 0.0941016884970401,
+            "4": 0.12801855371373833,
+            "7": 0.01022638138808735
+          }
+        },
+        {
+          "filename": "20240217170513PNFPeO_jpg.rf.9a121b7b79d8bea4d539cb98eb75c65a.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.6271822723626982,
+          "stage_scores": {
+            "3": 0.6271822723626982,
+            "2": 0.37281772763730187
+          }
+        },
+        {
+          "filename": "20240218044142lbB0i6_jpg.rf.53af6e44e00919abeff4f36f77238303.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.6450559021302985,
+          "stage_scores": {
+            "3": 0.6450559021302985,
+            "2": 0.28712138685449795,
+            "4": 0.0678227110152035
+          }
+        },
+        {
+          "filename": "20240218141519F8suN8_jpg.rf.4ee0062b8784949dfd98ff4d3e568664.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.7167632361065206,
+          "stage_scores": {
+            "3": 0.7167632361065206,
+            "2": 0.2832367638934793
+          }
+        },
+        {
+          "filename": "20240219020903XzbXG9_jpg.rf.3d641d6c4f1ace341199f4b5b96f536f.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.5969650557587871,
+          "stage_scores": {
+            "3": 0.5969650557587871,
+            "2": 0.3401710262341688,
+            "4": 0.06286391800704437
+          }
+        },
+        {
+          "filename": "20240223095436na6dmB_jpg.rf.96583789d668cfa0bfc35713683367ee.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.3192287556157832,
+          "stage_scores": {
+            "3": 0.3192287556157832,
+            "2": 0.2989392228572353,
+            "5": 0.15978438063232203,
+            "4": 0.22204764089465956
+          }
+        },
+        {
+          "filename": "20240223163801YZpMcS_jpg.rf.3d79b466613486d06c0d6982a2ee1de6.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.49884889203548644,
+          "stage_scores": {
+            "3": 0.49884889203548644,
+            "4": 0.18691798301483387,
+            "5": 0.1784168485228097,
+            "2": 0.13581627642687008
+          }
+        },
+        {
+          "filename": "20240224071448axsdpv_jpg.rf.ad4f4fe40741b81e846c0d18fe5bce7c.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.4377009550792301,
+          "stage_scores": {
+            "3": 0.4377009550792301,
+            "2": 0.209601273697866,
+            "6": 0.1499776668497642,
+            "4": 0.15834505132039553,
+            "5": 0.04437505305274402
+          }
+        },
+        {
+          "filename": "20240224071656Xas5S2_jpg.rf.0d83396c67a8272323497bb3a4d0b97f.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.3886437897857529,
+          "stage_scores": {
+            "3": 0.3886437897857529,
+            "5": 0.0887968525806264,
+            "4": 0.22937152418365328,
+            "6": 0.08103352988366051,
+            "2": 0.21215430356630705
+          }
+        },
+        {
+          "filename": "20240224090843fym4nC_jpg.rf.d80859e749828a596d682cc3280e4139.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.33367899081453023,
+          "stage_scores": {
+            "3": 0.33367899081453023,
+            "6": 0.14370963912754212,
+            "5": 0.09329458342196063,
+            "2": 0.22336898424469978,
+            "4": 0.2059478023912673
+          }
+        },
+        {
+          "filename": "20240225041055uQZDPJ_jpg.rf.cb4ba32d2ca7c68ef47599ff4a232453.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.4346697737660608,
+          "stage_scores": {
+            "3": 0.4103033993256806,
+            "2": 0.4346697737660608,
+            "4": 0.1550268269082588
+          }
+        },
+        {
+          "filename": "20240226133614PaLGlu_jpg.rf.07d91f12d48766a2592bbac5e45ac8ee.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.4993528249372291,
+          "stage_scores": {
+            "2": 0.4993528249372291,
+            "3": 0.42791719344730644,
+            "4": 0.07272998161546428
+          }
+        },
+        {
+          "filename": "20240227180634PqmAJX_jpg.rf.21dd5ab62f7dbd2f9b892fc7c49d4a0e.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.35631798315047686,
+          "stage_scores": {
+            "4": 0.3105683772090172,
+            "2": 0.3331136396405061,
+            "3": 0.35631798315047686
+          }
+        },
+        {
+          "filename": "20240228022345jEcVL5_jpg.rf.b935edc8b3e971487f610c95ab6246dc.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.3440722727134689,
+          "stage_scores": {
+            "3": 0.3440722727134689,
+            "2": 0.3036566043177338,
+            "5": 0.09783824058996632,
+            "6": 0.12343948685307937,
+            "4": 0.11776596090454139,
+            "7": 0.013227434621210234
+          }
+        },
+        {
+          "filename": "20240228110123IPYpYd_jpg.rf.3e5aba8d4c58a3d308e3ab123a79f16a.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.566836566360049,
+          "stage_scores": {
+            "2": 0.566836566360049,
+            "3": 0.3580665351609397,
+            "4": 0.07509689847901123
+          }
+        },
+        {
+          "filename": "20240229041720rQ8l0p_jpg.rf.8bb5e8029c0de71c1ee6d481e1e027b8.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.439219423607234,
+          "stage_scores": {
+            "3": 0.439219423607234,
+            "4": 0.23955950381143412,
+            "2": 0.22350165186420062,
+            "5": 0.04603921522327322,
+            "6": 0.05168020549385813
+          }
+        },
+        {
+          "filename": "20240305141825xPajgw_jpg.rf.6718ccc922e7f4069f17eb60dc65734d.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.4551096111259461,
+          "stage_scores": {
+            "3": 0.4551096111259461,
+            "5": 0.12652066263173029,
+            "4": 0.18903420268968268,
+            "2": 0.15726157864089507,
+            "6": 0.04184888647556533,
+            "7": 0.030225058436180507
+          }
+        },
+        {
+          "filename": "20231110070141qEi5wm_jpg.rf.20af76796b05405ce043227831af11b2.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6262792161410996,
+          "stage_scores": {
+            "3": 0.6262792161410996,
+            "2": 0.3265465188216442,
+            "4": 0.047174265037256066
+          }
+        },
+        {
+          "filename": "20231206043710OotqJs_jpg.rf.621d16a36fabb45a838cf73543a26577.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5503653364623575,
+          "stage_scores": {
+            "3": 0.5503653364623575,
+            "4": 0.19013706592224508,
+            "2": 0.2594975976153974
+          }
+        },
+        {
+          "filename": "20231222075010HDRqwK_jpg.rf.4e412fcbb2778e7599376a1cdd92cc7b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.42838743795723744,
+          "stage_scores": {
+            "3": 0.42838743795723744,
+            "5": 0.10439301258926953,
+            "4": 0.19905947526617493,
+            "2": 0.16818465161577456,
+            "6": 0.09997542257154376
+          }
+        },
+        {
+          "filename": "20231222094424akH8Au_jpg.rf.cb2c90ea14b4ec3aa056d435ea661e2b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4538027364586831,
+          "stage_scores": {
+            "3": 0.4538027364586831,
+            "2": 0.20044159828178862,
+            "4": 0.1589912031668002,
+            "5": 0.09219482389242128,
+            "6": 0.07339493493948773,
+            "7": 0.02117470326081893
+          }
+        },
+        {
+          "filename": "20231224074531ch8RvS_jpg.rf.a2bc429ffd23cfcbb137b75f037d0804.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.40601233305546397,
+          "stage_scores": {
+            "3": 0.40601233305546397,
+            "2": 0.3119861628932565,
+            "4": 0.19931923025659257,
+            "5": 0.068130730383366,
+            "6": 0.014551543411321201
+          }
+        },
+        {
+          "filename": "20231224145323tlJNT7_jpg.rf.a0f8b009f18cdca339276c7ea92fc5dd.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.388694991715396,
+          "stage_scores": {
+            "3": 0.388694991715396,
+            "4": 0.18645275091139096,
+            "2": 0.30792568710849016,
+            "5": 0.06073782485007991,
+            "6": 0.056188745414642825
+          }
+        },
+        {
+          "filename": "20231225045824PLLwSq_rgbshift_jpg.rf.6f9be6c655b371b35e1053761d7b6626.jpg",
+          "true_level": 2,
+          "pred_level": 6,
+          "confidence": 0.2767706007896116,
+          "stage_scores": {
+            "5": 0.1996135967376117,
+            "6": 0.2767706007896116,
+            "7": 0.20791727143562055,
+            "4": 0.13563590630857228,
+            "2": 0.11187636740982622,
+            "3": 0.06818625731875756
+          }
+        },
+        {
+          "filename": "20231225045824PLLwSq_sepia_jpg.rf.2f8315ce1666177e6f761a2b847eee43.jpg",
+          "true_level": 2,
+          "pred_level": 7,
+          "confidence": 0.2752886524459551,
+          "stage_scores": {
+            "7": 0.2752886524459551,
+            "5": 0.1944694934316193,
+            "6": 0.2321296823918727,
+            "4": 0.09851902796686594,
+            "2": 0.11729232864505981,
+            "3": 0.08230081511862698
+          }
+        },
+        {
+          "filename": "20231229055019q8obL0_jpg.rf.a44525ef4b70ca5326c02e646751cdd8.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.41431655292427694,
+          "stage_scores": {
+            "3": 0.41431655292427694,
+            "2": 0.407700839919695,
+            "4": 0.17798260715602782
+          }
+        },
+        {
+          "filename": "20231229090549BKawsC_jpg.rf.3ff75220704f4b6878ab84b9432e8ea4.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5027004305486923,
+          "stage_scores": {
+            "3": 0.5027004305486923,
+            "4": 0.22900630548270523,
+            "2": 0.26829326396860254
+          }
+        },
+        {
+          "filename": "20231229224733KEgsWh_jpg.rf.cd866c1c8965270a5f78e6324a115e6a.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4659897379339818,
+          "stage_scores": {
+            "3": 0.4659897379339818,
+            "4": 0.1785736698398335,
+            "2": 0.13013787158628784,
+            "7": 0.093729110800829,
+            "5": 0.06307407867574345,
+            "6": 0.06849553116332392
+          }
+        },
+        {
+          "filename": "20231231043028Q46NRr_jpg.rf.0227684b9bed2f5914efa7465b14b7b1.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5337719744630035,
+          "stage_scores": {
+            "3": 0.5337719744630035,
+            "2": 0.4269833111200207,
+            "4": 0.039244714416975475
+          }
+        },
+        {
+          "filename": "20231231054651z4VGer_jpg.rf.076b97375abd482fa8d551e0fc2a7b26.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.40056240999650444,
+          "stage_scores": {
+            "3": 0.40056240999650444,
+            "4": 0.18688994525775593,
+            "6": 0.13102002365062757,
+            "5": 0.08708075032479407,
+            "2": 0.18459065328736077,
+            "7": 0.00985621748295726
+          }
+        },
+        {
+          "filename": "20231231065720iJVyYt_jpg.rf.01d1f87df50ab17878cfca7bc4677a88.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4062046246060206,
+          "stage_scores": {
+            "3": 0.4062046246060206,
+            "2": 0.18305283810658152,
+            "4": 0.198214208702647,
+            "5": 0.11209009668159536,
+            "6": 0.08978349066890999,
+            "7": 0.010654741234245401
+          }
+        },
+        {
+          "filename": "202401080941003KIfb2_gauss_jpg.rf.408f53e8c1028b97f71e56081c5c7c41.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.2924426842239133,
+          "stage_scores": {
+            "2": 0.22180321154741373,
+            "3": 0.2924426842239133,
+            "5": 0.11637054544809942,
+            "4": 0.2507953150820194,
+            "6": 0.09877615036881247,
+            "7": 0.019812093329741997
+          }
+        },
+        {
+          "filename": "20240109072410jkB2Mo_sepia_jpg.rf.a4fdad46ce5f129b21dbe7bb6a14c3fe.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.46090483866215237,
+          "stage_scores": {
+            "3": 0.46090483866215237,
+            "2": 0.42247757866736974,
+            "4": 0.11661758267047806
+          }
+        },
+        {
+          "filename": "20240110043329FdhNwV_jpg.rf.99fcefece4cc66515201f00abaeb8e48.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3811209536706386,
+          "stage_scores": {
+            "3": 0.3811209536706386,
+            "4": 0.30546555311334406,
+            "2": 0.23020186660819963,
+            "6": 0.06321015139475561,
+            "5": 0.02000147521306159
+          }
+        },
+        {
+          "filename": "20240110161423irhZYT_jpg.rf.f522d126d27f9556ef4aaebc36469a89.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.421098340378932,
+          "stage_scores": {
+            "2": 0.259845808862873,
+            "3": 0.421098340378932,
+            "4": 0.2064704731154196,
+            "5": 0.06767750825829985,
+            "6": 0.023014598998408152,
+            "7": 0.021893270386067528
+          }
+        },
+        {
+          "filename": "20240110181024v6RUKz_jpg.rf.efae00619ff24a8ed2845e9bde7e8a48.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5279588924005345,
+          "stage_scores": {
+            "3": 0.5279588924005345,
+            "2": 0.3514208168640639,
+            "4": 0.12062029073540163
+          }
+        },
+        {
+          "filename": "20240111080420FDIESU_jpg.rf.726526b79b4ce44fa1710e5739269238.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3750324279789885,
+          "stage_scores": {
+            "3": 0.3750324279789885,
+            "4": 0.28567510428932474,
+            "5": 0.13972376678136839,
+            "6": 0.09256604041120288,
+            "2": 0.09761638228322794,
+            "7": 0.009386278255887627
+          }
+        },
+        {
+          "filename": "20240111181117uMGlb4_jpg.rf.f0a0b23d47eafad99f379f672b37d1f8.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3461745283102815,
+          "stage_scores": {
+            "4": 0.33753299389134916,
+            "3": 0.3461745283102815,
+            "2": 0.21263182537877884,
+            "5": 0.1036606524195904
+          }
+        },
+        {
+          "filename": "20240112041805zFsaoN_jpg.rf.049f78390a56c8312fe7ea79256a44eb.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.40557149000735837,
+          "stage_scores": {
+            "3": 0.40557149000735837,
+            "2": 0.25565331149642495,
+            "4": 0.13006535684764778,
+            "5": 0.08772577309858137,
+            "6": 0.07641982620673167,
+            "7": 0.044564242343256
+          }
+        },
+        {
+          "filename": "202401120735396rfKJL_jpg.rf.f587c7e6e7671abe29172f3da76c95c6.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.42604257910873583,
+          "stage_scores": {
+            "4": 0.3295829658781636,
+            "3": 0.42604257910873583,
+            "2": 0.18533359871130548,
+            "5": 0.04288220866966027,
+            "6": 0.016158647632134638
+          }
+        },
+        {
+          "filename": "20240130072349uniDRh_jpg.rf.f943e9a84d533634fab73140c6a126d5.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.44021182634525646,
+          "stage_scores": {
+            "4": 0.21679711755514072,
+            "2": 0.3429910560996029,
+            "3": 0.44021182634525646
+          }
+        },
+        {
+          "filename": "20240207051218k0Ayjg_jpg.rf.5ca21e5a6187c36f86f823b532009587.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3966691935934751,
+          "stage_scores": {
+            "2": 0.36531816754041896,
+            "3": 0.3966691935934751,
+            "4": 0.13357393468685055,
+            "5": 0.06073381663296296,
+            "7": 0.016717195641436457,
+            "6": 0.026987691904856236
+          }
+        },
+        {
+          "filename": "20240219045157mzVfj7_jpg.rf.c9b45d0874181d11613377e6b334a901.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.30598279972706105,
+          "stage_scores": {
+            "3": 0.30598279972706105,
+            "4": 0.2863471717818677,
+            "5": 0.11058912356395445,
+            "2": 0.12041720330473864,
+            "6": 0.13829451603873805,
+            "7": 0.03836918558363998
+          }
+        },
+        {
+          "filename": "20240224194300kOjsFD_jpg.rf.0c13fa04922a01749826cec6cc657c47.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5640738981078421,
+          "stage_scores": {
+            "3": 0.5640738981078421,
+            "4": 0.11543991158932836,
+            "2": 0.28977238051378984,
+            "7": 0.030713809789039773
+          }
+        },
+        {
+          "filename": "20240226191121Dv7z5w_jpg.rf.eb0c2f4b31aebe5bbeaa9a01fb3434aa.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3315860041196769,
+          "stage_scores": {
+            "3": 0.3315860041196769,
+            "4": 0.21349403137356443,
+            "6": 0.13754967476776894,
+            "2": 0.14821168406887114,
+            "5": 0.12471158805596066,
+            "7": 0.04444701761415811
+          }
+        },
+        {
+          "filename": "20240228022910jI5UiG_jpg.rf.ef2df61aef7de73f2e41ce77231b3f72.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.39106931015726637,
+          "stage_scores": {
+            "2": 0.3413900984374144,
+            "3": 0.39106931015726637,
+            "6": 0.04026514076686461,
+            "4": 0.17283143355795694,
+            "5": 0.05444401708049753
+          }
+        },
+        {
+          "filename": "20240228100442mIw9Zu_jpg.rf.334b9eea8eecabd6e884c210e7ca5b8b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.39293742924164615,
+          "stage_scores": {
+            "3": 0.39293742924164615,
+            "2": 0.27130156623603074,
+            "4": 0.1870460046044935,
+            "6": 0.08188447390143379,
+            "5": 0.06683052601639596
+          }
+        },
+        {
+          "filename": "20240228154416jXyC0M_gauss_jpg.rf.ac2af1c17a0d641455bc43da325ded4c.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.25897243247812424,
+          "stage_scores": {
+            "5": 0.16321579120997848,
+            "3": 0.25897243247812424,
+            "2": 0.1659544197319072,
+            "4": 0.21055431117119403,
+            "6": 0.19088656830895112,
+            "7": 0.010416477099844956
+          }
+        },
+        {
+          "filename": "202403051419132qBmCp_jpg.rf.da793fe65f18a09d455e7614e3522eff.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.37068167776557964,
+          "stage_scores": {
+            "3": 0.37068167776557964,
+            "4": 0.22875260627541336,
+            "5": 0.10277016271574194,
+            "2": 0.18826687260543776,
+            "6": 0.09740006057667434,
+            "7": 0.01212862006115259
+          }
+        },
+        {
+          "filename": "20240306093756Nxspmr_jpg.rf.520a1e540048254439e49edc6e72083d.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5242348012727034,
+          "stage_scores": {
+            "3": 0.5242348012727034,
+            "2": 0.2780888466110982,
+            "4": 0.17798016109540876,
+            "5": 0.0196961910207897
+          }
+        },
+        {
+          "filename": "20240422192617LNrK9O_jpg.rf.4efd92c9f17ab9391444755665005c57.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5385724403744457,
+          "stage_scores": {
+            "3": 0.5385724403744457,
+            "4": 0.27927612979439004,
+            "2": 0.18215142983116417
+          }
+        },
+        {
+          "filename": "20240426114804vEJvCL_jpg.rf.e8b208c0e3afd026da67dc6b206f33b1.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4452874223726183,
+          "stage_scores": {
+            "3": 0.4452874223726183,
+            "4": 0.3562338915329065,
+            "2": 0.11013441785435489,
+            "5": 0.04805619992497587,
+            "6": 0.04028806831514445
+          }
+        }
+      ],
+      "total_misclassified": 66,
+      "level_1_as_2": 8,
+      "level_2_as_1": 0
+    },
+    "elapsed_time": 69.37472653388977,
+    "total_images": 82
+  },
+  "exclude_lv1_top_k_10": {
+    "metrics": {
+      "accuracy": 0.14634146341463414,
+      "precision": 0.5331010452961673,
+      "recall": 0.14634146341463414,
+      "f1": 0.22964352720450282
+    },
+    "misclassification": {
+      "misclassified_cases": [
+        {
+          "filename": "202311090555509eWyUn_jpg.rf.f7825a587b498e9e211a2c37893d14ba.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "202311140507485YT3wv_jpg.rf.1031c59f7ddafa0c68ed7c43201ac687.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "202312240752033lv1EX_jpg.rf.3b65bd355cd4939f8730cde4e8576447.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20231224135435509UpD_jpg.rf.3092acf254489f0aeef597ce399e30bc.jpg",
+          "true_level": 1,
+          "pred_level": 4,
+          "confidence": 0.7369590078180556,
+          "stage_scores": {
+            "4": 0.7369590078180556,
+            "3": 0.26304099218194454
+          }
+        },
+        {
+          "filename": "202401020937479el5vT_jpg.rf.f4f73132c3d7d7b4ab713b6f866a36bf.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 1.0,
+          "stage_scores": {
+            "2": 1.0
+          }
+        },
+        {
+          "filename": "202401091258185i1XAv_jpg.rf.eb2174cd979011f9c7ec7c2b46330e0f.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "2024011005233346UTOo_jpg.rf.ff2dac6398422762c9e86892345c8eaf.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240111140530a1LmVw_jpg.rf.977fdf5e94ff6e2168273d5d7af7a34b.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240113100243cYsaPh_jpg.rf.4847e31d078360c9a021c95070015eb8.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240129090307iqpvZZ_jpg.rf.6dc3498c5b9d265f135165efe1d8fb03.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "202402090616121bPjaV_jpg.rf.666ced168b7c40072b72f427c1eaa436.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240209063754yo7GoV_jpg.rf.04378c69a6d17ae1e4d27a6f1217bc0b.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.45334765684383355,
+          "stage_scores": {
+            "3": 0.45334765684383355,
+            "2": 0.3876972929237636,
+            "5": 0.158955050232403
+          }
+        },
+        {
+          "filename": "20240211175131a0OZmc_jpg.rf.55ad5ce1f2beafff3d648b3b8b00f3cd.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.6060926690895784,
+          "stage_scores": {
+            "2": 0.39390733091042174,
+            "3": 0.6060926690895784
+          }
+        },
+        {
+          "filename": "20240214173337HZZSRn_jpg.rf.89faf2153da419d9450a2648f04fa754.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240217044736IcauP7_jpg.rf.630db56df4ba7c0261cbcc753a2631ea.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.7055892024036207,
+          "stage_scores": {
+            "3": 0.7055892024036207,
+            "2": 0.29441079759637934
+          }
+        },
+        {
+          "filename": "20240217170513PNFPeO_jpg.rf.9a121b7b79d8bea4d539cb98eb75c65a.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240218044142lbB0i6_jpg.rf.53af6e44e00919abeff4f36f77238303.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240218141519F8suN8_jpg.rf.4ee0062b8784949dfd98ff4d3e568664.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240219020903XzbXG9_jpg.rf.3d641d6c4f1ace341199f4b5b96f536f.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240223095436na6dmB_jpg.rf.96583789d668cfa0bfc35713683367ee.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.40974518600834614,
+          "stage_scores": {
+            "3": 0.40974518600834614,
+            "2": 0.39249552719320924,
+            "5": 0.19775928679844465
+          }
+        },
+        {
+          "filename": "20240223163801YZpMcS_jpg.rf.3d79b466613486d06c0d6982a2ee1de6.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240224071448axsdpv_jpg.rf.ad4f4fe40741b81e846c0d18fe5bce7c.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240224071656Xas5S2_jpg.rf.0d83396c67a8272323497bb3a4d0b97f.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240224090843fym4nC_jpg.rf.d80859e749828a596d682cc3280e4139.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240225041055uQZDPJ_jpg.rf.cb4ba32d2ca7c68ef47599ff4a232453.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240226133614PaLGlu_jpg.rf.07d91f12d48766a2592bbac5e45ac8ee.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240227180634PqmAJX_jpg.rf.21dd5ab62f7dbd2f9b892fc7c49d4a0e.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.5688441829933475,
+          "stage_scores": {
+            "4": 0.4311558170066525,
+            "2": 0.5688441829933475
+          }
+        },
+        {
+          "filename": "20240228022345jEcVL5_jpg.rf.b935edc8b3e971487f610c95ab6246dc.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240228110123IPYpYd_jpg.rf.3e5aba8d4c58a3d308e3ab123a79f16a.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240229041720rQ8l0p_jpg.rf.8bb5e8029c0de71c1ee6d481e1e027b8.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240305141825xPajgw_jpg.rf.6718ccc922e7f4069f17eb60dc65734d.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.7600609491220658,
+          "stage_scores": {
+            "3": 0.7600609491220658,
+            "5": 0.23993905087793413
+          }
+        },
+        {
+          "filename": "20231109103954UbVvLx_jpg.rf.08bf8f0253ff6ec4a392e60407a7ca05.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5329214601437947,
+          "stage_scores": {
+            "3": 0.5329214601437947,
+            "2": 0.46707853985620523
+          }
+        },
+        {
+          "filename": "20231110070141qEi5wm_jpg.rf.20af76796b05405ce043227831af11b2.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20231130095830aHEvMd_jpg.rf.d9b2f9314d2120498c24129616d8006c.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5035291229784389,
+          "stage_scores": {
+            "3": 0.5035291229784389,
+            "2": 0.4964708770215612
+          }
+        },
+        {
+          "filename": "20231206043710OotqJs_jpg.rf.621d16a36fabb45a838cf73543a26577.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6765443181492652,
+          "stage_scores": {
+            "3": 0.6765443181492652,
+            "4": 0.12124968383136488,
+            "2": 0.20220599801936992
+          }
+        },
+        {
+          "filename": "20231222075010HDRqwK_jpg.rf.4e412fcbb2778e7599376a1cdd92cc7b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4496637829847002,
+          "stage_scores": {
+            "3": 0.4496637829847002,
+            "5": 0.1764490385025352,
+            "4": 0.2504580326850504,
+            "2": 0.12342914582771407
+          }
+        },
+        {
+          "filename": "20231222094424akH8Au_jpg.rf.cb2c90ea14b4ec3aa056d435ea661e2b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6174161550515305,
+          "stage_scores": {
+            "3": 0.6174161550515305,
+            "2": 0.3825838449484694
+          }
+        },
+        {
+          "filename": "20231224074531ch8RvS_jpg.rf.a2bc429ffd23cfcbb137b75f037d0804.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5394947565401963,
+          "stage_scores": {
+            "3": 0.5394947565401963,
+            "2": 0.46050524345980387
+          }
+        },
+        {
+          "filename": "20231224145323tlJNT7_jpg.rf.a0f8b009f18cdca339276c7ea92fc5dd.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5832257863978888,
+          "stage_scores": {
+            "3": 0.5832257863978888,
+            "4": 0.22114672988927944,
+            "2": 0.19562748371283176
+          }
+        },
+        {
+          "filename": "20231225045824PLLwSq_rgbshift_jpg.rf.6f9be6c655b371b35e1053761d7b6626.jpg",
+          "true_level": 2,
+          "pred_level": 5,
+          "confidence": 0.2655326908461385,
+          "stage_scores": {
+            "5": 0.2655326908461385,
+            "6": 0.2504765370864715,
+            "7": 0.18891880801326771,
+            "4": 0.16046854256635928,
+            "2": 0.13460342148776305
+          }
+        },
+        {
+          "filename": "20231225045824PLLwSq_sepia_jpg.rf.2f8315ce1666177e6f761a2b847eee43.jpg",
+          "true_level": 2,
+          "pred_level": 7,
+          "confidence": 0.2627752863630797,
+          "stage_scores": {
+            "7": 0.2627752863630797,
+            "5": 0.22487994675570303,
+            "6": 0.23774725628735105,
+            "4": 0.07604651723464398,
+            "2": 0.13682241569819498,
+            "3": 0.06172857766102706
+          }
+        },
+        {
+          "filename": "20231229055019q8obL0_jpg.rf.a44525ef4b70ca5326c02e646751cdd8.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4560997623290015,
+          "stage_scores": {
+            "3": 0.4560997623290015,
+            "2": 0.40602633125820364,
+            "4": 0.13787390641279462
+          }
+        },
+        {
+          "filename": "20231229090549BKawsC_jpg.rf.3ff75220704f4b6878ab84b9432e8ea4.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20231229224733KEgsWh_jpg.rf.cd866c1c8965270a5f78e6324a115e6a.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4623583841668286,
+          "stage_scores": {
+            "3": 0.4623583841668286,
+            "4": 0.19851181585913458,
+            "2": 0.13382551352386593,
+            "7": 0.11355003034732254,
+            "5": 0.09175425610284811
+          }
+        },
+        {
+          "filename": "20231231043028Q46NRr_jpg.rf.0227684b9bed2f5914efa7465b14b7b1.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20231231054651z4VGer_jpg.rf.076b97375abd482fa8d551e0fc2a7b26.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5961021487849992,
+          "stage_scores": {
+            "3": 0.5961021487849992,
+            "4": 0.21935373203764189,
+            "6": 0.18454411917735888
+          }
+        },
+        {
+          "filename": "20231231065720iJVyYt_jpg.rf.01d1f87df50ab17878cfca7bc4677a88.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.37846499217341234,
+          "stage_scores": {
+            "3": 0.37846499217341234,
+            "2": 0.2648629164943896,
+            "4": 0.2548068469826214,
+            "5": 0.10186524434957667
+          }
+        },
+        {
+          "filename": "202401021640493dHvsP_jpg.rf.f4be72debbbdf68d5a828157d52c3537.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "202401041207296cmQVL_jpg.rf.69bff8742738d3e61393f3984ad7174a.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240106121506HtPoQC_jpg.rf.cadedd2a52e97a75ad530554d1a3a58e.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "202401080941003KIfb2_gauss_jpg.rf.408f53e8c1028b97f71e56081c5c7c41.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.31922377141611036,
+          "stage_scores": {
+            "2": 0.2292069648007758,
+            "3": 0.31922377141611036,
+            "5": 0.16565691079270717,
+            "4": 0.2859123529904067
+          }
+        },
+        {
+          "filename": "20240109072410jkB2Mo_sepia_jpg.rf.a4fdad46ce5f129b21dbe7bb6a14c3fe.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240110043329FdhNwV_jpg.rf.99fcefece4cc66515201f00abaeb8e48.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240110161423irhZYT_jpg.rf.f522d126d27f9556ef4aaebc36469a89.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240110181024v6RUKz_jpg.rf.efae00619ff24a8ed2845e9bde7e8a48.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6636958375620311,
+          "stage_scores": {
+            "3": 0.6636958375620311,
+            "2": 0.33630416243796896
+          }
+        },
+        {
+          "filename": "20240111080420FDIESU_jpg.rf.726526b79b4ce44fa1710e5739269238.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4360431005629353,
+          "stage_scores": {
+            "3": 0.4360431005629353,
+            "4": 0.2867131016340748,
+            "5": 0.09959387765668105,
+            "6": 0.09291089349049614,
+            "2": 0.08473902665581265
+          }
+        },
+        {
+          "filename": "20240111181117uMGlb4_jpg.rf.f0a0b23d47eafad99f379f672b37d1f8.jpg",
+          "true_level": 2,
+          "pred_level": 4,
+          "confidence": 0.42991650470774057,
+          "stage_scores": {
+            "4": 0.42991650470774057,
+            "3": 0.3422097723571817,
+            "2": 0.22787372293507768
+          }
+        },
+        {
+          "filename": "20240112041805zFsaoN_jpg.rf.049f78390a56c8312fe7ea79256a44eb.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5236733606019439,
+          "stage_scores": {
+            "3": 0.5236733606019439,
+            "2": 0.27015662622742487,
+            "4": 0.1189022536865285,
+            "5": 0.08726775948410277
+          }
+        },
+        {
+          "filename": "202401120735396rfKJL_jpg.rf.f587c7e6e7671abe29172f3da76c95c6.jpg",
+          "true_level": 2,
+          "pred_level": 4,
+          "confidence": 0.46572115731360825,
+          "stage_scores": {
+            "4": 0.46572115731360825,
+            "3": 0.3871736871407433,
+            "2": 0.14710515554564846
+          }
+        },
+        {
+          "filename": "20240130072349uniDRh_jpg.rf.f943e9a84d533634fab73140c6a126d5.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240202110316tKibKR_jpg.rf.2025d9adac2414f743f3a786b7769767.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5543677810647123,
+          "stage_scores": {
+            "3": 0.5543677810647123,
+            "2": 0.4456322189352876
+          }
+        },
+        {
+          "filename": "20240219045157mzVfj7_jpg.rf.c9b45d0874181d11613377e6b334a901.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.48293033408777286,
+          "stage_scores": {
+            "3": 0.48293033408777286,
+            "4": 0.38423874375060446,
+            "5": 0.13283092216162265
+          }
+        },
+        {
+          "filename": "20240224194300kOjsFD_jpg.rf.0c13fa04922a01749826cec6cc657c47.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240226191121Dv7z5w_jpg.rf.eb0c2f4b31aebe5bbeaa9a01fb3434aa.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3540396993510217,
+          "stage_scores": {
+            "3": 0.3540396993510217,
+            "4": 0.24327828632364154,
+            "6": 0.1362534294920761,
+            "2": 0.10865584571508952,
+            "5": 0.15777273911817108
+          }
+        },
+        {
+          "filename": "20240228100442mIw9Zu_jpg.rf.334b9eea8eecabd6e884c210e7ca5b8b.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240228154416jXyC0M_gauss_jpg.rf.ac2af1c17a0d641455bc43da325ded4c.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.629264550958948,
+          "stage_scores": {
+            "5": 0.37073544904105205,
+            "3": 0.629264550958948
+          }
+        },
+        {
+          "filename": "202403051419132qBmCp_jpg.rf.da793fe65f18a09d455e7614e3522eff.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5817489097690002,
+          "stage_scores": {
+            "3": 0.5817489097690002,
+            "4": 0.22120348505249116,
+            "5": 0.19704760517850872
+          }
+        },
+        {
+          "filename": "20240306093756Nxspmr_jpg.rf.520a1e540048254439e49edc6e72083d.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240422192617LNrK9O_jpg.rf.4efd92c9f17ab9391444755665005c57.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240426114804vEJvCL_jpg.rf.e8b208c0e3afd026da67dc6b206f33b1.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5863272937687222,
+          "stage_scores": {
+            "3": 0.5863272937687222,
+            "4": 0.41367270623127783
+          }
+        }
+      ],
+      "total_misclassified": 70,
+      "level_1_as_2": 2,
+      "level_2_as_1": 0
+    },
+    "elapsed_time": 68.42198491096497,
+    "total_images": 82
+  },
+  "exclude_lv1_top_k_20": {
+    "metrics": {
+      "accuracy": 0.1951219512195122,
+      "precision": 0.47386759581881527,
+      "recall": 0.1951219512195122,
+      "f1": 0.2764227642276422
+    },
+    "misclassification": {
+      "misclassified_cases": [
+        {
+          "filename": "202311090555509eWyUn_jpg.rf.f7825a587b498e9e211a2c37893d14ba.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "202311140507485YT3wv_jpg.rf.1031c59f7ddafa0c68ed7c43201ac687.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "202312240752033lv1EX_jpg.rf.3b65bd355cd4939f8730cde4e8576447.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20231224135435509UpD_jpg.rf.3092acf254489f0aeef597ce399e30bc.jpg",
+          "true_level": 1,
+          "pred_level": 4,
+          "confidence": 0.38719448258053235,
+          "stage_scores": {
+            "4": 0.38719448258053235,
+            "3": 0.2556737299720069,
+            "5": 0.18121045818678644,
+            "6": 0.17592132926067441
+          }
+        },
+        {
+          "filename": "202401020937479el5vT_jpg.rf.f4f73132c3d7d7b4ab713b6f866a36bf.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.5616416517989244,
+          "stage_scores": {
+            "2": 0.5616416517989244,
+            "3": 0.23004463055045501,
+            "4": 0.2083137176506206
+          }
+        },
+        {
+          "filename": "202401091258185i1XAv_jpg.rf.eb2174cd979011f9c7ec7c2b46330e0f.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 1.0,
+          "stage_scores": {
+            "2": 1.0
+          }
+        },
+        {
+          "filename": "2024011005233346UTOo_jpg.rf.ff2dac6398422762c9e86892345c8eaf.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240111140530a1LmVw_jpg.rf.977fdf5e94ff6e2168273d5d7af7a34b.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240113100243cYsaPh_jpg.rf.4847e31d078360c9a021c95070015eb8.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240129090307iqpvZZ_jpg.rf.6dc3498c5b9d265f135165efe1d8fb03.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.46440036971290527,
+          "stage_scores": {
+            "3": 0.46440036971290527,
+            "4": 0.19558089393399117,
+            "2": 0.3400187363531035
+          }
+        },
+        {
+          "filename": "202402090616121bPjaV_jpg.rf.666ced168b7c40072b72f427c1eaa436.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.4282686455727361,
+          "stage_scores": {
+            "2": 0.4282686455727361,
+            "3": 0.41375420738568947,
+            "4": 0.15797714704157453
+          }
+        },
+        {
+          "filename": "20240209063754yo7GoV_jpg.rf.04378c69a6d17ae1e4d27a6f1217bc0b.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.3440711627164879,
+          "stage_scores": {
+            "3": 0.3440711627164879,
+            "2": 0.29424539058390986,
+            "5": 0.1933588637032679,
+            "4": 0.16832458299633454
+          }
+        },
+        {
+          "filename": "20240211175131a0OZmc_jpg.rf.55ad5ce1f2beafff3d648b3b8b00f3cd.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.39047363931942836,
+          "stage_scores": {
+            "2": 0.36267780058848853,
+            "3": 0.39047363931942836,
+            "6": 0.24684856009208328
+          }
+        },
+        {
+          "filename": "20240214173337HZZSRn_jpg.rf.89faf2153da419d9450a2648f04fa754.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240217044736IcauP7_jpg.rf.630db56df4ba7c0261cbcc753a2631ea.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.36819101462605974,
+          "stage_scores": {
+            "3": 0.36819101462605974,
+            "2": 0.27565162065345145,
+            "6": 0.20203000128573137,
+            "5": 0.08270991946903428,
+            "4": 0.07141744396572315
+          }
+        },
+        {
+          "filename": "20240217170513PNFPeO_jpg.rf.9a121b7b79d8bea4d539cb98eb75c65a.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240218044142lbB0i6_jpg.rf.53af6e44e00919abeff4f36f77238303.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240218141519F8suN8_jpg.rf.4ee0062b8784949dfd98ff4d3e568664.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240219020903XzbXG9_jpg.rf.3d641d6c4f1ace341199f4b5b96f536f.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.6585199650775888,
+          "stage_scores": {
+            "3": 0.6585199650775888,
+            "2": 0.34148003492241125
+          }
+        },
+        {
+          "filename": "20240223095436na6dmB_jpg.rf.96583789d668cfa0bfc35713683367ee.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.32203450679371143,
+          "stage_scores": {
+            "3": 0.32203450679371143,
+            "2": 0.30847733624338003,
+            "5": 0.15542663236247523,
+            "4": 0.2140615246004334
+          }
+        },
+        {
+          "filename": "20240223163801YZpMcS_jpg.rf.3d79b466613486d06c0d6982a2ee1de6.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240224071448axsdpv_jpg.rf.ad4f4fe40741b81e846c0d18fe5bce7c.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.7372954150150554,
+          "stage_scores": {
+            "3": 0.7372954150150554,
+            "2": 0.26270458498494476
+          }
+        },
+        {
+          "filename": "20240224071656Xas5S2_jpg.rf.0d83396c67a8272323497bb3a4d0b97f.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240224090843fym4nC_jpg.rf.d80859e749828a596d682cc3280e4139.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.593673281848584,
+          "stage_scores": {
+            "3": 0.593673281848584,
+            "6": 0.4063267181514161
+          }
+        },
+        {
+          "filename": "20240225041055uQZDPJ_jpg.rf.cb4ba32d2ca7c68ef47599ff4a232453.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.41962903569445303,
+          "stage_scores": {
+            "3": 0.3981928730568427,
+            "2": 0.41962903569445303,
+            "4": 0.18217809124870435
+          }
+        },
+        {
+          "filename": "20240226133614PaLGlu_jpg.rf.07d91f12d48766a2592bbac5e45ac8ee.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 1.0,
+          "stage_scores": {
+            "2": 1.0
+          }
+        },
+        {
+          "filename": "20240227180634PqmAJX_jpg.rf.21dd5ab62f7dbd2f9b892fc7c49d4a0e.jpg",
+          "true_level": 1,
+          "pred_level": 4,
+          "confidence": 0.37363053071835156,
+          "stage_scores": {
+            "4": 0.37363053071835156,
+            "2": 0.36449636663226237,
+            "3": 0.261873102649386
+          }
+        },
+        {
+          "filename": "20240228022345jEcVL5_jpg.rf.b935edc8b3e971487f610c95ab6246dc.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.4748936391930457,
+          "stage_scores": {
+            "3": 0.4748936391930457,
+            "2": 0.35145869479712993,
+            "5": 0.17364766600982431
+          }
+        },
+        {
+          "filename": "20240228110123IPYpYd_jpg.rf.3e5aba8d4c58a3d308e3ab123a79f16a.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240229041720rQ8l0p_jpg.rf.8bb5e8029c0de71c1ee6d481e1e027b8.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240305141825xPajgw_jpg.rf.6718ccc922e7f4069f17eb60dc65734d.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.4468840196464759,
+          "stage_scores": {
+            "3": 0.4468840196464759,
+            "5": 0.23977418381473425,
+            "4": 0.20584040303455203,
+            "2": 0.10750139350423785
+          }
+        },
+        {
+          "filename": "20231109103954UbVvLx_jpg.rf.08bf8f0253ff6ec4a392e60407a7ca05.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5339310960387879,
+          "stage_scores": {
+            "3": 0.5339310960387879,
+            "2": 0.4660689039612121
+          }
+        },
+        {
+          "filename": "20231110070141qEi5wm_jpg.rf.20af76796b05405ce043227831af11b2.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20231130095830aHEvMd_jpg.rf.d9b2f9314d2120498c24129616d8006c.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5035291229784389,
+          "stage_scores": {
+            "3": 0.5035291229784389,
+            "2": 0.4964708770215612
+          }
+        },
+        {
+          "filename": "20231206043710OotqJs_jpg.rf.621d16a36fabb45a838cf73543a26577.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6765443181492652,
+          "stage_scores": {
+            "3": 0.6765443181492652,
+            "4": 0.12124968383136488,
+            "2": 0.20220599801936992
+          }
+        },
+        {
+          "filename": "20231222075010HDRqwK_jpg.rf.4e412fcbb2778e7599376a1cdd92cc7b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4099589606492321,
+          "stage_scores": {
+            "3": 0.4099589606492321,
+            "5": 0.16086878056291434,
+            "4": 0.22834286115790706,
+            "2": 0.1125304866704683,
+            "6": 0.08829891095947821
+          }
+        },
+        {
+          "filename": "20231222094424akH8Au_jpg.rf.cb2c90ea14b4ec3aa056d435ea661e2b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4411827924167022,
+          "stage_scores": {
+            "3": 0.4411827924167022,
+            "2": 0.273380292476793,
+            "4": 0.2024051237370204,
+            "5": 0.08303179136948426
+          }
+        },
+        {
+          "filename": "20231224074531ch8RvS_jpg.rf.a2bc429ffd23cfcbb137b75f037d0804.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4170360418518162,
+          "stage_scores": {
+            "3": 0.4170360418518162,
+            "2": 0.35597618263445474,
+            "4": 0.22698777551372912
+          }
+        },
+        {
+          "filename": "20231224145323tlJNT7_jpg.rf.a0f8b009f18cdca339276c7ea92fc5dd.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4466921007317919,
+          "stage_scores": {
+            "3": 0.4466921007317919,
+            "4": 0.16937607981005068,
+            "2": 0.2746475069034129,
+            "5": 0.10928431255474455
+          }
+        },
+        {
+          "filename": "20231225045824PLLwSq_rgbshift_jpg.rf.6f9be6c655b371b35e1053761d7b6626.jpg",
+          "true_level": 2,
+          "pred_level": 5,
+          "confidence": 0.2523345469003715,
+          "stage_scores": {
+            "5": 0.2523345469003715,
+            "6": 0.23802675027878972,
+            "7": 0.1795287113954972,
+            "4": 0.15249254941534854,
+            "2": 0.12791303874533216,
+            "3": 0.049704403264660926
+          }
+        },
+        {
+          "filename": "20231225045824PLLwSq_sepia_jpg.rf.2f8315ce1666177e6f761a2b847eee43.jpg",
+          "true_level": 2,
+          "pred_level": 7,
+          "confidence": 0.2359290437104543,
+          "stage_scores": {
+            "7": 0.2359290437104543,
+            "5": 0.20190525342791638,
+            "6": 0.21345798380429423,
+            "4": 0.11779052393924193,
+            "2": 0.12284405485996587,
+            "3": 0.10807314025812713
+          }
+        },
+        {
+          "filename": "20231229055019q8obL0_jpg.rf.a44525ef4b70ca5326c02e646751cdd8.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4560997623290015,
+          "stage_scores": {
+            "3": 0.4560997623290015,
+            "2": 0.40602633125820364,
+            "4": 0.13787390641279462
+          }
+        },
+        {
+          "filename": "20231229090549BKawsC_jpg.rf.3ff75220704f4b6878ab84b9432e8ea4.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.7077548676062015,
+          "stage_scores": {
+            "3": 0.7077548676062015,
+            "4": 0.29224513239379846
+          }
+        },
+        {
+          "filename": "20231229224733KEgsWh_jpg.rf.cd866c1c8965270a5f78e6324a115e6a.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.42841361210312795,
+          "stage_scores": {
+            "3": 0.42841361210312795,
+            "4": 0.18393775692121278,
+            "2": 0.12400050178311153,
+            "7": 0.10521357527273391,
+            "5": 0.0850179722677489,
+            "6": 0.07341658165206479
+          }
+        },
+        {
+          "filename": "20231231043028Q46NRr_jpg.rf.0227684b9bed2f5914efa7465b14b7b1.jpg",
+          "true_level": 2,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20231231054651z4VGer_jpg.rf.076b97375abd482fa8d551e0fc2a7b26.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3778633964826731,
+          "stage_scores": {
+            "3": 0.3778633964826731,
+            "4": 0.2416975311576054,
+            "6": 0.11698073529074123,
+            "5": 0.0943380062012419,
+            "2": 0.16912033086773853
+          }
+        },
+        {
+          "filename": "20231231065720iJVyYt_jpg.rf.01d1f87df50ab17878cfca7bc4677a88.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3478080314661011,
+          "stage_scores": {
+            "3": 0.3478080314661011,
+            "2": 0.2434081130338047,
+            "4": 0.23416661959714943,
+            "5": 0.17461723590294473
+          }
+        },
+        {
+          "filename": "202401041207296cmQVL_jpg.rf.69bff8742738d3e61393f3984ad7174a.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4599473983770036,
+          "stage_scores": {
+            "3": 0.4599473983770036,
+            "2": 0.3855636880283897,
+            "4": 0.15448891359460676
+          }
+        },
+        {
+          "filename": "202401080941003KIfb2_gauss_jpg.rf.408f53e8c1028b97f71e56081c5c7c41.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.2935255413485984,
+          "stage_scores": {
+            "2": 0.29125753410867883,
+            "3": 0.2935255413485984,
+            "5": 0.15232115767213159,
+            "4": 0.2628957668705913
+          }
+        },
+        {
+          "filename": "20240110043329FdhNwV_jpg.rf.99fcefece4cc66515201f00abaeb8e48.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5817185956113566,
+          "stage_scores": {
+            "3": 0.5817185956113566,
+            "4": 0.22348955593996747,
+            "2": 0.19479184844867575
+          }
+        },
+        {
+          "filename": "20240110161423irhZYT_jpg.rf.f522d126d27f9556ef4aaebc36469a89.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6080890902666057,
+          "stage_scores": {
+            "2": 0.3919109097333943,
+            "3": 0.6080890902666057
+          }
+        },
+        {
+          "filename": "20240110181024v6RUKz_jpg.rf.efae00619ff24a8ed2845e9bde7e8a48.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6051162043006463,
+          "stage_scores": {
+            "3": 0.6051162043006463,
+            "2": 0.3066210253969714,
+            "4": 0.08826277030238235
+          }
+        },
+        {
+          "filename": "20240111080420FDIESU_jpg.rf.726526b79b4ce44fa1710e5739269238.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3824100971922782,
+          "stage_scores": {
+            "3": 0.3824100971922782,
+            "4": 0.25144758607724177,
+            "5": 0.1538271474821428,
+            "6": 0.137998984959231,
+            "2": 0.07431618428910619
+          }
+        },
+        {
+          "filename": "20240111181117uMGlb4_jpg.rf.f0a0b23d47eafad99f379f672b37d1f8.jpg",
+          "true_level": 2,
+          "pred_level": 4,
+          "confidence": 0.42991650470774057,
+          "stage_scores": {
+            "4": 0.42991650470774057,
+            "3": 0.3422097723571817,
+            "2": 0.22787372293507768
+          }
+        },
+        {
+          "filename": "20240112041805zFsaoN_jpg.rf.049f78390a56c8312fe7ea79256a44eb.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4322642582888628,
+          "stage_scores": {
+            "3": 0.4322642582888628,
+            "2": 0.22299979804927636,
+            "4": 0.13997264189709357,
+            "5": 0.1098348625664063,
+            "6": 0.09492843919836091
+          }
+        },
+        {
+          "filename": "202401120735396rfKJL_jpg.rf.f587c7e6e7671abe29172f3da76c95c6.jpg",
+          "true_level": 2,
+          "pred_level": 4,
+          "confidence": 0.46572115731360825,
+          "stage_scores": {
+            "4": 0.46572115731360825,
+            "3": 0.3871736871407433,
+            "2": 0.14710515554564846
+          }
+        },
+        {
+          "filename": "20240130072349uniDRh_jpg.rf.f943e9a84d533634fab73140c6a126d5.jpg",
+          "true_level": 2,
+          "pred_level": 4,
+          "confidence": 1.0,
+          "stage_scores": {
+            "4": 1.0
+          }
+        },
+        {
+          "filename": "20240219045157mzVfj7_jpg.rf.c9b45d0874181d11613377e6b334a901.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.31960329132673376,
+          "stage_scores": {
+            "3": 0.31960329132673376,
+            "4": 0.2542891976125545,
+            "5": 0.14666975116190717,
+            "2": 0.14042382107619555,
+            "6": 0.1390139388226091
+          }
+        },
+        {
+          "filename": "20240224194300kOjsFD_jpg.rf.0c13fa04922a01749826cec6cc657c47.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240226191121Dv7z5w_jpg.rf.eb0c2f4b31aebe5bbeaa9a01fb3434aa.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3163277526414795,
+          "stage_scores": {
+            "3": 0.3163277526414795,
+            "4": 0.21736453205754258,
+            "6": 0.12173985352470143,
+            "2": 0.14818928013443974,
+            "5": 0.14096694829654974,
+            "7": 0.055411633345287085
+          }
+        },
+        {
+          "filename": "20240228100442mIw9Zu_jpg.rf.334b9eea8eecabd6e884c210e7ca5b8b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240228154416jXyC0M_gauss_jpg.rf.ac2af1c17a0d641455bc43da325ded4c.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.2719423367906414,
+          "stage_scores": {
+            "5": 0.23346588640555735,
+            "3": 0.2719423367906414,
+            "2": 0.11871222424593704,
+            "4": 0.20301140114439148,
+            "6": 0.1728681514134728
+          }
+        },
+        {
+          "filename": "202403051419132qBmCp_jpg.rf.da793fe65f18a09d455e7614e3522eff.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.33940728357521205,
+          "stage_scores": {
+            "3": 0.33940728357521205,
+            "4": 0.22761866734371242,
+            "5": 0.1837264851633035,
+            "2": 0.17438927137314678,
+            "6": 0.07485829254462514
+          }
+        },
+        {
+          "filename": "20240306093756Nxspmr_jpg.rf.520a1e540048254439e49edc6e72083d.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.7446752033422773,
+          "stage_scores": {
+            "3": 0.7446752033422773,
+            "2": 0.2553247966577226
+          }
+        },
+        {
+          "filename": "20240422192617LNrK9O_jpg.rf.4efd92c9f17ab9391444755665005c57.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.7156725490967893,
+          "stage_scores": {
+            "3": 0.7156725490967893,
+            "4": 0.2843274509032107
+          }
+        },
+        {
+          "filename": "20240426114804vEJvCL_jpg.rf.e8b208c0e3afd026da67dc6b206f33b1.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5100403678045452,
+          "stage_scores": {
+            "3": 0.5100403678045452,
+            "4": 0.35984983383722163,
+            "2": 0.1301097983582331
+          }
+        }
+      ],
+      "total_misclassified": 66,
+      "level_1_as_2": 5,
+      "level_2_as_1": 0
+    },
+    "elapsed_time": 69.87565660476685,
+    "total_images": 82
+  },
+  "exclude_lv1_top_k_30": {
+    "metrics": {
+      "accuracy": 0.23170731707317074,
+      "precision": 0.40748528174936927,
+      "recall": 0.23170731707317074,
+      "f1": 0.29542682926829267
+    },
+    "misclassification": {
+      "misclassified_cases": [
+        {
+          "filename": "202311090555509eWyUn_jpg.rf.f7825a587b498e9e211a2c37893d14ba.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.511852972803821,
+          "stage_scores": {
+            "3": 0.4881470271961789,
+            "2": 0.511852972803821
+          }
+        },
+        {
+          "filename": "202311140507485YT3wv_jpg.rf.1031c59f7ddafa0c68ed7c43201ac687.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "202312240752033lv1EX_jpg.rf.3b65bd355cd4939f8730cde4e8576447.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20231224135435509UpD_jpg.rf.3092acf254489f0aeef597ce399e30bc.jpg",
+          "true_level": 1,
+          "pred_level": 4,
+          "confidence": 0.44306834610036666,
+          "stage_scores": {
+            "4": 0.44306834610036666,
+            "3": 0.26131546860233223,
+            "5": 0.09222823257822832,
+            "6": 0.16743485064638391,
+            "2": 0.035953102072688856
+          }
+        },
+        {
+          "filename": "202401020937479el5vT_jpg.rf.f4f73132c3d7d7b4ab713b6f866a36bf.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.5238170485556013,
+          "stage_scores": {
+            "2": 0.5238170485556013,
+            "3": 0.24951905140997116,
+            "4": 0.2266639000344277
+          }
+        },
+        {
+          "filename": "202401091258185i1XAv_jpg.rf.eb2174cd979011f9c7ec7c2b46330e0f.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.5305998637637055,
+          "stage_scores": {
+            "2": 0.5305998637637055,
+            "3": 0.3767879532834453,
+            "4": 0.09261218295284923
+          }
+        },
+        {
+          "filename": "2024011005233346UTOo_jpg.rf.ff2dac6398422762c9e86892345c8eaf.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.636849556564356,
+          "stage_scores": {
+            "3": 0.636849556564356,
+            "4": 0.36315044343564395
+          }
+        },
+        {
+          "filename": "20240111140530a1LmVw_jpg.rf.977fdf5e94ff6e2168273d5d7af7a34b.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.7786081025021065,
+          "stage_scores": {
+            "3": 0.7786081025021065,
+            "2": 0.22139189749789348
+          }
+        },
+        {
+          "filename": "20240113100243cYsaPh_jpg.rf.4847e31d078360c9a021c95070015eb8.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.6326833860488064,
+          "stage_scores": {
+            "3": 0.24324169398851922,
+            "2": 0.6326833860488064,
+            "5": 0.12407491996267453
+          }
+        },
+        {
+          "filename": "20240129090307iqpvZZ_jpg.rf.6dc3498c5b9d265f135165efe1d8fb03.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.462512204759728,
+          "stage_scores": {
+            "3": 0.462512204759728,
+            "4": 0.23741740822768487,
+            "2": 0.3000703870125872
+          }
+        },
+        {
+          "filename": "202402090616121bPjaV_jpg.rf.666ced168b7c40072b72f427c1eaa436.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.464978679240747,
+          "stage_scores": {
+            "2": 0.464978679240747,
+            "3": 0.35693517337630865,
+            "4": 0.10654079833014443,
+            "5": 0.07154534905279995
+          }
+        },
+        {
+          "filename": "20240209063754yo7GoV_jpg.rf.04378c69a6d17ae1e4d27a6f1217bc0b.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.32851695179945384,
+          "stage_scores": {
+            "3": 0.32851695179945384,
+            "2": 0.3213944634166011,
+            "5": 0.1700308108394274,
+            "4": 0.1530637219029974,
+            "7": 0.02699405204152032
+          }
+        },
+        {
+          "filename": "20240211175131a0OZmc_jpg.rf.55ad5ce1f2beafff3d648b3b8b00f3cd.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.3570503756726759,
+          "stage_scores": {
+            "2": 0.2621817808921356,
+            "3": 0.3570503756726759,
+            "6": 0.1513950511498507,
+            "4": 0.15679155386227375,
+            "7": 0.04180999763522529,
+            "5": 0.030771240787838938
+          }
+        },
+        {
+          "filename": "20240214173337HZZSRn_jpg.rf.89faf2153da419d9450a2648f04fa754.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240217044736IcauP7_jpg.rf.630db56df4ba7c0261cbcc753a2631ea.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.3503032434192657,
+          "stage_scores": {
+            "3": 0.3503032434192657,
+            "2": 0.3092935544490201,
+            "6": 0.10843307769337857,
+            "5": 0.10338034929785928,
+            "4": 0.12858977514047623
+          }
+        },
+        {
+          "filename": "20240217170513PNFPeO_jpg.rf.9a121b7b79d8bea4d539cb98eb75c65a.jpg",
+          "true_level": 1,
+          "pred_level": 0,
+          "confidence": 0,
+          "stage_scores": {}
+        },
+        {
+          "filename": "20240218044142lbB0i6_jpg.rf.53af6e44e00919abeff4f36f77238303.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.6796334192714664,
+          "stage_scores": {
+            "3": 0.6796334192714664,
+            "2": 0.22507075409714114,
+            "4": 0.09529582663139259
+          }
+        },
+        {
+          "filename": "20240218141519F8suN8_jpg.rf.4ee0062b8784949dfd98ff4d3e568664.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.7802621107575964,
+          "stage_scores": {
+            "3": 0.7802621107575964,
+            "2": 0.21973788924240345
+          }
+        },
+        {
+          "filename": "20240219020903XzbXG9_jpg.rf.3d641d6c4f1ace341199f4b5b96f536f.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.5464975877570649,
+          "stage_scores": {
+            "3": 0.5464975877570649,
+            "2": 0.3761112529632015,
+            "4": 0.07739115927973375
+          }
+        },
+        {
+          "filename": "20240223095436na6dmB_jpg.rf.96583789d668cfa0bfc35713683367ee.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.3494173003991048,
+          "stage_scores": {
+            "3": 0.3072652346747047,
+            "2": 0.3494173003991048,
+            "5": 0.15746634036074025,
+            "4": 0.1858511245654503
+          }
+        },
+        {
+          "filename": "20240223163801YZpMcS_jpg.rf.3d79b466613486d06c0d6982a2ee1de6.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 1.0,
+          "stage_scores": {
+            "3": 1.0
+          }
+        },
+        {
+          "filename": "20240224071448axsdpv_jpg.rf.ad4f4fe40741b81e846c0d18fe5bce7c.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.4820116293529689,
+          "stage_scores": {
+            "3": 0.4820116293529689,
+            "2": 0.19314947811232458,
+            "6": 0.0691035654602492,
+            "4": 0.2079864664951091,
+            "5": 0.04774886057934821
+          }
+        },
+        {
+          "filename": "20240224071656Xas5S2_jpg.rf.0d83396c67a8272323497bb3a4d0b97f.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.5172515940372122,
+          "stage_scores": {
+            "3": 0.5172515940372122,
+            "5": 0.12452798615216767,
+            "4": 0.19545873384463197,
+            "6": 0.0869368142727272,
+            "2": 0.07582487169326106
+          }
+        },
+        {
+          "filename": "20240224090843fym4nC_jpg.rf.d80859e749828a596d682cc3280e4139.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.38098574940073193,
+          "stage_scores": {
+            "3": 0.38098574940073193,
+            "6": 0.20525075030426185,
+            "5": 0.08973916490142698,
+            "2": 0.14524094608288082,
+            "4": 0.17878338931069826
+          }
+        },
+        {
+          "filename": "20240225041055uQZDPJ_jpg.rf.cb4ba32d2ca7c68ef47599ff4a232453.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.4856595061134265,
+          "stage_scores": {
+            "3": 0.39153912445421074,
+            "2": 0.4856595061134265,
+            "4": 0.12280136943236292
+          }
+        },
+        {
+          "filename": "20240226133614PaLGlu_jpg.rf.07d91f12d48766a2592bbac5e45ac8ee.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.6148922040154613,
+          "stage_scores": {
+            "2": 0.6148922040154613,
+            "3": 0.3851077959845386
+          }
+        },
+        {
+          "filename": "20240227180634PqmAJX_jpg.rf.21dd5ab62f7dbd2f9b892fc7c49d4a0e.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.387090025534326,
+          "stage_scores": {
+            "4": 0.2709260598856531,
+            "2": 0.387090025534326,
+            "3": 0.3419839145800209
+          }
+        },
+        {
+          "filename": "20240228022345jEcVL5_jpg.rf.b935edc8b3e971487f610c95ab6246dc.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.4196344760445053,
+          "stage_scores": {
+            "3": 0.4196344760445053,
+            "2": 0.3128729027642866,
+            "5": 0.08617825873963944,
+            "6": 0.14209325571446718,
+            "4": 0.03922110673710151
+          }
+        },
+        {
+          "filename": "20240228110123IPYpYd_jpg.rf.3e5aba8d4c58a3d308e3ab123a79f16a.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 1.0,
+          "stage_scores": {
+            "2": 1.0
+          }
+        },
+        {
+          "filename": "20240229041720rQ8l0p_jpg.rf.8bb5e8029c0de71c1ee6d481e1e027b8.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.5315889748513494,
+          "stage_scores": {
+            "3": 0.5315889748513494,
+            "4": 0.31673588851933815,
+            "2": 0.1516751366293125
+          }
+        },
+        {
+          "filename": "20240305141825xPajgw_jpg.rf.6718ccc922e7f4069f17eb60dc65734d.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.4958615399902022,
+          "stage_scores": {
+            "3": 0.4958615399902022,
+            "5": 0.13985161239500146,
+            "4": 0.21505295938461372,
+            "2": 0.10388630767530509,
+            "6": 0.04534758055487756
+          }
+        },
+        {
+          "filename": "20231110070141qEi5wm_jpg.rf.20af76796b05405ce043227831af11b2.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.8328735212565715,
+          "stage_scores": {
+            "3": 0.8328735212565715,
+            "2": 0.1671264787434285
+          }
+        },
+        {
+          "filename": "20231206043710OotqJs_jpg.rf.621d16a36fabb45a838cf73543a26577.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.57130089851844,
+          "stage_scores": {
+            "3": 0.57130089851844,
+            "4": 0.17633254137365273,
+            "2": 0.2523665601079075
+          }
+        },
+        {
+          "filename": "20231222075010HDRqwK_jpg.rf.4e412fcbb2778e7599376a1cdd92cc7b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4064649383086288,
+          "stage_scores": {
+            "3": 0.4064649383086288,
+            "5": 0.1176526482869062,
+            "4": 0.20009151899099123,
+            "2": 0.16719431387614536,
+            "6": 0.1085965805373286
+          }
+        },
+        {
+          "filename": "20231222094424akH8Au_jpg.rf.cb2c90ea14b4ec3aa056d435ea661e2b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.44663800308394563,
+          "stage_scores": {
+            "3": 0.44663800308394563,
+            "2": 0.24011324136534212,
+            "4": 0.18066667981512058,
+            "5": 0.1027342853254341,
+            "6": 0.0298477904101574
+          }
+        },
+        {
+          "filename": "20231224074531ch8RvS_jpg.rf.a2bc429ffd23cfcbb137b75f037d0804.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4493760198938507,
+          "stage_scores": {
+            "3": 0.4493760198938507,
+            "2": 0.343741972685576,
+            "4": 0.20688200742057333
+          }
+        },
+        {
+          "filename": "20231224145323tlJNT7_jpg.rf.a0f8b009f18cdca339276c7ea92fc5dd.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4162797232308913,
+          "stage_scores": {
+            "3": 0.4162797232308913,
+            "4": 0.19725950764507522,
+            "2": 0.26476257221876853,
+            "5": 0.049027869435725964,
+            "6": 0.0726703274695392
+          }
+        },
+        {
+          "filename": "20231225045824PLLwSq_rgbshift_jpg.rf.6f9be6c655b371b35e1053761d7b6626.jpg",
+          "true_level": 2,
+          "pred_level": 6,
+          "confidence": 0.25467793985608084,
+          "stage_scores": {
+            "5": 0.22159144862837138,
+            "6": 0.25467793985608084,
+            "7": 0.19141539077284128,
+            "4": 0.13664145657161597,
+            "2": 0.11806538830527274,
+            "3": 0.07760837586581754
+          }
+        },
+        {
+          "filename": "20231225045824PLLwSq_sepia_jpg.rf.2f8315ce1666177e6f761a2b847eee43.jpg",
+          "true_level": 2,
+          "pred_level": 7,
+          "confidence": 0.26410846787144227,
+          "stage_scores": {
+            "7": 0.26410846787144227,
+            "5": 0.20736851202813716,
+            "6": 0.22147430771670779,
+            "4": 0.10149907278298088,
+            "2": 0.11374112507021572,
+            "3": 0.09180851453051604
+          }
+        },
+        {
+          "filename": "20231229090549BKawsC_jpg.rf.3ff75220704f4b6878ab84b9432e8ea4.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5880172593938633,
+          "stage_scores": {
+            "3": 0.5880172593938633,
+            "4": 0.14402336291005538,
+            "2": 0.2679593776960814
+          }
+        },
+        {
+          "filename": "20231229224733KEgsWh_jpg.rf.cd866c1c8965270a5f78e6324a115e6a.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.46314217081243,
+          "stage_scores": {
+            "3": 0.46314217081243,
+            "4": 0.17694919964203654,
+            "2": 0.12371357143043736,
+            "7": 0.1013504866023733,
+            "5": 0.06743854862701235,
+            "6": 0.06740602288571032
+          }
+        },
+        {
+          "filename": "20231231043028Q46NRr_jpg.rf.0227684b9bed2f5914efa7465b14b7b1.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6717506818399005,
+          "stage_scores": {
+            "3": 0.6717506818399005,
+            "2": 0.32824931816009945
+          }
+        },
+        {
+          "filename": "20231231054651z4VGer_jpg.rf.076b97375abd482fa8d551e0fc2a7b26.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.40756632055913233,
+          "stage_scores": {
+            "3": 0.40756632055913233,
+            "4": 0.1976269406428922,
+            "6": 0.1460552937705632,
+            "5": 0.07599264271106881,
+            "2": 0.1727588023163435
+          }
+        },
+        {
+          "filename": "20231231065720iJVyYt_jpg.rf.01d1f87df50ab17878cfca7bc4677a88.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.37621213672247494,
+          "stage_scores": {
+            "3": 0.37621213672247494,
+            "2": 0.20293748416680119,
+            "4": 0.22482575435370894,
+            "5": 0.1401929923878896,
+            "6": 0.055831632369125306
+          }
+        },
+        {
+          "filename": "202401080941003KIfb2_gauss_jpg.rf.408f53e8c1028b97f71e56081c5c7c41.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.273152897309638,
+          "stage_scores": {
+            "2": 0.22875144786622933,
+            "3": 0.273152897309638,
+            "5": 0.1384554789580559,
+            "4": 0.2507030899106663,
+            "6": 0.10893708595541035
+          }
+        },
+        {
+          "filename": "20240110043329FdhNwV_jpg.rf.99fcefece4cc66515201f00abaeb8e48.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.44156968097116855,
+          "stage_scores": {
+            "3": 0.44156968097116855,
+            "4": 0.38525635391764207,
+            "2": 0.1025351167244113,
+            "6": 0.0706388483867779
+          }
+        },
+        {
+          "filename": "20240110161423irhZYT_jpg.rf.f522d126d27f9556ef4aaebc36469a89.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6497455388770311,
+          "stage_scores": {
+            "2": 0.2320493778467465,
+            "3": 0.6497455388770311,
+            "4": 0.11820508327622262
+          }
+        },
+        {
+          "filename": "20240110181024v6RUKz_jpg.rf.efae00619ff24a8ed2845e9bde7e8a48.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5652297851529202,
+          "stage_scores": {
+            "3": 0.5652297851529202,
+            "2": 0.37548986064620865,
+            "4": 0.059280354200871105
+          }
+        },
+        {
+          "filename": "20240111080420FDIESU_jpg.rf.726526b79b4ce44fa1710e5739269238.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3860446291690149,
+          "stage_scores": {
+            "3": 0.3860446291690149,
+            "4": 0.2964287506998642,
+            "5": 0.14971319684164497,
+            "6": 0.07392291858079997,
+            "2": 0.0938905047086759
+          }
+        },
+        {
+          "filename": "20240111181117uMGlb4_jpg.rf.f0a0b23d47eafad99f379f672b37d1f8.jpg",
+          "true_level": 2,
+          "pred_level": 4,
+          "confidence": 0.36389414761643685,
+          "stage_scores": {
+            "4": 0.36389414761643685,
+            "3": 0.33843283413371833,
+            "2": 0.25752898375307,
+            "5": 0.0401440344967748
+          }
+        },
+        {
+          "filename": "20240112041805zFsaoN_jpg.rf.049f78390a56c8312fe7ea79256a44eb.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4317505076236429,
+          "stage_scores": {
+            "3": 0.4317505076236429,
+            "2": 0.23060205422599656,
+            "4": 0.13020954011116023,
+            "5": 0.09765544809846974,
+            "6": 0.08342481973478683,
+            "7": 0.02635763020594368
+          }
+        },
+        {
+          "filename": "202401120735396rfKJL_jpg.rf.f587c7e6e7671abe29172f3da76c95c6.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.40270972817993855,
+          "stage_scores": {
+            "4": 0.38587963165159883,
+            "3": 0.40270972817993855,
+            "2": 0.21141064016846253
+          }
+        },
+        {
+          "filename": "20240130072349uniDRh_jpg.rf.f943e9a84d533634fab73140c6a126d5.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5314809353858888,
+          "stage_scores": {
+            "4": 0.25313650381436137,
+            "2": 0.2153825607997497,
+            "3": 0.5314809353858888
+          }
+        },
+        {
+          "filename": "20240207051218k0Ayjg_jpg.rf.5ca21e5a6187c36f86f823b532009587.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3933137672041388,
+          "stage_scores": {
+            "2": 0.38426275919555875,
+            "3": 0.3933137672041388,
+            "4": 0.1572449653607384,
+            "5": 0.03565286439996327,
+            "7": 0.02952564383960099
+          }
+        },
+        {
+          "filename": "20240219045157mzVfj7_jpg.rf.c9b45d0874181d11613377e6b334a901.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3396823660298533,
+          "stage_scores": {
+            "3": 0.3396823660298533,
+            "4": 0.2793087970444041,
+            "5": 0.10428041754027988,
+            "2": 0.13158969270184154,
+            "6": 0.14513872668362102
+          }
+        },
+        {
+          "filename": "20240224194300kOjsFD_jpg.rf.0c13fa04922a01749826cec6cc657c47.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.7381480026064616,
+          "stage_scores": {
+            "3": 0.7381480026064616,
+            "4": 0.13598828387421877,
+            "2": 0.12586371351931963
+          }
+        },
+        {
+          "filename": "20240226191121Dv7z5w_jpg.rf.eb0c2f4b31aebe5bbeaa9a01fb3434aa.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.32530164154314056,
+          "stage_scores": {
+            "3": 0.32530164154314056,
+            "4": 0.21571429170946765,
+            "6": 0.14796425094686003,
+            "2": 0.14439066035118683,
+            "5": 0.11478243271488517,
+            "7": 0.051846722734459776
+          }
+        },
+        {
+          "filename": "20240228100442mIw9Zu_jpg.rf.334b9eea8eecabd6e884c210e7ca5b8b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5641770765662883,
+          "stage_scores": {
+            "3": 0.5641770765662883,
+            "2": 0.3224991088214501,
+            "4": 0.11332381461226139
+          }
+        },
+        {
+          "filename": "20240228154416jXyC0M_gauss_jpg.rf.ac2af1c17a0d641455bc43da325ded4c.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.2688757300761193,
+          "stage_scores": {
+            "5": 0.16572536247508482,
+            "3": 0.2688757300761193,
+            "2": 0.16791178097160375,
+            "4": 0.21148820581011324,
+            "6": 0.18599892066707893
+          }
+        },
+        {
+          "filename": "202403051419132qBmCp_jpg.rf.da793fe65f18a09d455e7614e3522eff.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.39340547033309897,
+          "stage_scores": {
+            "3": 0.39340547033309897,
+            "4": 0.24021507868349176,
+            "5": 0.10490883765215193,
+            "2": 0.19029704837004985,
+            "6": 0.07117356496120768
+          }
+        },
+        {
+          "filename": "20240306093756Nxspmr_jpg.rf.520a1e540048254439e49edc6e72083d.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5922755126761511,
+          "stage_scores": {
+            "3": 0.5922755126761511,
+            "2": 0.3421228017015713,
+            "4": 0.06560168562227783
+          }
+        },
+        {
+          "filename": "20240422192617LNrK9O_jpg.rf.4efd92c9f17ab9391444755665005c57.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5848915289501647,
+          "stage_scores": {
+            "3": 0.5848915289501647,
+            "4": 0.3045892310311014,
+            "2": 0.11051924001873381
+          }
+        },
+        {
+          "filename": "20240426114804vEJvCL_jpg.rf.e8b208c0e3afd026da67dc6b206f33b1.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5262917899453063,
+          "stage_scores": {
+            "3": 0.5262917899453063,
+            "4": 0.3524567718528848,
+            "2": 0.1212514382018088
+          }
+        }
+      ],
+      "total_misclassified": 63,
+      "level_1_as_2": 10,
+      "level_2_as_1": 0
+    },
+    "elapsed_time": 66.56211924552917,
+    "total_images": 82
+  },
+  "exclude_lv1_top_k_50": {
+    "metrics": {
+      "accuracy": 0.1951219512195122,
+      "precision": 0.4146341463414634,
+      "recall": 0.1951219512195122,
+      "f1": 0.2653658536585366
+    },
+    "misclassification": {
+      "misclassified_cases": [
+        {
+          "filename": "202311090555509eWyUn_jpg.rf.f7825a587b498e9e211a2c37893d14ba.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.46498977085282867,
+          "stage_scores": {
+            "3": 0.46498977085282867,
+            "2": 0.4589271469070081,
+            "4": 0.07608308224016323
+          }
+        },
+        {
+          "filename": "202311140507485YT3wv_jpg.rf.1031c59f7ddafa0c68ed7c43201ac687.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.7024527157058358,
+          "stage_scores": {
+            "2": 0.7024527157058358,
+            "3": 0.29754728429416405
+          }
+        },
+        {
+          "filename": "202312240752033lv1EX_jpg.rf.3b65bd355cd4939f8730cde4e8576447.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.7254119119274637,
+          "stage_scores": {
+            "3": 0.7254119119274637,
+            "2": 0.2745880880725364
+          }
+        },
+        {
+          "filename": "20231224135435509UpD_jpg.rf.3092acf254489f0aeef597ce399e30bc.jpg",
+          "true_level": 1,
+          "pred_level": 4,
+          "confidence": 0.4227203455700892,
+          "stage_scores": {
+            "4": 0.4227203455700892,
+            "3": 0.2272242180098709,
+            "5": 0.10911879430232178,
+            "6": 0.14721099522611394,
+            "2": 0.0937256468916042
+          }
+        },
+        {
+          "filename": "202401020937479el5vT_jpg.rf.f4f73132c3d7d7b4ab713b6f866a36bf.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.39229860903125224,
+          "stage_scores": {
+            "2": 0.39208152244577676,
+            "3": 0.39229860903125224,
+            "4": 0.21561986852297102
+          }
+        },
+        {
+          "filename": "202401091258185i1XAv_jpg.rf.eb2174cd979011f9c7ec7c2b46330e0f.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.44764110461753953,
+          "stage_scores": {
+            "2": 0.44764110461753953,
+            "3": 0.3894185581032867,
+            "4": 0.1629403372791738
+          }
+        },
+        {
+          "filename": "2024011005233346UTOo_jpg.rf.ff2dac6398422762c9e86892345c8eaf.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.49251857395333076,
+          "stage_scores": {
+            "3": 0.49251857395333076,
+            "4": 0.29954438953607804,
+            "2": 0.20793703651059142
+          }
+        },
+        {
+          "filename": "20240111140530a1LmVw_jpg.rf.977fdf5e94ff6e2168273d5d7af7a34b.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.6388273160295141,
+          "stage_scores": {
+            "3": 0.6388273160295141,
+            "2": 0.27136899108543094,
+            "4": 0.08980369288505524
+          }
+        },
+        {
+          "filename": "20240113100243cYsaPh_jpg.rf.4847e31d078360c9a021c95070015eb8.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.45024700447481136,
+          "stage_scores": {
+            "3": 0.3514924657605065,
+            "2": 0.45024700447481136,
+            "5": 0.11729301590356699,
+            "4": 0.08096751386111485
+          }
+        },
+        {
+          "filename": "20240129090307iqpvZZ_jpg.rf.6dc3498c5b9d265f135165efe1d8fb03.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.44538679370865264,
+          "stage_scores": {
+            "3": 0.44538679370865264,
+            "4": 0.246282872956733,
+            "2": 0.2859070470205792,
+            "5": 0.02242328631403521
+          }
+        },
+        {
+          "filename": "202402090616121bPjaV_jpg.rf.666ced168b7c40072b72f427c1eaa436.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.3323145123421598,
+          "stage_scores": {
+            "2": 0.3323145123421598,
+            "3": 0.29863142638789203,
+            "4": 0.20014218133564926,
+            "5": 0.07279230336664383,
+            "6": 0.059277902387155884,
+            "7": 0.03684167418049913
+          }
+        },
+        {
+          "filename": "20240209063754yo7GoV_jpg.rf.04378c69a6d17ae1e4d27a6f1217bc0b.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.32327256096755275,
+          "stage_scores": {
+            "3": 0.32327256096755275,
+            "2": 0.29486700142696504,
+            "5": 0.16092981720306676,
+            "4": 0.1460359788531058,
+            "7": 0.015250505866759873,
+            "6": 0.05964413568254988
+          }
+        },
+        {
+          "filename": "20240211175131a0OZmc_jpg.rf.55ad5ce1f2beafff3d648b3b8b00f3cd.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.3677248445242882,
+          "stage_scores": {
+            "2": 0.21375753754761206,
+            "3": 0.3677248445242882,
+            "6": 0.14470146079656956,
+            "4": 0.14813499586271517,
+            "7": 0.025360092742655525,
+            "5": 0.10032106852615973
+          }
+        },
+        {
+          "filename": "20240214173337HZZSRn_jpg.rf.89faf2153da419d9450a2648f04fa754.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.5615687812366205,
+          "stage_scores": {
+            "2": 0.5615687812366205,
+            "3": 0.4384312187633795
+          }
+        },
+        {
+          "filename": "20240217044736IcauP7_jpg.rf.630db56df4ba7c0261cbcc753a2631ea.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.3329383905033374,
+          "stage_scores": {
+            "3": 0.3329383905033374,
+            "2": 0.29421533274715994,
+            "6": 0.14049965315063684,
+            "5": 0.0941016884970401,
+            "4": 0.12801855371373833,
+            "7": 0.01022638138808735
+          }
+        },
+        {
+          "filename": "20240217170513PNFPeO_jpg.rf.9a121b7b79d8bea4d539cb98eb75c65a.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.6271822723626982,
+          "stage_scores": {
+            "3": 0.6271822723626982,
+            "2": 0.37281772763730187
+          }
+        },
+        {
+          "filename": "20240218044142lbB0i6_jpg.rf.53af6e44e00919abeff4f36f77238303.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.6450559021302985,
+          "stage_scores": {
+            "3": 0.6450559021302985,
+            "2": 0.28712138685449795,
+            "4": 0.0678227110152035
+          }
+        },
+        {
+          "filename": "20240218141519F8suN8_jpg.rf.4ee0062b8784949dfd98ff4d3e568664.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.7167632361065206,
+          "stage_scores": {
+            "3": 0.7167632361065206,
+            "2": 0.2832367638934793
+          }
+        },
+        {
+          "filename": "20240219020903XzbXG9_jpg.rf.3d641d6c4f1ace341199f4b5b96f536f.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.5969650557587871,
+          "stage_scores": {
+            "3": 0.5969650557587871,
+            "2": 0.3401710262341688,
+            "4": 0.06286391800704437
+          }
+        },
+        {
+          "filename": "20240223095436na6dmB_jpg.rf.96583789d668cfa0bfc35713683367ee.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.3192287556157832,
+          "stage_scores": {
+            "3": 0.3192287556157832,
+            "2": 0.2989392228572353,
+            "5": 0.15978438063232203,
+            "4": 0.22204764089465956
+          }
+        },
+        {
+          "filename": "20240223163801YZpMcS_jpg.rf.3d79b466613486d06c0d6982a2ee1de6.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.49884889203548644,
+          "stage_scores": {
+            "3": 0.49884889203548644,
+            "4": 0.18691798301483387,
+            "5": 0.1784168485228097,
+            "2": 0.13581627642687008
+          }
+        },
+        {
+          "filename": "20240224071448axsdpv_jpg.rf.ad4f4fe40741b81e846c0d18fe5bce7c.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.4377009550792301,
+          "stage_scores": {
+            "3": 0.4377009550792301,
+            "2": 0.209601273697866,
+            "6": 0.1499776668497642,
+            "4": 0.15834505132039553,
+            "5": 0.04437505305274402
+          }
+        },
+        {
+          "filename": "20240224071656Xas5S2_jpg.rf.0d83396c67a8272323497bb3a4d0b97f.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.3886437897857529,
+          "stage_scores": {
+            "3": 0.3886437897857529,
+            "5": 0.0887968525806264,
+            "4": 0.22937152418365328,
+            "6": 0.08103352988366051,
+            "2": 0.21215430356630705
+          }
+        },
+        {
+          "filename": "20240224090843fym4nC_jpg.rf.d80859e749828a596d682cc3280e4139.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.33367899081453023,
+          "stage_scores": {
+            "3": 0.33367899081453023,
+            "6": 0.14370963912754212,
+            "5": 0.09329458342196063,
+            "2": 0.22336898424469978,
+            "4": 0.2059478023912673
+          }
+        },
+        {
+          "filename": "20240225041055uQZDPJ_jpg.rf.cb4ba32d2ca7c68ef47599ff4a232453.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.4346697737660608,
+          "stage_scores": {
+            "3": 0.4103033993256806,
+            "2": 0.4346697737660608,
+            "4": 0.1550268269082588
+          }
+        },
+        {
+          "filename": "20240226133614PaLGlu_jpg.rf.07d91f12d48766a2592bbac5e45ac8ee.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.4993528249372291,
+          "stage_scores": {
+            "2": 0.4993528249372291,
+            "3": 0.42791719344730644,
+            "4": 0.07272998161546428
+          }
+        },
+        {
+          "filename": "20240227180634PqmAJX_jpg.rf.21dd5ab62f7dbd2f9b892fc7c49d4a0e.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.35631798315047686,
+          "stage_scores": {
+            "4": 0.3105683772090172,
+            "2": 0.3331136396405061,
+            "3": 0.35631798315047686
+          }
+        },
+        {
+          "filename": "20240228022345jEcVL5_jpg.rf.b935edc8b3e971487f610c95ab6246dc.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.3440722727134689,
+          "stage_scores": {
+            "3": 0.3440722727134689,
+            "2": 0.3036566043177338,
+            "5": 0.09783824058996632,
+            "6": 0.12343948685307937,
+            "4": 0.11776596090454139,
+            "7": 0.013227434621210234
+          }
+        },
+        {
+          "filename": "20240228110123IPYpYd_jpg.rf.3e5aba8d4c58a3d308e3ab123a79f16a.jpg",
+          "true_level": 1,
+          "pred_level": 2,
+          "confidence": 0.566836566360049,
+          "stage_scores": {
+            "2": 0.566836566360049,
+            "3": 0.3580665351609397,
+            "4": 0.07509689847901123
+          }
+        },
+        {
+          "filename": "20240229041720rQ8l0p_jpg.rf.8bb5e8029c0de71c1ee6d481e1e027b8.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.439219423607234,
+          "stage_scores": {
+            "3": 0.439219423607234,
+            "4": 0.23955950381143412,
+            "2": 0.22350165186420062,
+            "5": 0.04603921522327322,
+            "6": 0.05168020549385813
+          }
+        },
+        {
+          "filename": "20240305141825xPajgw_jpg.rf.6718ccc922e7f4069f17eb60dc65734d.jpg",
+          "true_level": 1,
+          "pred_level": 3,
+          "confidence": 0.4551096111259461,
+          "stage_scores": {
+            "3": 0.4551096111259461,
+            "5": 0.12652066263173029,
+            "4": 0.18903420268968268,
+            "2": 0.15726157864089507,
+            "6": 0.04184888647556533,
+            "7": 0.030225058436180507
+          }
+        },
+        {
+          "filename": "20231110070141qEi5wm_jpg.rf.20af76796b05405ce043227831af11b2.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.6262792161410996,
+          "stage_scores": {
+            "3": 0.6262792161410996,
+            "2": 0.3265465188216442,
+            "4": 0.047174265037256066
+          }
+        },
+        {
+          "filename": "20231206043710OotqJs_jpg.rf.621d16a36fabb45a838cf73543a26577.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5503653364623575,
+          "stage_scores": {
+            "3": 0.5503653364623575,
+            "4": 0.19013706592224508,
+            "2": 0.2594975976153974
+          }
+        },
+        {
+          "filename": "20231222075010HDRqwK_jpg.rf.4e412fcbb2778e7599376a1cdd92cc7b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.42838743795723744,
+          "stage_scores": {
+            "3": 0.42838743795723744,
+            "5": 0.10439301258926953,
+            "4": 0.19905947526617493,
+            "2": 0.16818465161577456,
+            "6": 0.09997542257154376
+          }
+        },
+        {
+          "filename": "20231222094424akH8Au_jpg.rf.cb2c90ea14b4ec3aa056d435ea661e2b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4538027364586831,
+          "stage_scores": {
+            "3": 0.4538027364586831,
+            "2": 0.20044159828178862,
+            "4": 0.1589912031668002,
+            "5": 0.09219482389242128,
+            "6": 0.07339493493948773,
+            "7": 0.02117470326081893
+          }
+        },
+        {
+          "filename": "20231224074531ch8RvS_jpg.rf.a2bc429ffd23cfcbb137b75f037d0804.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.40601233305546397,
+          "stage_scores": {
+            "3": 0.40601233305546397,
+            "2": 0.3119861628932565,
+            "4": 0.19931923025659257,
+            "5": 0.068130730383366,
+            "6": 0.014551543411321201
+          }
+        },
+        {
+          "filename": "20231224145323tlJNT7_jpg.rf.a0f8b009f18cdca339276c7ea92fc5dd.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.388694991715396,
+          "stage_scores": {
+            "3": 0.388694991715396,
+            "4": 0.18645275091139096,
+            "2": 0.30792568710849016,
+            "5": 0.06073782485007991,
+            "6": 0.056188745414642825
+          }
+        },
+        {
+          "filename": "20231225045824PLLwSq_rgbshift_jpg.rf.6f9be6c655b371b35e1053761d7b6626.jpg",
+          "true_level": 2,
+          "pred_level": 6,
+          "confidence": 0.2767706007896116,
+          "stage_scores": {
+            "5": 0.1996135967376117,
+            "6": 0.2767706007896116,
+            "7": 0.20791727143562055,
+            "4": 0.13563590630857228,
+            "2": 0.11187636740982622,
+            "3": 0.06818625731875756
+          }
+        },
+        {
+          "filename": "20231225045824PLLwSq_sepia_jpg.rf.2f8315ce1666177e6f761a2b847eee43.jpg",
+          "true_level": 2,
+          "pred_level": 7,
+          "confidence": 0.2752886524459551,
+          "stage_scores": {
+            "7": 0.2752886524459551,
+            "5": 0.1944694934316193,
+            "6": 0.2321296823918727,
+            "4": 0.09851902796686594,
+            "2": 0.11729232864505981,
+            "3": 0.08230081511862698
+          }
+        },
+        {
+          "filename": "20231229055019q8obL0_jpg.rf.a44525ef4b70ca5326c02e646751cdd8.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.41431655292427694,
+          "stage_scores": {
+            "3": 0.41431655292427694,
+            "2": 0.407700839919695,
+            "4": 0.17798260715602782
+          }
+        },
+        {
+          "filename": "20231229090549BKawsC_jpg.rf.3ff75220704f4b6878ab84b9432e8ea4.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5027004305486923,
+          "stage_scores": {
+            "3": 0.5027004305486923,
+            "4": 0.22900630548270523,
+            "2": 0.26829326396860254
+          }
+        },
+        {
+          "filename": "20231229224733KEgsWh_jpg.rf.cd866c1c8965270a5f78e6324a115e6a.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4659897379339818,
+          "stage_scores": {
+            "3": 0.4659897379339818,
+            "4": 0.1785736698398335,
+            "2": 0.13013787158628784,
+            "7": 0.093729110800829,
+            "5": 0.06307407867574345,
+            "6": 0.06849553116332392
+          }
+        },
+        {
+          "filename": "20231231043028Q46NRr_jpg.rf.0227684b9bed2f5914efa7465b14b7b1.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5337719744630035,
+          "stage_scores": {
+            "3": 0.5337719744630035,
+            "2": 0.4269833111200207,
+            "4": 0.039244714416975475
+          }
+        },
+        {
+          "filename": "20231231054651z4VGer_jpg.rf.076b97375abd482fa8d551e0fc2a7b26.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.40056240999650444,
+          "stage_scores": {
+            "3": 0.40056240999650444,
+            "4": 0.18688994525775593,
+            "6": 0.13102002365062757,
+            "5": 0.08708075032479407,
+            "2": 0.18459065328736077,
+            "7": 0.00985621748295726
+          }
+        },
+        {
+          "filename": "20231231065720iJVyYt_jpg.rf.01d1f87df50ab17878cfca7bc4677a88.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4062046246060206,
+          "stage_scores": {
+            "3": 0.4062046246060206,
+            "2": 0.18305283810658152,
+            "4": 0.198214208702647,
+            "5": 0.11209009668159536,
+            "6": 0.08978349066890999,
+            "7": 0.010654741234245401
+          }
+        },
+        {
+          "filename": "202401080941003KIfb2_gauss_jpg.rf.408f53e8c1028b97f71e56081c5c7c41.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.2924426842239133,
+          "stage_scores": {
+            "2": 0.22180321154741373,
+            "3": 0.2924426842239133,
+            "5": 0.11637054544809942,
+            "4": 0.2507953150820194,
+            "6": 0.09877615036881247,
+            "7": 0.019812093329741997
+          }
+        },
+        {
+          "filename": "20240109072410jkB2Mo_sepia_jpg.rf.a4fdad46ce5f129b21dbe7bb6a14c3fe.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.46090483866215237,
+          "stage_scores": {
+            "3": 0.46090483866215237,
+            "2": 0.42247757866736974,
+            "4": 0.11661758267047806
+          }
+        },
+        {
+          "filename": "20240110043329FdhNwV_jpg.rf.99fcefece4cc66515201f00abaeb8e48.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3811209536706386,
+          "stage_scores": {
+            "3": 0.3811209536706386,
+            "4": 0.30546555311334406,
+            "2": 0.23020186660819963,
+            "6": 0.06321015139475561,
+            "5": 0.02000147521306159
+          }
+        },
+        {
+          "filename": "20240110161423irhZYT_jpg.rf.f522d126d27f9556ef4aaebc36469a89.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.421098340378932,
+          "stage_scores": {
+            "2": 0.259845808862873,
+            "3": 0.421098340378932,
+            "4": 0.2064704731154196,
+            "5": 0.06767750825829985,
+            "6": 0.023014598998408152,
+            "7": 0.021893270386067528
+          }
+        },
+        {
+          "filename": "20240110181024v6RUKz_jpg.rf.efae00619ff24a8ed2845e9bde7e8a48.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5279588924005345,
+          "stage_scores": {
+            "3": 0.5279588924005345,
+            "2": 0.3514208168640639,
+            "4": 0.12062029073540163
+          }
+        },
+        {
+          "filename": "20240111080420FDIESU_jpg.rf.726526b79b4ce44fa1710e5739269238.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3750324279789885,
+          "stage_scores": {
+            "3": 0.3750324279789885,
+            "4": 0.28567510428932474,
+            "5": 0.13972376678136839,
+            "6": 0.09256604041120288,
+            "2": 0.09761638228322794,
+            "7": 0.009386278255887627
+          }
+        },
+        {
+          "filename": "20240111181117uMGlb4_jpg.rf.f0a0b23d47eafad99f379f672b37d1f8.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3461745283102815,
+          "stage_scores": {
+            "4": 0.33753299389134916,
+            "3": 0.3461745283102815,
+            "2": 0.21263182537877884,
+            "5": 0.1036606524195904
+          }
+        },
+        {
+          "filename": "20240112041805zFsaoN_jpg.rf.049f78390a56c8312fe7ea79256a44eb.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.40557149000735837,
+          "stage_scores": {
+            "3": 0.40557149000735837,
+            "2": 0.25565331149642495,
+            "4": 0.13006535684764778,
+            "5": 0.08772577309858137,
+            "6": 0.07641982620673167,
+            "7": 0.044564242343256
+          }
+        },
+        {
+          "filename": "202401120735396rfKJL_jpg.rf.f587c7e6e7671abe29172f3da76c95c6.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.42604257910873583,
+          "stage_scores": {
+            "4": 0.3295829658781636,
+            "3": 0.42604257910873583,
+            "2": 0.18533359871130548,
+            "5": 0.04288220866966027,
+            "6": 0.016158647632134638
+          }
+        },
+        {
+          "filename": "20240130072349uniDRh_jpg.rf.f943e9a84d533634fab73140c6a126d5.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.44021182634525646,
+          "stage_scores": {
+            "4": 0.21679711755514072,
+            "2": 0.3429910560996029,
+            "3": 0.44021182634525646
+          }
+        },
+        {
+          "filename": "20240207051218k0Ayjg_jpg.rf.5ca21e5a6187c36f86f823b532009587.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3966691935934751,
+          "stage_scores": {
+            "2": 0.36531816754041896,
+            "3": 0.3966691935934751,
+            "4": 0.13357393468685055,
+            "5": 0.06073381663296296,
+            "7": 0.016717195641436457,
+            "6": 0.026987691904856236
+          }
+        },
+        {
+          "filename": "20240219045157mzVfj7_jpg.rf.c9b45d0874181d11613377e6b334a901.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.30598279972706105,
+          "stage_scores": {
+            "3": 0.30598279972706105,
+            "4": 0.2863471717818677,
+            "5": 0.11058912356395445,
+            "2": 0.12041720330473864,
+            "6": 0.13829451603873805,
+            "7": 0.03836918558363998
+          }
+        },
+        {
+          "filename": "20240224194300kOjsFD_jpg.rf.0c13fa04922a01749826cec6cc657c47.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5640738981078421,
+          "stage_scores": {
+            "3": 0.5640738981078421,
+            "4": 0.11543991158932836,
+            "2": 0.28977238051378984,
+            "7": 0.030713809789039773
+          }
+        },
+        {
+          "filename": "20240226191121Dv7z5w_jpg.rf.eb0c2f4b31aebe5bbeaa9a01fb3434aa.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.3315860041196769,
+          "stage_scores": {
+            "3": 0.3315860041196769,
+            "4": 0.21349403137356443,
+            "6": 0.13754967476776894,
+            "2": 0.14821168406887114,
+            "5": 0.12471158805596066,
+            "7": 0.04444701761415811
+          }
+        },
+        {
+          "filename": "20240228022910jI5UiG_jpg.rf.ef2df61aef7de73f2e41ce77231b3f72.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.39106931015726637,
+          "stage_scores": {
+            "2": 0.3413900984374144,
+            "3": 0.39106931015726637,
+            "6": 0.04026514076686461,
+            "4": 0.17283143355795694,
+            "5": 0.05444401708049753
+          }
+        },
+        {
+          "filename": "20240228100442mIw9Zu_jpg.rf.334b9eea8eecabd6e884c210e7ca5b8b.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.39293742924164615,
+          "stage_scores": {
+            "3": 0.39293742924164615,
+            "2": 0.27130156623603074,
+            "4": 0.1870460046044935,
+            "6": 0.08188447390143379,
+            "5": 0.06683052601639596
+          }
+        },
+        {
+          "filename": "20240228154416jXyC0M_gauss_jpg.rf.ac2af1c17a0d641455bc43da325ded4c.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.25897243247812424,
+          "stage_scores": {
+            "5": 0.16321579120997848,
+            "3": 0.25897243247812424,
+            "2": 0.1659544197319072,
+            "4": 0.21055431117119403,
+            "6": 0.19088656830895112,
+            "7": 0.010416477099844956
+          }
+        },
+        {
+          "filename": "202403051419132qBmCp_jpg.rf.da793fe65f18a09d455e7614e3522eff.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.37068167776557964,
+          "stage_scores": {
+            "3": 0.37068167776557964,
+            "4": 0.22875260627541336,
+            "5": 0.10277016271574194,
+            "2": 0.18826687260543776,
+            "6": 0.09740006057667434,
+            "7": 0.01212862006115259
+          }
+        },
+        {
+          "filename": "20240306093756Nxspmr_jpg.rf.520a1e540048254439e49edc6e72083d.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5242348012727034,
+          "stage_scores": {
+            "3": 0.5242348012727034,
+            "2": 0.2780888466110982,
+            "4": 0.17798016109540876,
+            "5": 0.0196961910207897
+          }
+        },
+        {
+          "filename": "20240422192617LNrK9O_jpg.rf.4efd92c9f17ab9391444755665005c57.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.5385724403744457,
+          "stage_scores": {
+            "3": 0.5385724403744457,
+            "4": 0.27927612979439004,
+            "2": 0.18215142983116417
+          }
+        },
+        {
+          "filename": "20240426114804vEJvCL_jpg.rf.e8b208c0e3afd026da67dc6b206f33b1.jpg",
+          "true_level": 2,
+          "pred_level": 3,
+          "confidence": 0.4452874223726183,
+          "stage_scores": {
+            "3": 0.4452874223726183,
+            "4": 0.3562338915329065,
+            "2": 0.11013441785435489,
+            "5": 0.04805619992497587,
+            "6": 0.04028806831514445
+          }
+        }
+      ],
+      "total_misclassified": 66,
+      "level_1_as_2": 8,
+      "level_2_as_1": 0
+    },
+    "elapsed_time": 69.57805442810059,
+    "total_images": 82
+  }
+}

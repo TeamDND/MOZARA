@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 import torch
 import torchvision.transforms as transforms
-from sentence_transformers import SentenceTransformer
+import timm
 import os
 import base64
 import io
@@ -16,17 +16,19 @@ class ImageProcessor:
         """이미지 처리 및 특징 추출을 위한 클래스"""
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-        # CLIP 모델 로드
+        # ConvNeXt-L 모델 로드
         try:
-            self.clip_model = SentenceTransformer(settings.CLIP_MODEL_NAME)
-            logging.info(f"CLIP 모델 로드 완료: {settings.CLIP_MODEL_NAME}")
+            self.model = timm.create_model(settings.MODEL_NAME, pretrained=True, num_classes=0)
+            self.model.eval()
+            self.model.to(self.device)
+            logging.info(f"ConvNeXt-L 모델 로드 완료: {settings.MODEL_NAME}")
         except Exception as e:
-            logging.error(f"CLIP 모델 로드 실패: {e}")
+            logging.error(f"ConvNeXt-L 모델 로드 실패: {e}")
             raise
 
-        # 이미지 전처리 변환
+        # ConvNeXt-L용 이미지 전처리 변환
         self.transform = transforms.Compose([
-            transforms.Resize((224, 224)),
+            transforms.Resize((384, 384)),  # ConvNeXt-L은 384x384 입력 크기 사용
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                std=[0.229, 0.224, 0.225])
@@ -51,33 +53,44 @@ class ImageProcessor:
     def preprocess_image(self, image: Image.Image) -> np.ndarray:
         """이미지를 전처리하여 numpy 배열로 반환"""
         try:
-            # 이미지 크기 조정 (224x224)
-            image = image.resize((224, 224))
+            # 이미지 크기 조정 (384x384)
+            image = image.resize((384, 384))
             return np.array(image)
         except Exception as e:
             self.logger.error(f"이미지 전처리 실패: {e}")
             return None
 
     def extract_clip_embedding(self, image: Image.Image) -> Optional[np.ndarray]:
-        """CLIP 모델을 사용한 이미지 임베딩 추출"""
+        """ConvNeXt-L 모델을 사용한 이미지 임베딩 추출"""
         try:
-            # CLIP 임베딩 추출
-            embedding = self.clip_model.encode(image)
+            # 이미지 전처리
+            if isinstance(image, Image.Image):
+                input_tensor = self.transform(image).unsqueeze(0).to(self.device)
+            else:
+                self.logger.error("입력이 PIL Image가 아닙니다")
+                return None
+
+            # ConvNeXt-L로 특징 추출 (그래디언트 계산 비활성화)
+            with torch.no_grad():
+                features = self.model(input_tensor)
+                # CPU로 이동하고 numpy 배열로 변환
+                embedding = features.squeeze().cpu().numpy()
+
             return embedding
         except Exception as e:
-            self.logger.error(f"CLIP 임베딩 추출 실패: {e}")
+            self.logger.error(f"ConvNeXt-L 임베딩 추출 실패: {e}")
             return None
 
     def extract_clip_embedding_from_path(self, image_path: str) -> Optional[np.ndarray]:
-        """파일 경로에서 CLIP 임베딩 추출"""
+        """파일 경로에서 ConvNeXt-L 임베딩 추출"""
         try:
             image = Image.open(image_path).convert('RGB')
             return self.extract_clip_embedding(image)
         except Exception as e:
-            self.logger.error(f"파일에서 CLIP 임베딩 추출 실패 {image_path}: {e}")
+            self.logger.error(f"파일에서 ConvNeXt-L 임베딩 추출 실패 {image_path}: {e}")
             return None
 
-    def process_dataset(self, dataset_path: str, stages: List[int] = [2, 3, 4, 5]) -> Dict:
+    def process_dataset(self, dataset_path: str, stages: List[int] = [0, 1, 2, 3, 4, 5, 6, 7]) -> Dict:
         """데이터셋의 모든 이미지를 처리하여 임베딩 생성"""
         embeddings_data = {
             'embeddings': [],
@@ -100,7 +113,7 @@ class ImageProcessor:
                 if filename.lower().endswith(('.jpg', '.jpeg', '.png')):
                     image_path = os.path.join(stage_folder, filename)
 
-                    # CLIP 임베딩 추출
+                    # ConvNeXt-L 임베딩 추출
                     embedding = self.extract_clip_embedding_from_path(image_path)
 
                     if embedding is not None:
