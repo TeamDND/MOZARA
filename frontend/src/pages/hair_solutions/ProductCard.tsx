@@ -90,7 +90,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </div>
 
         {/* 브랜드 배지 */}
-        <div className="absolute top-3 right-3 bg-blue-600 text-white rounded-full px-2 py-1">
+        <div className="absolute top-32 right-3 bg-[#222222] text-white rounded-full px-2 py-1">
           <span className="text-xs font-medium">{product.brand}</span>
         </div>
         
@@ -108,7 +108,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       {/* 제품 정보 */}
       <div className="p-4">
         {/* 제품명 */}
-        <h3 className="font-semibold text-gray-800 text-lg mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+        <h3 className="font-semibold text-gray-800 text-lg mb-2 line-clamp-2 group-hover:text-[#222222] transition-colors">
           {product.productName}
         </h3>
 
@@ -169,7 +169,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             {product.suitableStages.map((stage) => (
               <span
                 key={stage}
-                className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium"
+                className="text-xs bg-gray-100 text-[#222222] px-2 py-1 rounded-full font-medium"
               >
                 {stage}단계
               </span>
@@ -179,7 +179,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* 구매 버튼 */}
         <button
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="w-full bg-[#222222] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#333333] transition-colors focus:outline-none focus:ring-2 focus:ring-[#222222] focus:ring-offset-2"
           onClick={(e) => {
             e.stopPropagation();
             window.open(product.productUrl, '_blank');

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { RootState } from "../utils/store"
+import { clearToken } from "../utils/tokenSlice"
+import { clearUser } from "../utils/userSlice"
 
 import { Card, CardContent } from "../components/ui/card"
 import { Button } from "../components/ui/button"
@@ -31,6 +33,7 @@ import {
   Play,
   ShoppingCart,
   ExternalLink,
+  LogOut,
 } from "lucide-react"
 
 // 분석 결과 타입 정의
@@ -56,6 +59,13 @@ export default function MyPage() {
   const user = useSelector((state: RootState) => state.user)
   const token = useSelector((state: RootState) => state.token.jwtToken)
   const dispatch = useDispatch()
+
+  // 로그아웃 함수
+  const handleLogout = () => {
+    dispatch(clearToken())
+    dispatch(clearUser())
+    navigate('/')
+  }
 
   // 분석 결과 개수 및 리스트 조회
   useEffect(() => {
@@ -313,7 +323,7 @@ export default function MyPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <UserProfile userInfo={userInfo} loading={loading} />
+      <UserProfile userInfo={userInfo} loading={loading} onLogout={handleLogout} />
 
       <div className="px-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4">

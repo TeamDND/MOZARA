@@ -66,7 +66,7 @@ const ProductList: React.FC<ProductListProps> = ({
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-[#222222] text-white px-6 py-2 rounded-lg hover:bg-[#333333] transition-colors"
           >
             다시 시도
           </button>
@@ -89,7 +89,7 @@ const ProductList: React.FC<ProductListProps> = ({
             </p>
           </div>
           <div className="text-right">
-            <div className="text-3xl font-bold text-blue-600">
+            <div className="text-3xl font-bold text-[#222222]">
               {products.length}개
             </div>
             <div className="text-sm text-gray-500">추천 제품</div>
@@ -97,14 +97,14 @@ const ProductList: React.FC<ProductListProps> = ({
         </div>
 
         {/* 단계별 안내 */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <div className="text-blue-600 text-lg">💡</div>
+            <div className="text-[#222222] text-lg">💡</div>
             <div>
-              <h4 className="font-semibold text-blue-800 mb-1">
+              <h4 className="font-semibold text-gray-800 mb-1">
                 {stage}단계 탈모 관리 가이드
               </h4>
-              <p className="text-sm text-blue-700">
+              <p className="text-sm text-gray-700">
                 {stage === 1 && '두피 건강 관리와 예방에 중점을 둔 제품들을 추천합니다.'}
                 {stage === 2 && '모발 강화와 탈모 억제에 효과적인 제품들을 추천합니다.'}
                 {stage === 3 && '탈모 진행 억제와 치료에 도움이 되는 제품들을 추천합니다.'}
