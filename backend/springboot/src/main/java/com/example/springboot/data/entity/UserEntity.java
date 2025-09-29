@@ -46,7 +46,7 @@ public class UserEntity {
     private String username;
 
     @Size(max = 100)
-    @Column(name = "address", length = 100)
-    private String address;
+    @Column(name = "nickname", length = 100)
+    private String nickname;
 
 }

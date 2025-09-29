@@ -283,7 +283,7 @@ const DailyCare: React.FC = () => {
       <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col">
         
         {/* 상단 그라데이션 배너 (Mobile-First) */}
-        <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-4">
+        <div className="bg-gradient-to-r from-[#222222] to-[#333333] text-white p-4">
           <div className="text-center">
             <p className="text-sm opacity-90">{todayStr}</p>
             <h1 className="text-xl font-bold mt-1">좋은 하루예요! 데일리 케어를 시작해볼까요?</h1>
@@ -294,10 +294,10 @@ const DailyCare: React.FC = () => {
         {/* 메인 컨텐츠 */}
         <div className="flex-1 p-4 overflow-y-auto space-y-4">
           {/* 다음 액션 카드 (Mobile-First) */}
-          <div className={`bg-white p-4 rounded-xl shadow-md ${nextAction.urgent ? 'ring-2 ring-blue-200 bg-blue-50' : ''}`}>
+          <div className={`bg-white p-4 rounded-xl shadow-md ${nextAction.urgent ? 'ring-2 ring-gray-200 bg-gray-50' : ''}`}>
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-blue-600" />
+                <Target className="w-5 h-5 text-[#222222]" />
                 <h3 className="text-lg font-semibold text-gray-800">{nextAction.title}</h3>
               </div>
               <p className="text-sm text-gray-600">{nextAction.description}</p>
@@ -311,7 +311,7 @@ const DailyCare: React.FC = () => {
                 }}
                 className={`w-full h-12 rounded-xl font-semibold ${
                   nextAction.urgent 
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                    ? 'bg-[#222222] hover:bg-[#333333] text-white' 
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 } active:scale-[0.98] transition-all`}
               >
@@ -377,7 +377,7 @@ const DailyCare: React.FC = () => {
                     }
                   }}
                   disabled={isAnalyzing}
-                  className="w-full h-12 px-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 font-semibold active:scale-[0.98] transition-all"
+                  className="w-full h-12 px-4 bg-[#222222] text-white rounded-xl hover:bg-[#333333] disabled:opacity-50 font-semibold active:scale-[0.98] transition-all"
                 >
                   {isAnalyzing ? '분석 중...' : '사진으로 AI 분석'}
                 </button>
@@ -431,9 +431,9 @@ const DailyCare: React.FC = () => {
               </ul>
             </div>
 
-            <div className="bg-blue-50 p-4 rounded-xl">
-              <h3 className="text-lg font-semibold text-blue-800 mb-3">💪 건강한 라이프스타일</h3>
-              <ul className="space-y-2 text-sm text-blue-700">
+            <div className="bg-gray-50 p-4 rounded-xl">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">💪 건강한 라이프스타일</h3>
+              <ul className="space-y-2 text-sm text-gray-700">
                 <li>• 규칙적인 운동과 신체 활동</li>
                 <li>• 충분한 수분 섭취</li>
                 <li>• 금연과 금주</li>
