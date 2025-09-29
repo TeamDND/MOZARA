@@ -2,11 +2,17 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { ImageWithFallback } from "../hooks/ImageWithFallback"
+import { useSelector } from "react-redux"
+import { RootState } from "../utils/store"
 
 export default function HomePage() {
   const navigate = useNavigate()
   const [currentSlide, setCurrentSlide] = useState(0)
   const sliderRef = useRef<HTMLDivElement>(null)
+  
+  // 로그인 상태 가져오기
+  const token = useSelector((state: RootState) => state.token.token)
+  const isLoggedIn = !!token
 
   // 모든 서비스 데이터 (솔루션 + 컨텐츠)
   const allServices = [
@@ -14,71 +20,46 @@ export default function HomePage() {
       name: "탈모 PT", 
       description: "새싹 키우기를 통한 생활습관 챌린지로 헤어 관리 동기부여",
       badge: "NEW",
-      image: "/sam1.png",
+      image: "/assets/images/landing/landingslide1.png",
       category: "솔루션"
     },
     { 
       name: "탈모 맵", 
       description: "내 주변 탈모 전문 병원과 클리닉을 쉽게 찾아보세요",
       badge: "NEW",
-      image: "/sam2.png",
+      image: "/assets/images/landing/landingslide2.png",
       category: "솔루션"
     },
     { 
       name: "제품추천", 
       description: "AI 분석 결과에 따른 개인 맞춤 헤어케어 제품 추천",
       badge: "NEW",
-      image: "/sam3.png",
+      image: "/assets/images/landing/landingslide3.png",
       category: "솔루션"
     },
     { 
       name: "머리스타일 변경", 
       description: "AI를 통한 가상 헤어스타일 체험과 시뮬레이션",
       badge: "NEW",
-      image: "/sam1.png",
+      image: "/assets/images/landing/landingslide4.png",
       category: "컨텐츠"
     },
     { 
       name: "YouTube 영상", 
       description: "전문가가 추천하는 탈모 관리 및 헤어케어 영상 모음",
       badge: "NEW",
-      image: "/sam2.png",
+      image: "/assets/images/landing/landingslide5.png",
       category: "컨텐츠"
     },
     { 
       name: "탈모 백과", 
       description: "탈모에 대한 과학적 정보와 전문 지식을 한눈에",
       badge: "NEW",
-      image: "/sam3.png",
+      image: "/assets/images/landing/landingslide6.png",
       category: "컨텐츠"
     },
   ];
 
-  // 도구 클릭 핸들러
-  const handleToolClick = (toolName: string) => {
-    switch (toolName) {
-      case "머리스타일 변경":
-        navigate('/hair-change');
-        break;
-      case "탈모 PT":
-        navigate('/hair-pt');
-        break;
-      case "YouTube 영상":
-        navigate('/youtube-videos');
-        break;
-      case "제품추천":
-        navigate('/product-search');
-        break;
-      case "탈모 백과":
-        navigate('/hair-encyclopedia');
-        break;
-      case "탈모 맵":
-        navigate('/store-finder');
-        break;
-      default:
-        break;
-    }
-  };
 
   // 슬라이더 자동 재생
   useEffect(() => {
@@ -134,8 +115,14 @@ export default function HomePage() {
             나만의 탈모 로드맵을 받아보세요
             </p>
             <button
-              className="bg-black text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-gray-800 transition-colors"
-              onClick={() => navigate('/login')}
+              className="bg-[#222222] text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-[#333333] transition-colors"
+              onClick={() => {
+                if (isLoggedIn) {
+                  navigate('/daily-care')
+                } else {
+                  navigate('/login')
+                }
+              }}
             >
               시작해보기
             </button>
@@ -147,7 +134,6 @@ export default function HomePage() {
         {/* 서비스 슬라이더 */}
         <div className="py-8">
           <div className="max-w-6xl mx-auto px-4">
-            
             <div className="relative overflow-hidden">
               <div 
                 ref={sliderRef}
@@ -160,29 +146,13 @@ export default function HomePage() {
                     className="w-1/3 px-3 flex-shrink-0"
                   >
                     <div
-                      className="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all cursor-pointer active:scale-[0.98] overflow-hidden h-32"
-                      onClick={() => handleToolClick(service.name)}
+                      className="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all overflow-hidden h-40"
                     >
-                      <div className="p-4 h-full flex items-center">
-                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0 mr-3">
-                          <ImageWithFallback 
-                            src={service.image}
-                            alt={service.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center mb-1">
-                            <h4 className="text-sm font-semibold text-gray-900 truncate">{service.name}</h4>
-                            {service.badge && (
-                              <span className="ml-2 px-1.5 py-0.5 text-xs text-white bg-blue-600 rounded-full">
-                                {service.badge}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs text-gray-600 line-clamp-2">{service.description}</p>
-                        </div>
-                      </div>
+                      <ImageWithFallback 
+                        src={service.image}
+                        alt={service.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   </div>
                 ))}
@@ -195,7 +165,7 @@ export default function HomePage() {
                 <button
                   key={index}
                   className={`w-2 h-2 rounded-full transition-colors ${
-                    Math.floor(currentSlide / 3) === index ? 'bg-blue-600' : 'bg-gray-300'
+                    Math.floor(currentSlide / 3) === index ? 'bg-[#222222]' : 'bg-[#222222] opacity-30'
                   }`}
                   onClick={() => setCurrentSlide(index * 3)}
                 />

@@ -61,7 +61,7 @@ const ProductRecommendation: React.FC<ProductRecommendationProps> = ({ products 
               ✨ {product.matchReason}
             </div>
             
-            <Button className="w-full h-10 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-[0.98]">
+            <Button className="w-full h-10 rounded-lg bg-[#222222] hover:bg-[#333333] active:scale-[0.98]">
               <ShoppingCart className="w-4 h-4 mr-2" />
               구매하기
             </Button>

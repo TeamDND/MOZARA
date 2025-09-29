@@ -82,7 +82,7 @@ export default function Home() {
     <div key={index} className="relative">
       {tool.badge && (
         <div className="absolute top-3 right-3 z-10">
-          <span className="px-2 py-1 text-xs text-white bg-blue-600 rounded-full">
+          <span className="px-2 py-1 text-xs text-white bg-[#222222] rounded-full">
             {tool.badge}
           </span>
         </div>
