@@ -82,18 +82,18 @@ const BottomNavigationBar: React.FC = () => {
 
             {/* 분석 */}
             <button
-              onClick={() => navigate('/check')}
+              onClick={() => navigate('/integrated-diagnosis')}
               className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
-                isActive('/check')
+                isActive('/integrated-diagnosis')
                   ? 'text-[#222222]' 
                   : 'text-gray-600'
               }`}
             >
               <Search className={`h-5 w-5 mb-1 ${
-                isActive('/check') ? 'text-[#222222]' : 'text-gray-600'
+                isActive('/integrated-diagnosis') ? 'text-[#222222]' : 'text-gray-600'
               }`} />
               <span className={`text-xs font-medium ${
-                isActive('/check') ? 'text-[#222222]' : 'text-gray-600'
+                isActive('/integrated-diagnosis') ? 'text-[#222222]' : 'text-gray-600'
               }`}>
                 분석
               </span>
