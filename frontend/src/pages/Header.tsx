@@ -141,7 +141,7 @@ export default function Header() {
           {/* 가운데 로고 */}
           <button 
             onClick={handleLogoClick}
-            className="text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors active:scale-95 font-kaushan"
+            className="text-xl font-bold text-[#222222] hover:text-[#333333] transition-colors active:scale-95 font-kaushan"
           >
             HairFit
           </button>
@@ -205,7 +205,7 @@ export default function Header() {
                             }
                           }}
                           className={`w-full h-12 px-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors flex items-center gap-3 ${
-                            item.active ? "bg-blue-100 text-blue-700 hover:bg-blue-200" : ""
+                            item.active ? "bg-gray-100 text-gray-700 hover:bg-gray-200" : ""
                           }`}
                         >
                           <Icon className="h-5 w-5 flex-shrink-0" />
@@ -223,7 +223,7 @@ export default function Header() {
                 <>
                   {/* 로그인된 사용자 정보 */}
                   <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-[#222222] rounded-full flex items-center justify-center">
                       <User className="h-5 w-5 text-white" />
                     </div>
                     <div>
@@ -245,7 +245,7 @@ export default function Header() {
                   <div className="space-y-3">
                     <button
                       onClick={handleLoginClick}
-                      className="w-full flex items-center gap-3 p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="w-full flex items-center gap-3 p-3 bg-[#222222] text-white rounded-lg hover:bg-[#333333] transition-colors"
                     >
                       <LogIn className="h-5 w-5" />
                       <span className="font-medium">로그인</span>

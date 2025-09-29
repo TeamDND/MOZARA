@@ -7,8 +7,8 @@ const HAIR_LOSS_STAGES = [
     title: '0단계',
     description: '예방 단계',
     subtitle: '예방용 샴푸, 두피 클렌저, 생활습관 가이드',
-    color: 'bg-blue-100 border-blue-300 text-blue-800',
-    hoverColor: 'hover:bg-blue-200',
+    color: 'bg-gray-100 border-gray-300 text-gray-800',
+    hoverColor: 'hover:bg-gray-200',
     icon: '🛡️'
   },
   {

@@ -42,7 +42,7 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
 
   const features = [
     {
-      icon: <Brain className="w-8 h-8 text-blue-600" />,
+      icon: <Brain className="w-8 h-8 text-[#222222]" />,
       title: "AI 탈모 분석",
       description: "이미지와 기본정보를 기반으로 쉽고 빠르게 AI 탈모 분석",
       highlight: "정확도 75%"
@@ -104,12 +104,12 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
       <div className="max-w-full md:max-w-md lg:max-w-lg mx-auto bg-white min-h-screen">
         {/* 히어로 섹션 - 풀스크린 모바일 경험 */}
         <section className="py-8 px-4 text-center">
-          <Badge variant="secondary" className="mb-4 px-3 py-1.5 text-xs bg-blue-50 text-blue-700">
+          <Badge variant="secondary" className="mb-4 px-3 py-1.5 text-xs bg-gray-50 text-gray-700">
             AI 탈모 분석을 통한 맞춤 컨텐츠 및 솔루션 서비스
           </Badge>
 
           <h1 className="text-2xl mb-4 leading-tight font-bold">
-            <span className="text-blue-600">MOZARA</span>
+            <span className="text-[#222222]">MOZARA</span>
           </h1>
 
           <p className="text-sm text-gray-600 mb-6 px-2 leading-relaxed">
@@ -121,7 +121,7 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
           <div className="space-y-3 mb-8">
             <Button
               onClick={handleDiagnosisStart}
-              className="w-full min-h-[48px] px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
+              className="w-full min-h-[48px] px-6 py-3 bg-[#222222] hover:bg-[#333333] text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
             >
               AI 분석 시작하기
               <ArrowRight className="w-5 h-5 ml-2" />
@@ -151,9 +151,9 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
                 <CheckCircle className="w-3 h-3 text-green-600" />
                 <span className="text-xs font-medium text-green-800">AI 분석 완료</span>
               </div>
-              <div className="bg-blue-100 rounded-full px-3 py-1.5 flex items-center gap-1.5">
-                <TrendingUp className="w-3 h-3 text-blue-600" />
-                <span className="text-xs font-medium text-blue-800">15% 개선됨</span>
+              <div className="bg-gray-100 rounded-full px-3 py-1.5 flex items-center gap-1.5">
+                <TrendingUp className="w-3 h-3 text-[#222222]" />
+                <span className="text-xs font-medium text-[#222222]">15% 개선됨</span>
               </div>
             </div>
           </div>
@@ -164,7 +164,7 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
           <div className="grid grid-cols-2 gap-3">
             {stats.map((stat, index) => (
               <div key={index} className="bg-white rounded-xl p-4 text-center shadow-sm">
-                <div className="flex justify-center mb-2 text-blue-600">
+                <div className="flex justify-center mb-2 text-[#222222]">
                   {stat.icon}
                 </div>
                 <div className="text-lg font-bold mb-1">{stat.value}</div>
@@ -197,7 +197,7 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-2">
                         <h3 className="text-base font-semibold text-gray-900">{feature.title}</h3>
-                        <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 ml-2">
+                        <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200 ml-2">
                           {feature.highlight}
                         </Badge>
                       </div>
@@ -269,7 +269,7 @@ export function MainPage({ setCurrentView }: MainPageProps = {}) {
             {/* 모바일 풀 너비 CTA 버튼 */}
             <Button
               onClick={handleDiagnosisStart}
-              className="w-full min-h-[52px] px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-2xl shadow-lg active:scale-[0.98] transition-all"
+              className="w-full min-h-[52px] px-6 py-4 bg-[#222222] hover:bg-[#333333] text-white text-base font-semibold rounded-2xl shadow-lg active:scale-[0.98] transition-all"
             >
               분석 시작하기
               <ArrowRight className="w-5 h-5 ml-2" />

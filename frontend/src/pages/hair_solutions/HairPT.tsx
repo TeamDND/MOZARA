@@ -534,7 +534,7 @@ const HairPT: React.FC = () => {
   // 미션별 아이콘과 색상 반환 함수
   const getMissionIcon = (missionName: string) => {
     const iconMap: { [key: string]: { icon: string; bgColor: string; textColor: string } } = {
-      '물 마시기': { icon: 'fas fa-tint', bgColor: 'bg-blue-100', textColor: 'text-blue-500' },
+      '물 마시기': { icon: 'fas fa-tint', bgColor: 'bg-gray-100', textColor: 'text-gray-500' },
       '이펙터 사용': { icon: 'fas fa-wand-magic-sparkles', bgColor: 'bg-purple-100', textColor: 'text-purple-500' },
       '아침 부스터 사용': { icon: 'fas fa-sun', bgColor: 'bg-yellow-100', textColor: 'text-yellow-500' },
       '밤 부스터 사용': { icon: 'fas fa-moon', bgColor: 'bg-indigo-100', textColor: 'text-indigo-500' },
