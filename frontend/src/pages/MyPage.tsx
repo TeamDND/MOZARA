@@ -4,13 +4,16 @@ import { useState, useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { RootState } from "../utils/store"
-import { clearToken } from "../utils/tokenSlice"
-import { clearUser } from "../utils/userSlice"
-import apiClient from "../services/apiClient"
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
+
+import { Card, CardContent } from "../components/ui/card"
 import { Button } from "../components/ui/button"
 import { Badge } from "../components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
+import UserProfile from "../components/mypage/UserProfile"
+import HospitalMap from "../components/mypage/HospitalMap"
+import ProductRecommendation from "../components/mypage/ProductRecommendation"
+import VideoContent from "../components/mypage/VideoContent"
+import UserInfoEdit from "../components/mypage/UserInfoEdit"
 import {
   FileText,
   Heart,
@@ -25,6 +28,9 @@ import {
   Menu,
   TrendingUp,
   Users,
+  Play,
+  ShoppingCart,
+  ExternalLink,
 } from "lucide-react"
 
 // 분석 결과 타입 정의
@@ -56,6 +62,67 @@ export default function MyPage() {
     const fetchAnalysisData = async () => {
       console.log('분석 결과 데이터 조회 시작:', { userId: user.userId, token: token ? '있음' : '없음' });
       
+      // 샘플 데이터로 테스트 (실제 API 호출 전에 샘플 데이터 표시)
+      const sampleResults: AnalysisResult[] = [
+        {
+          id: 1,
+          inspectionDate: '2024.09.25',
+          analysisSummary: '전반적인 두피 건강 상태 양호. 모근 강도 개선 필요.',
+          advice: '비타민 B 복합체 섭취 및 두피 마사지 권장',
+          grade: 75,
+          imageUrl: '/sam1.png',
+          type: '종합 진단',
+          improvement: '12% 개선됨'
+        },
+        {
+          id: 2,
+          inspectionDate: '2024.09.20',
+          analysisSummary: '정수리 부분 모발 밀도 감소 감지. 조기 관리 필요.',
+          advice: 'DHT 차단 샴푸 사용 및 전문의 상담 권장',
+          grade: 65,
+          imageUrl: '/sam2.png',
+          type: '탈모 진단',
+          improvement: '8% 개선됨'
+        },
+        {
+          id: 3,
+          inspectionDate: '2024.09.15',
+          analysisSummary: '두피 염증 및 각질 문제 발견. 세정 관리 강화 필요.',
+          advice: '저자극 샴푸 사용 및 주 2회 두피 스케일링',
+          grade: 70,
+          imageUrl: '/sam3.png',
+          type: '두피 건강',
+          improvement: '15% 개선됨'
+        },
+        {
+          id: 4,
+          inspectionDate: '2024.09.10',
+          analysisSummary: '모발 굵기 및 탄력성 양호. 지속적인 관리 유지 권장.',
+          advice: '프로틴 함유 헤어케어 제품 사용',
+          grade: 85,
+          imageUrl: '/sam1.png',
+          type: '모발 품질',
+          improvement: '20% 개선됨'
+        },
+        {
+          id: 5,
+          inspectionDate: '2024.09.05',
+          analysisSummary: '이마선 후퇴 초기 단계 감지. 적극적인 관리 필요.',
+          advice: '미녹시딜 5% 솔루션 사용 및 생활습관 개선',
+          grade: 60,
+          imageUrl: '/sam2.png',
+          type: '탈모 진행',
+          improvement: '5% 개선됨'
+        }
+      ];
+
+      // 샘플 데이터 설정
+      setTotalAnalysis(sampleResults.length);
+      setAnalysisResults(sampleResults);
+      setLoading(false);
+
+      // 실제 API 호출은 주석 처리 (필요시 활성화)
+      /*
       if (!user.userId || !token) {
         console.log('사용자 ID 또는 토큰이 없음:', { userId: user.userId, token: token });
         setLoading(false)
@@ -121,6 +188,7 @@ export default function MyPage() {
       } finally {
         setLoading(false)
       }
+      */
     }
 
     fetchAnalysisData()
@@ -139,20 +207,93 @@ export default function MyPage() {
     }))
   }
 
-  const favorites = {
-    maps: [
-      { id: 1, name: "강남 모발이식 클리닉", location: "서울 강남구", rating: 4.8, distance: "1.2km" },
-      { id: 2, name: "홍대 탈모 전문병원", location: "서울 마포구", rating: 4.6, distance: "2.5km" },
-    ],
-    videos: [
-      { id: 1, title: "탈모 예방을 위한 5가지 습관", channel: "헤어케어TV", views: "12만", duration: "8:32" },
-      { id: 2, title: "모발이식 후기 솔직 리뷰", channel: "탈모극복", views: "8.5만", duration: "12:15" },
-    ],
-    products: [
-      { id: 1, name: "프리미엄 탈모 샴푸", brand: "헤어랩", price: "29,000원", rating: 4.7 },
-      { id: 2, name: "모발 영양 세럼", brand: "스칼프케어", price: "45,000원", rating: 4.8 },
-    ],
-  }
+  // 모바일 우선 추천 데이터
+  const getRecommendations = () => {
+    // 병원 추천
+    const hospitals = [
+      {
+        name: "서울모발이식센터",
+        specialty: "모발이식 전문",
+        category: "모발이식",
+        rating: 4.8,
+        reviews: 342,
+        distance: "2.3km",
+        phone: "02-123-4567",
+        image: "/sam1.png",
+        matchReason: "중등도 탈모에 특화된 치료"
+      },
+      {
+        name: "더마헤어클리닉",
+        specialty: "피부과 전문의",
+        category: "탈모병원",
+        rating: 4.6,
+        reviews: 198,
+        distance: "1.8km", 
+        phone: "02-234-5678",
+        image: "/sam2.png",
+        matchReason: "두피 염증 치료 및 케어"
+      },
+      {
+        name: "프리미엄모발클리닉",
+        specialty: "종합 탈모 관리",
+        category: "탈모클리닉",
+        rating: 4.9,
+        reviews: 521,
+        distance: "3.1km",
+        phone: "02-345-6789",
+        image: "/sam3.png",
+        matchReason: "개인 맞춤형 토털 케어"
+      }
+    ];
+
+    // 제품 추천
+    const products = [
+      {
+        name: "아미노산 약산성 샴푸",
+        brand: "로레알 프로페셔널",
+        price: "28,000원",
+        rating: 4.5,
+        reviews: 1234,
+        image: "/sam1.png",
+        matchReason: "두피 진정 및 pH 밸런스 조절",
+        category: "샴푸"
+      },
+      {
+        name: "비오틴 헤어 토닉",
+        brand: "닥터포헤어",
+        price: "45,000원",
+        rating: 4.3,
+        reviews: 892,
+        image: "/sam2.png",
+        matchReason: "모발 성장 촉진 및 영양 공급",
+        category: "토닉"
+      }
+    ];
+
+    // 유튜브 추천
+    const youtubeVideos = [
+      {
+        title: "탈모 초기 단계, 이것만은 꼭 하세요!",
+        channel: "헤어닥터TV",
+        views: "124만회",
+        duration: "12:34",
+        thumbnail: "/sam3.png",
+        relevance: "초기 관리법"
+      },
+      {
+        title: "두피 마사지 완벽 가이드 - 혈액순환 개선",
+        channel: "뷰티헬스",
+        views: "89만회",
+        duration: "8:45",
+        thumbnail: "/sam1.png",
+        relevance: "실용적인 관리법"
+      }
+    ];
+
+    return { hospitals, products, youtubeVideos };
+  };
+
+  const recommendations = getRecommendations();
 
   // 실제 유저 정보로 구성 (기본값 제공)
   const userInfo = {
@@ -165,34 +306,14 @@ export default function MyPage() {
     address: user.address || "주소 정보 없음",
     gender: user.gender || "성별 정보 없음",
     age: user.age || 0,
-    role: user.role || "일반 사용자"
+    role: user.role || "일반 사용자",
+    recentHairLoss: false, // 기본값: 최근 머리빠짐 없음
+    familyHistory: false // 기본값: 가족력 없음
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="px-4 py-6 bg-white">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="h-16 w-16 rounded-full bg-blue-100 border-2 border-blue-200 flex items-center justify-center">
-            <User className="h-8 w-8 text-blue-600" />
-          </div>
-          <div className="flex-1">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">{userInfo.name}</h2>
-            <p className="text-sm text-gray-500 mb-2">가입일: {userInfo.joinDate}</p>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1">
-                <Users className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-gray-700">
-                  {loading ? "로딩 중..." : `${userInfo.totalAnalysis}회 분석`}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                <span className="text-sm font-medium text-gray-700">{userInfo.satisfaction} 만족도</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <UserProfile userInfo={userInfo} loading={loading} />
 
       <div className="px-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4">
@@ -352,171 +473,49 @@ export default function MyPage() {
             )}
           </TabsContent>
 
-          <TabsContent value="favorites" className="space-y-6">
-            {/* 탈모 맵 */}
-            <div>
-              <div className="flex items-center gap-2 mb-4 px-1">
-                <MapPin className="h-5 w-5 text-blue-600" />
-                <h3 className="font-bold text-gray-900">탈모 맵</h3>
-                <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">{favorites.maps.length}</Badge>
-              </div>
-              <div className="space-y-3">
-                {favorites.maps.map((map) => (
-                  <Card
-                    key={map.id}
-                    className="border-0 shadow-sm bg-white hover:shadow-md transition-all duration-200"
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 text-sm mb-1">{map.name}</h4>
-                          <div className="flex items-center gap-3 text-xs text-gray-500">
-                            <span>{map.location}</span>
-                            <span>• {map.distance}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm font-medium text-gray-700">{map.rating}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+          <TabsContent value="favorites" className="space-y-4">
+            {/* 맞춤 추천 탭 (Mobile-First) */}
+            <Tabs defaultValue="hospitals" className="space-y-4">
+              <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
+                <TabsTrigger 
+                  value="hospitals" 
+                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-blue-600 text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-blue-700 transition-colors"
+                >
+                  탈모 맵
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="products" 
+                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                >
+                  제품 추천
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="videos" 
+                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                >
+                  영상 컨텐츠
+                </TabsTrigger>
+              </TabsList>
 
-            {/* 유튜브 */}
-            <div>
-              <div className="flex items-center gap-2 mb-4 px-1">
-                <Youtube className="h-5 w-5 text-red-500" />
-                <h3 className="font-bold text-gray-900">유튜브</h3>
-                <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">{favorites.videos.length}</Badge>
-              </div>
-              <div className="space-y-3">
-                {favorites.videos.map((video) => (
-                  <Card
-                    key={video.id}
-                    className="border-0 shadow-sm bg-white hover:shadow-md transition-all duration-200"
-                  >
-                    <CardContent className="p-4">
-                      <h4 className="font-semibold text-gray-900 text-sm mb-2">{video.title}</h4>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
-                        <span>{video.channel}</span>
-                        <div className="flex items-center gap-2">
-                          <span>조회수 {video.views}</span>
-                          <span>• {video.duration}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+              {/* 병원 추천 (Mobile-First) */}
+              <TabsContent value="hospitals" className="space-y-4">
+                <HospitalMap hospitals={recommendations.hospitals} />
+              </TabsContent>
 
-            {/* 제품 */}
-            <div>
-              <div className="flex items-center gap-2 mb-4 px-1">
-                <Package className="h-5 w-5 text-blue-600" />
-                <h3 className="font-bold text-gray-900">제품</h3>
-                <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">{favorites.products.length}</Badge>
-              </div>
-              <div className="space-y-3">
-                {favorites.products.map((product) => (
-                  <Card
-                    key={product.id}
-                    className="border-0 shadow-sm bg-white hover:shadow-md transition-all duration-200"
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 text-sm mb-1">{product.name}</h4>
-                          <div className="flex items-center gap-3 text-xs text-gray-500">
-                            <span>{product.brand}</span>
-                            <div className="flex items-center gap-1">
-                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                              <span>{product.rating}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <span className="text-sm font-bold text-blue-600">{product.price}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+              {/* 제품 추천 (Mobile-First) */}
+              <TabsContent value="products" className="space-y-4">
+                <ProductRecommendation products={recommendations.products} />
+              </TabsContent>
+
+              {/* 영상 가이드 (Mobile-First) */}
+              <TabsContent value="videos" className="space-y-4">
+                <VideoContent videos={recommendations.youtubeVideos} />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 px-1">회원정보 수정</h3>
-
-            <Card className="border-0 shadow-sm bg-white">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-bold text-gray-900">기본 정보</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">이름</label>
-                  <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{userInfo.name}</div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">이메일</label>
-                  <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{userInfo.email}</div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">주소</label>
-                  <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{userInfo.address}</div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">성별</label>
-                  <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{userInfo.gender}</div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">나이</label>
-                  <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{userInfo.age > 0 ? `${userInfo.age}세` : "나이 정보 없음"}</div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">회원 등급</label>
-                  <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{userInfo.role}</div>
-                </div>
-
-                <Button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium">
-                  정보 수정하기
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-sm bg-white">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-bold text-gray-900">계정 관리</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start bg-white border-gray-200 text-gray-700 hover:bg-gray-50 rounded-lg"
-                >
-                  비밀번호 변경
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start bg-white border-gray-200 text-gray-700 hover:bg-gray-50 rounded-lg"
-                >
-                  알림 설정
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-red-600 hover:text-red-700 bg-white border-gray-200 hover:bg-red-50 rounded-lg"
-                >
-                  회원 탈퇴
-                </Button>
-              </CardContent>
-            </Card>
+            <UserInfoEdit userInfo={userInfo} />
           </TabsContent>
         </Tabs>
       </div>
