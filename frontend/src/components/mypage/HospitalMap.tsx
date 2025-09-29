@@ -59,7 +59,7 @@ const HospitalMap: React.FC<HospitalMapProps> = ({ hospitals }) => {
               onClick={() => setSelectedCategory(category)}
               className={`flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
                 selectedCategory === category
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-[#222222] text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -97,11 +97,11 @@ const HospitalMap: React.FC<HospitalMapProps> = ({ hospitals }) => {
               </div>
             </div>
             
-            <div className="bg-blue-50 p-3 rounded-lg text-xs mb-3">
+            <div className="bg-gray-50 p-3 rounded-lg text-xs mb-3">
               💡 {hospital.matchReason}
             </div>
             
-            <Button className="w-full h-10 rounded-lg bg-blue-600 hover:bg-blue-700 text-white active:scale-[0.98]">
+            <Button className="w-full h-10 rounded-lg bg-[#222222] hover:bg-[#333333] text-white active:scale-[0.98]">
               자세히 보기
             </Button>
           </div>

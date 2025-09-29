@@ -16,7 +16,6 @@ import HairEncyclopediaMain from './pages/hair_contents/hairEncyclopedia/HairEnc
 import HairDiagnosis from './pages/check/HairDiagnosis';
 import HairQuiz from './pages/hair_contents/HairQuiz';
 import DailyCare from './pages/hair_solutions/DailyCare';
-import LandingPageV2 from './pages/LandingPageV2';
 import StoreFinder from './pages/StoreFinder';
 
 // new_fn_flow.md에 따른 새로운 컴포넌트들
@@ -42,7 +41,6 @@ const App: React.FC = () => {
           {/* 메인 플로우 (Main Flow) - new_fn_flow.md */}
           {/* <Route path="main-page" element={<MainPage />} /> */}
           <Route path="landing" element={<LandingPage />} />
-          <Route path="landing2" element={<LandingPageV2 />} />
           <Route path="login" element={<LogIn />} />
           <Route path="integrated-diagnosis" element={<IntegratedDiagnosis />} />
           <Route path="diagnosis-results" element={<DiagnosisResults />} />
