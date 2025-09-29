@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { hairProductApi, HairProduct } from '../../services/hairProductApi';
 import apiClient from '../../services/apiClient';
-import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Target, Camera, Award, Sprout } from 'lucide-react';
 
@@ -419,54 +418,8 @@ const DailyCare: React.FC = () => {
             </div>
           )}
 
-          {/* 케어 가이드 섹션 (Mobile-First) */}
-          <div className="space-y-3">
-            <div className="bg-green-50 p-4 rounded-xl">
-              <h3 className="text-lg font-semibold text-green-800 mb-3">🌱 모발 건강 습관</h3>
-              <ul className="space-y-2 text-sm text-green-700">
-                <li>• 정기적인 샴푸와 컨디셔너 사용</li>
-                <li>• 두피 마사지로 혈액순환 개선</li>
-                <li>• 충분한 수면과 스트레스 관리</li>
-                <li>• 영양가 있는 식단 섭취</li>
-              </ul>
-            </div>
-
-            <div className="bg-gray-50 p-4 rounded-xl">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">💪 건강한 라이프스타일</h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li>• 규칙적인 운동과 신체 활동</li>
-                <li>• 충분한 수분 섭취</li>
-                <li>• 금연과 금주</li>
-                <li>• 정기적인 건강 검진</li>
-              </ul>
-            </div>
-          </div>
-
-          {/* 추천 습관 카드들 (Mobile-First) */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">오늘의 추천 습관</h2>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { icon: "🧴", title: "샴푸하기", desc: "머리를 깨끗하게 씻어주세요" },
-                { icon: "💧", title: "수분 섭취", desc: "하루 8잔 이상 물 마시기" },
-                { icon: "😴", title: "충분한 수면", desc: "7-8시간의 휴식" },
-                { icon: "🏃", title: "운동하기", desc: "30분 이상 신체 활동" },
-                { icon: "🥗", title: "건강한 식단", desc: "신선한 채소와 과일" },
-                { icon: "🧘", title: "스트레스 관리", desc: "명상이나 휴식 시간" }
-              ].map((habit, index) => (
-                <div key={index} className="bg-white p-3 rounded-xl shadow-md">
-                  <div className="text-center">
-                    <div className="text-2xl mb-2">{habit.icon}</div>
-                    <h3 className="text-sm font-semibold text-gray-800 mb-1">{habit.title}</h3>
-                    <p className="text-xs text-gray-600">{habit.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 진행률 표시 (Mobile-First) */}
-          <div className="bg-gray-50 p-4 rounded-xl">
+{/* 진행률 표시 (Mobile-First) */}
+<div className="bg-gray-50 p-4 rounded-xl">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">오늘의 진행률</h3>
             <div className="flex items-center mb-2">
               <div className="flex-grow bg-gray-200 rounded-full h-2 mr-3">
@@ -516,6 +469,75 @@ const DailyCare: React.FC = () => {
               <span className="text-sm">케어 기록</span>
             </Button>
           </div>
+
+          {/* 케어 가이드 섹션 (Mobile-First) */}
+          <div className="space-y-3">
+            {/* 오늘의 탈모 OX 퀴즈 */}
+            <div className="bg-white p-4 rounded-xl border border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">🧠 오늘의 탈모 OX 퀴즈</h3>
+              <div className="bg-gray-50 p-3 rounded-lg mb-3">
+                <p className="text-sm font-medium text-gray-800 mb-4">
+                  탈모를 예방하기 위해 매일 샴푸를 하는 것이 좋다.
+                </p>
+                <div className="flex gap-2">
+                  <button className="flex-1 h-12 px-4 bg-[#222222] text-white rounded-xl hover:bg-[#333333] font-semibold active:scale-[0.98] transition-all">
+                    O
+                  </button>
+                  <button className="flex-1 h-12 px-4 bg-[#222222] text-white rounded-xl hover:bg-[#333333] font-semibold active:scale-[0.98] transition-all">
+                    X
+                  </button>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">정답 해설을 보려면 버튼을 눌러보세요!</p>
+            </div>
+
+            {/* 오늘의 탈모 영상 */}
+            <div className="bg-white p-4 rounded-xl border border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">🎬 오늘의 탈모 영상</h3>
+              <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video mb-3">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <div className="text-4xl mb-2">▶️</div>
+                    <p className="text-sm font-medium">두피 마사지 방법 알아보기</p>
+                    <p className="text-xs opacity-75 mt-1">2분 30초</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button className="flex-1 h-12 px-4 bg-[#222222] text-white rounded-xl hover:bg-[#333333] font-semibold active:scale-[0.98] transition-all">
+                  영상 보기
+                </button>
+                <button className="flex-1 h-12 px-4 bg-[#222222] text-white rounded-xl hover:bg-[#333333] font-semibold active:scale-[0.98] transition-all">
+                  다음 영상
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* 추천 습관 카드들 (Mobile-First) */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">오늘의 추천 습관</h2>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { icon: "🧴", title: "샴푸하기", desc: "머리를 깨끗하게 씻어주세요" },
+                { icon: "💧", title: "수분 섭취", desc: "하루 8잔 이상 물 마시기" },
+                { icon: "😴", title: "충분한 수면", desc: "7-8시간의 휴식" },
+                { icon: "🏃", title: "운동하기", desc: "30분 이상 신체 활동" },
+                { icon: "🥗", title: "건강한 식단", desc: "신선한 채소와 과일" },
+                { icon: "🧘", title: "스트레스 관리", desc: "명상이나 휴식 시간" }
+              ].map((habit, index) => (
+                <div key={index} className="bg-white p-3 rounded-xl shadow-md">
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">{habit.icon}</div>
+                    <h3 className="text-sm font-semibold text-gray-800 mb-1">{habit.title}</h3>
+                    <p className="text-xs text-gray-600">{habit.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          
 
         </div>
       </div>
