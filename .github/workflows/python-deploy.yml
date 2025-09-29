@@ -38,25 +38,5 @@ jobs:
     steps:
       - name: Deploy Python API to Runpod
         run: |
-          echo "🚀 Runpod에 Python API 배포 중..."
-          
-          # Runpod API를 사용한 배포
-          curl -X POST "https://api.runpod.io/v2/${{ secrets.RUNPOD_ENDPOINT_ID }}/run" \
-            -H "Authorization: Bearer ${{ secrets.RUNPOD_API_KEY }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "input": {
-                "docker_image": "${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest",
-                "env": {
-                  "GEMINI_API_KEY": "${{ secrets.GEMINI_API_KEY }}",
-                  "OPENAI_API_KEY": "${{ secrets.OPENAI_API_KEY }}",
-                  "YOUTUBE_API_KEY": "${{ secrets.YOUTUBE_API_KEY }}",
-                  "ELEVEN_ST_API_KEY": "${{ secrets.ELEVEN_ST_API_KEY }}",
-                  "PINECONE_API_KEY": "${{ secrets.PINECONE_API_KEY }}",
-                  "PINECONE_ENVIRONMENT": "${{ secrets.PINECONE_ENVIRONMENT }}",
-                  "PINECONE_INDEX_NAME": "${{ secrets.PINECONE_INDEX_NAME }}"
-                }
-              }
-            }'
-          
-          echo "✅ Runpod 배포 요청 완료!"
+          echo "🚀 Runpod GitHub 연동으로 자동 배포 중..."
+          echo "✅ GitHub 연동 완료 - Runpod에서 자동 배포 처리됨"
