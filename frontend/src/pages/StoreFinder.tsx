@@ -257,42 +257,7 @@ const StoreFinder: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => navigate(-1)}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <h1 className="text-2xl font-bold text-gray-900">병원찾기</h1>
-            </div>
-            <div className="flex space-x-3">
-              <button
-                onClick={() => setShowStageSelector(!showStageSelector)}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  showStageSelector 
-                    ? 'bg-[#1F0101] text-white' 
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                {showStageSelector ? '단계 선택 숨기기' : '단계 선택 보기'}
-              </button>
-            </div>
-            <div className="text-sm text-gray-500">
-              {currentLocation 
-                ? `주변 10km 내 결과 ${effectiveHospitals.length}개`
-                : `결과 ${effectiveHospitals.length}개`
-              }
-            </div>
-          </div>
-        </div>
-      </div>
+      
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
