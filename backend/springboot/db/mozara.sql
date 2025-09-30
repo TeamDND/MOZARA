@@ -32,6 +32,7 @@ CREATE TABLE `analysis_results` (
   `grade` int DEFAULT NULL,
   `image_url` varchar(255) DEFAULT NULL,
   `user_id_foreign` int DEFAULT NULL,
+  `analysis_type` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`result_id`),
   KEY `user_id_foreign` (`user_id_foreign`),
   CONSTRAINT `analysis_results_ibfk_1` FOREIGN KEY (`user_id_foreign`) REFERENCES `users` (`user_id`)
@@ -42,6 +43,10 @@ CREATE TABLE `analysis_results` (
 -- Dumping data for table `analysis_results`
 --
 
+LOCK TABLES `analysis_results` WRITE;
+/*!40000 ALTER TABLE `analysis_results` DISABLE KEYS */;
+/*!40000 ALTER TABLE `analysis_results` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `daily_habits`
@@ -85,13 +90,18 @@ CREATE TABLE `seedling_status` (
   PRIMARY KEY (`seedling_id`),
   KEY `user_id_foreign` (`user_id_foreign`),
   CONSTRAINT `seedling_status_ibfk_1` FOREIGN KEY (`user_id_foreign`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `seedling_status`
 --
 
+LOCK TABLES `seedling_status` WRITE;
+/*!40000 ALTER TABLE `seedling_status` DISABLE KEYS */;
+INSERT INTO `seedling_status` VALUES (3,'정태의 새싹',90,4);
+/*!40000 ALTER TABLE `seedling_status` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `user_habit_log`
@@ -110,12 +120,18 @@ CREATE TABLE `user_habit_log` (
   KEY `user_id_foreign` (`user_id_foreign`),
   CONSTRAINT `user_habit_log_ibfk_1` FOREIGN KEY (`habit_id_foreign`) REFERENCES `daily_habits` (`habit_id`),
   CONSTRAINT `user_habit_log_ibfk_2` FOREIGN KEY (`user_id_foreign`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `user_habit_log`
 --
+
+LOCK TABLES `user_habit_log` WRITE;
+/*!40000 ALTER TABLE `user_habit_log` DISABLE KEYS */;
+INSERT INTO `user_habit_log` VALUES (37,2,4,'2025-09-30'),(38,2,4,'2025-09-30'),(39,1,4,'2025-09-30'),(40,1,4,'2025-09-30'),(41,3,4,'2025-09-30'),(42,4,4,'2025-09-30'),(43,5,4,'2025-09-30'),(44,6,4,'2025-09-30'),(45,7,4,'2025-09-30'),(46,8,4,'2025-09-30'),(47,9,4,'2025-09-30'),(48,10,4,'2025-09-30'),(49,11,4,'2025-09-30'),(50,12,4,'2025-09-30'),(51,13,4,'2025-09-30'),(52,14,4,'2025-09-30'),(53,15,4,'2025-09-30'),(54,16,4,'2025-09-30');
+/*!40000 ALTER TABLE `user_habit_log` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `user_log`
@@ -161,7 +177,7 @@ CREATE TABLE `users` (
   `email` varchar(100) DEFAULT NULL,
   `username` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -170,6 +186,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (4,'$2a$10$N96lSh/ts7/4Ixiv3WjgTO.3ezNPVtioWcD2jhxVRTL2rDdP0tv4C','ROLE_USER','정태','2025-09-30 01:41:07','jeongtae9324@gmail.com','asdasdasd');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -185,8 +202,8 @@ CREATE TABLE `users_info` (
   `gender` varchar(50) DEFAULT NULL,
   `age` int DEFAULT NULL,
   `user_id_foreign` int DEFAULT NULL,
-  `family_history` tinyint DEFAULT NULL,
-  `is_loss` tinyint DEFAULT NULL,
+  `family_history` bit(1) DEFAULT NULL,
+  `is_loss` bit(1) DEFAULT NULL,
   `stress` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`user_info_id`),
   KEY `user_id_foreign` (`user_id_foreign`),
@@ -212,4 +229,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-09-25 17:39:27
+-- Dump completed on 2025-09-30 13:18:17

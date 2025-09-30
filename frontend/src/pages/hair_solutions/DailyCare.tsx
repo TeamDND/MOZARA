@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../utils/store';
 import { hairProductApi, HairProduct } from '../../services/hairProductApi';
 import apiClient from '../../services/apiClient';
 import { Card, CardContent } from '../../components/ui/card';
@@ -46,6 +48,9 @@ const DailyCare: React.FC = () => {
   const [analysis, setAnalysis] = useState<HairAnalysisResponse | null>(null);
   const [products, setProducts] = useState<HairProduct[] | null>(null);
   const [tips, setTips] = useState<string[]>([]);
+
+  // Redux에서 사용자 정보 가져오기
+  const { userId } = useSelector((state: RootState) => state.user);
 
   // 다음 액션 결정 함수 (Dashboard에서 가져옴)
   const getNextAction = () => {
@@ -385,6 +390,14 @@ const DailyCare: React.FC = () => {
                       formData.append('image', selectedImage);
                       formData.append('top_k', '10');
                       formData.append('use_preprocessing', 'true');
+                      
+                      // 로그인한 사용자의 user_id 추가
+                      if (userId) {
+                        formData.append('user_id', userId.toString());
+                        console.log('Daily 분석에 user_id 추가:', userId);
+                      } else {
+                        console.log('로그인하지 않은 사용자 - user_id 없음');
+                      }
                       
                       const response = await apiClient.post('/ai/hair-loss-daily/analyze', formData, {
                         headers: { 'Content-Type': 'multipart/form-data' },
