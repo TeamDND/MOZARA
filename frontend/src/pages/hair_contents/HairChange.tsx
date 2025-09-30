@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { hairChangeService, HairChangeRequest, HairChangeResponse, Hairstyle } from '../../services/hairChangeService';
 
 export default function HairChange() {
+  const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [selectedHairstyle, setSelectedHairstyle] = useState<string>('');
+  const [selectedHairstyle, setSelectedHairstyle] = useState<string>('-');
   const [customPrompt, setCustomPrompt] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<HairChangeResponse | null>(null);
@@ -120,218 +122,254 @@ export default function HairChange() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">가발 & 빈머리 매꾸기</h1>
-        <p className="text-gray-600">AI를 통해 원하는 가발 스타일로 바꾸거나 빈머리를 자연스럽게 매꿔보세요</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* 모바일 헤더 */}
+      <div className="bg-white px-4 py-6 shadow-sm border-b border-gray-200 mb-6">
+        <h1 className="text-2xl font-bold text-gray-800 text-center ">가발 & 빈머리 매꾸기</h1>
+        <p className="text-gray-600 mt-2 text-sm text-center">AI로 원하는 가발 스타일로 바꾸거나 빈머리를 자연스럽게 매꿔보세요</p>
       </div>
 
-      {/* Input Section */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-        <div className="space-y-6">
-          {/* Mode Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              서비스 선택
-            </label>
-            <div className="flex gap-4">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="mode"
-                  value="wig"
-                  checked={mode === 'wig'}
-                  onChange={(e) => {
-                    setMode(e.target.value as 'wig');
-                    setSelectedHairstyle('');
-                  }}
-                  className="mr-2 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-gray-700">가발 스타일 변경</span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="mode"
-                  value="fill_bald"
-                  checked={mode === 'fill_bald'}
-                  onChange={(e) => {
-                    setMode(e.target.value as 'fill_bald');
-                    setSelectedHairstyle('');
-                  }}
-                  className="mr-2 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-gray-700">빈머리 매꾸기</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Image Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              사진 업로드
-            </label>
-            <div className="flex items-center gap-4">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              />
-              {selectedImage && (
-                <div className="flex items-center gap-2 text-sm text-green-600">
-                  <span>✓</span>
-                  <span>{selectedImage.name}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Hairstyle Selection - Only show for wig mode */}
-          {mode === 'wig' && (
+      {/* 모바일 우선 컨테이너 */}
+      <div className="max-w-md mx-auto px-4 pb-6">
+        
+        {/* 입력 섹션 */}
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+          <div className="space-y-6">
+            
+            {/* 서비스 선택 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                원하는 가발 스타일
-              </label>
-              <select
-                value={selectedHairstyle}
-                onChange={(e) => setSelectedHairstyle(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">가발 스타일을 선택하세요</option>
-                {Object.entries(hairstyles)
-                  .filter(([key]) => key !== 'fill_bald')
-                  .map(([key, value]) => (
-                    <option key={key} value={key}>
-                      {value}
-                    </option>
-                  ))}
-              </select>
-            </div>
-          )}
-
-          {/* Fill Bald Mode Info */}
-          {mode === 'fill_bald' && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-blue-800">
-                    빈머리 매꾸기
-                  </h3>
-                  <div className="mt-2 text-sm text-blue-700">
-                    <p>현재 헤어스타일을 분석하여 빈머리 부분을 자연스럽게 채워드립니다.</p>
-                    <p className="mt-1">기존 머리카락의 색상, 질감, 길이를 유지하면서 자연스럽게 연결됩니다.</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">서비스 선택</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => {
+                    setMode('wig');
+                    setSelectedHairstyle('');
+                  }}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    mode === 'wig' 
+                      ? 'border-[#222222] bg-[#222222] text-white' 
+                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">🎨</div>
+                    <div className="font-medium text-sm">가발 스타일 변경</div>
                   </div>
+                </button>
+                
+                <button
+                  onClick={() => {
+                    setMode('fill_bald');
+                    setSelectedHairstyle('');
+                  }}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    mode === 'fill_bald' 
+                      ? 'border-[#222222] bg-[#222222] text-white' 
+                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">🔧</div>
+                    <div className="font-medium text-sm">빈머리 매꾸기</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* 이미지 업로드 */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">사진 업로드</h3>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <div className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${
+                  selectedImage 
+                    ? 'border-green-400 bg-green-50' 
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}>
+                  {selectedImage ? (
+                    <div className="space-y-2">
+                      <div className="text-green-600 text-2xl">✓</div>
+                      <div className="text-green-700 font-medium text-sm">{selectedImage.name}</div>
+                      <div className="text-green-600 text-xs">클릭하여 변경</div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="text-gray-400 text-3xl">📷</div>
+                      <div className="text-gray-600 font-medium">사진을 선택하세요</div>
+                      <div className="text-gray-400 text-xs">클릭하여 업로드</div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          )}
 
-          {/* Custom Prompt */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              추가 요청사항 (선택사항)
-            </label>
-            <textarea
-              value={customPrompt}
-              onChange={(e) => setCustomPrompt(e.target.value)}
-              placeholder="특별한 요청사항이 있다면 입력하세요..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-              rows={3}
-            />
-          </div>
+            {/* 헤어스타일 선택 (가발 모드만) */}
+            {mode === 'wig' && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">원하는 가발 스타일</h3>
+                <select
+                  value={selectedHairstyle}
+                  onChange={(e) => setSelectedHairstyle(e.target.value)}
+                  className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#222222] focus:border-transparent bg-white text-gray-700 font-medium"
+                >
+                  <option value="">가발 스타일을 선택하세요</option>
+                  {Object.entries(hairstyles)
+                    .filter(([key]) => key !== 'fill_bald')
+                    .map(([key, value]) => (
+                      <option key={key} value={key}>
+                        {value}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            )}
 
-          {/* Action Buttons */}
-          <div className="flex gap-4">
-            <button
-              onClick={handleGenerate}
-              disabled={isLoading}
-              className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {isLoading 
-                ? (mode === 'fill_bald' ? '빈머리 매꾸는 중...' : '변경 중...') 
-                : (mode === 'fill_bald' ? '🔧 빈머리 매꾸기' : '🎨 가발 스타일 변경하기')
-              }
-            </button>
-            <button
-              onClick={handleReset}
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-            >
-              초기화
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 mb-6 rounded-r-lg">
-          <p>{error}</p>
-        </div>
-      )}
-
-      {/* Loading */}
-      {isLoading && (
-        <div className="bg-white rounded-xl shadow-sm p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">
-            {mode === 'fill_bald' 
-              ? 'AI가 빈머리를 자연스럽게 매꾸고 있습니다...' 
-              : 'AI가 가발 스타일을 변경하고 있습니다...'
-            }
-          </p>
-          <p className="text-sm text-gray-500 mt-2">이 과정은 1-2분 정도 소요될 수 있습니다.</p>
-        </div>
-      )}
-
-      {/* Results */}
-      {result && !isLoading && (
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="text-center mb-6">
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">✨ 변경 결과</h3>
-            <p className="text-green-600 font-medium text-lg">{result.message}</p>
-          </div>
-
-          {result.images && result.images.length > 0 && (
-            <div className="space-y-8">
-              {result.images.map((image, index) => (
-                <div key={index} className="text-center">
-                  <div className="mb-4">
-                    <h4 className="text-lg font-semibold text-gray-700 mb-2">
-                      {mode === 'fill_bald' ? '빈머리 매꾸기 결과' : '변경된 가발 스타일'} {index + 1}
-                    </h4>
+            {/* 빈머리 매꾸기 모드 안내 */}
+            {mode === 'fill_bald' && (
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <div className="text-gray-500 text-xl">ℹ️</div>
+                  <div>
+                    <h4 className="font-medium text-gray-800 mb-1">빈머리 매꾸기</h4>
+                    <p className="text-sm text-gray-600">현재 헤어스타일을 분석하여 빈머리 부분을 자연스럽게 채워드립니다.</p>
+                    <p className="text-sm text-gray-600 mt-1">기존 머리카락의 색상, 질감, 길이를 유지합니다.</p>
                   </div>
-                  
-                  <div className="flex justify-center mb-4">
-                    <img
-                      src={image.data}
-                      alt={mode === 'fill_bald' ? `빈머리 매꾸기 결과 ${index + 1}` : `변경된 가발 스타일 ${index + 1}`}
-                      className="max-w-full h-auto rounded-xl shadow-lg border border-gray-200"
-                      style={{ maxHeight: '500px' }}
-                    />
-                  </div>
-                  
-                  <button
-                    onClick={() => handleDownloadImage(image.data, index)}
-                    className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-md"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    이미지 다운로드
-                  </button>
                 </div>
-              ))}
+              </div>
+            )}
+
+            {/* 추가 요청사항 */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">추가 요청사항 (선택사항)</h3>
+              <textarea
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                placeholder="특별한 요청사항이 있다면 입력하세요..."
+                className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#222222] focus:border-transparent resize-none text-gray-700"
+                rows={3}
+              />
             </div>
-          )}
+
+            {/* 액션 버튼들 */}
+            <div className="space-y-3">
+              <button
+                onClick={handleGenerate}
+                disabled={isLoading}
+                className="w-full bg-[#222222] text-white py-4 px-6 rounded-xl font-semibold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-lg"
+              >
+                {isLoading 
+                  ? (mode === 'fill_bald' ? '🔄 빈머리 매꾸는 중...' : '🔄 변경 중...') 
+                  : (mode === 'fill_bald' ? '🔧 빈머리 매꾸기' : '🎨 가발 스타일 변경하기')
+                }
+              </button>
+              <button
+                onClick={handleReset}
+                className="w-full border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+              >
+                초기화
+              </button>
+            </div>
+          </div>
         </div>
-      )}
+
+        {/* 에러 메시지 */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl mb-6">
+            <div className="flex items-start gap-2">
+              <span className="text-red-500 text-xl">⚠️</span>
+              <p className="text-sm">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {/* 로딩 상태 */}
+        {isLoading && (
+          <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#222222] border-t-transparent mx-auto mb-6"></div>
+            <p className="text-gray-700 font-medium mb-2">
+              {mode === 'fill_bald' 
+                ? 'AI가 빈다를 자연스럽게 매꾸고 있습니다...' 
+                : 'AI가 가발 스타일을 변경하고 있습니다...'
+              }
+            </p>
+            <p className="text-sm text-gray-500">이 과정은 1-2분 정도 소요될 수 있습니다.</p>
+          </div>
+        )}
+
+        {/* 결과 표시 */}
+        {result && !isLoading && (
+          <div className="bg-white rounded-2xl shadow-sm p-6">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">✨ 변경 결과</h3>
+              <p className="text-[#222222] font-medium">{result.message}</p>
+            </div>
+
+            {result.images && result.images.length > 0 && (
+              <div className="space-y-6">
+                {result.images.map((image, index) => (
+                  <div key={index} className="space-y-4">
+                    <div className="text-center">
+                      <h4 className="text-lg font-semibold text-gray-700 mb-3">
+                        {mode === 'fill_bald' ? '빈머리 매꾸기 결과' : '변경된 가발 스타일'} {index + 1}
+                      </h4>
+                    </div>
+                    
+                    <div className="rounded-xl overflow-hidden border border-gray-200">
+                      <img
+                        src={image.data}
+                        alt={mode === 'fill_bald' ? `빈머리 매꾸기 결과 ${index + 1}` : `변경된 가발 스타일 ${index + 1}`}
+                        className="w-full h-auto"
+                      />
+                    </div>
+                    
+                    <button
+                      onClick={() => handleDownloadImage(image.data, index)}
+                      className="w-full inline-flex items-center justify-center gap-2 bg-[#222222] text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3" />
+                      </svg>
+                      이미지 다운로드
+                    </button>
+                  </div>
+                ))}
+
+                {/* 매장 찾기 버튼 - 모드에 따라 다른 버튼 표시 */}
+                <div className="pt-4 border-t border-gray-200">
+                  {mode === 'wig' ? (
+                    <button
+                      onClick={() => navigate('/store-finder?category=가발전문점')}
+                      className="w-full inline-flex items-center justify-center gap-2 bg-white border-2 border-[#222222] text-[#222222] px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      🎩 내 주변 가발 매장 찾기
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => navigate('/store-finder?category=두피문신')}
+                      className="w-full inline-flex items-center justify-center gap-2 bg-white border-2 border-[#222222] text-[#222222] px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      🎨 내 주변 두피문신 매장 찾기
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

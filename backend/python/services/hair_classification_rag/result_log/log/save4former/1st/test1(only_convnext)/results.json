@@ -1,0 +1,2544 @@
+{
+  "test_info": {
+    "test_type": "backend_analyzer",
+    "test_number": 1,
+    "timestamp": "2025-09-22T16:08:13.094135",
+    "test_data_path": "C:\\Users\\301\\Desktop\\test_data_set\\test",
+    "total_images": 177,
+    "level_counts": {
+      "2": 51,
+      "3": 53,
+      "4": 26,
+      "5": 17,
+      "6": 10,
+      "7": 20
+    }
+  },
+  "metrics": {
+    "total_tests": 177,
+    "successful_tests": 177,
+    "failed_tests": 0,
+    "success_rate": 1.0,
+    "accuracy": 0.3615819209039548,
+    "precision": 0.3488749692950135,
+    "recall": 0.3615819209039548,
+    "f1_score": 0.35051914962184155,
+    "avg_analysis_time": 1.1240661359776212,
+    "avg_confidence": 0.493774011299435,
+    "confusion_matrix": [
+      [
+        30,
+        17,
+        2,
+        0,
+        1,
+        1
+      ],
+      [
+        24,
+        17,
+        5,
+        1,
+        3,
+        3
+      ],
+      [
+        11,
+        7,
+        6,
+        2,
+        0,
+        0
+      ],
+      [
+        3,
+        4,
+        8,
+        0,
+        2,
+        0
+      ],
+      [
+        1,
+        1,
+        4,
+        3,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        3,
+        6,
+        11
+      ]
+    ],
+    "class_report": {
+      "2": {
+        "precision": 0.43478260869565216,
+        "recall": 0.5882352941176471,
+        "f1-score": 0.5,
+        "support": 51.0
+      },
+      "3": {
+        "precision": 0.3695652173913043,
+        "recall": 0.32075471698113206,
+        "f1-score": 0.3434343434343434,
+        "support": 53.0
+      },
+      "4": {
+        "precision": 0.24,
+        "recall": 0.23076923076923078,
+        "f1-score": 0.23529411764705882,
+        "support": 26.0
+      },
+      "5": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 17.0
+      },
+      "6": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 10.0
+      },
+      "7": {
+        "precision": 0.6875,
+        "recall": 0.55,
+        "f1-score": 0.6111111111111112,
+        "support": 20.0
+      },
+      "accuracy": 0.3615819209039548,
+      "macro avg": {
+        "precision": 0.2886413043478261,
+        "recall": 0.281626540311335,
+        "f1-score": 0.28163992869875226,
+        "support": 177.0
+      },
+      "weighted avg": {
+        "precision": 0.3488749692950135,
+        "recall": 0.3615819209039548,
+        "f1-score": 0.35051914962184155,
+        "support": 177.0
+      }
+    },
+    "unique_labels": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ]
+  },
+  "detailed_results": [
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240422192617LNrK9O_jpg.rf.4efd92c9f17ab9391444755665005c57.jpg",
+      "filename": "20240422192617LNrK9O_jpg.rf.4efd92c9f17ab9391444755665005c57.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.1875038146972656,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240110181024v6RUKz_jpg.rf.efae00619ff24a8ed2845e9bde7e8a48.jpg",
+      "filename": "20240110181024v6RUKz_jpg.rf.efae00619ff24a8ed2845e9bde7e8a48.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.0160377025604248,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231109103954UbVvLx_jpg.rf.08bf8f0253ff6ec4a392e60407a7ca05.jpg",
+      "filename": "20231109103954UbVvLx_jpg.rf.08bf8f0253ff6ec4a392e60407a7ca05.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 0.9379630088806152,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231224145323tlJNT7_jpg.rf.a0f8b009f18cdca339276c7ea92fc5dd.jpg",
+      "filename": "20231224145323tlJNT7_jpg.rf.a0f8b009f18cdca339276c7ea92fc5dd.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.2503864765167236,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240306093756Nxspmr_jpg.rf.520a1e540048254439e49edc6e72083d.jpg",
+      "filename": "20240306093756Nxspmr_jpg.rf.520a1e540048254439e49edc6e72083d.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2504184246063232,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231224091924onQUTB_jpg.rf.0f83fa7708ed4d0defb85bcb27c20a6e.jpg",
+      "filename": "20231224091924onQUTB_jpg.rf.0f83fa7708ed4d0defb85bcb27c20a6e.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2812488079071045,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231231065720iJVyYt_jpg.rf.01d1f87df50ab17878cfca7bc4677a88.jpg",
+      "filename": "20231231065720iJVyYt_jpg.rf.01d1f87df50ab17878cfca7bc4677a88.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.2812526226043701,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231206043710OotqJs_jpg.rf.621d16a36fabb45a838cf73543a26577.jpg",
+      "filename": "20231206043710OotqJs_jpg.rf.621d16a36fabb45a838cf73543a26577.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.2660486698150635,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231231043028Q46NRr_jpg.rf.0227684b9bed2f5914efa7465b14b7b1.jpg",
+      "filename": "20231231043028Q46NRr_jpg.rf.0227684b9bed2f5914efa7465b14b7b1.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 0.9535651206970215,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231227124154haqhNM_jpg.rf.e9d696a94c5bdaa6e21a27812c01cd9c.jpg",
+      "filename": "20231227124154haqhNM_jpg.rf.e9d696a94c5bdaa6e21a27812c01cd9c.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 0.502,
+      "analysis_time": 0.968747615814209,
+      "stage_scores": {
+        "3": 0.502,
+        "2": 0.498
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231231054651z4VGer_jpg.rf.076b97375abd482fa8d551e0fc2a7b26.jpg",
+      "filename": "20231231054651z4VGer_jpg.rf.076b97375abd482fa8d551e0fc2a7b26.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.031677007675171,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240113075133ZSjUb8_jpg.rf.f0d16a7888ce70d7bcba5e72366c9fe5.jpg",
+      "filename": "20240113075133ZSjUb8_jpg.rf.f0d16a7888ce70d7bcba5e72366c9fe5.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.250016450881958,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240202110316tKibKR_jpg.rf.2025d9adac2414f743f3a786b7769767.jpg",
+      "filename": "20240202110316tKibKR_jpg.rf.2025d9adac2414f743f3a786b7769767.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2812318801879883,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\202401021640493dHvsP_jpg.rf.f4be72debbbdf68d5a828157d52c3537.jpg",
+      "filename": "202401021640493dHvsP_jpg.rf.f4be72debbbdf68d5a828157d52c3537.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2656352519989014,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231110070141qEi5wm_jpg.rf.20af76796b05405ce043227831af11b2.jpg",
+      "filename": "20231110070141qEi5wm_jpg.rf.20af76796b05405ce043227831af11b2.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.265624761581421,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240226191121Dv7z5w_jpg.rf.eb0c2f4b31aebe5bbeaa9a01fb3434aa.jpg",
+      "filename": "20240226191121Dv7z5w_jpg.rf.eb0c2f4b31aebe5bbeaa9a01fb3434aa.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 0.517,
+      "analysis_time": 1.1562490463256836,
+      "stage_scores": {
+        "3": 0.517,
+        "4": 0.242,
+        "6": 0.241
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231229224733KEgsWh_jpg.rf.cd866c1c8965270a5f78e6324a115e6a.jpg",
+      "filename": "20231229224733KEgsWh_jpg.rf.cd866c1c8965270a5f78e6324a115e6a.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 0.658,
+      "analysis_time": 0.9218711853027344,
+      "stage_scores": {
+        "3": 0.658,
+        "4": 0.342
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240110062442KzTdCP_jpg.rf.9e9eaaadaf4a94a9c565b0106724f041.jpg",
+      "filename": "20240110062442KzTdCP_jpg.rf.9e9eaaadaf4a94a9c565b0106724f041.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0.42,
+      "analysis_time": 0.8905611038208008,
+      "stage_scores": {
+        "2": 0.42,
+        "5": 0.158,
+        "6": 0.281,
+        "3": 0.142
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240111080420FDIESU_jpg.rf.726526b79b4ce44fa1710e5739269238.jpg",
+      "filename": "20240111080420FDIESU_jpg.rf.726526b79b4ce44fa1710e5739269238.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 0.683,
+      "analysis_time": 1.21915864944458,
+      "stage_scores": {
+        "3": 0.683,
+        "4": 0.317
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240207051218k0Ayjg_jpg.rf.5ca21e5a6187c36f86f823b532009587.jpg",
+      "filename": "20240207051218k0Ayjg_jpg.rf.5ca21e5a6187c36f86f823b532009587.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 0.65,
+      "analysis_time": 1.2500157356262207,
+      "stage_scores": {
+        "2": 0.35,
+        "3": 0.65
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231130095830aHEvMd_jpg.rf.d9b2f9314d2120498c24129616d8006c.jpg",
+      "filename": "20231130095830aHEvMd_jpg.rf.d9b2f9314d2120498c24129616d8006c.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0.661,
+      "analysis_time": 1.250004529953003,
+      "stage_scores": {
+        "3": 0.339,
+        "2": 0.661
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240228022910jI5UiG_jpg.rf.ef2df61aef7de73f2e41ce77231b3f72.jpg",
+      "filename": "20240228022910jI5UiG_jpg.rf.ef2df61aef7de73f2e41ce77231b3f72.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0.503,
+      "analysis_time": 1.4062504768371582,
+      "stage_scores": {
+        "2": 0.503,
+        "3": 0.497
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240228100442mIw9Zu_jpg.rf.334b9eea8eecabd6e884c210e7ca5b8b.jpg",
+      "filename": "20240228100442mIw9Zu_jpg.rf.334b9eea8eecabd6e884c210e7ca5b8b.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.25,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231224074531ch8RvS_jpg.rf.a2bc429ffd23cfcbb137b75f037d0804.jpg",
+      "filename": "20231224074531ch8RvS_jpg.rf.a2bc429ffd23cfcbb137b75f037d0804.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 0.664,
+      "analysis_time": 1.0468780994415283,
+      "stage_scores": {
+        "3": 0.664,
+        "2": 0.336
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\202401041207296cmQVL_jpg.rf.69bff8742738d3e61393f3984ad7174a.jpg",
+      "filename": "202401041207296cmQVL_jpg.rf.69bff8742738d3e61393f3984ad7174a.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 0.9067234992980957,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231225045824PLLwSq_rgbshift_jpg.rf.6f9be6c655b371b35e1053761d7b6626.jpg",
+      "filename": "20231225045824PLLwSq_rgbshift_jpg.rf.6f9be6c655b371b35e1053761d7b6626.jpg",
+      "true_level": 2,
+      "predicted_level": 6,
+      "confidence": 0.336,
+      "analysis_time": 0.9383378028869629,
+      "stage_scores": {
+        "5": 0.228,
+        "6": 0.336,
+        "7": 0.327,
+        "4": 0.109
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\202403051419132qBmCp_jpg.rf.da793fe65f18a09d455e7614e3522eff.jpg",
+      "filename": "202403051419132qBmCp_jpg.rf.da793fe65f18a09d455e7614e3522eff.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.3749947547912598,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240426114804vEJvCL_jpg.rf.e8b208c0e3afd026da67dc6b206f33b1.jpg",
+      "filename": "20240426114804vEJvCL_jpg.rf.e8b208c0e3afd026da67dc6b206f33b1.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.234372615814209,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240109072410jkB2Mo_sepia_jpg.rf.a4fdad46ce5f129b21dbe7bb6a14c3fe.jpg",
+      "filename": "20240109072410jkB2Mo_sepia_jpg.rf.a4fdad46ce5f129b21dbe7bb6a14c3fe.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.344161033630371,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240111181117uMGlb4_jpg.rf.f0a0b23d47eafad99f379f672b37d1f8.jpg",
+      "filename": "20240111181117uMGlb4_jpg.rf.f0a0b23d47eafad99f379f672b37d1f8.jpg",
+      "true_level": 2,
+      "predicted_level": 4,
+      "confidence": 0.667,
+      "analysis_time": 1.2656254768371582,
+      "stage_scores": {
+        "4": 0.667,
+        "3": 0.333
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231222075010HDRqwK_jpg.rf.4e412fcbb2778e7599376a1cdd92cc7b.jpg",
+      "filename": "20231222075010HDRqwK_jpg.rf.4e412fcbb2778e7599376a1cdd92cc7b.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 0.757,
+      "analysis_time": 1.2031404972076416,
+      "stage_scores": {
+        "3": 0.757,
+        "5": 0.243
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240202104708fP4JB4_jpg.rf.f1d09525954f7a064f60bb7bea6b99a3.jpg",
+      "filename": "20240202104708fP4JB4_jpg.rf.f1d09525954f7a064f60bb7bea6b99a3.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 1.0,
+      "analysis_time": 0.8597729206085205,
+      "stage_scores": {
+        "2": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231122070433psAfzt_jpg.rf.a7efa27e390c92f2fc5a03788ccc1b8d.jpg",
+      "filename": "20231122070433psAfzt_jpg.rf.a7efa27e390c92f2fc5a03788ccc1b8d.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0.511,
+      "analysis_time": 0.9379153251647949,
+      "stage_scores": {
+        "2": 0.511,
+        "3": 0.489
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240110043329FdhNwV_jpg.rf.99fcefece4cc66515201f00abaeb8e48.jpg",
+      "filename": "20240110043329FdhNwV_jpg.rf.99fcefece4cc66515201f00abaeb8e48.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.125417709350586,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240106121506HtPoQC_jpg.rf.cadedd2a52e97a75ad530554d1a3a58e.jpg",
+      "filename": "20240106121506HtPoQC_jpg.rf.cadedd2a52e97a75ad530554d1a3a58e.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2656230926513672,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231225045824PLLwSq_sepia_jpg.rf.2f8315ce1666177e6f761a2b847eee43.jpg",
+      "filename": "20231225045824PLLwSq_sepia_jpg.rf.2f8315ce1666177e6f761a2b847eee43.jpg",
+      "true_level": 2,
+      "predicted_level": 7,
+      "confidence": 0.552,
+      "analysis_time": 1.2504196166992188,
+      "stage_scores": {
+        "7": 0.552,
+        "5": 0.221,
+        "6": 0.227
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231229090549BKawsC_jpg.rf.3ff75220704f4b6878ab84b9432e8ea4.jpg",
+      "filename": "20231229090549BKawsC_jpg.rf.3ff75220704f4b6878ab84b9432e8ea4.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2191717624664307,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240224194300kOjsFD_jpg.rf.0c13fa04922a01749826cec6cc657c47.jpg",
+      "filename": "20240224194300kOjsFD_jpg.rf.0c13fa04922a01749826cec6cc657c47.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.250486135482788,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240130072349uniDRh_jpg.rf.f943e9a84d533634fab73140c6a126d5.jpg",
+      "filename": "20240130072349uniDRh_jpg.rf.f943e9a84d533634fab73140c6a126d5.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.0472779273986816,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231222094424akH8Au_jpg.rf.cb2c90ea14b4ec3aa056d435ea661e2b.jpg",
+      "filename": "20231222094424akH8Au_jpg.rf.cb2c90ea14b4ec3aa056d435ea661e2b.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 0.8437516689300537,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\202401080941003KIfb2_gauss_jpg.rf.408f53e8c1028b97f71e56081c5c7c41.jpg",
+      "filename": "202401080941003KIfb2_gauss_jpg.rf.408f53e8c1028b97f71e56081c5c7c41.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0.343,
+      "analysis_time": 0.8683075904846191,
+      "stage_scores": {
+        "2": 0.343,
+        "3": 0.335,
+        "5": 0.323
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\202401120735396rfKJL_jpg.rf.f587c7e6e7671abe29172f3da76c95c6.jpg",
+      "filename": "202401120735396rfKJL_jpg.rf.f587c7e6e7671abe29172f3da76c95c6.jpg",
+      "true_level": 2,
+      "predicted_level": 4,
+      "confidence": 0.667,
+      "analysis_time": 1.2343864440917969,
+      "stage_scores": {
+        "4": 0.667,
+        "3": 0.333
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240228154416jXyC0M_gauss_jpg.rf.ac2af1c17a0d641455bc43da325ded4c.jpg",
+      "filename": "20240228154416jXyC0M_gauss_jpg.rf.ac2af1c17a0d641455bc43da325ded4c.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2343921661376953,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240112041805zFsaoN_jpg.rf.049f78390a56c8312fe7ea79256a44eb.jpg",
+      "filename": "20240112041805zFsaoN_jpg.rf.049f78390a56c8312fe7ea79256a44eb.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.266035556793213,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\202402291538061tgGTo_jpg.rf.71225fb0ca131e1423c872fa6cb00d22.jpg",
+      "filename": "202402291538061tgGTo_jpg.rf.71225fb0ca131e1423c872fa6cb00d22.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2812504768371582,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240109130224qMYou5_jpg.rf.3043b4f7c667b3ea7cd792158ff9b3da.jpg",
+      "filename": "20240109130224qMYou5_jpg.rf.3043b4f7c667b3ea7cd792158ff9b3da.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2039573192596436,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240219045157mzVfj7_jpg.rf.c9b45d0874181d11613377e6b334a901.jpg",
+      "filename": "20240219045157mzVfj7_jpg.rf.c9b45d0874181d11613377e6b334a901.jpg",
+      "true_level": 2,
+      "predicted_level": 3,
+      "confidence": 0.527,
+      "analysis_time": 0.8906147480010986,
+      "stage_scores": {
+        "3": 0.527,
+        "4": 0.473
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231229055019q8obL0_jpg.rf.a44525ef4b70ca5326c02e646751cdd8.jpg",
+      "filename": "20231229055019q8obL0_jpg.rf.a44525ef4b70ca5326c02e646751cdd8.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0.651,
+      "analysis_time": 0.796884298324585,
+      "stage_scores": {
+        "3": 0.349,
+        "2": 0.651
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20231225162717mMHTF1_jpg.rf.4024fbbff8cbaa9f0f8ec8ab6e5ffb05.jpg",
+      "filename": "20231225162717mMHTF1_jpg.rf.4024fbbff8cbaa9f0f8ec8ab6e5ffb05.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 0.9070813655853271,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240110161423irhZYT_jpg.rf.f522d126d27f9556ef4aaebc36469a89.jpg",
+      "filename": "20240110161423irhZYT_jpg.rf.f522d126d27f9556ef4aaebc36469a89.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2343785762786865,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\2\\20240108082008eZLaUu_jpg.rf.b623b32e674d549d8b66f8a7c15443f1.jpg",
+      "filename": "20240108082008eZLaUu_jpg.rf.b623b32e674d549d8b66f8a7c15443f1.jpg",
+      "true_level": 2,
+      "predicted_level": 2,
+      "confidence": 1.0,
+      "analysis_time": 1.2656242847442627,
+      "stage_scores": {
+        "2": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240426115256f1Ko7D_jpg.rf.b42faf62730ff91984fbe9aaa01b735a.jpg",
+      "filename": "20240426115256f1Ko7D_jpg.rf.b42faf62730ff91984fbe9aaa01b735a.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 1.0,
+      "analysis_time": 1.1883800029754639,
+      "stage_scores": {
+        "2": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240111060524b17ZW5_sepia_jpg.rf.eb8d5cb964d5b30f24baf9fa05b9ae48.jpg",
+      "filename": "20240111060524b17ZW5_sepia_jpg.rf.eb8d5cb964d5b30f24baf9fa05b9ae48.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2812585830688477,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240204072051rg8Nmk_channeldrop_jpg.rf.f1fb3f7cfe3052aabfd1ccd830f93a27.jpg",
+      "filename": "20240204072051rg8Nmk_channeldrop_jpg.rf.f1fb3f7cfe3052aabfd1ccd830f93a27.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.1566746234893799,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240108051424gCRvbM_gauss_jpg.rf.254e2fe7aa5c311d1b8e97053c860967.jpg",
+      "filename": "20240108051424gCRvbM_gauss_jpg.rf.254e2fe7aa5c311d1b8e97053c860967.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0.676,
+      "analysis_time": 0.8906240463256836,
+      "stage_scores": {
+        "2": 0.676,
+        "4": 0.324
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240112132304tccwzd_gauss_jpg.rf.77882e0928537bc10b32d80d8ed8a9f6.jpg",
+      "filename": "20240112132304tccwzd_gauss_jpg.rf.77882e0928537bc10b32d80d8ed8a9f6.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 0.8125123977661133,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240227162138HhyrSg_jpg.rf.8948f5eff511d08563115c96f02fb16e.jpg",
+      "filename": "20240227162138HhyrSg_jpg.rf.8948f5eff511d08563115c96f02fb16e.jpg",
+      "true_level": 3,
+      "predicted_level": 4,
+      "confidence": 0.443,
+      "analysis_time": 1.0472822189331055,
+      "stage_scores": {
+        "4": 0.443,
+        "2": 0.145,
+        "3": 0.412
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240226042041FWzeO8_jpg.rf.3be436b5e7d26e3bff8351eb7891b0a9.jpg",
+      "filename": "20240226042041FWzeO8_jpg.rf.3be436b5e7d26e3bff8351eb7891b0a9.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0.658,
+      "analysis_time": 1.1722941398620605,
+      "stage_scores": {
+        "2": 0.658,
+        "3": 0.342
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240425090756H9ZvXS_rgbshift_jpg.rf.992caff21af3c8f6af666cee90c8dab4.jpg",
+      "filename": "20240425090756H9ZvXS_rgbshift_jpg.rf.992caff21af3c8f6af666cee90c8dab4.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 0.619,
+      "analysis_time": 1.2504117488861084,
+      "stage_scores": {
+        "2": 0.13,
+        "4": 0.251,
+        "3": 0.619
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240426114655aET0c3_jpg.rf.6b17df2542c768f6b1857ef2bb4f0e08.jpg",
+      "filename": "20240426114655aET0c3_jpg.rf.6b17df2542c768f6b1857ef2bb4f0e08.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2191762924194336,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\202402261821202JT72o_gauss_jpg.rf.ca45335553a2b0aea260ba1f8379fe67.jpg",
+      "filename": "202402261821202JT72o_gauss_jpg.rf.ca45335553a2b0aea260ba1f8379fe67.jpg",
+      "true_level": 3,
+      "predicted_level": 4,
+      "confidence": 0.399,
+      "analysis_time": 1.2035682201385498,
+      "stage_scores": {
+        "5": 0.209,
+        "4": 0.399,
+        "6": 0.393
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240112132218uNOG9r_rgbshift_jpg.rf.4748bd91270be1385496fe83da8a46de.jpg",
+      "filename": "20240112132218uNOG9r_rgbshift_jpg.rf.4748bd91270be1385496fe83da8a46de.jpg",
+      "true_level": 3,
+      "predicted_level": 4,
+      "confidence": 0.536,
+      "analysis_time": 1.0785346031188965,
+      "stage_scores": {
+        "4": 0.536,
+        "3": 0.464
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231225074112vWHR6I_sepia_jpg.rf.ad16553c963cba58bbcadb968f941cb0.jpg",
+      "filename": "20231225074112vWHR6I_sepia_jpg.rf.ad16553c963cba58bbcadb968f941cb0.jpg",
+      "true_level": 3,
+      "predicted_level": 6,
+      "confidence": 0.612,
+      "analysis_time": 0.8593742847442627,
+      "stage_scores": {
+        "7": 0.135,
+        "2": 0.129,
+        "6": 0.612,
+        "5": 0.124
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240110081709sAjzng_sepia_jpg.rf.55f69b4653365b7a29b91952dc60190e.jpg",
+      "filename": "20240110081709sAjzng_sepia_jpg.rf.55f69b4653365b7a29b91952dc60190e.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 1.0,
+      "analysis_time": 0.8754079341888428,
+      "stage_scores": {
+        "2": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240111060524b17ZW5_channeldrop_jpg.rf.c0f08018cf0b1246515b2bb00e59ab19.jpg",
+      "filename": "20240111060524b17ZW5_channeldrop_jpg.rf.c0f08018cf0b1246515b2bb00e59ab19.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.1419405937194824,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231228093404CvWZPa_channeldrop_jpg.rf.41b22b1135ef967412292a51645fd0cf.jpg",
+      "filename": "20231228093404CvWZPa_channeldrop_jpg.rf.41b22b1135ef967412292a51645fd0cf.jpg",
+      "true_level": 3,
+      "predicted_level": 5,
+      "confidence": 0.426,
+      "analysis_time": 1.281259298324585,
+      "stage_scores": {
+        "6": 0.147,
+        "5": 0.426,
+        "3": 0.144,
+        "4": 0.142,
+        "2": 0.141
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240111041511pkq7FS_channeldrop_jpg.rf.490e784d8da4c7e1b4bf9db6f7cae94e.jpg",
+      "filename": "20240111041511pkq7FS_channeldrop_jpg.rf.490e784d8da4c7e1b4bf9db6f7cae94e.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.234785795211792,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240218111411fMj4dz_channeldrop_jpg.rf.7807edc445487fb83ab4dbd22dd4e03f.jpg",
+      "filename": "20240218111411fMj4dz_channeldrop_jpg.rf.7807edc445487fb83ab4dbd22dd4e03f.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.234818696975708,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240105194437swInPJ_gauss_jpg.rf.aa84f1644ab879a575b7d02b22ca8180.jpg",
+      "filename": "20240105194437swInPJ_gauss_jpg.rf.aa84f1644ab879a575b7d02b22ca8180.jpg",
+      "true_level": 3,
+      "predicted_level": 7,
+      "confidence": 0.44,
+      "analysis_time": 1.1879417896270752,
+      "stage_scores": {
+        "7": 0.44,
+        "5": 0.237,
+        "4": 0.112,
+        "6": 0.21
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231228093404CvWZPa_gauss_jpg.rf.f4e93244bb1ef70c21ccfb79e026fa82.jpg",
+      "filename": "20231228093404CvWZPa_gauss_jpg.rf.f4e93244bb1ef70c21ccfb79e026fa82.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 0.655,
+      "analysis_time": 1.0000004768371582,
+      "stage_scores": {
+        "4": 0.345,
+        "3": 0.655
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240213093407MyH0JP_sepia_jpg.rf.ab6e8973f56f52f3773a90e3bd32676d.jpg",
+      "filename": "20240213093407MyH0JP_sepia_jpg.rf.ab6e8973f56f52f3773a90e3bd32676d.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 0.8281421661376953,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240110081709sAjzng_channeldrop_jpg.rf.9d8e9beec63ffbca9cda85b268f02eb4.jpg",
+      "filename": "20240110081709sAjzng_channeldrop_jpg.rf.9d8e9beec63ffbca9cda85b268f02eb4.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 0.859797477722168,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240222123202yOrNLX_rgbshift_jpg.rf.8148f6f64b005841d148ccc5cd084795.jpg",
+      "filename": "20240222123202yOrNLX_rgbshift_jpg.rf.8148f6f64b005841d148ccc5cd084795.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 0.548,
+      "analysis_time": 1.2031207084655762,
+      "stage_scores": {
+        "4": 0.155,
+        "5": 0.151,
+        "6": 0.147,
+        "3": 0.548
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240226182643NWSMuw_gauss_jpg.rf.f2fceabfaf2d9b642580b4307b235bca.jpg",
+      "filename": "20240226182643NWSMuw_gauss_jpg.rf.f2fceabfaf2d9b642580b4307b235bca.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 0.729,
+      "analysis_time": 1.2660486698150635,
+      "stage_scores": {
+        "4": 0.271,
+        "3": 0.729
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231225073745O43Mc1_jpg.rf.473f35d0092686ccbb30cc3f15f4263b.jpg",
+      "filename": "20231225073745O43Mc1_jpg.rf.473f35d0092686ccbb30cc3f15f4263b.jpg",
+      "true_level": 3,
+      "predicted_level": 4,
+      "confidence": 0.52,
+      "analysis_time": 1.2191801071166992,
+      "stage_scores": {
+        "4": 0.52,
+        "3": 0.48
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240108051424gCRvbM_jpg.rf.351f77cb05997d7292b4456202d43b8b.jpg",
+      "filename": "20240108051424gCRvbM_jpg.rf.351f77cb05997d7292b4456202d43b8b.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0.692,
+      "analysis_time": 1.2191612720489502,
+      "stage_scores": {
+        "2": 0.692,
+        "4": 0.308
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240209045816dwnC5d_jpg.rf.9e226db4741e25e77f6290396d8d63bc.jpg",
+      "filename": "20240209045816dwnC5d_jpg.rf.9e226db4741e25e77f6290396d8d63bc.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.328122854232788,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240219045611lxf00s_gauss_jpg.rf.e5990723263edf53cf703214a2a53cdf.jpg",
+      "filename": "20240219045611lxf00s_gauss_jpg.rf.e5990723263edf53cf703214a2a53cdf.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0.507,
+      "analysis_time": 0.8906407356262207,
+      "stage_scores": {
+        "2": 0.507,
+        "4": 0.493
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240302035813N0PMwt_jpg.rf.2d121f81ef49f31662111596e805b894.jpg",
+      "filename": "20240302035813N0PMwt_jpg.rf.2d121f81ef49f31662111596e805b894.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 0.501,
+      "analysis_time": 0.8437447547912598,
+      "stage_scores": {
+        "3": 0.501,
+        "4": 0.17,
+        "5": 0.166,
+        "6": 0.164
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240218111411fMj4dz_gauss_jpg.rf.9109f6c6c983a8c4f47b072634b47159.jpg",
+      "filename": "20240218111411fMj4dz_gauss_jpg.rf.9109f6c6c983a8c4f47b072634b47159.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0.669,
+      "analysis_time": 1.0005111694335938,
+      "stage_scores": {
+        "2": 0.669,
+        "5": 0.331
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\2024011004015104ybgS_rgbshift_jpg.rf.d7839680a8a123209e803c3278fd120e.jpg",
+      "filename": "2024011004015104ybgS_rgbshift_jpg.rf.d7839680a8a123209e803c3278fd120e.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 0.517,
+      "analysis_time": 1.2035655975341797,
+      "stage_scores": {
+        "3": 0.517,
+        "4": 0.182,
+        "2": 0.301
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231228115833acozQC_rgbshift_jpg.rf.e6a07a506a653ce72df95ea83e22f789.jpg",
+      "filename": "20231228115833acozQC_rgbshift_jpg.rf.e6a07a506a653ce72df95ea83e22f789.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2348251342773438,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231226062922lMCITq_gauss_jpg.rf.e38f6682d1d46806492cb6d6e5c2b0e7.jpg",
+      "filename": "20231226062922lMCITq_gauss_jpg.rf.e38f6682d1d46806492cb6d6e5c2b0e7.jpg",
+      "true_level": 3,
+      "predicted_level": 7,
+      "confidence": 0.348,
+      "analysis_time": 1.2499959468841553,
+      "stage_scores": {
+        "7": 0.348,
+        "6": 0.226,
+        "4": 0.215,
+        "5": 0.211
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240215033052F7tuLZ_sepia_jpg.rf.b3647ea19c9b422d64500107acccd138.jpg",
+      "filename": "20240215033052F7tuLZ_sepia_jpg.rf.b3647ea19c9b422d64500107acccd138.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0.746,
+      "analysis_time": 1.2343831062316895,
+      "stage_scores": {
+        "2": 0.746,
+        "3": 0.254
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\2024022312304391z3Un_sepia_jpg.rf.5169561ae14c5bd8d98b9b3ed8c4dcef.jpg",
+      "filename": "2024022312304391z3Un_sepia_jpg.rf.5169561ae14c5bd8d98b9b3ed8c4dcef.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0.375,
+      "analysis_time": 1.15625,
+      "stage_scores": {
+        "3": 0.253,
+        "2": 0.375,
+        "5": 0.248,
+        "7": 0.124
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240107133634EeG4f8_channeldrop_jpg.rf.f9368d56fdb790d33e3b3202eb133fbb.jpg",
+      "filename": "20240107133634EeG4f8_channeldrop_jpg.rf.f9368d56fdb790d33e3b3202eb133fbb.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 0.331,
+      "analysis_time": 0.8281421661376953,
+      "stage_scores": {
+        "2": 0.17,
+        "3": 0.331,
+        "4": 0.168,
+        "5": 0.331
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240215033052F7tuLZ_rgbshift_jpg.rf.31f8704241d0335a57be563a09eae83e.jpg",
+      "filename": "20240215033052F7tuLZ_rgbshift_jpg.rf.31f8704241d0335a57be563a09eae83e.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 0.8749842643737793,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231227181434cW11aN_rgbshift_jpg.rf.09f2e77b51512460a7224428cfb9069f.jpg",
+      "filename": "20231227181434cW11aN_rgbshift_jpg.rf.09f2e77b51512460a7224428cfb9069f.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 1.0,
+      "analysis_time": 1.0160553455352783,
+      "stage_scores": {
+        "2": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240424100208AroWLv_gauss_jpg.rf.235765ec43cd37112108cd6db0512f59.jpg",
+      "filename": "20240424100208AroWLv_gauss_jpg.rf.235765ec43cd37112108cd6db0512f59.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.234365701675415,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\eu-aebd9c81-79a2-424b-ab2e-419af65adfcc_channeldrop_jpg.rf.26693d21f12fb4686c3abfe100483533.jpg",
+      "filename": "eu-aebd9c81-79a2-424b-ab2e-419af65adfcc_channeldrop_jpg.rf.26693d21f12fb4686c3abfe100483533.jpg",
+      "true_level": 3,
+      "predicted_level": 6,
+      "confidence": 0.252,
+      "analysis_time": 1.2191975116729736,
+      "stage_scores": {
+        "6": 0.252,
+        "4": 0.25,
+        "2": 0.249,
+        "3": 0.249
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231230044850qZAAzh_gauss_jpg.rf.36cc50c06ac06bebf45fe24ad48cd098.jpg",
+      "filename": "20231230044850qZAAzh_gauss_jpg.rf.36cc50c06ac06bebf45fe24ad48cd098.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 0.337,
+      "analysis_time": 1.2500057220458984,
+      "stage_scores": {
+        "2": 0.174,
+        "5": 0.172,
+        "3": 0.337,
+        "6": 0.16,
+        "4": 0.156
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240227162138HhyrSg_channeldrop_jpg.rf.ac19017f00633b7b36ada19d29c6e4c6.jpg",
+      "filename": "20240227162138HhyrSg_channeldrop_jpg.rf.ac19017f00633b7b36ada19d29c6e4c6.jpg",
+      "true_level": 3,
+      "predicted_level": 4,
+      "confidence": 0.437,
+      "analysis_time": 1.2352211475372314,
+      "stage_scores": {
+        "4": 0.437,
+        "3": 0.416,
+        "2": 0.147
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231227181434cW11aN_gauss_jpg.rf.a74b86769ecc1003a4bbc0f385ec27bc.jpg",
+      "filename": "20231227181434cW11aN_gauss_jpg.rf.a74b86769ecc1003a4bbc0f385ec27bc.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 1.0,
+      "analysis_time": 1.0473077297210693,
+      "stage_scores": {
+        "2": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240110124808P42uto_rgbshift_jpg.rf.fdb6ea6ce0f9135bccfa4352bd4571e5.jpg",
+      "filename": "20240110124808P42uto_rgbshift_jpg.rf.fdb6ea6ce0f9135bccfa4352bd4571e5.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 0.674,
+      "analysis_time": 0.8598067760467529,
+      "stage_scores": {
+        "3": 0.674,
+        "4": 0.326
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\202401051745190N1Rb5_rgbshift_jpg.rf.38c27b9b2000a662519a54e82db32f59.jpg",
+      "filename": "202401051745190N1Rb5_rgbshift_jpg.rf.38c27b9b2000a662519a54e82db32f59.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 1.0,
+      "analysis_time": 0.8281266689300537,
+      "stage_scores": {
+        "2": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\202401231026386G3sD7_channeldrop_jpg.rf.b9bac3ff0ee6c40c455ec5351a8c7bc8.jpg",
+      "filename": "202401231026386G3sD7_channeldrop_jpg.rf.b9bac3ff0ee6c40c455ec5351a8c7bc8.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.157571792602539,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240213093407MyH0JP_jpg.rf.9a522970a4f3b4e4382f073fba38130b.jpg",
+      "filename": "20240213093407MyH0JP_jpg.rf.9a522970a4f3b4e4382f073fba38130b.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 0.534,
+      "analysis_time": 1.2035746574401855,
+      "stage_scores": {
+        "3": 0.534,
+        "4": 0.313,
+        "2": 0.154
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\202401071754396EVo4b_channeldrop_jpg.rf.24fccc53a4053cecb3d267777f220f9b.jpg",
+      "filename": "202401071754396EVo4b_channeldrop_jpg.rf.24fccc53a4053cecb3d267777f220f9b.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.2035417556762695,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240113083925VOQCo6_jpg.rf.3626b5411a26115f33dfe16ca824b679.jpg",
+      "filename": "20240113083925VOQCo6_jpg.rf.3626b5411a26115f33dfe16ca824b679.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2343673706054688,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240112075111DNEjQg_sepia_jpg.rf.8f8ee8a96cb6e897724b08f48c8902ba.jpg",
+      "filename": "20240112075111DNEjQg_sepia_jpg.rf.8f8ee8a96cb6e897724b08f48c8902ba.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2664916515350342,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\202402050540562jiC2d_sepia_jpg.rf.b8625a5e9d995dc5a36c51ee342a5516.jpg",
+      "filename": "202402050540562jiC2d_sepia_jpg.rf.b8625a5e9d995dc5a36c51ee342a5516.jpg",
+      "true_level": 3,
+      "predicted_level": 2,
+      "confidence": 0.419,
+      "analysis_time": 0.9375147819519043,
+      "stage_scores": {
+        "2": 0.419,
+        "3": 0.214,
+        "4": 0.188,
+        "5": 0.179
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240226024249a4lTvm_gauss_jpg.rf.43fbfce1010841dcb1e1a9b11752b272.jpg",
+      "filename": "20240226024249a4lTvm_gauss_jpg.rf.43fbfce1010841dcb1e1a9b11752b272.jpg",
+      "true_level": 3,
+      "predicted_level": 3,
+      "confidence": 0.562,
+      "analysis_time": 0.8437573909759521,
+      "stage_scores": {
+        "6": 0.295,
+        "4": 0.143,
+        "3": 0.562
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20240105194437swInPJ_jpg.rf.85cde95d37e24ebc9094ce3bad2399d2.jpg",
+      "filename": "20240105194437swInPJ_jpg.rf.85cde95d37e24ebc9094ce3bad2399d2.jpg",
+      "true_level": 3,
+      "predicted_level": 7,
+      "confidence": 0.437,
+      "analysis_time": 0.8606483936309814,
+      "stage_scores": {
+        "7": 0.437,
+        "4": 0.114,
+        "6": 0.228,
+        "5": 0.221
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\3\\20231225074112vWHR6I_channeldrop_jpg.rf.5d016bb20ef061d01612c66e5eef5595.jpg",
+      "filename": "20231225074112vWHR6I_channeldrop_jpg.rf.5d016bb20ef061d01612c66e5eef5595.jpg",
+      "true_level": 3,
+      "predicted_level": 6,
+      "confidence": 0.447,
+      "analysis_time": 1.2500126361846924,
+      "stage_scores": {
+        "2": 0.118,
+        "6": 0.447,
+        "5": 0.111,
+        "7": 0.324
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20240425071858rrzmu4_rgbshift_jpg.rf.9431b0de664424429026c0250e23940f.jpg",
+      "filename": "20240425071858rrzmu4_rgbshift_jpg.rf.9431b0de664424429026c0250e23940f.jpg",
+      "true_level": 4,
+      "predicted_level": 4,
+      "confidence": 0.507,
+      "analysis_time": 1.234774112701416,
+      "stage_scores": {
+        "4": 0.507,
+        "5": 0.298,
+        "6": 0.195
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20231103110433jYqnpE_gauss_jpg.rf.f4145207e07c2fcc133f0a8919f4d132.jpg",
+      "filename": "20231103110433jYqnpE_gauss_jpg.rf.f4145207e07c2fcc133f0a8919f4d132.jpg",
+      "true_level": 4,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.265625,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\202311200849306GXBax_sepia_jpg.rf.54351e78be88a32ca30c1ce8bcff546b.jpg",
+      "filename": "202311200849306GXBax_sepia_jpg.rf.54351e78be88a32ca30c1ce8bcff546b.jpg",
+      "true_level": 4,
+      "predicted_level": 2,
+      "confidence": 1.0,
+      "analysis_time": 1.234381914138794,
+      "stage_scores": {
+        "2": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\eu-43b1f497-0c6e-4b66-9a04-3f2c46c643c3_jpg.rf.c06d0f6689cf0c6537345768dc864ba2.jpg",
+      "filename": "eu-43b1f497-0c6e-4b66-9a04-3f2c46c643c3_jpg.rf.c06d0f6689cf0c6537345768dc864ba2.jpg",
+      "true_level": 4,
+      "predicted_level": 5,
+      "confidence": 0.446,
+      "analysis_time": 1.2187433242797852,
+      "stage_scores": {
+        "4": 0.339,
+        "5": 0.446,
+        "7": 0.215
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20231230151734RiWQtO_rgbshift_jpg.rf.c511eaf4b553c73599f265171066b161.jpg",
+      "filename": "20231230151734RiWQtO_rgbshift_jpg.rf.c511eaf4b553c73599f265171066b161.jpg",
+      "true_level": 4,
+      "predicted_level": 4,
+      "confidence": 0.55,
+      "analysis_time": 0.8593740463256836,
+      "stage_scores": {
+        "5": 0.311,
+        "4": 0.55,
+        "3": 0.139
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\202403060614542Dotke_rgbshift_jpg.rf.f4c729d63770034095fbe18af5b91cbc.jpg",
+      "filename": "202403060614542Dotke_rgbshift_jpg.rf.f4c729d63770034095fbe18af5b91cbc.jpg",
+      "true_level": 4,
+      "predicted_level": 4,
+      "confidence": 0.538,
+      "analysis_time": 0.8593740463256836,
+      "stage_scores": {
+        "4": 0.538,
+        "5": 0.462
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20240109072317PAZUZQ_gauss_jpg.rf.600d8e8c8869281f1766b1ed55d7edaa.jpg",
+      "filename": "20240109072317PAZUZQ_gauss_jpg.rf.600d8e8c8869281f1766b1ed55d7edaa.jpg",
+      "true_level": 4,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.016045331954956,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\202311200849306GXBax_rgbshift_jpg.rf.f04336b9c68681e03c9ce9c3ed22c4a1.jpg",
+      "filename": "202311200849306GXBax_rgbshift_jpg.rf.f04336b9c68681e03c9ce9c3ed22c4a1.jpg",
+      "true_level": 4,
+      "predicted_level": 2,
+      "confidence": 0.748,
+      "analysis_time": 1.2187681198120117,
+      "stage_scores": {
+        "4": 0.252,
+        "2": 0.748
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\eu-63733eb1-8461-4a69-b378-2cb94e5d54df_channeldrop_jpg.rf.91ca38a86aafb023ac3c183530cb9678.jpg",
+      "filename": "eu-63733eb1-8461-4a69-b378-2cb94e5d54df_channeldrop_jpg.rf.91ca38a86aafb023ac3c183530cb9678.jpg",
+      "true_level": 4,
+      "predicted_level": 5,
+      "confidence": 1.0,
+      "analysis_time": 1.2504138946533203,
+      "stage_scores": {
+        "5": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20231103110433jYqnpE_jpg.rf.6df1bf4c341b60688d94e7cac1c11fa6.jpg",
+      "filename": "20231103110433jYqnpE_jpg.rf.6df1bf4c341b60688d94e7cac1c11fa6.jpg",
+      "true_level": 4,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.3129310607910156,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20231120052324RHCSvi_sepia_jpg.rf.462ac1a91366dd8ba6a6777945a6f593.jpg",
+      "filename": "20231120052324RHCSvi_sepia_jpg.rf.462ac1a91366dd8ba6a6777945a6f593.jpg",
+      "true_level": 4,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2812578678131104,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20231224143124Rg7CVv_rgbshift_jpg.rf.635d9b823f7250673ed832e0411df556.jpg",
+      "filename": "20231224143124Rg7CVv_rgbshift_jpg.rf.635d9b823f7250673ed832e0411df556.jpg",
+      "true_level": 4,
+      "predicted_level": 3,
+      "confidence": 0.511,
+      "analysis_time": 1.2523531913757324,
+      "stage_scores": {
+        "3": 0.511,
+        "2": 0.489
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20240219032734nhvXLV_channeldrop_jpg.rf.1825dfbbb209de4ea9d73f459fdbddba.jpg",
+      "filename": "20240219032734nhvXLV_channeldrop_jpg.rf.1825dfbbb209de4ea9d73f459fdbddba.jpg",
+      "true_level": 4,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 0.8768751621246338,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20231230152425AvmOBj_rgbshift_jpg.rf.d7b54580f0b83a2c690db21f3a7a2eaf.jpg",
+      "filename": "20231230152425AvmOBj_rgbshift_jpg.rf.d7b54580f0b83a2c690db21f3a7a2eaf.jpg",
+      "true_level": 4,
+      "predicted_level": 4,
+      "confidence": 0.746,
+      "analysis_time": 0.8351256847381592,
+      "stage_scores": {
+        "5": 0.254,
+        "4": 0.746
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20231103110433jYqnpE_channeldrop_jpg.rf.55df1e29070651c505ba314ce661fb47.jpg",
+      "filename": "20231103110433jYqnpE_channeldrop_jpg.rf.55df1e29070651c505ba314ce661fb47.jpg",
+      "true_level": 4,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.197894811630249,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\eu-578daadb-caa8-4174-9ff6-4ebbcddfb052_channeldrop_jpg.rf.5509fcc56c4d0432a98720dbf4e02e4c.jpg",
+      "filename": "eu-578daadb-caa8-4174-9ff6-4ebbcddfb052_channeldrop_jpg.rf.5509fcc56c4d0432a98720dbf4e02e4c.jpg",
+      "true_level": 4,
+      "predicted_level": 4,
+      "confidence": 0.666,
+      "analysis_time": 1.2552812099456787,
+      "stage_scores": {
+        "4": 0.666,
+        "3": 0.334
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20240106172936p85aHK_gauss_jpg.rf.66e6eb49c79dba236b293423ffa6ea7e.jpg",
+      "filename": "20240106172936p85aHK_gauss_jpg.rf.66e6eb49c79dba236b293423ffa6ea7e.jpg",
+      "true_level": 4,
+      "predicted_level": 4,
+      "confidence": 0.745,
+      "analysis_time": 1.3124892711639404,
+      "stage_scores": {
+        "4": 0.745,
+        "3": 0.255
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\202404290146011QkWj4_rgbshift_jpg.rf.07df410111259184bdca24379f4502a9.jpg",
+      "filename": "202404290146011QkWj4_rgbshift_jpg.rf.07df410111259184bdca24379f4502a9.jpg",
+      "true_level": 4,
+      "predicted_level": 2,
+      "confidence": 0.669,
+      "analysis_time": 1.2968723773956299,
+      "stage_scores": {
+        "2": 0.669,
+        "3": 0.331
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20231229111438zxQKPZ_gauss_jpg.rf.38f59e964a71c8492e507e52fb484751.jpg",
+      "filename": "20231229111438zxQKPZ_gauss_jpg.rf.38f59e964a71c8492e507e52fb484751.jpg",
+      "true_level": 4,
+      "predicted_level": 3,
+      "confidence": 0.585,
+      "analysis_time": 1.383213996887207,
+      "stage_scores": {
+        "4": 0.415,
+        "3": 0.585
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20240103045433viidUR_sepia_jpg.rf.4abb8ba1a3ff4fd9922b86320742589b.jpg",
+      "filename": "20240103045433viidUR_sepia_jpg.rf.4abb8ba1a3ff4fd9922b86320742589b.jpg",
+      "true_level": 4,
+      "predicted_level": 2,
+      "confidence": 0.435,
+      "analysis_time": 1.1254184246063232,
+      "stage_scores": {
+        "2": 0.435,
+        "3": 0.284,
+        "5": 0.281
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20231231053455wlgTw6_jpg.rf.d236d7ad5b38e84711979867fffbbbb6.jpg",
+      "filename": "20231231053455wlgTw6_jpg.rf.d236d7ad5b38e84711979867fffbbbb6.jpg",
+      "true_level": 4,
+      "predicted_level": 3,
+      "confidence": 0.553,
+      "analysis_time": 0.8910586833953857,
+      "stage_scores": {
+        "4": 0.118,
+        "3": 0.553,
+        "5": 0.114,
+        "2": 0.215
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20231120052355OcUjWk_sepia_jpg.rf.cdeb55dba21f10c580c3ebbfd01318db.jpg",
+      "filename": "20231120052355OcUjWk_sepia_jpg.rf.cdeb55dba21f10c580c3ebbfd01318db.jpg",
+      "true_level": 4,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.031665325164795,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20240215110406iMfVgF_gauss_jpg.rf.f8a12ee73681e632f02f0e4e5aab353b.jpg",
+      "filename": "20240215110406iMfVgF_gauss_jpg.rf.f8a12ee73681e632f02f0e4e5aab353b.jpg",
+      "true_level": 4,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.2656214237213135,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\20240304113225u9TBwP_jpg.rf.a33a92edae900029f8c4b3067816daa6.jpg",
+      "filename": "20240304113225u9TBwP_jpg.rf.a33a92edae900029f8c4b3067816daa6.jpg",
+      "true_level": 4,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.2500114440917969,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\202402220844294Nm8YS_channeldrop_jpg.rf.b1207928212dbf91f579e0711dd784e0.jpg",
+      "filename": "202402220844294Nm8YS_channeldrop_jpg.rf.b1207928212dbf91f579e0711dd784e0.jpg",
+      "true_level": 4,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.2343692779541016,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\4\\eu-304b0061-3171-44e5-81cf-46660cf81ac9_sepia_jpg.rf.adef70ad511121ae0cfd7692d8fce64b.jpg",
+      "filename": "eu-304b0061-3171-44e5-81cf-46660cf81ac9_sepia_jpg.rf.adef70ad511121ae0cfd7692d8fce64b.jpg",
+      "true_level": 4,
+      "predicted_level": 3,
+      "confidence": 0.504,
+      "analysis_time": 1.2343807220458984,
+      "stage_scores": {
+        "3": 0.504,
+        "4": 0.496
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20240112105627LSnOLz_gauss_jpg.rf.0bc2aa5afdd3420a624c53400f1133f7.jpg",
+      "filename": "20240112105627LSnOLz_gauss_jpg.rf.0bc2aa5afdd3420a624c53400f1133f7.jpg",
+      "true_level": 5,
+      "predicted_level": 3,
+      "confidence": 0.671,
+      "analysis_time": 1.1874916553497314,
+      "stage_scores": {
+        "3": 0.671,
+        "5": 0.329
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20240215090512rzk6E3_gauss_jpg.rf.c15c386a8639bd53c8a59001545ac5f7.jpg",
+      "filename": "20240215090512rzk6E3_gauss_jpg.rf.c15c386a8639bd53c8a59001545ac5f7.jpg",
+      "true_level": 5,
+      "predicted_level": 4,
+      "confidence": 0.508,
+      "analysis_time": 0.859788179397583,
+      "stage_scores": {
+        "4": 0.508,
+        "3": 0.134,
+        "5": 0.239,
+        "6": 0.118
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20240112074015kN7E4b_rgbshift_jpg.rf.8702ae66f53063a8a3ece4d473b15a37.jpg",
+      "filename": "20240112074015kN7E4b_rgbshift_jpg.rf.8702ae66f53063a8a3ece4d473b15a37.jpg",
+      "true_level": 5,
+      "predicted_level": 4,
+      "confidence": 0.534,
+      "analysis_time": 0.875443696975708,
+      "stage_scores": {
+        "4": 0.534,
+        "2": 0.466
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\eu-12853114-0db0-472d-8e1d-8b6d6fa55a6e_channeldrop_jpg.rf.5eb0861a6fbdcaa40d1ea0124b34cc55.jpg",
+      "filename": "eu-12853114-0db0-472d-8e1d-8b6d6fa55a6e_channeldrop_jpg.rf.5eb0861a6fbdcaa40d1ea0124b34cc55.jpg",
+      "true_level": 5,
+      "predicted_level": 4,
+      "confidence": 0.501,
+      "analysis_time": 1.0316791534423828,
+      "stage_scores": {
+        "4": 0.501,
+        "5": 0.499
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\202312301914187GAyAD_jpg.rf.1e6a0b6194f23996e77b71643a6e2ff1.jpg",
+      "filename": "202312301914187GAyAD_jpg.rf.1e6a0b6194f23996e77b71643a6e2ff1.jpg",
+      "true_level": 5,
+      "predicted_level": 3,
+      "confidence": 0.401,
+      "analysis_time": 1.2343754768371582,
+      "stage_scores": {
+        "3": 0.401,
+        "4": 0.2,
+        "2": 0.399
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20240103132430lj9ibM_sepia_jpg.rf.c3a0a3fd138996c250c888196ebeeab7.jpg",
+      "filename": "20240103132430lj9ibM_sepia_jpg.rf.c3a0a3fd138996c250c888196ebeeab7.jpg",
+      "true_level": 5,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.1875064373016357,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\eu-76f3335b-6fda-4e2a-a332-650fde339ea2_channeldrop_jpg.rf.c39947c4b50edf47da777caf4a22d555.jpg",
+      "filename": "eu-76f3335b-6fda-4e2a-a332-650fde339ea2_channeldrop_jpg.rf.c39947c4b50edf47da777caf4a22d555.jpg",
+      "true_level": 5,
+      "predicted_level": 3,
+      "confidence": 1.0,
+      "analysis_time": 1.2343838214874268,
+      "stage_scores": {
+        "3": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20240425045422sSExj3_channeldrop_jpg.rf.d136e5e8bf6f4e7e6b40b4bd73c6115f.jpg",
+      "filename": "20240425045422sSExj3_channeldrop_jpg.rf.d136e5e8bf6f4e7e6b40b4bd73c6115f.jpg",
+      "true_level": 5,
+      "predicted_level": 6,
+      "confidence": 0.507,
+      "analysis_time": 1.2187576293945312,
+      "stage_scores": {
+        "6": 0.507,
+        "4": 0.248,
+        "3": 0.245
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20240425045640NBum03_jpg.rf.e70417afcb9237704fdc7ede1168d3d9.jpg",
+      "filename": "20240425045640NBum03_jpg.rf.e70417afcb9237704fdc7ede1168d3d9.jpg",
+      "true_level": 5,
+      "predicted_level": 4,
+      "confidence": 0.502,
+      "analysis_time": 1.141857624053955,
+      "stage_scores": {
+        "4": 0.502,
+        "5": 0.498
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\202312280934398IF2Jt_rgbshift_jpg.rf.be5794ebb373999581757e8891273feb.jpg",
+      "filename": "202312280934398IF2Jt_rgbshift_jpg.rf.be5794ebb373999581757e8891273feb.jpg",
+      "true_level": 5,
+      "predicted_level": 4,
+      "confidence": 0.493,
+      "analysis_time": 0.8754122257232666,
+      "stage_scores": {
+        "3": 0.26,
+        "4": 0.493,
+        "6": 0.247
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20231224095810ANM3Tb_jpg.rf.2e895f5a0fcc7106ac9de2e4c74dc524.jpg",
+      "filename": "20231224095810ANM3Tb_jpg.rf.2e895f5a0fcc7106ac9de2e4c74dc524.jpg",
+      "true_level": 5,
+      "predicted_level": 4,
+      "confidence": 0.493,
+      "analysis_time": 0.8754167556762695,
+      "stage_scores": {
+        "5": 0.262,
+        "4": 0.493,
+        "3": 0.124,
+        "6": 0.121
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20240109072235tZP15F_channeldrop_jpg.rf.0069f5b9a4203155b81f8f591678aa06.jpg",
+      "filename": "20240109072235tZP15F_channeldrop_jpg.rf.0069f5b9a4203155b81f8f591678aa06.jpg",
+      "true_level": 5,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.1566879749298096,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20240112195912TM8oSH_rgbshift_jpg.rf.f03d84a3453d24fc9603d1f069ab6ec4.jpg",
+      "filename": "20240112195912TM8oSH_rgbshift_jpg.rf.f03d84a3453d24fc9603d1f069ab6ec4.jpg",
+      "true_level": 5,
+      "predicted_level": 2,
+      "confidence": 1.0,
+      "analysis_time": 1.2343730926513672,
+      "stage_scores": {
+        "2": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\eu-12853114-0db0-472d-8e1d-8b6d6fa55a6e_gauss_jpg.rf.8d5cd2a6c221d457cf18be530a959706.jpg",
+      "filename": "eu-12853114-0db0-472d-8e1d-8b6d6fa55a6e_gauss_jpg.rf.8d5cd2a6c221d457cf18be530a959706.jpg",
+      "true_level": 5,
+      "predicted_level": 4,
+      "confidence": 0.691,
+      "analysis_time": 1.2187540531158447,
+      "stage_scores": {
+        "5": 0.107,
+        "4": 0.691,
+        "6": 0.102,
+        "3": 0.099
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20240103132359Pv6csI_sepia_jpg.rf.58de9bceecf5d69148e0c6b455c866e8.jpg",
+      "filename": "20240103132359Pv6csI_sepia_jpg.rf.58de9bceecf5d69148e0c6b455c866e8.jpg",
+      "true_level": 5,
+      "predicted_level": 3,
+      "confidence": 0.672,
+      "analysis_time": 1.265632152557373,
+      "stage_scores": {
+        "3": 0.672,
+        "4": 0.328
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20240215090512rzk6E3_sepia_jpg.rf.88b56d6afe6d30d532097054a827b157.jpg",
+      "filename": "20240215090512rzk6E3_sepia_jpg.rf.88b56d6afe6d30d532097054a827b157.jpg",
+      "true_level": 5,
+      "predicted_level": 6,
+      "confidence": 0.492,
+      "analysis_time": 1.2500052452087402,
+      "stage_scores": {
+        "3": 0.41,
+        "6": 0.492,
+        "4": 0.098
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\5\\20240228055251651sqD_jpg.rf.23902437c6f662d822eaf6d8cc4a87ab.jpg",
+      "filename": "20240228055251651sqD_jpg.rf.23902437c6f662d822eaf6d8cc4a87ab.jpg",
+      "true_level": 5,
+      "predicted_level": 4,
+      "confidence": 0.384,
+      "analysis_time": 0.9847893714904785,
+      "stage_scores": {
+        "4": 0.384,
+        "5": 0.127,
+        "6": 0.246,
+        "3": 0.243
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\exhibition_202210_0000123_gauss_jpg.rf.08f98d2d77921c25d6fd07e5969412ce.jpg",
+      "filename": "exhibition_202210_0000123_gauss_jpg.rf.08f98d2d77921c25d6fd07e5969412ce.jpg",
+      "true_level": 6,
+      "predicted_level": 5,
+      "confidence": 0.701,
+      "analysis_time": 0.8754174709320068,
+      "stage_scores": {
+        "5": 0.701,
+        "4": 0.199,
+        "7": 0.1
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\20231224094540Ln5VZt_rgbshift_jpg.rf.126bb810c66904a4d298e9cd2fa4a512.jpg",
+      "filename": "20231224094540Ln5VZt_rgbshift_jpg.rf.126bb810c66904a4d298e9cd2fa4a512.jpg",
+      "true_level": 6,
+      "predicted_level": 4,
+      "confidence": 0.5,
+      "analysis_time": 0.9227221012115479,
+      "stage_scores": {
+        "4": 0.5,
+        "5": 0.333,
+        "6": 0.168
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\20240101073644Ddtc1n_jpg.rf.131abcc18de314e5a354df3a598b05c7.jpg",
+      "filename": "20240101073644Ddtc1n_jpg.rf.131abcc18de314e5a354df3a598b05c7.jpg",
+      "true_level": 6,
+      "predicted_level": 4,
+      "confidence": 0.403,
+      "analysis_time": 1.234391450881958,
+      "stage_scores": {
+        "4": 0.403,
+        "5": 0.4,
+        "6": 0.197
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\20240202104800D2eUmA_sepia_jpg.rf.f17025a13c980527bd4274bf6b48f882.jpg",
+      "filename": "20240202104800D2eUmA_sepia_jpg.rf.f17025a13c980527bd4274bf6b48f882.jpg",
+      "true_level": 6,
+      "predicted_level": 3,
+      "confidence": 0.83,
+      "analysis_time": 1.2191517353057861,
+      "stage_scores": {
+        "3": 0.83,
+        "4": 0.17
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\exhibition_202212_0000073_channeldrop_jpg.rf.956c75a1ca8716f77237cd45abaf63a6.jpg",
+      "filename": "exhibition_202212_0000073_channeldrop_jpg.rf.956c75a1ca8716f77237cd45abaf63a6.jpg",
+      "true_level": 6,
+      "predicted_level": 2,
+      "confidence": 0,
+      "analysis_time": 1.218759536743164,
+      "stage_scores": {},
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\exhibition_202210_0000123_jpg.rf.948a69389108134fc8f2f04fe70a7551.jpg",
+      "filename": "exhibition_202210_0000123_jpg.rf.948a69389108134fc8f2f04fe70a7551.jpg",
+      "true_level": 6,
+      "predicted_level": 5,
+      "confidence": 0.434,
+      "analysis_time": 1.2499957084655762,
+      "stage_scores": {
+        "4": 0.339,
+        "3": 0.227,
+        "5": 0.434
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\exhibition_202210_0000123_sepia_jpg.rf.2874a9f94ac73f422060bc3d4ed0f00e.jpg",
+      "filename": "exhibition_202210_0000123_sepia_jpg.rf.2874a9f94ac73f422060bc3d4ed0f00e.jpg",
+      "true_level": 6,
+      "predicted_level": 4,
+      "confidence": 0.423,
+      "analysis_time": 1.2348029613494873,
+      "stage_scores": {
+        "5": 0.152,
+        "6": 0.144,
+        "4": 0.423,
+        "3": 0.281
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\20240218141722wm6DJk_channeldrop_jpg.rf.2308bcdb6f64f60c9a9dc3d7d6f77da0.jpg",
+      "filename": "20240218141722wm6DJk_channeldrop_jpg.rf.2308bcdb6f64f60c9a9dc3d7d6f77da0.jpg",
+      "true_level": 6,
+      "predicted_level": 7,
+      "confidence": 0.335,
+      "analysis_time": 0.875417947769165,
+      "stage_scores": {
+        "7": 0.335,
+        "5": 0.334,
+        "6": 0.332
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\eu-b297419e-9967-4674-984b-c00848cd4d38_gauss_jpg.rf.7806dfa08790435edf41f0eb89139547.jpg",
+      "filename": "eu-b297419e-9967-4674-984b-c00848cd4d38_gauss_jpg.rf.7806dfa08790435edf41f0eb89139547.jpg",
+      "true_level": 6,
+      "predicted_level": 5,
+      "confidence": 0.686,
+      "analysis_time": 0.906252384185791,
+      "stage_scores": {
+        "5": 0.686,
+        "4": 0.314
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\6\\20240202104730bdOOXO_rgbshift_jpg.rf.8714fafb11a7465db731431deefb9b79.jpg",
+      "filename": "20240202104730bdOOXO_rgbshift_jpg.rf.8714fafb11a7465db731431deefb9b79.jpg",
+      "true_level": 6,
+      "predicted_level": 4,
+      "confidence": 0.6,
+      "analysis_time": 1.157094955444336,
+      "stage_scores": {
+        "4": 0.6,
+        "3": 0.4
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\eu-729c12a1-dacc-45a8-a321-096f5bfa7a55_gauss_jpg.rf.5c14bf47f50d3506d40935ed62e0d0a3.jpg",
+      "filename": "eu-729c12a1-dacc-45a8-a321-096f5bfa7a55_gauss_jpg.rf.5c14bf47f50d3506d40935ed62e0d0a3.jpg",
+      "true_level": 7,
+      "predicted_level": 7,
+      "confidence": 0.689,
+      "analysis_time": 1.2656259536743164,
+      "stage_scores": {
+        "5": 0.311,
+        "7": 0.689
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20231103164336CCVTLU_channeldrop_jpg.rf.e60e04c0532b9826ad4c57369512eedc.jpg",
+      "filename": "20231103164336CCVTLU_channeldrop_jpg.rf.e60e04c0532b9826ad4c57369512eedc.jpg",
+      "true_level": 7,
+      "predicted_level": 5,
+      "confidence": 0.376,
+      "analysis_time": 1.2187507152557373,
+      "stage_scores": {
+        "6": 0.257,
+        "5": 0.376,
+        "7": 0.368
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\eu-5077c9d7-a510-4542-adf4-e7d01b018aa2_sepia_jpg.rf.9645043779f5d54aa7b2e7fbf995e9c2.jpg",
+      "filename": "eu-5077c9d7-a510-4542-adf4-e7d01b018aa2_sepia_jpg.rf.9645043779f5d54aa7b2e7fbf995e9c2.jpg",
+      "true_level": 7,
+      "predicted_level": 7,
+      "confidence": 1.0,
+      "analysis_time": 1.218747615814209,
+      "stage_scores": {
+        "7": 1.0
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20231103164923CD3dOM_jpg.rf.baa9ef8cd8a8876c684144b1996723af.jpg",
+      "filename": "20231103164923CD3dOM_jpg.rf.baa9ef8cd8a8876c684144b1996723af.jpg",
+      "true_level": 7,
+      "predicted_level": 5,
+      "confidence": 0.348,
+      "analysis_time": 1.187506914138794,
+      "stage_scores": {
+        "5": 0.348,
+        "6": 0.219,
+        "7": 0.111,
+        "2": 0.11,
+        "4": 0.212
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\eu-15cb7654-1f49-4f13-a500-8adb845e2284_channeldrop_jpg.rf.008a461a35dae3b7e8dad1b72b14fbe2.jpg",
+      "filename": "eu-15cb7654-1f49-4f13-a500-8adb845e2284_channeldrop_jpg.rf.008a461a35dae3b7e8dad1b72b14fbe2.jpg",
+      "true_level": 7,
+      "predicted_level": 7,
+      "confidence": 0.554,
+      "analysis_time": 1.0941696166992188,
+      "stage_scores": {
+        "6": 0.334,
+        "7": 0.554,
+        "5": 0.112
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20231226165040dWTttW_jpg.rf.82f39866ebd79b6d31d60db1daeca9ab.jpg",
+      "filename": "20231226165040dWTttW_jpg.rf.82f39866ebd79b6d31d60db1daeca9ab.jpg",
+      "true_level": 7,
+      "predicted_level": 7,
+      "confidence": 0.907,
+      "analysis_time": 0.8754150867462158,
+      "stage_scores": {
+        "7": 0.907,
+        "6": 0.093
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20231103164336CCVTLU_rgbshift_jpg.rf.bf8d335bea55b970d93fcf07dc69d357.jpg",
+      "filename": "20231103164336CCVTLU_rgbshift_jpg.rf.bf8d335bea55b970d93fcf07dc69d357.jpg",
+      "true_level": 7,
+      "predicted_level": 6,
+      "confidence": 0.433,
+      "analysis_time": 0.875002384185791,
+      "stage_scores": {
+        "7": 0.24,
+        "4": 0.327,
+        "6": 0.433
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\eu-04a53e8d-0642-47ce-afed-0dce3d2e3b85_gauss_jpg.rf.71557f32a418b18df2414e9ae976eb1c.jpg",
+      "filename": "eu-04a53e8d-0642-47ce-afed-0dce3d2e3b85_gauss_jpg.rf.71557f32a418b18df2414e9ae976eb1c.jpg",
+      "true_level": 7,
+      "predicted_level": 6,
+      "confidence": 0.39,
+      "analysis_time": 1.2660975456237793,
+      "stage_scores": {
+        "7": 0.315,
+        "4": 0.2,
+        "6": 0.39,
+        "5": 0.095
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\eu-04a53e8d-0642-47ce-afed-0dce3d2e3b85_rgbshift_jpg.rf.82f463b1be47876cb9c88f094c117c14.jpg",
+      "filename": "eu-04a53e8d-0642-47ce-afed-0dce3d2e3b85_rgbshift_jpg.rf.82f463b1be47876cb9c88f094c117c14.jpg",
+      "true_level": 7,
+      "predicted_level": 6,
+      "confidence": 0.387,
+      "analysis_time": 1.2499942779541016,
+      "stage_scores": {
+        "7": 0.309,
+        "4": 0.207,
+        "6": 0.387,
+        "5": 0.098
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20231103164336CCVTLU_sepia_jpg.rf.e82a48b78c833b21701eabad99ee1456.jpg",
+      "filename": "20231103164336CCVTLU_sepia_jpg.rf.e82a48b78c833b21701eabad99ee1456.jpg",
+      "true_level": 7,
+      "predicted_level": 6,
+      "confidence": 0.395,
+      "analysis_time": 1.218750238418579,
+      "stage_scores": {
+        "5": 0.302,
+        "7": 0.302,
+        "6": 0.395
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20231226165040dWTttW_rgbshift_jpg.rf.3e9f2276cf95168a538838230856f5fb.jpg",
+      "filename": "20231226165040dWTttW_rgbshift_jpg.rf.3e9f2276cf95168a538838230856f5fb.jpg",
+      "true_level": 7,
+      "predicted_level": 7,
+      "confidence": 0.905,
+      "analysis_time": 1.2187564373016357,
+      "stage_scores": {
+        "7": 0.905,
+        "6": 0.095
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20240216135059nWPzuu_sepia_jpg.rf.6012f516da74b6d29f578db2fb6ef13e.jpg",
+      "filename": "20240216135059nWPzuu_sepia_jpg.rf.6012f516da74b6d29f578db2fb6ef13e.jpg",
+      "true_level": 7,
+      "predicted_level": 5,
+      "confidence": 0.358,
+      "analysis_time": 1.2031230926513672,
+      "stage_scores": {
+        "5": 0.358,
+        "4": 0.324,
+        "6": 0.213,
+        "3": 0.105
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20240302062739ypHcMG_rgbshift_jpg.rf.20d84e74088a0bd5ac1c61ebf6d00c05.jpg",
+      "filename": "20240302062739ypHcMG_rgbshift_jpg.rf.20d84e74088a0bd5ac1c61ebf6d00c05.jpg",
+      "true_level": 7,
+      "predicted_level": 6,
+      "confidence": 0.558,
+      "analysis_time": 0.9691643714904785,
+      "stage_scores": {
+        "4": 0.228,
+        "6": 0.558,
+        "5": 0.109,
+        "7": 0.105
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20240216135059nWPzuu_channeldrop_jpg.rf.1d830dc408298d2a379f8edd39915a7a.jpg",
+      "filename": "20240216135059nWPzuu_channeldrop_jpg.rf.1d830dc408298d2a379f8edd39915a7a.jpg",
+      "true_level": 7,
+      "predicted_level": 6,
+      "confidence": 0.7,
+      "analysis_time": 0.8906784057617188,
+      "stage_scores": {
+        "5": 0.104,
+        "6": 0.7,
+        "3": 0.099,
+        "4": 0.098
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\exhibition_202304_0000087_gauss_jpg.rf.5d5d97a75d7526e4bbc045e5dfb1b3a5.jpg",
+      "filename": "exhibition_202304_0000087_gauss_jpg.rf.5d5d97a75d7526e4bbc045e5dfb1b3a5.jpg",
+      "true_level": 7,
+      "predicted_level": 7,
+      "confidence": 0.609,
+      "analysis_time": 0.9222507476806641,
+      "stage_scores": {
+        "7": 0.609,
+        "6": 0.391
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\20231226165040dWTttW_sepia_jpg.rf.1ec1b93e4d8b9625305a9502bb06f55f.jpg",
+      "filename": "20231226165040dWTttW_sepia_jpg.rf.1ec1b93e4d8b9625305a9502bb06f55f.jpg",
+      "true_level": 7,
+      "predicted_level": 7,
+      "confidence": 0.812,
+      "analysis_time": 1.2187504768371582,
+      "stage_scores": {
+        "7": 0.812,
+        "6": 0.188
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\eu-729c12a1-dacc-45a8-a321-096f5bfa7a55_jpg.rf.b4043695b78a6a492308e56b7d4aa1f8.jpg",
+      "filename": "eu-729c12a1-dacc-45a8-a321-096f5bfa7a55_jpg.rf.b4043695b78a6a492308e56b7d4aa1f8.jpg",
+      "true_level": 7,
+      "predicted_level": 7,
+      "confidence": 0.693,
+      "analysis_time": 1.219177007675171,
+      "stage_scores": {
+        "5": 0.307,
+        "7": 0.693
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\eu-5b6f3f83-50aa-4683-8a0a-a73a3c1f9893_channeldrop_jpg.rf.812150165e1c9d59d6970c4f6061ccb7.jpg",
+      "filename": "eu-5b6f3f83-50aa-4683-8a0a-a73a3c1f9893_channeldrop_jpg.rf.812150165e1c9d59d6970c4f6061ccb7.jpg",
+      "true_level": 7,
+      "predicted_level": 7,
+      "confidence": 0.602,
+      "analysis_time": 1.2035551071166992,
+      "stage_scores": {
+        "6": 0.398,
+        "7": 0.602
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\eu-a3fdadc5-2ae0-4f5d-968b-a72e98fa6052_jpg.rf.51b9084c476dfd6a5e279893fbb2f6c3.jpg",
+      "filename": "eu-a3fdadc5-2ae0-4f5d-968b-a72e98fa6052_jpg.rf.51b9084c476dfd6a5e279893fbb2f6c3.jpg",
+      "true_level": 7,
+      "predicted_level": 7,
+      "confidence": 0.804,
+      "analysis_time": 1.2187504768371582,
+      "stage_scores": {
+        "7": 0.804,
+        "6": 0.196
+      },
+      "success": true,
+      "error": null
+    },
+    {
+      "image_path": "C:\\Users\\301\\Desktop\\test_data_set\\test\\7\\eu-15cb7654-1f49-4f13-a500-8adb845e2284_gauss_jpg.rf.c473caa094d00e5bc253d136d2ca0172.jpg",
+      "filename": "eu-15cb7654-1f49-4f13-a500-8adb845e2284_gauss_jpg.rf.c473caa094d00e5bc253d136d2ca0172.jpg",
+      "true_level": 7,
+      "predicted_level": 7,
+      "confidence": 0.599,
+      "analysis_time": 1.1718790531158447,
+      "stage_scores": {
+        "7": 0.599,
+        "6": 0.201,
+        "5": 0.199
+      },
+      "success": true,
+      "error": null
+    }
+  ]
+}

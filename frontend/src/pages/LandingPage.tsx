@@ -60,23 +60,26 @@ export default function HomePage() {
     },
   ];
 
+// 원래 방식으로 복구: 별도 상태 없이 allServices 사용
 
-  // 슬라이더 자동 재생
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % allServices.length);
-    }, 3000);
 
-    return () => clearInterval(interval);
-  }, [allServices.length]);
+// 슬라이더 자동 재생 (원래 로직)
+useEffect(() => {
+  const interval = setInterval(() => {
+    setCurrentSlide((prev) => (prev + 1) % allServices.length);
+  }, 3000);
+  return () => clearInterval(interval);
+}, [allServices.length])
 
-  // 슬라이더 위치 업데이트
+  // 슬라이더 위치 업데이트 (한 장씩 이동)
   useEffect(() => {
     if (sliderRef.current) {
-      const slideWidth = sliderRef.current.offsetWidth / 3; // 한 번에 3개씩 보이도록
+      const slideWidth = sliderRef.current.offsetWidth / 3; // 한 화면에 3개
       sliderRef.current.style.transform = `translateX(-${currentSlide * slideWidth}px)`;
     }
   }, [currentSlide]);
+
+// 무한 루프 전환 로직 제거 (원래 상태)
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -104,18 +107,13 @@ export default function HomePage() {
             <h1 className="text-6xl md:text-8xl font-bold text-white mb-4 font-serif">
               HairFit
             </h1>
-            <p className="text-white text-lg md:text-xl mb-8 opacity-90">
-              AI 분석 기반 맞춤형 솔루션 및 컨텐츠
-            </p>
-
-            <p className="text-white text-lg md:text-xl mb-8 opacity-90">
-              셀카로 쉽게 알아보는 내 탈모 진행 상태
-            </p>
-            <p  className="text-white text-lg md:text-xl mb-8 opacity-90">
-            나만의 탈모 로드맵을 받아보세요
+            <p className="text-white text-lg md:text-xl mt-16 mb-8 opacity-90">
+              AI 분석 기반 맞춤형 솔루션 및 컨텐츠 <br />
+              셀카로 쉽게 알아보는 내 탈모 진행 상태 <br />
+              나만의 탈모 로드맵을 받아보세요
             </p>
             <button
-              className="bg-[#222222] text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-[#333333] transition-colors"
+              className="bg-[#222222] text-white px-8 py-4 mt-8 rounded-lg text-lg font-medium hover:bg-[#333333] transition-colors"
               onClick={() => {
                 if (isLoggedIn) {
                   navigate('/daily-care')
@@ -139,6 +137,7 @@ export default function HomePage() {
                 ref={sliderRef}
                 className="flex transition-transform duration-500 ease-in-out"
                 style={{ width: `${allServices.length * 33.333}%` }}
+                
               >
                 {allServices.map((service, index) => (
                   <div
@@ -146,12 +145,12 @@ export default function HomePage() {
                     className="w-1/3 px-3 flex-shrink-0"
                   >
                     <div
-                      className="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all overflow-hidden h-40"
+                      className="bg-transparent h-40 flex items-center justify-center"
                     >
                       <ImageWithFallback 
                         src={service.image}
                         alt={service.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                       />
                     </div>
                   </div>
@@ -159,18 +158,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* 슬라이더 인디케이터 */}
-            <div className="flex justify-center mt-6 space-x-2">
-              {Array.from({ length: Math.ceil(allServices.length / 3) }).map((_, index) => (
-                <button
-                  key={index}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    Math.floor(currentSlide / 3) === index ? 'bg-[#222222]' : 'bg-[#222222] opacity-30'
-                  }`}
-                  onClick={() => setCurrentSlide(index * 3)}
-                />
-              ))}
-            </div>
           </div>
         </div>
       </div>

@@ -271,7 +271,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
                     setCurrentStep(3);
                     performRealAnalysis();
                   }}
-                  className="flex-1 h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98]"
+                  className="flex-1 h-12 rounded-xl bg-[#222222] hover:bg-[#333333] active:scale-[0.98]"
                   disabled={isAnalyzing}
                 >
                   {isAnalyzing ? (
@@ -292,7 +292,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
                 <Button 
                   onClick={() => setCurrentStep(2)}
                   disabled={!baspAnswers.gender || !baspAnswers.age || !baspAnswers.familyHistory || !baspAnswers.recentHairLoss || !baspAnswers.stress}
-                  className="flex-1 h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
+                  className="flex-1 h-12 rounded-xl bg-[#222222] hover:bg-[#333333] active:scale-[0.98] disabled:opacity-50"
                 >
                   다음
                   <ArrowRight className="w-4 h-4 ml-2" />

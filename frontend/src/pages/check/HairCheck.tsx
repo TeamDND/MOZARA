@@ -141,7 +141,7 @@ export default function HairCheck() {
               >
                 <Camera className="h-6 w-6 text-white" />
               </div>
-              <h1 className="text-4xl font-bold text-gray-900">毛자라</h1>
+              <h1 className="text-4xl font-bold text-gray-900">Hairfit</h1>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
               맞춤 서비스를 위한

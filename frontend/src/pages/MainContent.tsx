@@ -13,19 +13,19 @@ export default function Home() {
       name: "탈모 PT", 
       description: "새싹 키우기를 통한 생활습관 챌린지로 헤어 관리 동기부여",
       badge: "NEW",
-      image: "/sam1.png"
+      image: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?w=300&h=300&fit=crop&crop=center" // 운동/습관 느낌
     },
     { 
       name: "탈모 맵", 
       description: "내 주변 탈모 전문 병원과 클리닉을 쉽게 찾아보세요",
       badge: "NEW",
-      image: "/sam2.png"
+      image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=300&h=300&fit=crop&crop=center" // 지도 썸네일
     },
     { 
       name: "제품추천", 
       description: "AI 분석 결과에 따른 개인 맞춤 헤어케어 제품 추천",
       badge: "NEW",
-      image: "/sam3.png"
+      image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300&h=300&fit=crop&crop=center" // 화장품/제품
     },
   ];
 
@@ -35,19 +35,19 @@ export default function Home() {
       name: "머리스타일 변경", 
       description: "AI를 통한 가상 헤어스타일 체험과 시뮬레이션",
       badge: "NEW",
-      image: "/sam1.png"
+      image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300&h=300&fit=crop&crop=center" // 헤어/살롱
     },
     { 
       name: "YouTube 영상", 
       description: "전문가가 추천하는 탈모 관리 및 헤어케어 영상 모음",
       badge: "NEW",
-      image: "/sam2.png"
+      image: "https://images.unsplash.com/photo-1497551060073-4c5ab6435f12?w=300&h=300&fit=crop&crop=center" // 동영상/미디어
     },
     { 
       name: "탈모 백과", 
       description: "탈모에 대한 과학적 정보와 전문 지식을 한눈에",
       badge: "NEW",
-      image: "/sam3.png"
+      useIcon: true
     },
   ];
 
@@ -81,8 +81,11 @@ export default function Home() {
   const renderToolCard = (tool: any, index: number) => (
     <div key={index} className="relative">
       {tool.badge && (
-        <div className="absolute top-3 right-3 z-10">
-          <span className="px-2 py-1 text-xs text-white bg-[#222222] rounded-full">
+        <div className="absolute top-2 right-2 z-10">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] leading-none text-white bg-[#222222]/90 rounded-full shadow-sm">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-yellow-300">
+              <path d="M12 2l1.9 5.8h6.1l-4.9 3.6 1.9 5.8-5-3.6-5 3.6 1.9-5.8L4 7.8h6.1L12 2z"/>
+            </svg>
             {tool.badge}
           </span>
         </div>
@@ -93,12 +96,19 @@ export default function Home() {
       >
         <div className="flex items-center p-4">
           {/* 이미지 영역 */}
-          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0 mr-4">
-            <ImageWithFallback 
-              src={tool.image}
-              alt={tool.name}
-              className="w-full h-full object-cover"
-            />
+          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0 mr-4 flex items-center justify-center">
+            {tool.useIcon ? (
+              <svg viewBox="0 0 24 24" width="28" height="28" className="text-[#1F0101]" fill="currentColor" aria-hidden>
+                <path d="M4 5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.8.4l-1.2-.9a4 4 0 0 0-2.4-.8H6a2 2 0 0 0-2 2V5z"/>
+                <path d="M17 3h1a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.8.4l-1.2-.9a4 4 0 0 0-2.4-.8H8" fill="none" stroke="currentColor" strokeWidth="1.2"/>
+              </svg>
+            ) : (
+              <ImageWithFallback 
+                src={tool.image}
+                alt={tool.name}
+                className="w-full h-full object-cover"
+              />
+            )}
           </div>
           
           {/* 텍스트 영역 */}
