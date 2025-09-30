@@ -50,11 +50,8 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
   const [youtubeVideos, setYoutubeVideos] = useState<Video[]>([]);
   const [videosLoading, setVideosLoading] = useState(false);
   const [videosError, setVideosError] = useState<string | null>(null);
-
   // URL state 또는 props에서 Swin 분석 결과 가져오기
   const swinResult = location.state?.swinResult || diagnosisData?.photo?.swinResult;
-
-  // Swin 단계별 YouTube 영상 추천 설정
   const stageRecommendations: Record<number, StageRecommendation> = {
     0: {
       title: '정상 - 예방 및 두피 관리',
@@ -128,11 +125,9 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
       setVideosLoading(false);
     }
   }, []);
-
   // 컴포넌트 마운트 시 Swin 단계에 맞는 영상 로드
   useEffect(() => {
     if (swinResult && swinResult.stage !== undefined) {
-      const stage = swinResult.stage;
       const recommendation = stageRecommendations[stage];
       if (recommendation) {
         fetchYouTubeVideos(recommendation.query);
@@ -150,7 +145,6 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
     const baspScore = swinStage !== undefined ? swinStage : (diagnosisData?.basp?.score || 3.2);
     const scalpHealth = diagnosisData?.photo?.scalpHealth || 85;
     const swinTitle = swinResult?.title || '';
-    const swinDescription = swinResult?.description || '';
     
     // 병원 추천 (BASP 점수와 지역에 따라)
     const hospitals = [
@@ -245,7 +239,6 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
       }
     ];
 
-    // 생활습관 가이드 (Swin 결과에 따라 조정)
     const getLifestyleGuides = () => {
       const baseGuides = [
         {
@@ -541,6 +534,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                     {swinResult && (
                       <span className="text-sm font-normal text-gray-600">
                         ({getStageDescription(swinResult.stage)} 맞춤)
+
                       </span>
                     )}
                   </h3>
@@ -548,7 +542,6 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                 <p className="text-sm text-gray-600 mb-4">
                   {swinResult && stageRecommendations[swinResult.stage]
                     ? stageRecommendations[swinResult.stage].description
-                    : '전문가들이 추천하는 탈모 관리 영상들'
                   }
                 </p>
 

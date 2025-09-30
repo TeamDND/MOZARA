@@ -84,7 +84,6 @@ const HairDiagnosis: React.FC = () => {
     } else {
       console.log('로그인하지 않은 사용자 - user_id 없음');
     }
-
     console.log('API 호출 시작: /ai/swin-check/analyze');
 
     const { data: result } = await apiClient.post('/ai/swin-check/analyze', formData, {
@@ -360,6 +359,7 @@ const HairDiagnosis: React.FC = () => {
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">AI 두피 사진 분석</h2>
           
           {/* 파일 업로드 섹션 */}
+
           <div className="grid md:grid-cols-2 gap-8 mb-8">
             {/* Top View 업로드 */}
             <div className="text-center border-2 border-dashed border-gray-300 rounded-lg p-6">

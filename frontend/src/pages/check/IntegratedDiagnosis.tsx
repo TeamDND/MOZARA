@@ -264,7 +264,6 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 이전
               </Button>
-              
               {currentStep === 2 && uploadedPhoto && (baspAnswers.gender === 'female' || uploadedSidePhoto) && (
                 <Button
                   onClick={() => {
