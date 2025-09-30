@@ -1,4 +1,4 @@
-package com.example.springboot.controller;
+package com.example.springboot.controller.reissue;
 
 
 import com.example.springboot.jwt.JwtUtil;
