@@ -1,5 +1,6 @@
-import React, { useState, FormEvent, ChangeEvent } from 'react';
+import React, { useState, FormEvent, ChangeEvent, useEffect } from 'react';
 import apiClient from '../../services/apiClient';
+import { emailAuthService } from '../../services/emailAuthService';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../utils/userSlice';
@@ -9,7 +10,7 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Separator } from '../../components/ui/separator';
 import { Checkbox } from '../../components/ui/checkbox';
-import { ArrowLeft, Sparkles, Lock, User, Mail } from 'lucide-react';
+import { ArrowLeft, Sparkles, Lock, User, Mail, Clock, CheckCircle } from 'lucide-react';
 
 interface SignUpFormData {
   username: string;
@@ -25,6 +26,7 @@ interface ValidationErrors {
   passwordCheck?: string;
   email?: string;
   nickname?: string;
+  authCode?: string;
 }
 
 const SignUp: React.FC = () => {
@@ -45,6 +47,14 @@ const SignUp: React.FC = () => {
   const [showPasswordCheck, setShowPasswordCheck] = useState(false);
   const [usernameChecked, setUsernameChecked] = useState(false);
   const [nicknameChecked, setNicknameChecked] = useState(false);
+  
+  // 이메일 인증 관련 상태
+  const [authCode, setAuthCode] = useState('');
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [emailAuthLoading, setEmailAuthLoading] = useState(false);
+  const [authCodeSent, setAuthCodeSent] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   // 입력값 변경 핸들러
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -161,6 +171,79 @@ const SignUp: React.FC = () => {
     }
   };
 
+  // 이메일 인증코드 발송
+  const sendAuthCode = async () => {
+    const emailError = validateEmail(formData.email);
+    if (emailError) {
+      setErrors(prev => ({ ...prev, email: emailError }));
+      return;
+    }
+
+    setEmailAuthLoading(true);
+    try {
+      const response = await emailAuthService.sendAuthCode(formData.email);
+      if (response.success) {
+        setAuthCodeSent(true);
+        setCountdown(300); // 5분 = 300초
+        setResendCooldown(60); // 1분 = 60초
+        alert('인증코드가 발송되었습니다.');
+      } else {
+        alert(response.message);
+        if (response.remainingTime) {
+          setResendCooldown(response.remainingTime);
+        }
+      }
+    } catch (error) {
+      console.error('인증코드 발송 오류:', error);
+      alert('인증코드 발송 중 오류가 발생했습니다.');
+    } finally {
+      setEmailAuthLoading(false);
+    }
+  };
+
+  // 인증코드 검증
+  const verifyAuthCode = async () => {
+    if (!authCode) {
+      setErrors(prev => ({ ...prev, authCode: '인증코드를 입력해주세요.' }));
+      return;
+    }
+
+    setEmailAuthLoading(true);
+    try {
+      const response = await emailAuthService.verifyAuthCode(formData.email, authCode);
+      if (response.success) {
+        setEmailVerified(true);
+        setErrors(prev => ({ ...prev, authCode: undefined }));
+        alert('이메일 인증이 완료되었습니다.');
+      } else {
+        setErrors(prev => ({ ...prev, authCode: response.message }));
+      }
+    } catch (error) {
+      console.error('인증코드 검증 오류:', error);
+      setErrors(prev => ({ ...prev, authCode: '인증코드 검증 중 오류가 발생했습니다.' }));
+    } finally {
+      setEmailAuthLoading(false);
+    }
+  };
+
+  // 카운트다운 타이머
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [countdown]);
+
+  // 재발송 쿨다운 타이머
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (resendCooldown > 0) {
+      timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
+
   // 폼 제출 핸들러
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -183,6 +266,7 @@ const SignUp: React.FC = () => {
     
     const emailError = validateEmail(formData.email);
     if (emailError) newErrors.email = emailError;
+    else if (!emailVerified) newErrors.email = '이메일 인증을 완료해주세요.';
     
     const nicknameError = validateNickname(formData.nickname);
     if (nicknameError) newErrors.nickname = nicknameError;
@@ -358,24 +442,90 @@ const SignUp: React.FC = () => {
               <Label htmlFor="email" className="text-sm font-medium text-gray-700">
                 이메일 <span className="text-red-500">*</span>
               </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="example@email.com"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={`pl-11 h-12 rounded-xl ${
-                    errors.email ? 'border-red-500' : 'border-gray-200'
-                  } focus:border-blue-500 focus:ring-blue-500`}
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Mail className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="example@email.com"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className={`pl-11 h-12 rounded-xl ${
+                      errors.email ? 'border-red-500' : 'border-gray-200'
+                    } focus:border-blue-500 focus:ring-blue-500`}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={sendAuthCode}
+                  disabled={!formData.email || emailAuthLoading || resendCooldown > 0}
+                  className={`min-w-[90px] h-12 rounded-xl ${
+                    emailVerified 
+                      ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-50' 
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  } active:scale-[0.98] transition-all`}
+                >
+                  {emailVerified ? (
+                    <CheckCircle className="h-4 w-4" />
+                  ) : emailAuthLoading ? (
+                    '발송중...'
+                  ) : resendCooldown > 0 ? (
+                    `${resendCooldown}초`
+                  ) : (
+                    '인증발송'
+                  )}
+                </Button>
               </div>
               {errors.email && (
                 <p className="text-sm text-red-600">{errors.email}</p>
               )}
             </div>
+
+            {/* 이메일 인증코드 */}
+            {authCodeSent && !emailVerified && (
+              <div className="space-y-2">
+                <Label htmlFor="authCode" className="text-sm font-medium text-gray-700">
+                  인증코드 <span className="text-red-500">*</span>
+                  {countdown > 0 && (
+                    <span className="ml-2 text-xs text-orange-600">
+                      <Clock className="inline h-3 w-3 mr-1" />
+                      {Math.floor(countdown / 60)}:{(countdown % 60).toString().padStart(2, '0')}
+                    </span>
+                  )}
+                </Label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Input
+                      id="authCode"
+                      type="text"
+                      placeholder="6자리 인증코드"
+                      value={authCode}
+                      onChange={(e) => setAuthCode(e.target.value)}
+                      maxLength={6}
+                      className={`h-12 rounded-xl ${
+                        errors.authCode ? 'border-red-500' : 'border-gray-200'
+                      } focus:border-blue-500 focus:ring-blue-500`}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={verifyAuthCode}
+                    disabled={!authCode || emailAuthLoading || countdown === 0}
+                    className="min-w-[90px] h-12 rounded-xl bg-green-600 text-white hover:bg-green-700 active:scale-[0.98] transition-all"
+                  >
+                    {emailAuthLoading ? '확인중...' : '인증확인'}
+                  </Button>
+                </div>
+                {errors.authCode && (
+                  <p className="text-sm text-red-600">{errors.authCode}</p>
+                )}
+                {countdown === 0 && authCodeSent && !emailVerified && (
+                  <p className="text-sm text-red-600">인증코드가 만료되었습니다. 다시 발송해주세요.</p>
+                )}
+              </div>
+            )}
 
 
             {/* 닉네임 */}
