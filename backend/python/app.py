@@ -855,6 +855,24 @@ try:
 except ImportError as e:
     print(f"Hair Encyclopedia Paper API 라우터 마운트 실패: {e}")
 
+# Gemini Hair Check 모듈
+try:
+    from services.hair_gemini_check import analyze_hair_with_gemini
+    GEMINI_HAIR_CHECK_AVAILABLE = True
+    print("Gemini Hair Check 모듈 로드 성공")
+except ImportError as e:
+    print(f"Gemini Hair Check 모듈 로드 실패: {e}")
+    GEMINI_HAIR_CHECK_AVAILABLE = False
+
+# Swin Hair Classification 모듈
+try:
+    from services.swin_hair_classification.hair_swin_check import analyze_hair_with_swin
+    SWIN_HAIR_CHECK_AVAILABLE = True
+    print("Swin Hair Check 모듈 로드 성공")
+except ImportError as e:
+    print(f"Swin Hair Check 모듈 로드 실패: {e}")
+    SWIN_HAIR_CHECK_AVAILABLE = False
+
 # Gemini Hair Analysis Models
 class HairAnalysisRequest(BaseModel):
     image_base64: str
@@ -897,7 +915,9 @@ def read_root():
         "modules": {
             "hair_loss_daily": "/hair-loss-daily" if HAIR_ANALYSIS_AVAILABLE else "unavailable",
             "hair_change": "/generate_hairstyle" if HAIR_CHANGE_AVAILABLE else "unavailable",
-            "basp_diagnosis": "/api/basp/evaluate" if BASP_AVAILABLE else "unavailable"
+            "basp_diagnosis": "/api/basp/evaluate" if BASP_AVAILABLE else "unavailable",
+            "hair_gemini_check": "/hair_gemini_check" if GEMINI_HAIR_CHECK_AVAILABLE else "unavailable",
+            "hair_swin_check": "/hair_swin_check" if SWIN_HAIR_CHECK_AVAILABLE else "unavailable"
         }
     }
 
@@ -937,6 +957,55 @@ async def api_hair_gemini_check(file: Annotated[UploadFile, File(...)]):
 # def get_hair_gemini_check_ping():
 #     return {"status": "ok"}
 
+# --- Swin 탈모 사진 분석 전용 엔드포인트 ---
+@app.post("/hair_swin_check")
+async def api_hair_swin_check(
+    top_image: Annotated[UploadFile, File(...)],
+    side_image: Optional[UploadFile] = File(None),
+    gender: Optional[str] = Form(None),
+    age: Optional[str] = Form(None),
+    familyHistory: Optional[str] = Form(None),
+    recentHairLoss: Optional[str] = Form(None),
+    stress: Optional[str] = Form(None)
+):
+    """
+    multipart/form-data로 전송된 Top/Side 이미지를 Swin으로 분석하여 표준 결과를 반환
+    Side 이미지는 optional (여성의 경우 없을 수 있음)
+    설문 데이터도 함께 받아서 동적 가중치 계산에 사용
+    """
+    if not SWIN_HAIR_CHECK_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Swin 분석 모듈이 활성화되지 않았습니다.")
+
+    try:
+        top_image_bytes = await top_image.read()
+        side_image_bytes = None
+
+        if side_image:
+            side_image_bytes = await side_image.read()
+            print(f"--- [DEBUG] Files received. Top: {len(top_image_bytes)} bytes, Side: {len(side_image_bytes)} bytes ---")
+        else:
+            print(f"--- [DEBUG] Files received. Top: {len(top_image_bytes)} bytes, Side: None (여성) ---")
+
+        # 설문 데이터 구성
+        survey_data = None
+        if age and familyHistory:
+            survey_data = {
+                'gender': gender,
+                'age': age,
+                'familyHistory': familyHistory,
+                'recentHairLoss': recentHairLoss,
+                'stress': stress
+            }
+            print(f"--- [DEBUG] Survey data: {survey_data} ---")
+
+        # bytes 데이터와 설문 데이터를 함께 전달
+        result = analyze_hair_with_swin(top_image_bytes, side_image_bytes, survey_data)
+
+        return result
+    except Exception as e:
+        print(f"--- [DEBUG] Swin Error: {str(e)} ---")
+        raise HTTPException(status_code=500, detail=str(e))
+        
 # --- 네이버 지역 검색 API 프록시 ---
 @app.get("/api/naver/local/search")
 async def search_naver_local(query: str):
