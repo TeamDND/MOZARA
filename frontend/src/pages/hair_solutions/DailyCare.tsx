@@ -512,6 +512,14 @@ const DailyCare: React.FC = () => {
                       formData.append('top_k', '10');
                       formData.append('use_preprocessing', 'true');
                       
+                      // 로그인한 사용자의 user_id 추가
+                      if (userId) {
+                        formData.append('user_id', userId.toString());
+                        console.log('Daily 분석에 user_id 추가:', userId);
+                      } else {
+                        console.log('로그인하지 않은 사용자 - user_id 없음');
+                      }
+                      
                       const response = await apiClient.post('/ai/hair-loss-daily/analyze', formData, {
                         headers: { 'Content-Type': 'multipart/form-data' },
                       });
