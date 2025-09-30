@@ -260,8 +260,6 @@ GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 KAKAO_CLIENT_SECRET=your_kakao_client_secret
 
-# JWT 설정 (application.properties에 하드코딩됨)
-# jwt.secret.key=alaoskjovjcpovcjqawpjcxapsjcpaosjcpasocpoadasjdlakslaks
 
 # Docker Hub 설정 (선택사항)
 DOCKERHUB_TOKEN=your_dockerhub_token

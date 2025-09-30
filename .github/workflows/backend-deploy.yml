@@ -79,6 +79,7 @@ jobs:
             sudo docker pull ${{secrets.DOCKERHUB_USERNAME}}/mozara-springboot
             sudo docker run -d -p 8080:8080 --name mozara-springboot \
             -e PYTHON_API_URL=${{secrets.PYTHON_API_URL}} \
+            -e JWT_SECRET_KEY=${{secrets.JWT_SECRET_KEY}} \
             -e GOOGLE_CLIENT_ID=${{secrets.GOOGLE_CLIENT_ID}} \
             -e GOOGLE_CLIENT_SECRET=${{secrets.GOOGLE_CLIENT_SECRET}} \
             -e KAKAO_CLIENT_SECRET=${{secrets.KAKAO_CLIENT_SECRET}} \
