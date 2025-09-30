@@ -166,5 +166,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         public String getEmail() {
             return user.getEmail();
         }
+        
+        public UserEntity getUserEntity() {
+            return user;
+        }
     }
 }

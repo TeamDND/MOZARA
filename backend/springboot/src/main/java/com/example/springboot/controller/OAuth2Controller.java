@@ -109,11 +109,15 @@ public class OAuth2Controller {
                 return ResponseEntity.ok(response);
             } else {
                 log.error("OAuth2 인증 정보를 찾을 수 없음");
-                return ResponseEntity.status(401).body(Map.of("error", "인증 정보를 찾을 수 없습니다."));
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "인증 정보를 찾을 수 없습니다.");
+                return ResponseEntity.status(401).body(errorResponse);
             }
         } catch (Exception e) {
             log.error("OAuth2 토큰 생성 실패", e);
-            return ResponseEntity.status(500).body(Map.of("error", "토큰 생성에 실패했습니다."));
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "토큰 생성에 실패했습니다.");
+            return ResponseEntity.status(500).body(errorResponse);
         }
     }
 
