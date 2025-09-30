@@ -31,6 +31,7 @@ import { PlantGrowth } from './components/PlantGrowth';
 import MyPage from './pages/MyPage';
 import MyReportPage from './pages/MyReportPage';
 import Chat from './pages/Chat';
+import OAuth2Callback from './pages/users/OAuth2Callback';
 
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
@@ -43,6 +44,7 @@ const App: React.FC = () => {
           {/* <Route path="main-page" element={<MainPage />} /> */}
           <Route path="landing" element={<LandingPage />} />
           <Route path="login" element={<LogIn />} />
+          <Route path="oauth2/callback" element={<OAuth2Callback />} />
           <Route path="integrated-diagnosis" element={<IntegratedDiagnosis />} />
           <Route path="diagnosis-results" element={<DiagnosisResults />} />
           <Route path="dashboard" element={<Dashboard />} />
