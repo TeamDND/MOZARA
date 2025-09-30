@@ -67,6 +67,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
     
     // OAuth2UserInfo 인터페이스
+
     public interface OAuth2UserInfo {
         String getProvider();
         String getProviderId();
