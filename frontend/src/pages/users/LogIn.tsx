@@ -78,10 +78,14 @@ const LogIn: React.FC = () => {
   
   // 소셜 로그인 핸들러
   const handleSocialLogin = (provider: string) => {
-    // TODO: 소셜 로그인 API 구현
-    console.log(`${provider} 로그인 시도`);
-    // 데일리케어로 이동
-    navigate('/daily-care');
+    if (provider === 'google') {
+      // Google OAuth2 로그인
+      window.location.href = 'https://hairfit.duckdns.org:8080/oauth2/authorization/google';
+    } else if (provider === 'kakao') {
+      // TODO: 카카오 로그인 API 구현
+      console.log('카카오 로그인 시도');
+      navigate('/daily-care');
+    }
   };
 
   // 게스트 로그인 핸들러
