@@ -70,6 +70,9 @@ export default function MyPage() {
   // 분석 결과 개수 및 리스트 조회
   useEffect(() => {
     const fetchAnalysisData = async () => {
+      console.log('=== MyPage Redux 상태 확인 ===');
+      console.log('전체 user 상태:', user);
+      console.log('전체 token 상태:', token);
       console.log('분석 결과 데이터 조회 시작:', { userId: user.userId, token: token ? '있음' : '없음' });
       
       // 샘플 데이터로 테스트 (실제 API 호출 전에 샘플 데이터 표시)

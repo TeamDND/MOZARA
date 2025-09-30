@@ -50,8 +50,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         UserEntity user;
         if (existingUser.isPresent()) {
             user = existingUser.get();
-            log.info("기존 사용자 로그인 성공 - ID: {}, Email: {}, Nickname: {}, Username: {}", 
-                    user.getId(), user.getEmail(), user.getNickname(), user.getUsername());
+            log.info("기존 사용자 로그인 성공 - ID: {}, Email: {}, Nickname: {}, Username: {}, Role: {}", 
+                    user.getId(), user.getEmail(), user.getNickname(), user.getUsername(), user.getRole());
+            
+            // 기존 사용자 정보도 DB에서 재조회해서 확인
+            Optional<UserEntity> dbUser = userRepository.findById(user.getId());
+            if (dbUser.isPresent()) {
+                log.info("기존 사용자 DB 조회 검증 성공 - 실제 DB에서 조회된 사용자: ID={}, Email={}, Nickname={}, Username={}, Role={}", 
+                        dbUser.get().getId(), dbUser.get().getEmail(), dbUser.get().getNickname(), 
+                        dbUser.get().getUsername(), dbUser.get().getRole());
+            } else {
+                log.error("기존 사용자 DB 조회 검증 실패 - 사용자를 찾을 수 없음: ID={}", user.getId());
+            }
         } else {
             // 새 사용자 생성 (Google 이름을 nickname으로 사용)
             log.info("새 사용자 생성 시작 - Email: {}, Name: {}", email, name);
@@ -69,6 +79,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user = userRepository.save(user);
             log.info("새 사용자 DB 저장 완료 - ID: {}, Email: {}, Nickname: {}", 
                     user.getId(), user.getEmail(), user.getNickname());
+            
+            // DB 저장 후 실제 조회해서 확인
+            Optional<UserEntity> savedUser = userRepository.findById(user.getId());
+            if (savedUser.isPresent()) {
+                UserEntity dbUser = savedUser.get();
+                log.info("DB 저장 검증 성공 - 실제 DB에서 조회된 사용자: ID={}, Email={}, Nickname={}, Username={}, Role={}", 
+                        dbUser.getId(), dbUser.getEmail(), dbUser.getNickname(), dbUser.getUsername(), dbUser.getRole());
+            } else {
+                log.error("DB 저장 검증 실패 - 저장된 사용자를 찾을 수 없음: ID={}", user.getId());
+            }
         }
         
         return new CustomOAuth2User(user, oAuth2User.getAttributes());
