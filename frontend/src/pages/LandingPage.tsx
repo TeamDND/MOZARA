@@ -60,23 +60,26 @@ export default function HomePage() {
     },
   ];
 
+// 원래 방식으로 복구: 별도 상태 없이 allServices 사용
 
-  // 슬라이더 자동 재생
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % allServices.length);
-    }, 3000);
 
-    return () => clearInterval(interval);
-  }, [allServices.length]);
+// 슬라이더 자동 재생 (원래 로직)
+useEffect(() => {
+  const interval = setInterval(() => {
+    setCurrentSlide((prev) => (prev + 1) % allServices.length);
+  }, 3000);
+  return () => clearInterval(interval);
+}, [allServices.length])
 
-  // 슬라이더 위치 업데이트
+  // 슬라이더 위치 업데이트 (한 장씩 이동)
   useEffect(() => {
     if (sliderRef.current) {
-      const slideWidth = sliderRef.current.offsetWidth / 3; // 한 번에 3개씩 보이도록
+      const slideWidth = sliderRef.current.offsetWidth / 3; // 한 화면에 3개
       sliderRef.current.style.transform = `translateX(-${currentSlide * slideWidth}px)`;
     }
   }, [currentSlide]);
+
+// 무한 루프 전환 로직 제거 (원래 상태)
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -134,6 +137,7 @@ export default function HomePage() {
                 ref={sliderRef}
                 className="flex transition-transform duration-500 ease-in-out"
                 style={{ width: `${allServices.length * 33.333}%` }}
+                
               >
                 {allServices.map((service, index) => (
                   <div
@@ -141,12 +145,12 @@ export default function HomePage() {
                     className="w-1/3 px-3 flex-shrink-0"
                   >
                     <div
-                      className="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all overflow-hidden h-40"
+                      className="bg-transparent h-40 flex items-center justify-center"
                     >
                       <ImageWithFallback 
                         src={service.image}
                         alt={service.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                       />
                     </div>
                   </div>

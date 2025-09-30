@@ -331,33 +331,6 @@ const DailyCare: React.FC = () => {
 
         {/* 메인 컨텐츠 */}
         <div className="flex-1 p-4 overflow-y-auto space-y-4">
-          {/* 다음 액션 카드 (Mobile-First) */}
-          <div className={`bg-white p-4 rounded-xl shadow-md ${nextAction.urgent ? 'ring-2 ring-gray-200 bg-gray-50' : ''}`}>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-[#222222]" />
-                <h3 className="text-lg font-semibold text-gray-800">{nextAction.title}</h3>
-              </div>
-              <p className="text-sm text-gray-600">{nextAction.description}</p>
-              <Button 
-                onClick={() => {
-                  if (nextAction.action === 'diagnosis') {
-                    navigate('/integrated-diagnosis');
-                  } else {
-                    console.log(`Action: ${nextAction.action}`);
-                  }
-                }}
-                className={`w-full h-12 rounded-xl font-semibold ${
-                  nextAction.urgent 
-                    ? 'bg-[#222222] hover:bg-[#333333] text-white' 
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                } active:scale-[0.98] transition-all`}
-              >
-                {nextAction.buttonText}
-              </Button>
-            </div>
-          </div>
-
           {/* 메인 카드: 두피 촬영하기 (Mobile-First) */}
           <div className="bg-white p-4 rounded-xl shadow-md">
             <div className="space-y-4">
@@ -420,6 +393,23 @@ const DailyCare: React.FC = () => {
                   {isAnalyzing ? '분석 중...' : '사진으로 AI 분석'}
                 </button>
               </div>
+            </div>
+          </div>
+
+          {/* AI 탈모 분석 카드 */}
+          <div className="bg-white p-4 rounded-xl shadow-md">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-[#222222]" />
+                <h3 className="text-lg font-semibold text-gray-800">AI 탈모 분석</h3>
+              </div>
+              <p className="text-sm text-gray-600">AI 분석과 설문을 통한 종합적인 두피 상태 파악</p>
+              <Button 
+                onClick={() => navigate('/integrated-diagnosis')}
+                className="w-full h-12 rounded-xl font-semibold bg-[#222222] hover:bg-[#333333] text-white active:scale-[0.98] transition-all"
+              >
+                분석하기
+              </Button>
             </div>
           </div>
 
@@ -501,58 +491,6 @@ const DailyCare: React.FC = () => {
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* 진행률 표시 (Mobile-First) */}
-          <div className="bg-gray-50 p-4 rounded-xl">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">오늘의 진행률</h3>
-            <div className="flex items-center mb-2">
-              <div className="flex-grow bg-gray-200 rounded-full h-2 mr-3">
-                <div className="bg-green-500 h-2 rounded-full transition-all duration-300" style={{width: '60%'}}></div>
-              </div>
-              <span className="text-sm font-medium text-gray-700">6 / 10 완료</span>
-            </div>
-            <p className="text-sm text-gray-600">훌륭해요! 오늘도 건강한 하루를 보내고 계시네요! 🌟</p>
-          </div>
-
-          {/* 빠른 액션 버튼들 (Mobile-First) */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button 
-              variant="outline" 
-              className="h-16 flex flex-col items-center gap-2 rounded-xl"
-              onClick={() => navigate('/integrated-diagnosis')}
-            >
-              <Target className="w-5 h-5" />
-              <span className="text-sm">재진단</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-16 flex flex-col items-center gap-2 rounded-xl"
-              onClick={() => navigate('/hair-pt')}
-            >
-              <Camera className="w-5 h-5" />
-              <span className="text-sm">탈모 PT</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-16 flex flex-col items-center gap-2 rounded-xl"
-              onClick={() => {
-                console.log('챌린지 페이지로 이동');
-              }}
-            >
-              <Award className="w-5 h-5" />
-              <span className="text-sm">챌린지</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-16 flex flex-col items-center gap-2 rounded-xl"
-              onClick={() => {
-                console.log('케어 기록 페이지로 이동');
-              }}
-            >
-              <Sprout className="w-5 h-5" />
-              <span className="text-sm">케어 기록</span>
-            </Button>
           </div>
 
         </div>
