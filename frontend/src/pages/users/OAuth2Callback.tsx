@@ -23,7 +23,10 @@ const OAuth2Callback: React.FC = () => {
         const error = searchParams.get('error');
         
         console.log('OAuth2 콜백 처리 시작');
+        console.log('전체 URL:', window.location.href);
         console.log('URL 파라미터:', { success, accessToken: accessToken ? '있음' : '없음', refreshToken: refreshToken ? '있음' : '없음', error });
+        console.log('실제 accessToken 값:', accessToken);
+        console.log('실제 refreshToken 값:', refreshToken);
 
         if (success === 'false' || error) {
           setStatus('error');

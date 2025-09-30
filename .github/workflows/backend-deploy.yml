@@ -82,5 +82,7 @@ jobs:
             -e JWT_SECRET_KEY=${{secrets.JWT_SECRET_KEY}} \
             -e GOOGLE_CLIENT_ID=${{secrets.GOOGLE_CLIENT_ID}} \
             -e GOOGLE_CLIENT_SECRET=${{secrets.GOOGLE_CLIENT_SECRET}} \
+            -e DOMAIN_NAME=hairfit.duckdns.org \
+            -e KAKAO_CLIENT_ID=${{secrets.KAKAO_CLIENT_ID}} \
             -e KAKAO_CLIENT_SECRET=${{secrets.KAKAO_CLIENT_SECRET}} \
                 ${{secrets.DOCKERHUB_USERNAME}}/mozara-springboot
