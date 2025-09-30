@@ -1209,100 +1209,87 @@ async def get_paper_analysis(paper_id: str):
         )
 
     except Exception as e:
-        safe_detail = str(e).encode('utf-8', errors='ignore').decode('utf-8')
-        raise HTTPException(status_code=500, detail=safe_detail)
+        print(f"설정 조회 중 오류: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="설정 조회 중 오류가 발생했습니다."
+        )
 
-@app.post("/qna", response_model=QnaResponse)
-async def answer_qna(query: QnaQuery):
-    if not index:
-        raise HTTPException(status_code=503, detail="Thesis search service is not available")
-    
+@app.get("/api/location/status")
+async def get_location_status():
+    """위치 서비스 상태 확인 API"""
+    naver_client_id = os.getenv("NAVER_CLIENT_ID") or os.getenv("REACT_APP_NAVER_CLIENT_ID")
+    naver_client_secret = os.getenv("NAVER_CLIENT_SECRET") or os.getenv("REACT_APP_NAVER_CLIENT_SECRET")
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY") or os.getenv("REACT_APP_KAKAO_REST_API_KEY")
+
+    return {
+        "status": "ok",
+        "message": "Location API 서버가 정상적으로 동작 중입니다.",
+        "naverApiConfigured": bool(naver_client_id and naver_client_secret),
+        "kakaoApiConfigured": bool(kakao_api_key),
+    }
+
+
+
+# --- Gemini Hair Quiz API ---
+@app.post("/hair-quiz/generate", response_model=QuizGenerateResponse)
+async def generate_hair_quiz():
+    """Gemini로 O/X 탈모 퀴즈 20문항 생성 (서비스로 위임)"""
     try:
-        fetch_results = index.fetch(ids=[query.paper_id])
-        vectors = fetch_results.vectors
-        if not vectors or query.paper_id not in vectors:
-            raise HTTPException(status_code=404, detail="Paper chunk not found.")
+        items = generate_hair_quiz_service()
+        return {"items": items}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        print(f"Gemini 퀴즈 생성 오류: {e}")
+        raise HTTPException(status_code=500, detail=f"퀴즈 생성 중 오류가 발생했습니다: {str(e)}")
 
-        clicked_chunk_metadata = vectors[query.paper_id].metadata
-        original_file_path = clicked_chunk_metadata.get('file_path')
+@app.get("/hair-quiz/health")
+async def hair_quiz_health_check():
+    """퀴즈 생성 서비스 헬스체크"""
+    return {
+        "status": "healthy" if genai else "unavailable",
+        "service": "gemini-hair-quiz",
+        "timestamp": datetime.now().isoformat()
+    }
 
-        if not original_file_path:
-            original_title = clicked_chunk_metadata.get('title')
-            if not original_title:
-                raise HTTPException(status_code=404, detail="Original paper identifier (path or title) not found for this chunk.")
-            
-            filter_criteria = {"title": original_title}
-        else:
-            filter_criteria = {"file_path": original_file_path}
 
-        query_response = index.query(
-            vector=[0.0] * 1536,
-            top_k=100,
-            include_metadata=True,
-            filter=filter_criteria
-        )
+# --- Location Services API ---
+@app.get("/location/naver/search")
+async def search_naver_local(query: str):
+    """네이버 로컬 검색 API 프록시"""
+    try:
+        naver_client_id = os.getenv("NAVER_CLIENT_ID")
+        naver_client_secret = os.getenv("NAVER_CLIENT_SECRET")
 
-        matches = query_response.get('matches', [])
-        if not matches:
-            context_text = clicked_chunk_metadata.get('text', '')
-            if not context_text:
-                 raise HTTPException(status_code=404, detail="No text found for this paper chunk.")
-        else:
-            sorted_chunks = sorted(matches, key=lambda m: m.get('metadata', {}).get('chunk_index', 0))
-            context_text = "\n\n".join([chunk.get('metadata', {}).get('text', '') for chunk in sorted_chunks])
+        if not naver_client_id or not naver_client_secret:
+            return {
+                "error": "네이버 API 키가 설정되지 않았습니다.",
+                "items": []
+            }
 
-        def count_tokens(text):
-            return len(text) // 4
-        
-        def split_context_into_chunks(text, max_tokens):
-            max_chars = max_tokens * 4
-            chunks = []
-            
-            paragraphs = text.split('\n\n')
-            current_chunk = ""
-            
-            for paragraph in paragraphs:
-                if len(current_chunk + paragraph) <= max_chars:
-                    current_chunk += paragraph + "\n\n"
-                else:
-                    if current_chunk:
-                        chunks.append(current_chunk.strip())
-                        current_chunk = paragraph + "\n\n"
-                    else:
-                        chunks.append(paragraph[:max_chars])
-                        
-            if current_chunk:
-                chunks.append(current_chunk.strip())
-                
-            return chunks
-        
-        system_prompt = (
-            "You are a helpful AI assistant specializing in scientific papers. "
-            "Answer the user's question based *only* on the provided context text from a research paper. "
-            "If the answer is not found in the context, state that you cannot find the answer in the provided document. "
-            "Do not use any external knowledge. "
-            "Provide the answer in Korean."
-        )
-        
-        system_tokens = count_tokens(system_prompt)
-        question_tokens = count_tokens(f"Question: {query.question}")
-        overhead_tokens = 500
-        max_context_tokens = 12000 - system_tokens - question_tokens - overhead_tokens
-        
-        context_tokens = count_tokens(context_text)
-        
-        if context_tokens <= max_context_tokens:
-            user_prompt = f"Context from the paper:\n\n---\n{context_text}\n---\n\nQuestion: {query.question}"
-            
-            completion_response = openai_client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                temperature=0.0,
-            )
-            answer = completion_response.choices[0].message.content.strip()
+        import requests
+
+        url = "https://openapi.naver.com/v1/search/local.json"
+        headers = {
+            'X-Naver-Client-Id': naver_client_id,
+            'X-Naver-Client-Secret': naver_client_secret,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+
+        params = {
+            'query': query,
+            'display': 20,
+            'sort': 'comment'
+        }
+
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+
+        if response.status_code == 200:
+            data = response.json()
+            return data
         else:
             return {
                 "error": f"네이버 API 호출 실패: {response.status_code}",

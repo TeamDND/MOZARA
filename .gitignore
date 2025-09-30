@@ -126,6 +126,8 @@ MANIFEST
 
 
 # IDE
+
+# IDE
 .claude/
 
 # Model files (too large for git)
