@@ -119,6 +119,7 @@ const HairPT: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [seedlingPoints, setSeedlingPoints] = useState(0);
   const [seedlingLevel, setSeedlingLevel] = useState(1);
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   const plantStages = {
     1: { emoji: '🌱', name: '새싹' },
@@ -343,16 +344,24 @@ const HairPT: React.FC = () => {
 
   // 진행률 계산 함수
   const calculateProgress = () => {
-    const totalMissions = 18; // 총 미션 수
+    if (missionData.length === 0) return 0;
+    
     let completedMissions = 0;
+    const totalMissions = missionData.length;
 
-    // 카운터 미션 (물 7잔, 이펙터 4번)
-    if (counters.water >= 7) completedMissions++;
-    if (counters.effector >= 4) completedMissions++;
-
-    // 체크박스 미션들
-    Object.values(missionState).forEach(completed => {
-      if (completed) completedMissions++;
+    // 각 미션의 완료 상태 확인 (백엔드 데이터 우선)
+    missionData.forEach(mission => {
+      if (mission.completed !== undefined) {
+        // 백엔드에서 완료 상태가 있으면 사용
+        if (mission.completed) {
+          completedMissions++;
+        }
+      } else {
+        // 백엔드 데이터가 없으면 로컬 상태 사용
+        if (missionState[mission.key]) {
+          completedMissions++;
+        }
+      }
     });
 
     return Math.round((completedMissions / totalMissions) * 100);
@@ -568,19 +577,26 @@ const HairPT: React.FC = () => {
       
       return (
         <div key={mission.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-          <div className="flex items-center space-x-4 mb-4">
-            <div className={`w-14 h-14 flex items-center justify-center ${missionIcon.bgColor} rounded-lg`}>
-              <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
+          {/* 헤더 영역: 좌측 정보 / 우측 완료 배지 */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center space-x-4">
+              <div className={`w-14 h-14 flex items-center justify-center ${missionIcon.bgColor} rounded-lg`}>
+                <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold">{mission.name}</h3>
+                <p className="text-sm text-gray-500">{mission.description}</p>
+                <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
+                  +{mission.rewardPoints} 포인트
+                </span>
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold">{mission.name}</h3>
-              <p className="text-sm text-gray-500">{mission.description}</p>
-              <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
-                +{mission.rewardPoints} 포인트
-              </span>
-            </div>
+            {isCounterCompleted && (
+              <span className="px-3 py-1.5 rounded-lg font-bold bg-green-500 text-white whitespace-nowrap text-sm">미션완료</span>
+            )}
           </div>
           
+          {/* 진행률 */}
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-600">진행률</span>
@@ -594,12 +610,9 @@ const HairPT: React.FC = () => {
             </div>
           </div>
           
-          {isCounterCompleted ? (
-            <div className="w-full py-4 rounded-xl font-bold bg-green-500 text-white text-center">
-              미션완료
-            </div>
-          ) : (
-            <div className="flex gap-3 justify-center">
+          {/* 하단 조작 버튼 (완료 전에는 카운터, 완료 시 버튼 없음) */}
+          {!isCounterCompleted && (
+            <div className="flex gap-3 justify-end">
               <button 
                 className="w-12 h-12 rounded-xl font-bold bg-gray-400 hover:bg-gray-500 text-white transition-colors flex items-center justify-center active:scale-[0.95]"
                 onClick={() => {
@@ -616,7 +629,7 @@ const HairPT: React.FC = () => {
                 -1
               </button>
               <button 
-                className="w-12 h-12 rounded-xl font-bold bg-blue-500 hover:bg-blue-600 text-white transition-colors flex items-center justify-center active:scale-[0.95]"
+                className="w-12 h-12 rounded-xl font-bold bg-[#1F0101] hover:bg-[#2A0202] text-white transition-colors flex items-center justify-center active:scale-[0.95]"
                 onClick={() => incrementCounter(mission.key as keyof Counters)}
               >
                 +1
@@ -630,29 +643,31 @@ const HairPT: React.FC = () => {
     // 일반 미션들 (Mobile-First)
     return (
       <div key={mission.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-        <div className="flex items-center space-x-4 mb-4">
-          <div className={`w-14 h-14 flex items-center justify-center ${missionIcon.bgColor} rounded-lg`}>
-            <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
+        {/* 헤더: 좌측 정보 / 우측 컨트롤(완료 배지 또는 시작 버튼) */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center space-x-4">
+            <div className={`w-14 h-14 flex items-center justify-center ${missionIcon.bgColor} rounded-lg`}>
+              <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold">{mission.name}</h3>
+              <p className="text-sm text-gray-500">{mission.description}</p>
+              <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
+                +{mission.rewardPoints} 포인트
+              </span>
+            </div>
           </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold">{mission.name}</h3>
-            <p className="text-sm text-gray-500">{mission.description}</p>
-            <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
-              +{mission.rewardPoints} 포인트
-            </span>
-          </div>
+          {isCompleted ? (
+            <span className="px-3 py-1.5 rounded-lg font-bold bg-green-500 text-white whitespace-nowrap text-sm">완료됨</span>
+          ) : (
+            <button 
+              className="px-3 py-1.5 rounded-lg font-bold bg-[#1F0101] hover:bg-[#2A0202] text-white active:scale-[0.98] whitespace-nowrap text-sm"
+              onClick={() => !isCompleted && toggleMission(mission.key)}
+            >
+              미션 시작
+            </button>
+          )}
         </div>
-        <button 
-          className={`w-full py-4 rounded-xl font-bold transition-colors ${
-            isCompleted 
-              ? 'bg-green-500 text-white cursor-not-allowed' 
-              : 'bg-blue-500 hover:bg-blue-600 text-white active:scale-[0.98]'
-          }`}
-          onClick={() => !isCompleted && toggleMission(mission.key)}
-          disabled={isCompleted}
-        >
-          {isCompleted ? '완료됨' : '미션 시작'}
-        </button>
       </div>
     );
   };
@@ -663,7 +678,7 @@ const HairPT: React.FC = () => {
       <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col">
         
         {/* Plant Display 영역 (상단 배치) */}
-        <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4">
+        <div className="bg-[#1F0101] text-white p-4">
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-2">
               <span className="text-lg font-bold">🌱</span>
@@ -750,7 +765,7 @@ const HairPT: React.FC = () => {
           
           {/* Progress Bar */}
           <div className="flex items-center bg-white/20 rounded-2xl p-3">
-            <span className="bg-white text-indigo-600 px-3 py-1 rounded-full text-sm font-bold">
+            <span className="bg-white text-[#1F0101] px-3 py-1 rounded-full text-sm font-bold">
               Lv.{seedlingLevel}
             </span>
             <div className="flex-1 h-2 bg-white/30 rounded-full mx-3 overflow-hidden">
@@ -766,17 +781,27 @@ const HairPT: React.FC = () => {
         {/* Header */}
         <header className="p-4 bg-white border-b border-gray-200">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-xl font-bold text-gray-800">탈모 PT</h1>
+            <div className="flex items-center space-x-2">
+              <h1 className="text-xl font-bold text-gray-800">탈모 PT</h1>
+              <button
+                className="w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors"
+                onMouseEnter={() => setShowInfoModal(true)}
+                onMouseLeave={() => setShowInfoModal(false)}
+                title="탈모 PT 정보"
+              >
+                <i className="fas fa-question text-sm"></i>
+              </button>
+            </div>
             <div className="flex items-center space-x-2 text-sm text-gray-500">
               <span>진행률</span>
-              <span className="text-blue-500 font-bold">{progressPercentage}%</span>
+              <span className="text-[#1F0101] font-bold">{progressPercentage}%</span>
             </div>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
-            <div className="bg-blue-500 h-3 rounded-full transition-all duration-500" style={{ width: `${progressPercentage}%` }}></div>
+            <div className="bg-[#1F0101] h-3 rounded-full transition-all duration-500" style={{ width: `${progressPercentage}%` }}></div>
           </div>
           <p className="text-sm text-center text-gray-600 mt-3">
-            오늘의 미션 <span className="text-blue-500 font-bold">{progressPercentage}%</span> 완료했어요
+            오늘의 미션 <span className="text-[#1F0101] font-bold">{progressPercentage}%</span> 완료했어요
           </p>
         </header>
 
@@ -784,16 +809,19 @@ const HairPT: React.FC = () => {
         <div className="p-4 bg-white border-b border-gray-200">
           <div className="flex justify-around text-center">
             <div>
-              <div className="text-lg font-bold text-indigo-600">0</div>
-              <div className="text-xs text-gray-600">연속일</div>
-            </div>
-            <div>
-              <div className="text-lg font-bold text-indigo-600">{currentPoint || seedlingPoints}</div>
+              <div className="text-lg font-bold text-[#1F0101]">{currentPoint || seedlingPoints}</div>
               <div className="text-xs text-gray-600">새싹 포인트</div>
             </div>
-            <div>
-              <div className="text-lg font-bold text-indigo-600">{Math.round((Object.values(missionState).filter(v => v).length / Object.keys(missionState).length) * 100)}%</div>
-              <div className="text-xs text-gray-600">달성률</div>
+            <div className="flex items-center">
+              <button 
+                className="px-3 py-1.5 bg-[#1F0101] hover:bg-[#2A0202] text-white rounded-lg text-sm font-medium transition-colors"
+                onClick={() => {
+                  // 포인트 교환 기능은 추후 구현
+                  console.log('포인트 교환 클릭');
+                }}
+              >
+                새싹 포인트 교환
+              </button>
             </div>
           </div>
         </div>
@@ -806,7 +834,7 @@ const HairPT: React.FC = () => {
                 key={index}
                 className={`flex-shrink-0 px-2 py-2 rounded-lg transition-colors min-w-[50px] ${
                   dateInfo.isToday 
-                    ? 'text-blue-500 bg-blue-100' 
+                    ? 'text-[#1F0101] bg-gray-100' 
                     : 'text-gray-400 hover:bg-gray-50'
                 }`}
               >
@@ -822,21 +850,21 @@ const HairPT: React.FC = () => {
         {/* Main Content Tabs */}
         <div className="flex items-center bg-white px-4 py-3 space-x-2 text-sm font-semibold text-gray-600 overflow-x-auto">
           <div 
-            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-3 py-2 rounded-lg transition-colors ${activeTab === 'routine' ? 'text-blue-500 bg-blue-50' : 'text-gray-600 hover:bg-gray-50'}`}
+            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-3 py-2 rounded-lg transition-colors ${activeTab === 'routine' ? 'text-[#1F0101] bg-gray-100' : 'text-gray-600 hover:bg-gray-50'}`}
             onClick={() => showContent('routine')}
           >
             <i className="fas fa-check-square text-green-500 text-sm"></i>
             <span>루틴</span>
           </div>
           <div 
-            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-3 py-2 rounded-lg transition-colors ${activeTab === 'nutrition' ? 'text-blue-500 bg-blue-50' : 'text-gray-600 hover:bg-gray-50'}`}
+            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-3 py-2 rounded-lg transition-colors ${activeTab === 'nutrition' ? 'text-[#1F0101] bg-gray-100' : 'text-gray-600 hover:bg-gray-50'}`}
             onClick={() => showContent('nutrition')}
           >
             <i className="fas fa-pills text-red-500 text-sm"></i>
             <span>영양</span>
           </div>
           <div 
-            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-3 py-2 rounded-lg transition-colors ${activeTab === 'clean' ? 'text-blue-500 bg-blue-50' : 'text-gray-600 hover:bg-gray-50'}`}
+            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-3 py-2 rounded-lg transition-colors ${activeTab === 'clean' ? 'text-[#1F0101] bg-gray-100' : 'text-gray-600 hover:bg-gray-50'}`}
             onClick={() => showContent('clean')}
           >
             <i className="fas fa-magnifying-glass text-blue-400 text-sm"></i>
@@ -849,7 +877,7 @@ const HairPT: React.FC = () => {
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1F0101] mx-auto mb-4"></div>
                 <p className="text-gray-600">습관 데이터를 불러오는 중...</p>
               </div>
             </div>
@@ -868,16 +896,18 @@ const HairPT: React.FC = () => {
                         <i className="fas fa-camera text-purple-500 text-lg"></i>
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold">두피 사진 촬영</h3>
+                        <h3 className="text-sm font-semibold">두피 사진 촬영</h3>
                         <p className="text-sm text-gray-500">두피 상태 기록하기</p>
                       </div>
                     </div>
-                    <button 
-                      className="w-full py-4 rounded-xl font-bold transition-colors bg-purple-500 hover:bg-purple-600 text-white active:scale-[0.98]"
-                      onClick={takeScalpPhoto}
-                    >
-                      사진 촬영하기
-                    </button>
+                    <div className="flex justify-end">
+                      <button 
+                        className="px-4 py-2 rounded-xl font-bold transition-colors bg-gray-200 hover:bg-gray-300 text-[#1F0101] active:scale-[0.98]"
+                        onClick={takeScalpPhoto}
+                      >
+                        사진 촬영하기
+                      </button>
+                    </div>
                   </div>
                 </>
               )}
@@ -906,29 +936,31 @@ const HairPT: React.FC = () => {
                               <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
                             </div>
                             <div className="flex-1">
-                              <h3 className="text-lg font-semibold">{mission.name}</h3>
+                              <h3 className="text-sm font-semibold">{mission.name}</h3>
                               <p className="text-sm text-gray-500">{mission.description}</p>
                               <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
                                 +{mission.rewardPoints} 포인트
                               </span>
                             </div>
                           </div>
-                          <button 
-                            className={`w-full py-4 rounded-xl font-bold transition-colors ${
-                              isCompleted 
-                                ? 'bg-green-500 text-white cursor-not-allowed' 
-                                : 'bg-blue-500 hover:bg-blue-600 text-white active:scale-[0.98]'
-                            }`}
-                            onClick={() => {
-                              if (!isCompleted) {
-                                setShowVideoModal(true);
-                                toggleMission(mission.key);
-                              }
-                            }}
-                            disabled={isCompleted}
-                          >
-                            {isCompleted ? '완료됨' : '시작하기'}
-                          </button>
+                          {/* 우측 상단 동일 위치 컨트롤 */}
+                          <div className="flex justify-end">
+                            {isCompleted ? (
+                              <span className="px-3 py-1.5 rounded-lg font-bold bg-green-500 text-white whitespace-nowrap text-sm">완료됨</span>
+                            ) : (
+                              <button 
+                                className="px-3 py-1.5 rounded-lg font-bold bg-[#1F0101] hover:bg-[#2A0202] text-white active:scale-[0.98] whitespace-nowrap text-sm"
+                                onClick={() => {
+                                  if (!isCompleted) {
+                                    setShowVideoModal(true);
+                                    toggleMission(mission.key);
+                                  }
+                                }}
+                              >
+                                시작하기
+                              </button>
+                            )}
+                          </div>
                         </div>
                       );
                     }
@@ -983,12 +1015,38 @@ const HairPT: React.FC = () => {
               <div className="text-sm text-gray-600 mb-6">{achievementData.description}</div>
               <button
                 onClick={() => setShowAchievement(false)}
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-2 rounded-xl hover:scale-105 transition-transform"
+                className="bg-gray-200 text-[#1F0101] px-6 py-2 rounded-xl hover:bg-gray-300 transition-colors"
               >
                 확인
               </button>
             </div>
           </>
+        )}
+
+        {/* Info Modal */}
+        {showInfoModal && (
+          <div className="fixed top-20 left-4 right-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 max-w-sm mx-auto">
+              <div className="flex items-start space-x-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <i className="fas fa-info-circle text-blue-500 text-sm"></i>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-800 mb-2">탈모 PT란?</h3>
+                  <p className="text-sm text-gray-600 mb-3">
+                    개인 맞춤형 탈모 예방 및 개선을 위한 체계적인 관리 프로그램입니다. 
+                    루틴, 영양, 청결 세 가지 영역의 습관을 통해 건강한 모발을 기를 수 있어요.
+                  </p>
+                  <div className="border-t border-gray-100 pt-3">
+                    <h4 className="font-medium text-gray-800 mb-2">포인트 사용처</h4>
+                    <p className="text-sm text-gray-600">
+                      새싹을 전부 키우면 상품을 드립니다!
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Toast */}

@@ -72,7 +72,7 @@ const AnalysisResultStep: React.FC<AnalysisResultStepProps> = ({ analysisResult,
         <Button 
           onClick={onComplete} 
           variant="outline" 
-          className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl active:scale-[0.98]"
+          className="w-full h-12 bg-[#222222] hover:bg-[#333333] text-white rounded-xl active:scale-[0.98]"
         >
           맞춤 솔루션 및 컨텐츠 확인하기
         </Button>

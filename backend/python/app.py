@@ -1522,5 +1522,122 @@ async def hair_quiz_health_check():
 
 
 
+# --- Location Services API ---
+@app.get("/location/naver/search")
+async def search_naver_local(query: str):
+    """네이버 로컬 검색 API 프록시"""
+    try:
+        naver_client_id = os.getenv("NAVER_CLIENT_ID")
+        naver_client_secret = os.getenv("NAVER_CLIENT_SECRET")
+
+        if not naver_client_id or not naver_client_secret:
+            return {
+                "error": "네이버 API 키가 설정되지 않았습니다.",
+                "items": []
+            }
+
+        import requests
+
+        url = "https://openapi.naver.com/v1/search/local.json"
+        headers = {
+            'X-Naver-Client-Id': naver_client_id,
+            'X-Naver-Client-Secret': naver_client_secret,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+
+        params = {
+            'query': query,
+            'display': 20,
+            'sort': 'comment'
+        }
+
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+
+        if response.status_code == 200:
+            data = response.json()
+            return data
+        else:
+            return {
+                "error": f"네이버 API 호출 실패: {response.status_code}",
+                "items": []
+            }
+
+    except Exception as e:
+        print(f"네이버 로컬 검색 오류: {e}")
+        return {
+            "error": f"네이버 API 호출 중 오류가 발생했습니다: {str(e)}",
+            "items": []
+        }
+
+@app.get("/location/kakao/search")
+async def search_kakao_local(
+    query: str,
+    x: Optional[float] = None,
+    y: Optional[float] = None,
+    radius: Optional[int] = 5000
+):
+    """카카오 로컬 검색 API 프록시"""
+    try:
+        kakao_api_key = os.getenv("KAKAO_REST_API_KEY")
+
+        if not kakao_api_key:
+            return {
+                "error": "카카오 API 키가 설정되지 않았습니다.",
+                "documents": []
+            }
+
+        import requests
+
+        url = "https://dapi.kakao.com/v2/local/search/keyword.json"
+        headers = {
+            'Authorization': f'KakaoAK {kakao_api_key}',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+
+        params = {
+            'query': query,
+            'size': 15
+        }
+
+        # 좌표 기반 검색이 요청된 경우
+        if x is not None and y is not None:
+            params['x'] = x
+            params['y'] = y
+            params['radius'] = radius
+
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+
+        if response.status_code == 200:
+            data = response.json()
+            return data
+        else:
+            return {
+                "error": f"카카오 API 호출 실패: {response.status_code}",
+                "documents": []
+            }
+
+    except Exception as e:
+        print(f"카카오 로컬 검색 오류: {e}")
+        return {
+            "error": f"카카오 API 호출 중 오류가 발생했습니다: {str(e)}",
+            "documents": []
+        }
+
+@app.get("/location/status")
+async def location_service_status():
+    """위치 서비스 상태 확인"""
+    naver_client_id = os.getenv("NAVER_CLIENT_ID")
+    naver_client_secret = os.getenv("NAVER_CLIENT_SECRET")
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY")
+
+    return {
+        "status": "ok",
+        "message": "Python 위치 서비스가 정상적으로 동작 중입니다.",
+        "naverApiConfigured": bool(naver_client_id and naver_client_secret),
+        "kakaoApiConfigured": bool(kakao_api_key),
+        "timestamp": datetime.now().isoformat()
+    }
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
