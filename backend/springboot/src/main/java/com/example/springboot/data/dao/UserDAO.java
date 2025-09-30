@@ -1,12 +1,13 @@
 package com.example.springboot.data.dao;
 
 import com.example.springboot.data.entity.UserEntity;
-import com.example.springboot.data.repository.UserRepository;
+import com.example.springboot.data.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -15,6 +16,11 @@ import java.util.Optional;
 public class UserDAO {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserLogRepository userLogRepository;
+    private final UserHabitLogRepository userHabitLogRepository;
+    private final UsersInfoRepository usersInfoRepository;
+    private final AnalysisResultRepository analysisResultRepository;
+    private final SeedlingStatusRepository seedlingStatusRepository;
 
     public Optional<UserEntity> findByUsername(String username){
         return userRepository.findByUsername(username);
@@ -41,6 +47,19 @@ public class UserDAO {
             return;
         }
         throw new EntityNotFoundException("user not found");
+    }
+
+    @Transactional
+    public void deleteMember(UserEntity user) {
+        // 1. FK 관계 자식 엔티티들 먼저 삭제
+        userLogRepository.deleteAllByUserEntityIdForeign(user);
+        userHabitLogRepository.deleteAllByUserEntityIdForeign(user);
+        usersInfoRepository.deleteAllByUserEntityIdForeign(user);
+        analysisResultRepository.deleteAllByUserEntityIdForeign(user);
+        seedlingStatusRepository.deleteAllByUserEntityIdForeign(user);
+
+        // 2. 마지막으로 UserEntity 삭제
+        userRepository.delete(user);
     }
 
 }

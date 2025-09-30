@@ -201,6 +201,18 @@ public class UserService {
     }
 
     /**
+     * 회원 탈퇴
+     */
+    public String deleteMember(String username) {
+        UserEntity userEntity = userDAO.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        userDAO.deleteMember(userEntity);
+
+        return "회원 탈퇴가 완료되었습니다.";
+    }
+
+    /**
      * 회원가입 데이터 검증
      */
     private void validateSignUpData(SignUpDTO signUpDTO) {

@@ -130,4 +130,21 @@ public class UserController {
                     .body("{\"error\": \"비밀번호 변경 중 오류가 발생했습니다.\"}");
         }
     }
+
+    /**
+     * 회원 탈퇴
+     */
+    @DeleteMapping("/delete-member/{username}")
+    public ResponseEntity<String> deleteMember(@PathVariable String username) {
+        try {
+            String result = userService.deleteMember(username);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body("{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"회원 탈퇴 중 오류가 발생했습니다.\"}");
+        }
+    }
 }

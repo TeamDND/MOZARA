@@ -5,6 +5,7 @@ import { User, Activity } from 'lucide-react';
 import apiClient from '../../services/apiClient';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../utils/store';
+import { useNavigate } from 'react-router-dom';
 
 // TypeScript: UserInfoEdit 컴포넌트 타입 정의
 interface UserInfo {
@@ -28,6 +29,7 @@ interface UserInfoEditProps {
 
 const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
   const [activeTab, setActiveTab] = useState<'basic' | 'analysis'>('basic');
+  const navigate = useNavigate();
 
   // Redux에서 username 가져오기
   const username = useSelector((state: RootState) => state.user.username);
@@ -162,6 +164,36 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
     }
   };
 
+  // 회원 탈퇴 핸들러
+  const handleDeleteAccount = async () => {
+    const confirmDelete = window.confirm("정말로 회원 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.");
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    const doubleConfirm = window.confirm("모든 데이터가 삭제됩니다. 정말 진행하시겠습니까?");
+
+    if (!doubleConfirm) {
+      return;
+    }
+
+    try {
+      const res = await apiClient.delete(`/delete-member/${username}`);
+
+      if (res?.data) {
+        alert('회원 탈퇴가 완료되었습니다.');
+        // 로그아웃 처리 및 메인 페이지로 이동
+        localStorage.clear();
+        window.location.href = '/';
+      }
+    } catch (error: any) {
+      console.error(error);
+      const errorMessage = error.response?.data?.error || "회원 탈퇴 중 오류가 발생했습니다.";
+      alert(errorMessage);
+    }
+  };
+
   const renderBasicInfo = () => (
     <Card className="border-0 shadow-sm bg-white">
       <CardHeader className="pb-3">
@@ -197,13 +229,32 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
     </Card>
   );
 
-  const renderAnalysisInfo = () => (
-    <Card className="border-0 shadow-sm bg-white">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base font-bold text-gray-900">분석 정보</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <form onSubmit={handleAnalysisInfoSubmit} className="space-y-4">
+  const renderAnalysisInfo = () => {
+    // 분석 정보가 없는지 확인 (gender가 없거나 age가 0이면 데이터 없음으로 간주)
+    const hasAnalysisData = userInfo.gender && userInfo.age > 0;
+
+    return (
+      <Card className="border-0 shadow-sm bg-white">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-bold text-gray-900">분석 정보</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {!hasAnalysisData ? (
+            // 데이터가 없을 때 표시
+            <div className="text-center py-8 space-y-4">
+              <div className="text-gray-600 text-sm">
+                분석 실행이 먼저 필요합니다.
+              </div>
+              <Button
+                onClick={() => navigate('/integrated-diagnosis')}
+                className="bg-[#222222] hover:bg-[#333333] text-white px-6 py-2 rounded-lg font-medium"
+              >
+                분석 바로가기
+              </Button>
+            </div>
+          ) : (
+            // 데이터가 있을 때 수정 폼 표시
+            <form onSubmit={handleAnalysisInfoSubmit} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">성별</label>
             <select
@@ -255,9 +306,11 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
             분석 정보 수정하기
           </Button>
         </form>
+          )}
       </CardContent>
     </Card>
-  );
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -353,6 +406,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
           </Button>
           <Button
             variant="outline"
+            onClick={handleDeleteAccount}
             className="w-full justify-start text-red-600 hover:text-red-700 bg-white border-gray-200 hover:bg-red-50 rounded-lg"
           >
             회원 탈퇴

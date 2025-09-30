@@ -23,4 +23,6 @@ public interface AnalysisResultRepository extends JpaRepository<AnalysisResultEn
      * 사용자 ID로 최근 분석 결과 조회
      */
     AnalysisResultEntity findFirstByUserEntityIdForeign_IdOrderByInspectionDateDesc(Integer userId);
+
+    void deleteAllByUserEntityIdForeign(com.example.springboot.data.entity.UserEntity userEntity);
 }
