@@ -3,6 +3,7 @@ import { Home, User, Bot, Search, Layers3 } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { RootState } from "../utils/store"
+import { openChatBotModal, closeChatBotModal } from "../components/ChatBot/ChatBotModal"
 
 const BottomNavigationBar: React.FC = () => {
   const navigate = useNavigate()
@@ -22,7 +23,7 @@ const BottomNavigationBar: React.FC = () => {
 
   return (
     // 모바일 하단 네비게이션
-    <nav className="fixed bottom-0 left-0 right-0 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 z-[9999]">
       <div className="relative bg-white/90 backdrop-blur">
         {/* 상단 둥근 모서리 */}
         <div className="bg-white/90 backdrop-blur rounded-t-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
@@ -31,6 +32,7 @@ const BottomNavigationBar: React.FC = () => {
             {/* 홈 */}
             <button
               onClick={() => {
+                closeChatBotModal();
                 if (isLoggedIn) {
                   navigate('/daily-care')
                 } else {
@@ -55,7 +57,10 @@ const BottomNavigationBar: React.FC = () => {
 
             {/* 기능 */}
             <button
-              onClick={() => navigate('/main-contents')}
+              onClick={() => {
+                closeChatBotModal();
+                navigate('/main-contents');
+              }}
               className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
                 isActive('/main-contents')
                   ? 'text-[#222222]' 
@@ -72,17 +77,20 @@ const BottomNavigationBar: React.FC = () => {
               </span>
             </button>
 
-            {/* 챗봇 (아이콘만) */}
+            {/* 챗봇 (아이콘만) - 모달 열기 */}
             <button
-              onClick={() => navigate('/chat')}
-              className="flex flex-col items-center py-2 px-3 bg-[#222222] rounded-full w-12 h-12 justify-center transition-all hover:bg-[#333333]"
+              onClick={() => openChatBotModal()}
+              className="flex flex-col items-center py-2 px-3 bg-[#222222] rounded-full w-12 h-12 justify-center transition-all hover:bg-[#333333] hover:scale-110"
             >
               <Bot className="h-6 w-6 text-white" />
             </button>
 
             {/* 분석 */}
             <button
-              onClick={() => navigate('/integrated-diagnosis')}
+              onClick={() => {
+                closeChatBotModal();
+                navigate('/integrated-diagnosis');
+              }}
               className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
                 isActive('/integrated-diagnosis')
                   ? 'text-[#222222]' 
@@ -102,7 +110,10 @@ const BottomNavigationBar: React.FC = () => {
 
             {/* 프로필 */}
             <button
-              onClick={() => navigate('/mypage')}
+              onClick={() => {
+                closeChatBotModal();
+                navigate('/mypage');
+              }}
               className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
                 isActive('/mypage')
                   ? 'text-[#222222]' 

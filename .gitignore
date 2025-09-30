@@ -125,3 +125,5 @@ MANIFEST
 
 # IDE
 .claude/
+# Claude Code settings
+.claude/
