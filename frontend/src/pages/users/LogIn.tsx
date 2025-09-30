@@ -80,7 +80,7 @@ const LogIn: React.FC = () => {
   const handleSocialLogin = (provider: string) => {
     if (provider === 'google') {
       // Google OAuth2 로그인
-      window.location.href = 'http://hairfit.duckdns.org:8080/oauth2/authorization/google';
+      window.location.href = 'https://hairfit.duckdns.org/oauth2/authorization/google';
     } else if (provider === 'kakao') {
       // TODO: 카카오 로그인 API 구현
       console.log('카카오 로그인 시도');
