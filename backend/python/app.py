@@ -870,6 +870,23 @@ class QuizQuestion(BaseModel):
     question: str
     answer: str
 
+class PaperDetail(BaseModel):
+    id: str
+    title: str
+    source: str
+    full_summary: str
+
+class PaperAnalysis(BaseModel):
+    id: str
+    title: str
+    source: str
+    main_topics: List[str]
+    key_conclusions: str
+    section_summaries: List[dict]
+
+class QuizGenerateResponse(BaseModel):
+    items: List[QuizQuestion]
+
 @app.get("/")
 
 def read_root():
