@@ -70,6 +70,53 @@ public class OAuth2Controller {
         response.sendRedirect("https://hairfit.duckdns.org/oauth2/callback?success=false&error=login_failed");
     }
 
+    @PostMapping("/token")
+    public ResponseEntity<?> oauth2Token(@RequestBody Map<String, String> request) {
+        log.info("=== OAuth2 토큰 생성 요청 ===");
+        log.info("요청 데이터: {}", request);
+        
+        try {
+            String code = request.get("code");
+            String state = request.get("state");
+            String scope = request.get("scope");
+            
+            log.info("OAuth2 파라미터 - Code: {}, State: {}, Scope: {}", code, state, scope);
+            
+            // Google OAuth2 인증 정보를 사용하여 사용자 정보 조회
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            log.info("현재 인증 상태: {}", authentication);
+            
+            if (authentication != null && authentication.getPrincipal() instanceof CustomOAuth2UserService.CustomOAuth2User) {
+                CustomOAuth2UserService.CustomOAuth2User oauth2User = 
+                    (CustomOAuth2UserService.CustomOAuth2User) authentication.getPrincipal();
+                
+                // JWT 토큰 생성
+                String accessToken = jwtUtil.createAccessToken(oauth2User.getEmail());
+                String refreshToken = jwtUtil.createRefreshToken(oauth2User.getEmail());
+                
+                log.info("JWT 토큰 생성 완료 - AccessToken: {}, RefreshToken: {}",
+                        accessToken.substring(0, 20) + "...", refreshToken.substring(0, 20) + "...");
+                
+                // 사용자 정보 반환
+                Map<String, Object> response = new HashMap<>();
+                response.put("accessToken", accessToken);
+                response.put("refreshToken", refreshToken);
+                response.put("user", oauth2User.getUserEntity());
+                response.put("success", true);
+                
+                log.info("OAuth2 토큰 생성 성공 - 사용자: {}", oauth2User.getEmail());
+                
+                return ResponseEntity.ok(response);
+            } else {
+                log.error("OAuth2 인증 정보를 찾을 수 없음");
+                return ResponseEntity.status(401).body(Map.of("error", "인증 정보를 찾을 수 없습니다."));
+            }
+        } catch (Exception e) {
+            log.error("OAuth2 토큰 생성 실패", e);
+            return ResponseEntity.status(500).body(Map.of("error", "토큰 생성에 실패했습니다."));
+        }
+    }
+
     @GetMapping("/login/google")
     public ResponseEntity<Map<String, String>> googleLogin() {
         Map<String, String> response = new HashMap<>();
