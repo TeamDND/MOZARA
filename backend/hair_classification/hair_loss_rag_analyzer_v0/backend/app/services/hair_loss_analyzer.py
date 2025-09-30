@@ -4,7 +4,8 @@ from typing import Dict, List, Any, Optional
 import logging
 from datetime import datetime
 from .image_processor import ImageProcessor
-from .pinecone_manager import PineconeManager
+from .faiss_manager import FAISSManager
+from .llm_analyzer import LLMHairAnalyzer
 from ..config import settings
 from PIL import Image
 
@@ -13,9 +14,10 @@ class HairLossAnalyzer:
         """탈모 RAG 분석기 초기화"""
         try:
             self.image_processor = ImageProcessor()
-            self.pinecone_manager = PineconeManager()
+            self.vector_manager = FAISSManager()
+            self.llm_analyzer = LLMHairAnalyzer()
             self.logger = logging.getLogger(__name__)
-            self.logger.info("HairLossAnalyzer 초기화 완료")
+            self.logger.info("HairLossAnalyzer 초기화 완료 (LLM 통합)")
         except Exception as e:
             self.logger.error(f"HairLossAnalyzer 초기화 실패: {e}")
             raise
@@ -34,11 +36,11 @@ class HairLossAnalyzer:
                 }
 
             # 인덱스 생성
-            index_created = self.pinecone_manager.create_index(delete_if_exists=recreate_index)
+            index_created = self.vector_manager.create_index(delete_if_exists=recreate_index)
             if not index_created:
                 return {
                     'success': False,
-                    'error': 'Pinecone 인덱스 생성 실패',
+                    'error': 'FAISS 인덱스 생성 실패',
                     'timestamp': datetime.now()
                 }
 
@@ -53,14 +55,15 @@ class HairLossAnalyzer:
                     'timestamp': datetime.now()
                 }
 
-            # Pinecone에 업로드
-            self.logger.info("Pinecone에 임베딩 업로드 중...")
-            upload_success = self.pinecone_manager.upload_embeddings(embeddings_data)
+            # FAISS에 업로드
+            self.logger.info("FAISS에 임베딩 업로드 중...")
+            embeddings_data['recreate'] = recreate_index
+            upload_success = self.vector_manager.upload_embeddings(embeddings_data)
 
             if not upload_success:
                 return {
                     'success': False,
-                    'error': 'Pinecone 임베딩 업로드 실패',
+                    'error': 'FAISS 임베딩 업로드 실패',
                     'timestamp': datetime.now()
                 }
 
@@ -79,7 +82,7 @@ class HairLossAnalyzer:
                 'timestamp': datetime.now()
             }
 
-    async def analyze_image_from_base64(self, base64_data: str, filename: str, top_k: int = 10) -> Dict:
+    async def analyze_image_from_base64(self, base64_data: str, filename: str, top_k: int = 10, use_llm: bool = True) -> Dict:
         """Base64 이미지 데이터 분석"""
         try:
             self.logger.info(f"이미지 분석 시작: {filename}")
@@ -93,7 +96,7 @@ class HairLossAnalyzer:
                     'timestamp': datetime.now()
                 }
 
-            return await self.analyze_image(image, filename, top_k)
+            return await self.analyze_image(image, filename, top_k, use_llm)
 
         except Exception as e:
             self.logger.error(f"Base64 이미지 분석 실패: {e}")
@@ -103,7 +106,7 @@ class HairLossAnalyzer:
                 'timestamp': datetime.now()
             }
 
-    async def analyze_image(self, image: Image.Image, filename: str, top_k: int = 10) -> Dict:
+    async def analyze_image(self, image: Image.Image, filename: str, top_k: int = 10, use_llm: bool = True) -> Dict:
         """PIL Image 객체 분석"""
         try:
             # 이미지 임베딩 추출
@@ -116,39 +119,77 @@ class HairLossAnalyzer:
                     'timestamp': datetime.now()
                 }
 
-            # 탈모 단계 예측
-            prediction_result = self.pinecone_manager.predict_hair_loss_stage(
+            # FAISS 기반 탈모 단계 예측
+            faiss_result = self.vector_manager.predict_hair_loss_stage(
                 query_embedding, top_k
             )
 
-            if prediction_result['predicted_stage'] is None:
+            if faiss_result['predicted_stage'] is None:
                 return {
                     'success': False,
                     'error': '유사한 이미지를 찾을 수 없습니다',
                     'timestamp': datetime.now()
                 }
 
-            # 결과 구성
-            result = {
-                'success': True,
-                'predicted_stage': prediction_result['predicted_stage'],
-                'confidence': round(prediction_result['confidence'], 3),
-                'stage_description': settings.STAGE_DESCRIPTIONS.get(
-                    prediction_result['predicted_stage'],
-                    "알 수 없는 단계"
-                ),
-                'stage_scores': {
-                    str(k): round(v, 3) for k, v in prediction_result['stage_scores'].items()
-                },
-                'similar_images': prediction_result['similar_images'],
-                'analysis_details': {
-                    'filename': filename,
-                    'total_similar_found': len(prediction_result['similar_images']),
-                    'embedding_dimension': len(query_embedding),
-                    'search_parameters': {'top_k': top_k}
-                },
-                'timestamp': datetime.now()
-            }
+            # LLM 분석 수행 여부 결정
+            if use_llm:
+                self.logger.info(f"LLM 분석 시작: {filename}")
+                llm_result = await self.llm_analyzer.analyze_with_llm(image, faiss_result)
+
+                # FAISS와 LLM 결과 결합
+                combined_result = self.llm_analyzer.combine_results(faiss_result, llm_result)
+
+                if combined_result['success']:
+                    result = {
+                        'success': True,
+                        'predicted_stage': combined_result['predicted_stage'],
+                        'confidence': round(combined_result['confidence'], 3),
+                        'stage_description': combined_result['stage_description'],
+                        'stage_scores': {
+                            str(k): round(v, 3) for k, v in combined_result.get('faiss_results', {}).get('stage_scores', {}).items()
+                        },
+                        'similar_images': combined_result.get('faiss_results', {}).get('similar_images', []),
+                        'analysis_details': {
+                            'filename': filename,
+                            'method': combined_result['method'],
+                            'llm_analysis': combined_result.get('analysis_details', {}),
+                            'llm_reasoning': combined_result.get('analysis_details', {}).get('llm_reasoning', ''),
+                            'token_usage': combined_result.get('analysis_details', {}).get('token_usage', {}),
+                            'embedding_dimension': len(query_embedding),
+                            'search_parameters': {'top_k': top_k, 'llm_enabled': True}
+                        },
+                        'faiss_comparison': combined_result.get('faiss_results', {}),
+                        'timestamp': datetime.now()
+                    }
+                    self.logger.info(f"LLM 분석 완료: 단계 {result['predicted_stage']} (신뢰도: {result['confidence']:.3f})")
+                else:
+                    # LLM 실패 시 FAISS 결과만 사용
+                    use_llm = False
+                    self.logger.warning("LLM 분석 실패, FAISS 결과만 사용")
+
+            if not use_llm:
+                # FAISS 결과만 사용
+                result = {
+                    'success': True,
+                    'predicted_stage': faiss_result['predicted_stage'],
+                    'confidence': round(faiss_result['confidence'], 3),
+                    'stage_description': settings.STAGE_DESCRIPTIONS.get(
+                        faiss_result['predicted_stage'],
+                        "알 수 없는 단계"
+                    ),
+                    'stage_scores': {
+                        str(k): round(v, 3) for k, v in faiss_result['stage_scores'].items()
+                    },
+                    'similar_images': faiss_result['similar_images'],
+                    'analysis_details': {
+                        'filename': filename,
+                        'method': 'faiss_only',
+                        'total_similar_found': len(faiss_result['similar_images']),
+                        'embedding_dimension': len(query_embedding),
+                        'search_parameters': {'top_k': top_k, 'llm_enabled': False}
+                    },
+                    'timestamp': datetime.now()
+                }
 
             self.logger.info(f"분석 완료: 단계 {result['predicted_stage']} (신뢰도: {result['confidence']:.3f})")
             return result
@@ -165,14 +206,14 @@ class HairLossAnalyzer:
         """데이터베이스 정보 조회"""
         try:
             # 인덱스 존재 확인
-            if not self.pinecone_manager.index_exists():
+            if not self.vector_manager.index_exists():
                 return {
                     'success': False,
-                    'error': 'Pinecone 인덱스가 존재하지 않습니다. 먼저 데이터베이스를 설정하세요.',
+                    'error': 'FAISS 인덱스가 존재하지 않습니다. 먼저 데이터베이스를 설정하세요.',
                     'timestamp': datetime.now()
                 }
 
-            stats = self.pinecone_manager.get_index_stats()
+            stats = self.vector_manager.get_index_stats()
 
             if not stats['success']:
                 return {
@@ -183,11 +224,10 @@ class HairLossAnalyzer:
 
             return {
                 'success': True,
-                'index_name': self.pinecone_manager.index_name,
+                'index_type': stats.get('index_type', 'FAISS'),
                 'total_vectors': stats.get('total_vector_count', 0),
                 'dimension': stats.get('dimension', 0),
-                'namespaces': stats.get('namespaces', {}),
-                'index_fullness': stats.get('index_fullness', 0),
+                'metadata_count': stats.get('metadata_count', 0),
                 'timestamp': datetime.now()
             }
         except Exception as e:
@@ -205,17 +245,17 @@ class HairLossAnalyzer:
                 'status': 'healthy',
                 'services': {
                     'image_processor': True,
-                    'pinecone': False,
+                    'vector_storage': False,
                     'dataset': False
                 },
                 'timestamp': datetime.now()
             }
 
-            # Pinecone 연결 확인
+            # 벡터 저장소 연결 확인
             try:
-                health_status['services']['pinecone'] = self.pinecone_manager.index_exists()
+                health_status['services']['vector_storage'] = self.vector_manager.index_exists()
             except:
-                health_status['services']['pinecone'] = False
+                health_status['services']['vector_storage'] = False
 
             # 데이터셋 경로 확인
             health_status['services']['dataset'] = os.path.exists(settings.DATASET_PATH)
@@ -247,11 +287,11 @@ class HairLossAnalyzer:
                 }
 
             # 필요시 인덱스 생성 또는 재생성
-            index_created = self.pinecone_manager.create_index(delete_if_exists=recreate_index)
+            index_created = self.vector_manager.create_index(delete_if_exists=recreate_index)
             if not index_created:
                 return {
                     'success': False,
-                    'error': 'Failed to create or verify Pinecone index',
+                    'error': 'Failed to create or verify FAISS index',
                     'timestamp': datetime.now()
                 }
 
@@ -266,14 +306,15 @@ class HairLossAnalyzer:
                     'timestamp': datetime.now()
                 }
 
-            # Pinecone에 업로드
-            self.logger.info("Uploading embeddings to Pinecone...")
-            upload_success = self.pinecone_manager.upload_embeddings(embeddings_data)
+            # FAISS에 업로드
+            self.logger.info("Uploading embeddings to FAISS...")
+            embeddings_data['recreate'] = recreate_index
+            upload_success = self.vector_manager.upload_embeddings(embeddings_data)
 
             if not upload_success:
                 return {
                     'success': False,
-                    'error': 'Failed to upload embeddings to Pinecone',
+                    'error': 'Failed to upload embeddings to FAISS',
                     'timestamp': datetime.now()
                 }
 

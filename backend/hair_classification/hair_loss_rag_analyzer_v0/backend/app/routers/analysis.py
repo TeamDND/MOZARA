@@ -65,7 +65,7 @@ async def analyze_image_base64(request: AnalysisRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/analyze-upload", response_model=AnalysisResult)
-async def analyze_uploaded_image(file: UploadFile = File(...)):
+async def analyze_uploaded_image(file: UploadFile = File(...), use_llm: bool = True):
     """업로드된 이미지 파일 분석"""
     try:
         # 파일 크기 확인
@@ -92,7 +92,7 @@ async def analyze_uploaded_image(file: UploadFile = File(...)):
 
         # 분석 실행
         analyzer = get_analyzer()
-        result = await analyzer.analyze_image(image, file.filename)
+        result = await analyzer.analyze_image(image, file.filename, use_llm=use_llm)
 
         if result['success']:
             return AnalysisResult(**result)
