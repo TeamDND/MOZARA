@@ -35,10 +35,10 @@ const OAuth2Callback: React.FC = () => {
           // JWT 토큰에서 사용자 정보 추출 (간단한 방법)
           try {
             const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
-            const userEmail = tokenPayload.sub;
+            const username = tokenPayload.username;
             
             // 사용자 정보 가져오기
-            const userResponse = await apiClient.get(`/userinfo/${userEmail}`, {
+            const userResponse = await apiClient.get(`/userinfo/${username}`, {
               headers: {
                 'Authorization': `Bearer ${accessToken}`
               }
