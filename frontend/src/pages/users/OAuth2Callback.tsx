@@ -32,8 +32,7 @@ const OAuth2Callback: React.FC = () => {
         }
 
         if (accessToken && refreshToken) {
-          // 토큰 저장
-          dispatch(setToken(accessToken));
+          console.log('토큰 확인 완료 - AccessToken과 RefreshToken 모두 존재');
           
           // JWT 토큰에서 사용자 정보 추출 (간단한 방법)
           try {
@@ -55,7 +54,14 @@ const OAuth2Callback: React.FC = () => {
             console.log('사용자 정보:', userResponse.data);
             console.log('토큰:', accessToken);
             
+            // Redux에 저장
             dispatch(setUser(userResponse.data));
+            dispatch(setToken(accessToken));
+            
+            // Redux 상태 확인
+            console.log('Redux 저장 완료 - 사용자 정보:', userResponse.data);
+            console.log('Redux 저장 완료 - 토큰:', accessToken);
+            
             setStatus('success');
             
             // 2초 후 대시보드로 이동
