@@ -9,7 +9,7 @@ module.exports = {
       // 커스텀 색상 정의
       colors: {
         primary: {
-          DEFAULT: '#2563eb', // 기본 primary 색상
+          DEFAULT: '#222222', // 기본 primary 색상
           foreground: '#ffffff', // primary 색상 위의 텍스트 색상
         },
         secondary: {
@@ -30,6 +30,10 @@ module.exports = {
         },
         background: '#ffffff', // 배경 색상
         foreground: '#0f172a', // 전경 텍스트 색상
+      },
+      // 커스텀 폰트 패밀리
+      fontFamily: {
+        'kaushan': ['KaushanScript', 'cursive'],
       },
       // 커스텀 폰트 크기
       fontSize: {
