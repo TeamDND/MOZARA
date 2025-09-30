@@ -36,9 +36,12 @@ public class OAuth2Controller {
                 (CustomOAuth2UserService.CustomOAuth2User) authentication.getPrincipal();
             
             // JWT 토큰 생성
+            log.info("JWT 토큰 생성 시작 - 사용자: {}", oauth2User.getEmail());
             String accessToken = jwtUtil.createAccessToken(oauth2User.getEmail());
             String refreshToken = jwtUtil.createRefreshToken(oauth2User.getEmail());
             
+            log.info("JWT 토큰 생성 완료 - AccessToken: {}, RefreshToken: {}", 
+                    accessToken.substring(0, 20) + "...", refreshToken.substring(0, 20) + "...");
             log.info("OAuth2 로그인 성공 - 사용자: {}, 토큰 생성 완료", oauth2User.getEmail());
             
             // 프론트엔드로 리다이렉트 (토큰을 쿼리 파라미터로 전달)

@@ -44,14 +44,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         log.info("OAuth2 사용자 정보 - Email: {}, Name: {}", email, name);
         
         // 기존 사용자 확인
+        log.info("DB에서 사용자 조회 시작 - Email: {}", email);
         Optional<UserEntity> existingUser = userRepository.findByEmail(email);
         
         UserEntity user;
         if (existingUser.isPresent()) {
             user = existingUser.get();
-            log.info("기존 사용자 로그인: {}", email);
+            log.info("기존 사용자 로그인 성공 - ID: {}, Email: {}, Nickname: {}, Username: {}", 
+                    user.getId(), user.getEmail(), user.getNickname(), user.getUsername());
         } else {
             // 새 사용자 생성 (Google 이름을 nickname으로 사용)
+            log.info("새 사용자 생성 시작 - Email: {}, Name: {}", email, name);
+            
             user = UserEntity.builder()
                     .email(email)
                     .nickname(name)
@@ -59,8 +63,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .role("ROLE_USER")
                     .build();
             
+            log.info("사용자 엔티티 생성 완료 - Email: {}, Nickname: {}, Username: {}, Role: {}", 
+                    user.getEmail(), user.getNickname(), user.getUsername(), user.getRole());
+            
             user = userRepository.save(user);
-            log.info("새 사용자 생성: {}", email);
+            log.info("새 사용자 DB 저장 완료 - ID: {}, Email: {}, Nickname: {}", 
+                    user.getId(), user.getEmail(), user.getNickname());
         }
         
         return new CustomOAuth2User(user, oAuth2User.getAttributes());

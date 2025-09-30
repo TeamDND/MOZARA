@@ -21,6 +21,9 @@ const OAuth2Callback: React.FC = () => {
         const accessToken = searchParams.get('access_token');
         const refreshToken = searchParams.get('refresh_token');
         const error = searchParams.get('error');
+        
+        console.log('OAuth2 콜백 처리 시작');
+        console.log('URL 파라미터:', { success, accessToken: accessToken ? '있음' : '없음', refreshToken: refreshToken ? '있음' : '없음', error });
 
         if (success === 'false' || error) {
           setStatus('error');
@@ -37,12 +40,20 @@ const OAuth2Callback: React.FC = () => {
             const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
             const username = tokenPayload.username;
             
+            console.log('JWT 토큰 파싱 성공');
+            console.log('토큰 페이로드:', tokenPayload);
+            console.log('사용자명:', username);
+            
             // 사용자 정보 가져오기
             const userResponse = await apiClient.get(`/userinfo/${username}`, {
               headers: {
                 'Authorization': `Bearer ${accessToken}`
               }
             });
+            
+            console.log('OAuth2 로그인 성공!');
+            console.log('사용자 정보:', userResponse.data);
+            console.log('토큰:', accessToken);
             
             dispatch(setUser(userResponse.data));
             setStatus('success');
