@@ -205,6 +205,7 @@ class LocationService {
     const isSmp = q.includes('문신') || q.includes('smp') || q.includes('두피') || q.includes('scalp');
     const isHairSalon = q.includes('미용실') || q.includes('헤어살롱') || q.includes('탈모전용');
     const isWigShop = q.includes('가발') || q.includes('증모술');
+    const isPharmacy = q.includes('약국');
 
     return items
       .filter(item => {
@@ -233,7 +234,12 @@ class LocationService {
         // 가발 관련
         const isWig = cat.includes('가발') || name.includes('가발') || name.includes('증모술');
 
-        // 카테고리별 필터링 - 탈모미용실은 모든 미용실 포함
+        // 약국 관련
+        const isPharmacyPlace = cat.includes('약국') || cat.includes('pharmacy') ||
+                               name.includes('약국') || name.includes('pharmacy');
+
+        // 카테고리별 필터링
+        if (isPharmacy) return isPharmacyPlace;
         if (isSmp) return isTattoo || isMedical;
         if (isHairSalon) {
           // 탈모미용실 검색 시 모든 미용실/헤어살롱을 포함
@@ -284,6 +290,7 @@ class LocationService {
     const isSmp = q.includes('문신') || q.includes('smp') || q.includes('두피') || q.includes('scalp');
     const isHairSalon = q.includes('미용실') || q.includes('헤어살롱') || q.includes('탈모전용');
     const isWigShop = q.includes('가발') || q.includes('증모술');
+    const isPharmacy = q.includes('약국');
 
     return documents
       .filter(doc => {
@@ -311,7 +318,12 @@ class LocationService {
         // 가발 관련
         const isWig = cat.includes('가발') || name.includes('가발') || name.includes('증모술');
 
-        // 카테고리별 필터링 - 탈모미용실은 모든 미용실 포함
+        // 약국 관련
+        const isPharmacyPlace = cat.includes('약국') || cat.includes('pharmacy') ||
+                               name.includes('약국') || name.includes('pharmacy');
+
+        // 카테고리별 필터링
+        if (isPharmacy) return isPharmacyPlace;
         if (isSmp) return isTattoo || isMedical;
         if (isHairSalon) {
           // 탈모미용실 검색 시 모든 미용실/헤어살롱을 포함
@@ -362,6 +374,9 @@ class LocationService {
   private extractSpecialties(category: string): string[] {
     const specialties: string[] = [];
 
+    if (category.includes('약국') || category.includes('pharmacy')) {
+      specialties.push('탈모약', '영양제', '건강기능식품');
+    }
     if (category.includes('피부과')) {
       specialties.push('탈모치료', '두피관리', '모발진단');
     }
@@ -429,6 +444,9 @@ class LocationService {
     const name = hospital.name || '';
     
     // 카테고리 기반 정규화
+    if (category.includes('약국') || category.includes('pharmacy')) {
+      return '탈모약국';
+    }
     if (category.includes('병원') || category.includes('의원') || category.includes('클리닉')) {
       return '탈모병원';
     }
@@ -443,6 +461,9 @@ class LocationService {
     }
     
     // 이름 기반 정규화
+    if (name.includes('약국')) {
+      return '탈모약국';
+    }
     if (name.includes('병원') || name.includes('의원') || name.includes('클리닉')) {
       return '탈모병원';
     }
@@ -786,6 +807,43 @@ class LocationService {
         longitude: 126.9780,
         description: "두피 건강에 특화된 전문 클리닉입니다.",
         category: "두피문신",
+      },
+      // 탈모약국
+      {
+        id: 'sample_17',
+        name: "헬스케어 약국",
+        address: "서울특별시 강남구 테헤란로 152",
+        phone: "02-1111-2222",
+        specialties: ["탈모약", "영양제", "두피케어제품"],
+        rating: 4.5,
+        latitude: 37.5048,
+        longitude: 127.0495,
+        description: "탈모 치료제와 영양제를 전문으로 취급하는 약국입니다.",
+        category: "탈모약국",
+      },
+      {
+        id: 'sample_18',
+        name: "모발 건강 약국",
+        address: "서울특별시 강남구 역삼동 303",
+        phone: "02-2222-3333",
+        specialties: ["탈모약", "비타민", "두피영양제"],
+        rating: 4.6,
+        latitude: 37.5010,
+        longitude: 127.0373,
+        description: "모발 건강 전문 상담 약사가 있는 약국입니다.",
+        category: "탈모약국",
+      },
+      {
+        id: 'sample_19',
+        name: "웰빙 약국",
+        address: "서울특별시 서초구 서초대로 404",
+        phone: "02-3333-4444",
+        specialties: ["탈모약", "건강기능식품", "두피케어"],
+        rating: 4.4,
+        latitude: 37.4946,
+        longitude: 127.0276,
+        description: "탈모 관련 처방약과 건강식품을 다양하게 구비한 약국입니다.",
+        category: "탈모약국",
       }
     ];
 
@@ -848,6 +906,7 @@ class LocationService {
         return this.getFilteredSampleData({ ...finalParams, query: (canonicalCategory ?? finalParams.query) as string });
       }
 
+      console.log('API 검색 시작 - 검색어:', enhancedQuery);
       const [naverResults, kakaoResults] = await Promise.allSettled([
         this.searchHospitalsWithNaver(finalParams),
         this.searchHospitalsWithKakao(finalParams),
@@ -856,16 +915,25 @@ class LocationService {
       const hospitals: Hospital[] = [];
 
       if (naverResults.status === 'fulfilled') {
+        console.log('네이버 API 결과:', naverResults.value.length, '개');
         hospitals.push(...naverResults.value);
+      } else {
+        console.warn('네이버 API 실패:', naverResults.reason);
       }
 
       if (kakaoResults.status === 'fulfilled') {
+        console.log('카카오 API 결과:', kakaoResults.value.length, '개');
         hospitals.push(...kakaoResults.value);
+      } else {
+        console.warn('카카오 API 실패:', kakaoResults.reason);
       }
+
+      console.log('전체 API 결과:', hospitals.length, '개');
 
       // API 결과가 없으면 샘플 데이터 반환
       if (hospitals.length === 0) {
         console.warn('No API results, returning sample data');
+        console.log('샘플 데이터 반환 - 카테고리:', canonicalCategory, '검색어:', finalParams.query);
         return this.getFilteredSampleData({ ...finalParams, query: (canonicalCategory ?? finalParams.query) as string });
       }
 
@@ -936,23 +1004,54 @@ class LocationService {
   // 검색어에 따른 샘플 데이터 필터링
   private getFilteredSampleData(params: SearchParams): Hospital[] {
     const sampleData = this.getSampleHospitals(params.location);
+    console.log('샘플 데이터 총 개수:', sampleData.length);
+    console.log('검색어:', params.query);
 
     if (params.query) {
       const query = params.query.toLowerCase();
+      console.log('소문자 변환된 검색어:', query);
       
-      // 카테고리별 필터링 (정확한 매칭)
-      if (query === '탈모병원' || query === '탈모미용실' || query === '가발전문점' || query === '두피문신') {
-        return sampleData.filter(hospital => hospital.category === query);
+      // 카테고리별 필터링 (정확한 매칭 + 확장 검색어)
+      if (query === '탈모병원' || (query.includes('탈모') && (query.includes('병원') || query.includes('의원') || query.includes('클리닉')))) {
+        const filtered = sampleData.filter(hospital => hospital.category === '탈모병원');
+        console.log('탈모병원 필터링 결과:', filtered.length);
+        return filtered;
+      }
+      
+      if (query === '탈모미용실') {
+        const filtered = sampleData.filter(hospital => hospital.category === '탈모미용실');
+        console.log('탈모미용실 필터링 결과:', filtered.length);
+        return filtered;
+      }
+      
+      if (query === '가발전문점' || query.includes('가발')) {
+        const filtered = sampleData.filter(hospital => hospital.category === '가발전문점');
+        console.log('가발전문점 필터링 결과:', filtered.length);
+        return filtered;
+      }
+      
+      if (query === '두피문신' || query.includes('두피문신')) {
+        const filtered = sampleData.filter(hospital => hospital.category === '두피문신');
+        console.log('두피문신 필터링 결과:', filtered.length);
+        return filtered;
+      }
+      
+      if (query === '약국' || query.includes('약국')) {
+        const filtered = sampleData.filter(hospital => hospital.category === '탈모약국');
+        console.log('탈모약국 필터링 결과:', filtered.length);
+        return filtered;
       }
       
       // 일반 검색어 필터링
-      return sampleData.filter(hospital =>
+      const filtered = sampleData.filter(hospital =>
         hospital.name.toLowerCase().includes(query) ||
         hospital.address.toLowerCase().includes(query) ||
         hospital.specialties.some(specialty => specialty.toLowerCase().includes(query)) ||
         hospital.description.toLowerCase().includes(query) ||
         hospital.category.toLowerCase().includes(query)
       );
+      console.log('일반 필터링 결과:', filtered.length);
+      return filtered;
     }
 
     return sampleData;

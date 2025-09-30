@@ -1031,15 +1031,18 @@ async def search_naver_local(query: str):
         # 카테고리별로 다른 검색어 전략 사용
         if "미용실" in query or "헤어살롱" in query or "탈모전용" in query:
             # 탈모미용실 검색 시 더 광범위한 미용실 검색
-            search_query = "미용실 헤어살롱"
+            search_query = "탈모 미용실 헤어살롱"
         elif "가발" in query or "증모술" in query:
             search_query = f"{query}"
         elif "문신" in query or "smp" in query.lower():
-            search_query = f"{query} 문신"
+            search_query = f"두피문신 SMP"
+        elif "약국" in query:
+            # 탈모약국 검색
+            search_query = "약국"
         else:
-            # 탈모병원 검색 시 더 광범위한 의료기관 검색
-            if "탈모병원" in query or "탈모" in query or "병원" in query:
-                search_query = "병원 의원 클리닉 피부과"
+            # 탈모병원 검색 시 탈모 관련 의료기관 검색
+            if "탈모" in query or "병원" in query or "의원" in query:
+                search_query = "탈모 병원 의원 클리닉 피부과 모발"
             else:
                 search_query = f"{query} 병원"
 
@@ -1163,15 +1166,18 @@ async def search_kakao_local(
         # 카테고리별로 다른 검색어 전략 사용
         if "미용실" in query or "헤어살롱" in query or "탈모전용" in query:
             # 탈모미용실 검색 시 더 광범위한 미용실 검색
-            search_query = "미용실 헤어살롱"
+            search_query = "탈모 미용실 헤어살롱"
         elif "가발" in query or "증모술" in query:
             search_query = f"{query}"
         elif "문신" in query or "smp" in query.lower():
-            search_query = f"{query} 문신"
+            search_query = f"두피문신 SMP"
+        elif "약국" in query:
+            # 탈모약국 검색
+            search_query = "약국"
         else:
-            # 탈모병원 검색 시 더 광범위한 의료기관 검색
-            if "탈모병원" in query or "탈모" in query or "병원" in query:
-                search_query = "병원 의원 클리닉 피부과"
+            # 탈모병원 검색 시 탈모 관련 의료기관 검색
+            if "탈모" in query or "병원" in query or "의원" in query:
+                search_query = "탈모 병원 의원 클리닉 피부과 모발"
             else:
                 search_query = f"{query} 병원"
 
