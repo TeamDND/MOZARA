@@ -92,14 +92,6 @@ public class SecurityConfig {
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 
-//                .oauth2Login(oauth2 -> oauth2
-//                        .loginPage("/login")
-//                        .defaultSuccessUrl("/api/oauth2/google/success", true)
-//                        .failureUrl("/api/oauth2/google/failure")
-//                        .userInfoEndpoint(userInfo -> userInfo
-//                                .userService(googleOAuth2UserService)
-//                        )
-//                )
 
                 .addFilterBefore(new JwtFilter(jwtUtil), JwtLoginFilter.class)
                 .addFilterAt(new JwtLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
