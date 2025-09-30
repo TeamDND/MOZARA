@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { Button } from '../../components/ui/button';
 import { Progress } from '../../components/ui/progress';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { analyzeHairWithGemini, getStageDescription, getStageColor, GeminiAnalysisResult } from '../../services/geminiAnalysisService';
+import { analyzeHairWithSwin, getStageDescription, getStageColor, SwinAnalysisResult } from '../../services/swinAnalysisService';
 import SelfCheckStep from '../../components/check/SelfCheckStep';
 import ImageUploadStep from '../../components/check/ImageUploadStep';
 import AnalysisProgressStep from '../../components/check/AnalysisProgressStep';
@@ -39,7 +39,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [analysisSteps, setAnalysisSteps] = useState<string[]>([]);
-  const [analysisResult, setAnalysisResult] = useState<GeminiAnalysisResult | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<SwinAnalysisResult | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -48,8 +48,14 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
   // 이미지 업로드 핸들러는 ImageUploadStep 컴포넌트로 이동됨
 
   const performRealAnalysis = async () => {
+    // 남성인 경우 top, side 모두 필요, 여성인 경우 top만 필요
+    const isMale = baspAnswers.gender === 'male';
     if (!uploadedPhotoFile) {
-      setAnalysisError('분석할 이미지가 없습니다.');
+      setAnalysisError('Top View 이미지가 필요합니다.');
+      return;
+    }
+    if (isMale && !uploadedSidePhotoFile) {
+      setAnalysisError('남성의 경우 Side View 이미지가 필요합니다.');
       return;
     }
 
@@ -63,7 +69,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
       const steps = [
         'BASP 설문 분석 완료',
         '이미지 전처리 완료',
-        'Gemini AI 모발 분석 중...',
+        'Swin Transformer AI 모발 분석 중...',
         '탈모 진행도 측정 완료',
         '헤어라인 분석 완료',
         '개인 맞춤 계획 수립 완료'
@@ -76,15 +82,23 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
 
         if (i === 2) {
           // 실제 API 호출은 3번째 단계에서
-          console.log('🔄 실제 Gemini API 분석 시작');
+          console.log('🔄 실제 Swin API 분석 시작');
 
-          const result = await analyzeHairWithGemini(
+          const result = await analyzeHairWithSwin(
             uploadedPhotoFile,
+            uploadedSidePhotoFile!, // 여성의 경우 null일 수 있음
             undefined, // 현재는 userId 없이 (로그인 구현 후 추가 가능)
-            undefined  // imageUrl 없이
+            undefined, // imageUrl 없이
+            {
+              gender: baspAnswers.gender,
+              age: baspAnswers.age,
+              familyHistory: baspAnswers.familyHistory,
+              recentHairLoss: baspAnswers.recentHairLoss,
+              stress: baspAnswers.stress
+            }
           );
 
-          console.log('✅ Gemini 분석 결과:', result);
+          console.log('✅ Swin 분석 결과:', result);
           setAnalysisResult(result.analysis);
         }
 
@@ -137,7 +151,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         scalpHealth: 85,
         improvementAreas: ['정수리 부분', '헤어라인'],
         overallScore: 78,
-        geminiResult: analysisResult
+        swinResult: analysisResult
       },
       integrated: {
         priority: analysisResult && analysisResult.stage <= 1 ? 'low' : analysisResult && analysisResult.stage >= 3 ? 'high' : 'medium',
@@ -149,13 +163,13 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
     if (onDiagnosisComplete) {
       onDiagnosisComplete(results);
     }
-    // 결과 페이지로 이동 (Gemini 분석 결과와 함께)
+    // 결과 페이지로 이동 (Swin 분석 결과와 함께)
     if (setCurrentView) {
       setCurrentView('results');
     } else {
       navigate('/diagnosis-results', {
         state: {
-          geminiResult: analysisResult,
+          swinResult: analysisResult,
           diagnosisData: results
         }
       });
@@ -174,13 +188,14 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
 
       case 2:
         return (
-          <ImageUploadStep 
+          <ImageUploadStep
             uploadedPhoto={uploadedPhoto}
             setUploadedPhoto={setUploadedPhoto}
             setUploadedPhotoFile={setUploadedPhotoFile}
             uploadedSidePhoto={uploadedSidePhoto}
             setUploadedSidePhoto={setUploadedSidePhoto}
             setUploadedSidePhotoFile={setUploadedSidePhotoFile}
+            gender={baspAnswers.gender}
           />
         );
 
@@ -249,8 +264,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 이전
               </Button>
-              
-              {currentStep === 2 && uploadedPhoto && (
+              {currentStep === 2 && uploadedPhoto && (baspAnswers.gender === 'female' || uploadedSidePhoto) && (
                 <Button
                   onClick={() => {
                     setCurrentStep(3);
