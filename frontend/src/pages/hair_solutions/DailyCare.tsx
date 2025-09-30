@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { hairProductApi, HairProduct } from '../../services/hairProductApi';
 import apiClient from '../../services/apiClient';
 import { Button } from '../../components/ui/button';
-import { Target, Camera, Award, Sprout } from 'lucide-react';
+import { Target, Camera, Award, Sprout, MapPin, Video, HelpCircle } from 'lucide-react';
 
 // 분석 결과 타입 정의
 interface HairAnalysisResponse {
@@ -88,7 +88,8 @@ const DailyCare: React.FC = () => {
     overallImprovement: 15,
     lastPhotoDate: null as string | null,
     completedChallenges: 8,
-    level: 'bronze'
+    level: 'bronze',
+    hasCompletedInitialAnalysis: false // 최초 탈모분석 완료 여부
   });
 
   const progress = userProgress;
@@ -243,10 +244,13 @@ const DailyCare: React.FC = () => {
   });
   const [streak, setStreak] = useState<number>(1);
 
-  // 연속 케어 일수 계산 (로컬 스토리지 기반)
+  // 연속 케어 일수 계산 및 최초 분석 상태 확인 (로컬 스토리지 기반)
   React.useEffect(() => {
-    const key = 'dailyCareStreak';
-    const stored = localStorage.getItem(key);
+    const streakKey = 'dailyCareStreak';
+    const analysisKey = 'hasCompletedInitialAnalysis';
+    
+    // 연속 케어 일수 계산
+    const stored = localStorage.getItem(streakKey);
     const today = new Date();
     const yyyyMmDd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
@@ -273,7 +277,14 @@ const DailyCare: React.FC = () => {
     }
 
     setStreak(count);
-    localStorage.setItem(key, JSON.stringify({ count, lastDate: lastDateStr }));
+    localStorage.setItem(streakKey, JSON.stringify({ count, lastDate: lastDateStr }));
+
+    // 최초 분석 완료 상태 확인
+    const hasCompletedAnalysis = localStorage.getItem(analysisKey) === 'true';
+    setUserProgress(prev => ({
+      ...prev,
+      hasCompletedInitialAnalysis: hasCompletedAnalysis
+    }));
   }, []);
 
   return (
@@ -292,38 +303,38 @@ const DailyCare: React.FC = () => {
 
         {/* 메인 컨텐츠 */}
         <div className="flex-1 p-4 overflow-y-auto space-y-4">
-          {/* 다음 액션 카드 (Mobile-First) */}
-          <div className={`bg-white p-4 rounded-xl shadow-md ${nextAction.urgent ? 'ring-2 ring-gray-200 bg-gray-50' : ''}`}>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-[#222222]" />
-                <h3 className="text-lg font-semibold text-gray-800">{nextAction.title}</h3>
-              </div>
-              <p className="text-sm text-gray-600">{nextAction.description}</p>
-              <Button 
-                onClick={() => {
-                  if (nextAction.action === 'diagnosis') {
+          {/* 0. 탈모분석 (최초 기준이고 한번이라도 분석하면 안보임) */}
+          {!userProgress.hasCompletedInitialAnalysis && (
+            <div className="bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded-xl border-2 border-red-200">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Target className="w-5 h-5 text-red-600" />
+                  <h3 className="text-lg font-semibold text-red-800">최초 탈모 분석</h3>
+                </div>
+                <p className="text-sm text-red-700">AI 분석과 설문을 통한 종합적인 두피 상태 파악을 시작해보세요</p>
+                <Button 
+                  onClick={() => {
+                    // 최초 분석 완료 상태 저장
+                    localStorage.setItem('hasCompletedInitialAnalysis', 'true');
+                    setUserProgress(prev => ({
+                      ...prev,
+                      hasCompletedInitialAnalysis: true
+                    }));
                     navigate('/integrated-diagnosis');
-                  } else {
-                    console.log(`Action: ${nextAction.action}`);
-                  }
-                }}
-                className={`w-full h-12 rounded-xl font-semibold ${
-                  nextAction.urgent 
-                    ? 'bg-[#222222] hover:bg-[#333333] text-white' 
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                } active:scale-[0.98] transition-all`}
-              >
-                {nextAction.buttonText}
-              </Button>
+                  }}
+                  className="w-full h-12 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold active:scale-[0.98] transition-all"
+                >
+                  지금 분석하기
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* 메인 카드: 두피 촬영하기 (Mobile-First) */}
+          {/* 1. 두피 분석 (오늘의 두피분석) */}
           <div className="bg-white p-4 rounded-xl shadow-md">
             <div className="space-y-4">
               <div>
-                <h2 className="text-lg font-semibold text-gray-800">두피 촬영하기</h2>
+                <h2 className="text-lg font-semibold text-gray-800">오늘의 두피 분석</h2>
                 <p className="text-sm text-gray-600 mt-1">오늘의 두피 상태를 확인해보세요</p>
               </div>
               
@@ -384,31 +395,153 @@ const DailyCare: React.FC = () => {
             </div>
           </div>
 
-          {/* 통계 카드 (Mobile-First) */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white p-4 rounded-xl shadow-md">
-              <p className="text-xs text-gray-500">두피 점수</p>
-              <div className="mt-1 text-2xl font-bold text-gray-800">{scalpScore}</div>
-              <p className="mt-1 text-xs text-green-600">LLM 종합 분석</p>
-            </div>
-            <div className="bg-white p-4 rounded-xl shadow-md">
-              <p className="text-xs text-gray-500">비듬 상태</p>
-              <div className="mt-1 text-xl font-bold text-gray-800">{dandruffLabel}</div>
-              <p className="mt-1 text-xs text-emerald-600">{dandruffSub}</p>
-            </div>
-            <div className="bg-white p-4 rounded-xl shadow-md">
-              <p className="text-xs text-gray-500">각질 상태</p>
-              <div className="mt-1 text-xl font-bold text-gray-800">{flakeLabel}</div>
-              <p className="mt-1 text-xs text-teal-600">{flakeSub}</p>
-            </div>
-            <div className="bg-white p-4 rounded-xl shadow-md">
-              <p className="text-xs text-gray-500">홍반 상태</p>
-              <div className="mt-1 text-xl font-bold text-gray-800">{rednessLabel}</div>
-              <p className="mt-1 text-xs text-green-600">{rednessSub}</p>
+          {/* 2. 탈모 PT (오늘의 미션) */}
+          <div className="bg-white p-4 rounded-xl shadow-md">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Camera className="w-5 h-5 text-[#222222]" />
+                <h3 className="text-lg font-semibold text-gray-800">오늘의 탈모 PT</h3>
+              </div>
+              <p className="text-sm text-gray-600">오늘의 미션을 완료하고 새싹 포인트를 획득하세요</p>
+              <Button 
+                onClick={() => navigate('/hair-pt')}
+                className="w-full h-12 bg-[#222222] hover:bg-[#333333] text-white rounded-xl font-semibold active:scale-[0.98] transition-all"
+              >
+                PT 시작하기
+              </Button>
             </div>
           </div>
 
-          {/* 오늘의 케어 팁 (Mobile-First) */}
+          {/* 3. 탈모 맵 (내 위치기반 지도 화면) */}
+          <div className="bg-white p-4 rounded-xl shadow-md">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-[#222222]" />
+                <h3 className="text-lg font-semibold text-gray-800">탈모 맵</h3>
+              </div>
+              <p className="text-sm text-gray-600">내 위치 기반 탈모 전문 병원 및 약국 찾기</p>
+              
+              {/* 지도 영역 */}
+              <div className="relative bg-gray-100 rounded-lg h-48 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">지도 로딩 중...</p>
+                </div>
+              </div>
+              
+              <Button 
+                variant="outline"
+                className="w-full h-12 border-2 border-gray-300 hover:border-gray-400 text-gray-700 rounded-xl font-semibold active:scale-[0.98] transition-all"
+                onClick={() => navigate('/store-finder')}
+              >
+                더 알아보기
+              </Button>
+            </div>
+          </div>
+
+          {/* 분석 결과 통계 카드 */}
+          {analysis && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white p-4 rounded-xl shadow-md">
+                <p className="text-xs text-gray-500">두피 점수</p>
+                <div className="mt-1 text-2xl font-bold text-gray-800">{scalpScore}</div>
+                <p className="mt-1 text-xs text-green-600">LLM 종합 분석</p>
+              </div>
+              <div className="bg-white p-4 rounded-xl shadow-md">
+                <p className="text-xs text-gray-500">비듬 상태</p>
+                <div className="mt-1 text-xl font-bold text-gray-800">{dandruffLabel}</div>
+                <p className="mt-1 text-xs text-emerald-600">{dandruffSub}</p>
+              </div>
+              <div className="bg-white p-4 rounded-xl shadow-md">
+                <p className="text-xs text-gray-500">각질 상태</p>
+                <div className="mt-1 text-xl font-bold text-gray-800">{flakeLabel}</div>
+                <p className="mt-1 text-xs text-teal-600">{flakeSub}</p>
+              </div>
+              <div className="bg-white p-4 rounded-xl shadow-md">
+                <p className="text-xs text-gray-500">홍반 상태</p>
+                <div className="mt-1 text-xl font-bold text-gray-800">{rednessLabel}</div>
+                <p className="mt-1 text-xs text-green-600">{rednessSub}</p>
+              </div>
+            </div>
+          )}
+
+          {/* 4. 탈모 OX (오늘의 퀴즈) */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200">
+            <div className="flex items-center gap-2 mb-3">
+              <HelpCircle className="w-5 h-5 text-[#222222]" />
+              <h3 className="text-lg font-semibold text-gray-800">오늘의 탈모 OX 퀴즈</h3>
+            </div>
+            <div className="bg-gray-50 p-3 rounded-lg mb-3">
+              <p className="text-sm font-medium text-gray-800 mb-4">
+                탈모를 예방하기 위해 매일 샴푸를 하는 것이 좋다.
+              </p>
+              <div className="flex gap-2">
+                <button className="flex-1 h-12 px-4 bg-[#222222] text-white rounded-xl hover:bg-[#333333] font-semibold active:scale-[0.98] transition-all">
+                  O
+                </button>
+                <button className="flex-1 h-12 px-4 bg-[#222222] text-white rounded-xl hover:bg-[#333333] font-semibold active:scale-[0.98] transition-all">
+                  X
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500">정답 해설을 보려면 버튼을 눌러보세요!</p>
+          </div>
+
+          {/* 5. 탈모 영상 (오늘의 영상) */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200">
+            <div className="flex items-center gap-2 mb-3">
+              <Video className="w-5 h-5 text-[#222222]" />
+              <h3 className="text-lg font-semibold text-gray-800">오늘의 탈모 영상</h3>
+            </div>
+            <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video mb-3">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-white">
+                  <div className="text-4xl mb-2">▶️</div>
+                  <p className="text-sm font-medium">두피 마사지 방법 알아보기</p>
+                  <p className="text-xs opacity-75 mt-1">2분 30초</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button className="flex-1 h-12 px-4 bg-[#222222] text-white rounded-xl hover:bg-[#333333] font-semibold active:scale-[0.98] transition-all">
+                영상 보기
+              </button>
+              <button className="flex-1 h-12 px-4 bg-[#222222] text-white rounded-xl hover:bg-[#333333] font-semibold active:scale-[0.98] transition-all">
+                다음 영상
+              </button>
+            </div>
+          </div>
+
+          {/* 6. 헤어스타일 바꾸기 */}
+          <div className="bg-white p-4 rounded-xl shadow-md">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="text-2xl">💇‍♀️</div>
+                <h3 className="text-lg font-semibold text-gray-800">헤어스타일 바꾸기</h3>
+              </div>
+              <p className="text-sm text-gray-600">새로운 헤어스타일을 시도해보세요</p>
+              
+              {/* 물음표 그림 영역 */}
+              <div className="relative bg-gray-100 rounded-lg h-48 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <div className="text-6xl mb-2">❓</div>
+                  <p className="text-sm">새로운 스타일을 찾아보세요</p>
+                </div>
+              </div>
+              
+              <Button 
+                onClick={() => {
+                  console.log('헤어스타일 페이지로 이동');
+                  // TODO: 헤어스타일 페이지로 이동
+                }}
+                className="w-full h-12 bg-[#222222] hover:bg-[#333333] text-white rounded-xl font-semibold active:scale-[0.98] transition-all"
+              >
+                페이지 이동하기
+              </Button>
+            </div>
+          </div>
+
+          {/* 오늘의 케어 팁 */}
           {tips.length > 0 && (
             <div className="bg-white p-4 rounded-xl shadow-md">
               <h3 className="text-lg font-semibold text-gray-800 mb-3">오늘의 케어 팁</h3>
@@ -417,127 +550,6 @@ const DailyCare: React.FC = () => {
               </ol>
             </div>
           )}
-
-{/* 진행률 표시 (Mobile-First) */}
-<div className="bg-gray-50 p-4 rounded-xl">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">오늘의 진행률</h3>
-            <div className="flex items-center mb-2">
-              <div className="flex-grow bg-gray-200 rounded-full h-2 mr-3">
-                <div className="bg-green-500 h-2 rounded-full transition-all duration-300" style={{width: '60%'}}></div>
-              </div>
-              <span className="text-sm font-medium text-gray-700">6 / 10 완료</span>
-            </div>
-            <p className="text-sm text-gray-600">훌륭해요! 오늘도 건강한 하루를 보내고 계시네요! 🌟</p>
-          </div>
-
-          {/* 빠른 액션 버튼들 (Mobile-First) */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button 
-              variant="outline" 
-              className="h-16 flex flex-col items-center gap-2 rounded-xl"
-              onClick={() => navigate('/integrated-diagnosis')}
-            >
-              <Target className="w-5 h-5" />
-              <span className="text-sm">재진단</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-16 flex flex-col items-center gap-2 rounded-xl"
-              onClick={() => navigate('/hair-pt')}
-            >
-              <Camera className="w-5 h-5" />
-              <span className="text-sm">탈모 PT</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-16 flex flex-col items-center gap-2 rounded-xl"
-              onClick={() => {
-                console.log('챌린지 페이지로 이동');
-              }}
-            >
-              <Award className="w-5 h-5" />
-              <span className="text-sm">챌린지</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-16 flex flex-col items-center gap-2 rounded-xl"
-              onClick={() => {
-                console.log('케어 기록 페이지로 이동');
-              }}
-            >
-              <Sprout className="w-5 h-5" />
-              <span className="text-sm">케어 기록</span>
-            </Button>
-          </div>
-
-          {/* 케어 가이드 섹션 (Mobile-First) */}
-          <div className="space-y-3">
-            {/* 오늘의 탈모 OX 퀴즈 */}
-            <div className="bg-white p-4 rounded-xl border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">🧠 오늘의 탈모 OX 퀴즈</h3>
-              <div className="bg-gray-50 p-3 rounded-lg mb-3">
-                <p className="text-sm font-medium text-gray-800 mb-4">
-                  탈모를 예방하기 위해 매일 샴푸를 하는 것이 좋다.
-                </p>
-                <div className="flex gap-2">
-                  <button className="flex-1 h-12 px-4 bg-[#222222] text-white rounded-xl hover:bg-[#333333] font-semibold active:scale-[0.98] transition-all">
-                    O
-                  </button>
-                  <button className="flex-1 h-12 px-4 bg-[#222222] text-white rounded-xl hover:bg-[#333333] font-semibold active:scale-[0.98] transition-all">
-                    X
-                  </button>
-                </div>
-              </div>
-              <p className="text-xs text-gray-500">정답 해설을 보려면 버튼을 눌러보세요!</p>
-            </div>
-
-            {/* 오늘의 탈모 영상 */}
-            <div className="bg-white p-4 rounded-xl border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">🎬 오늘의 탈모 영상</h3>
-              <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video mb-3">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <div className="text-4xl mb-2">▶️</div>
-                    <p className="text-sm font-medium">두피 마사지 방법 알아보기</p>
-                    <p className="text-xs opacity-75 mt-1">2분 30초</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button className="flex-1 h-12 px-4 bg-[#222222] text-white rounded-xl hover:bg-[#333333] font-semibold active:scale-[0.98] transition-all">
-                  영상 보기
-                </button>
-                <button className="flex-1 h-12 px-4 bg-[#222222] text-white rounded-xl hover:bg-[#333333] font-semibold active:scale-[0.98] transition-all">
-                  다음 영상
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* 추천 습관 카드들 (Mobile-First) */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">오늘의 추천 습관</h2>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { icon: "🧴", title: "샴푸하기", desc: "머리를 깨끗하게 씻어주세요" },
-                { icon: "💧", title: "수분 섭취", desc: "하루 8잔 이상 물 마시기" },
-                { icon: "😴", title: "충분한 수면", desc: "7-8시간의 휴식" },
-                { icon: "🏃", title: "운동하기", desc: "30분 이상 신체 활동" },
-                { icon: "🥗", title: "건강한 식단", desc: "신선한 채소와 과일" },
-                { icon: "🧘", title: "스트레스 관리", desc: "명상이나 휴식 시간" }
-              ].map((habit, index) => (
-                <div key={index} className="bg-white p-3 rounded-xl shadow-md">
-                  <div className="text-center">
-                    <div className="text-2xl mb-2">{habit.icon}</div>
-                    <h3 className="text-sm font-semibold text-gray-800 mb-1">{habit.title}</h3>
-                    <p className="text-xs text-gray-600">{habit.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          
 
         </div>
       </div>
