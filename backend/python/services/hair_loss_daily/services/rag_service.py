@@ -302,7 +302,7 @@ class RAGService:
                 "value_2": [],  # 피지과다
                 "value_3": [],  # 모낭사이홍반
                 "value_4": [],  # 모낭홍반농포
-                "value_5": []   # 비듬
+                "value_5": []   # 비듬 (데이터는 수집하지만 결과에서 제외)
                 # "value_6": []   # 탈모 - 제외
             }
             scores = []
@@ -392,7 +392,7 @@ class RAGService:
             "value_2": "피지과다", 
             "value_3": "모낭사이홍반",
             "value_4": "모낭홍반농포",
-            "value_5": "비듬"
+            "value_5": "비듬"  # 데이터는 수집하지만 결과에서 제외
             # "value_6": "탈모" - 제외
         }
         
@@ -400,7 +400,9 @@ class RAGService:
             if vals:
                 avg_score = statistics.mean(vals)
                 category_name = category_names.get(key, key)
-                scores[category_name] = round(avg_score, 2)
+                # 비듬은 결과에서 제외 (빛반사 오인 문제)
+                if category_name != "비듬":
+                    scores[category_name] = round(avg_score, 2)
         
         return scores
     
@@ -413,7 +415,7 @@ class RAGService:
             "value_2": "피지과다", 
             "value_3": "모낭사이홍반",
             "value_4": "모낭홍반농포",
-            "value_5": "비듬"
+            "value_5": "비듬"  # 데이터는 수집하지만 결과에서 제외
             # "value_6": "탈모" - 제외
         }
         
@@ -436,7 +438,9 @@ class RAGService:
                 if total_weight > 0:
                     normalized_score = weighted_sum / total_weight
                     category_name = category_names.get(key, key)
-                    weighted_scores[category_name] = round(normalized_score, 2)
+                    # 비듬은 결과에서 제외 (빛반사 오인 문제)
+                    if category_name != "비듬":
+                        weighted_scores[category_name] = round(normalized_score, 2)
         
         return weighted_scores
     
@@ -458,15 +462,14 @@ class RAGService:
         # 모든 카테고리에 대해 엄격한 기준 적용
         category_score = float(weighted_categories[primary_category])
         
-        # 비듬 카테고리의 경우 더욱 엄격한 기준
+        # 비듬 카테고리는 완전히 제외 (빛반사 오인 문제)
         if primary_category == "비듬":
-            if category_score < 0.7:  # 비듬은 0.7 이상 필요
-                # 두 번째로 높은 카테고리로 변경
-                sorted_categories = sorted(weighted_categories.items(), key=lambda x: float(x[1]), reverse=True)
-                if len(sorted_categories) > 1:
-                    primary_category = sorted_categories[1][0]
-                else:
-                    return "0.양호"
+            # 두 번째로 높은 카테고리로 변경
+            sorted_categories = sorted(weighted_categories.items(), key=lambda x: float(x[1]), reverse=True)
+            if len(sorted_categories) > 1:
+                primary_category = sorted_categories[1][0]
+            else:
+                return "0.양호"
         
         # 다른 카테고리들도 엄격한 기준 적용
         elif category_score < 0.6:  # 일반 카테고리는 0.6 이상 필요
@@ -538,7 +541,7 @@ class RAGService:
                 "항균 샴푸 사용",
                 "두피 청결 유지"
             ],
-            "비듬": [
+            "비듬": [  # 데이터는 유지하지만 결과에서 제외
                 "항진균 샴푸 사용",
                 "규칙적인 샴푸",
                 "두피 건조 방지"
@@ -564,11 +567,11 @@ class RAGService:
                     "value_2": "피지과다",
                     "value_3": "모낭사이홍반", 
                     "value_4": "모낭홍반농포",
-                    "value_5": "비듬"
+                    "value_5": "비듬"  # 데이터는 수집하지만 결과에서 제외
                     # "value_6": "탈모" - 제외
                 }.get(key, "")
                 
-                if category_name and category_name != primary_category:
+                if category_name and category_name != primary_category and category_name != "비듬":
                     recommendations.extend(category_recommendations.get(category_name, []))
         
         # 중복 제거 및 상위 5개만 반환

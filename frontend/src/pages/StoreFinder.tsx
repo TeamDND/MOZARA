@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { locationService, Hospital, Location } from '../services/locationService';
 import HairLossStageSelector from '../components/ui/HairLossStageSelector';
 import MapPreview from '../components/ui/MapPreview';
@@ -7,7 +7,7 @@ import DirectionModal from '../components/ui/DirectionModal';
 import { HAIR_LOSS_STAGES, STAGE_RECOMMENDATIONS } from '../utils/hairLossStages';
 
 const StoreFinder: React.FC = () => {
-  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [filteredHospitals, setFilteredHospitals] = useState<Hospital[]>([]);
@@ -17,12 +17,13 @@ const StoreFinder: React.FC = () => {
   const [isUsingSampleData, setIsUsingSampleData] = useState(false);
   const [selectedStage, setSelectedStage] = useState<number | null>(null);
   const [showStageSelector, setShowStageSelector] = useState(true);
+  const [showCategoryButtons, setShowCategoryButtons] = useState(true);
   const [imageLoadErrors, setImageLoadErrors] = useState<Set<string>>(new Set());
   const [directionTarget, setDirectionTarget] = useState<Hospital | null>(null);
 
   // 4개 카테고리 정의
   const categories = [
-    { name: "탈모병원", icon: "🏥", searchTerm: "탈모병원", category: "탈모병원" },
+    { name: "탈모병원", icon: "🏥", searchTerm: "탈모", category: "탈모병원" },
     { name: "탈모미용실", icon: "💇", searchTerm: "탈모미용실", category: "탈모미용실" },
     { name: "가발전문점", icon: "🎭", searchTerm: "가발전문점", category: "가발전문점" },
     { name: "두피문신", icon: "🎨", searchTerm: "두피문신", category: "두피문신" }
@@ -39,6 +40,16 @@ const StoreFinder: React.FC = () => {
   const visibleCategories = selectedStage === null
     ? categories
     : categories.filter(c => (stageCategoryMap[selectedStage] || []).includes(c.category));
+
+  // URL 파라미터에서 카테고리 읽기 (최초 1회만)
+  useEffect(() => {
+    const category = searchParams.get('category');
+    if (category) {
+      setSearchTerm(category);
+      setShowStageSelector(false); // 카테고리가 지정된 경우 단계 선택기 숨김
+      setShowCategoryButtons(false); // 카테고리 버튼들도 숨김
+    }
+  }, []); // 빈 배열로 최초 1회만 실행
 
   // 단계 선택 시 기본 검색어 자동 설정 (검색어 비어있을 때)
   useEffect(() => {
@@ -257,10 +268,37 @@ const StoreFinder: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      
-
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* 전용 모드 헤더 */}
+        {!showCategoryButtons && searchTerm === '가발전문점' && (
+          <div className="mb-6">
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg p-6">
+              <div className="flex items-center gap-3">
+                <span className="text-4xl">🎭</span>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">가발 매장 찾기</h2>
+                  <p className="text-gray-600 mt-1">내 주변 가발 전문점을 찾아보세요</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {!showCategoryButtons && searchTerm === '두피문신' && (
+          <div className="mb-6">
+            <div className="bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-200 rounded-lg p-6">
+              <div className="flex items-center gap-3">
+                <span className="text-4xl">🎨</span>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">두피문신 매장 찾기</h2>
+                  <p className="text-gray-600 mt-1">내 주변 두피문신 전문점을 찾아보세요</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 탈모 단계 선택기 */}
         {showStageSelector && (
           <div className="mb-6">
@@ -278,13 +316,13 @@ const StoreFinder: React.FC = () => {
           <div className="mb-6">
             <div className="bg-[#1F0101]/5 border border-[#1F0101] rounded-lg p-4">
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex items-center gap-3">
                   <h3 className="text-lg font-semibold text-[#1F0101]">
                     {selectedStage}단계: {HAIR_LOSS_STAGES[selectedStage]?.name}
                   </h3>
-                  <p className="text-[#1F0101] text-sm mt-1 opacity-80">
+                  <span className="text-sm text-[#1F0101] opacity-80">
                     {STAGE_RECOMMENDATIONS[selectedStage as keyof typeof STAGE_RECOMMENDATIONS]?.message}
-                  </p>
+                  </span>
                 </div>
                 <button
                   onClick={() => setSelectedStage(null)}
@@ -297,42 +335,26 @@ const StoreFinder: React.FC = () => {
           </div>
         )}
 
-        {/* Stage-based Map Preview */}
-        {selectedStage !== null && (
-          <div className="mb-6">
-            <div className="bg-white rounded-lg shadow-sm p-4">
-              <h3 className="text-sm font-semibold text-gray-800 mb-3">현재 단계 추천 장소 미리보기</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {getStagePreviewTargets().map((h) => (
-                  <MapPreview
-                    key={`preview-${h.id}`}
-                    latitude={h.latitude ?? (currentLocation?.latitude as number)}
-                    longitude={h.longitude ?? (currentLocation?.longitude as number)}
-                    title={h.name}
-                    className=""
-                    zoom={15}
-                  />
-                ))}
-                {getStagePreviewTargets().length === 0 && (
-                  <div className="text-sm text-gray-500">추천 미리보기 대상을 찾지 못했습니다. 검색을 입력해 보세요.</div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Search Section */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              병원명 또는 주소 검색
+              {!showCategoryButtons && searchTerm === '가발전문점' 
+                ? '가발 매장 또는 주소 검색'
+                : !showCategoryButtons && searchTerm === '두피문신'
+                ? '두피문신 매장 또는 주소 검색'
+                : '병원명 또는 주소 검색'}
             </label>
             <div className="relative">
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="병원명, 주소로 검색... (위치 기반으로 자동 검색)"
+                placeholder={!showCategoryButtons && searchTerm === '가발전문점'
+                  ? "가발 매장, 주소로 검색... (위치 기반으로 자동 검색)"
+                  : !showCategoryButtons && searchTerm === '두피문신'
+                  ? "두피문신 매장, 주소로 검색... (위치 기반으로 자동 검색)"
+                  : "병원명, 주소로 검색... (위치 기반으로 자동 검색)"}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1F0101] focus:border-transparent"
               />
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -344,21 +366,53 @@ const StoreFinder: React.FC = () => {
           </div>
         </div>
 
-        {/* Category Buttons - 단계별 가시성 제어 */}
-        <div className="mb-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {visibleCategories.map((category) => (
-              <button
-                key={category.name}
-                onClick={() => setSearchTerm(category.searchTerm)}
-                className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200 hover:border-[#1F0101]"
-              >
-                <span className="text-2xl mb-2">{category.icon}</span>
-                <span className="text-sm font-medium text-gray-700">{category.name}</span>
-              </button>
-            ))}
+        {/* 검색 결과 통합 지도 */}
+        {!isLoading && effectiveHospitals.length > 0 && currentLocation && (
+          <div className="mb-6">
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+              <div className="px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 border-b">
+                <div className="flex items-center justify-between text-white">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">📍</span>
+                    <div>
+                      <h3 className="text-lg font-bold">검색 결과 지도</h3>
+                      <p className="text-xs opacity-90">{effectiveHospitals.length}개 장소</p>
+                    </div>
+                  </div>
+                  <div className="text-sm bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
+                    {searchTerm}
+                  </div>
+                </div>
+              </div>
+              <MapPreview
+                latitude={currentLocation.latitude}
+                longitude={currentLocation.longitude}
+                hospitals={effectiveHospitals}
+                userLocation={currentLocation}
+                zoom={13}
+                className="h-[400px]"
+              />
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Category Buttons - 단계별 가시성 제어 */}
+        {showCategoryButtons && (
+          <div className="mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {visibleCategories.map((category) => (
+                <button
+                  key={category.name}
+                  onClick={() => setSearchTerm(category.searchTerm)}
+                  className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200 hover:border-[#1F0101]"
+                >
+                  <span className="text-2xl mb-2">{category.icon}</span>
+                  <span className="text-sm font-medium text-gray-700">{category.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Loading State */}
         {isLoading && (
@@ -519,6 +573,7 @@ const StoreFinder: React.FC = () => {
           address={directionTarget?.roadAddress || directionTarget?.address}
           latitude={directionTarget?.latitude}
           longitude={directionTarget?.longitude}
+          userLocation={currentLocation || undefined}
         />
       </div>
     </div>

@@ -13,7 +13,6 @@ import {
 import StageSelector from '../check/StageSelector';
 import ProductList from '../hair_solutions/ProductList';
 import Header from '../Header';
-import Footer from '../Footer';
 
 /**
  * 탈모 단계별 제품 추천 페이지
@@ -384,7 +383,7 @@ const HairLossProducts: React.FC = () => {
         </div>
       </div>
       
-      <Footer />
+      
     </div>
   );
 };
