@@ -1,13 +1,13 @@
 import { Button } from '../ui/button';
 import { Progress } from '../ui/progress';
 import { CheckCircle, AlertCircle } from 'lucide-react';
-import { GeminiAnalysisResult, getStageDescription, getStageColor } from '../../services/geminiAnalysisService';
+import { SwinAnalysisResult, getStageDescription, getStageColor } from '../../services/swinAnalysisService';
 
 interface AnalysisProgressStepProps {
   analysisComplete: boolean;
   analysisProgress: number;
   analysisSteps: string[];
-  analysisResult: GeminiAnalysisResult | null;
+  analysisResult: SwinAnalysisResult | null;
   analysisError: string | null;
   isAnalyzing: boolean;
   onRetry: () => void;
@@ -61,14 +61,14 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
             {isAnalyzing && (
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-sm">Gemini AI로 이미지 분석 중...</span>
+                <span className="text-sm">Swin Transformer AI로 이미지 분석 중...</span>
               </div>
             )}
           </div>
 
           <div className="bg-blue-50 p-4 rounded-xl">
             <p className="text-sm text-blue-800">
-              🧠 <strong>실제 AI 분석 진행 중!</strong> Google Gemini가 귀하의 두피 상태를 분석하고 있습니다.
+              🧠 <strong>실제 AI 분석 진행 중!</strong> Swin Transformer 모델이 귀하의 두피 상태를 분석하고 있습니다.
               잠시만 기다려주세요.
             </p>
           </div>

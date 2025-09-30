@@ -5,7 +5,7 @@ import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { ImageWithFallback } from '../../hooks/ImageWithFallback';
-import { getStageDescription, getStageColor } from '../../services/geminiAnalysisService';
+import { getStageDescription, getStageColor } from '../../services/swinAnalysisService';
 import apiClient from '../../services/apiClient';
 import {
   CheckCircle,
@@ -51,10 +51,10 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
   const [videosLoading, setVideosLoading] = useState(false);
   const [videosError, setVideosError] = useState<string | null>(null);
 
-  // URL state 또는 props에서 Gemini 분석 결과 가져오기
-  const geminiResult = location.state?.geminiResult || diagnosisData?.photo?.geminiResult;
+  // URL state 또는 props에서 Swin 분석 결과 가져오기
+  const swinResult = location.state?.swinResult || diagnosisData?.photo?.swinResult;
 
-  // Gemini 단계별 YouTube 영상 추천 설정
+  // Swin 단계별 YouTube 영상 추천 설정
   const stageRecommendations: Record<number, StageRecommendation> = {
     0: {
       title: '정상 - 예방 및 두피 관리',
@@ -129,10 +129,10 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
     }
   }, []);
 
-  // 컴포넌트 마운트 시 Gemini 단계에 맞는 영상 로드
+  // 컴포넌트 마운트 시 Swin 단계에 맞는 영상 로드
   useEffect(() => {
-    if (geminiResult && geminiResult.stage !== undefined) {
-      const stage = geminiResult.stage;
+    if (swinResult && swinResult.stage !== undefined) {
+      const stage = swinResult.stage;
       const recommendation = stageRecommendations[stage];
       if (recommendation) {
         fetchYouTubeVideos(recommendation.query);
@@ -141,16 +141,16 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
       // 기본값으로 일반적인 탈모 관리 영상 로드
       fetchYouTubeVideos('탈모 관리 예방 두피케어');
     }
-  }, [geminiResult, fetchYouTubeVideos]);
+  }, [swinResult, fetchYouTubeVideos]);
 
-  // 진단 결과에 따른 추천 데이터 생성 (Gemini 결과 반영)
+  // 진단 결과에 따른 추천 데이터 생성 (Swin 결과 반영)
   const getRecommendations = () => {
-    // Gemini 결과가 있으면 우선 사용, 없으면 기본값
-    const geminiStage = geminiResult?.stage;
-    const baspScore = geminiStage !== undefined ? geminiStage : (diagnosisData?.basp?.score || 3.2);
+    // Swin 결과가 있으면 우선 사용, 없으면 기본값
+    const swinStage = swinResult?.stage;
+    const baspScore = swinStage !== undefined ? swinStage : (diagnosisData?.basp?.score || 3.2);
     const scalpHealth = diagnosisData?.photo?.scalpHealth || 85;
-    const geminiTitle = geminiResult?.title || '';
-    const geminiDescription = geminiResult?.description || '';
+    const swinTitle = swinResult?.title || '';
+    const swinDescription = swinResult?.description || '';
     
     // 병원 추천 (BASP 점수와 지역에 따라)
     const hospitals = [
@@ -245,7 +245,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
       }
     ];
 
-    // 생활습관 가이드 (Gemini 결과에 따라 조정)
+    // 생활습관 가이드 (Swin 결과에 따라 조정)
     const getLifestyleGuides = () => {
       const baseGuides = [
         {
@@ -268,13 +268,13 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
         }
       ];
 
-      // Gemini 조언이 있으면 추가
-      if (geminiResult && geminiResult.advice && geminiResult.advice.length > 0) {
+      // Swin 조언이 있으면 추가
+      if (swinResult && swinResult.advice && swinResult.advice.length > 0) {
         baseGuides.push({
           title: "🧠 AI 맞춤 가이드",
-          description: geminiDescription,
+          description: swinDescription,
           icon: <Brain className="w-5 h-5 text-purple-500" />,
-          tips: geminiResult.advice
+          tips: swinResult.advice
         });
       }
 
@@ -316,16 +316,16 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             
             <div className="grid grid-cols-3 gap-3">
               <div className="text-center p-3 bg-white rounded-lg">
-                <p className="text-xs text-gray-600">🧠 Gemini AI 분석</p>
+                <p className="text-xs text-gray-600">🧠 Swin AI 분석</p>
                 <p className="text-xl font-bold text-gray-800">
-                  {geminiResult ? `${geminiResult.stage}단계` : '분석 중'}
+                  {swinResult ? `${swinResult.stage}단계` : '분석 중'}
                 </p>
                 <Badge
                   className={`text-xs px-2 py-1 ${
-                    geminiResult ? getStageColor(geminiResult.stage) : 'bg-gray-100 text-gray-600'
+                    swinResult ? getStageColor(swinResult.stage) : 'bg-gray-100 text-gray-600'
                   }`}
                 >
-                  {geminiResult ? getStageDescription(geminiResult.stage) : "분석 중"}
+                  {swinResult ? getStageDescription(swinResult.stage) : "분석 중"}
                 </Badge>
               </div>
               <div className="text-center p-3 bg-white rounded-lg">
@@ -340,14 +340,14 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
               </div>
             </div>
 
-            {/* Gemini 분석 결과 요약 */}
-            {geminiResult && (
+            {/* Swin 분석 결과 요약 */}
+            {swinResult && (
               <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <Brain className="w-4 h-4 text-blue-600" />
-                  <h3 className="text-sm font-semibold text-blue-800">{geminiResult.title}</h3>
+                  <h3 className="text-sm font-semibold text-blue-800">{swinResult.title}</h3>
                 </div>
-                <p className="text-xs text-blue-700">{geminiResult.description}</p>
+                <p className="text-xs text-blue-700">{swinResult.description}</p>
               </div>
             )}
           </div>
@@ -538,16 +538,16 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                   <Brain className="w-5 h-5 text-blue-600" />
                   <h3 className="text-lg font-semibold text-gray-800">
                     AI 맞춤 영상 추천
-                    {geminiResult && (
+                    {swinResult && (
                       <span className="text-sm font-normal text-gray-600">
-                        ({getStageDescription(geminiResult.stage)} 맞춤)
+                        ({getStageDescription(swinResult.stage)} 맞춤)
                       </span>
                     )}
                   </h3>
                 </div>
                 <p className="text-sm text-gray-600 mb-4">
-                  {geminiResult && stageRecommendations[geminiResult.stage]
-                    ? stageRecommendations[geminiResult.stage].description
+                  {swinResult && stageRecommendations[swinResult.stage]
+                    ? stageRecommendations[swinResult.stage].description
                     : '전문가들이 추천하는 탈모 관리 영상들'
                   }
                 </p>
@@ -591,9 +591,9 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                         {video.channelName}
                       </p>
 
-                      {geminiResult && (
+                      {swinResult && (
                         <div className="bg-blue-50 p-3 rounded-lg text-xs mb-3">
-                          🎯 {stageRecommendations[geminiResult.stage]?.title || '맞춤 추천'}
+                          🎯 {stageRecommendations[swinResult.stage]?.title || '맞춤 추천'}
                         </div>
                       )}
 

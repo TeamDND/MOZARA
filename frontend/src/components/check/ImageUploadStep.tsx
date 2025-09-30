@@ -11,6 +11,7 @@ interface ImageUploadStepProps {
   uploadedSidePhoto: string | null;
   setUploadedSidePhoto: React.Dispatch<React.SetStateAction<string | null>>;
   setUploadedSidePhotoFile: React.Dispatch<React.SetStateAction<File | null>>;
+  gender?: string; // 성별 추가
 }
 
 const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
@@ -19,8 +20,12 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
   setUploadedPhotoFile,
   uploadedSidePhoto,
   setUploadedSidePhoto,
-  setUploadedSidePhotoFile
+  setUploadedSidePhotoFile,
+  gender
 }) => {
+  // 남성인 경우에만 Side View 필요
+  const isMale = gender === 'male';
+
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -138,7 +143,8 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
           )}
         </div>
 
-        {/* Side View - 머리 옆부분 사진 */}
+        {/* Side View - 머리 옆부분 사진 (남성만 표시) */}
+        {isMale && (
         <div className="border-2 border-dashed border-gray-300 rounded-xl p-6">
           <div className="text-center mb-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Side View - 머리 옆부분</h3>
@@ -202,19 +208,10 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
                   />
                 </div>
               </div>
-              
-              {/* 블러처리 버튼 - Side View 사진이 업로드된 후에만 표시 */}
-              <div className="pt-2">
-                <Button 
-                  type="button" 
-                  className="h-10 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg active:scale-[0.98]"
-                >
-                  🔒 블러처리하기
-                </Button>
-              </div>
             </div>
           )}
         </div>
+        )}
 
         <div className="bg-blue-50 p-4 rounded-xl">
           <h4 className="font-semibold text-blue-800 mb-3">📸 탈모 분석 촬영 가이드</h4>
