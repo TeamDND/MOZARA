@@ -1,3 +1,6 @@
+// locationProvider import 추가
+import { locationProvider } from './locationProvider';
+
 // 위치기반 서비스 API
 export interface Location {
   latitude: number;
@@ -34,38 +37,23 @@ class LocationService {
   private apiBaseUrl: string;
 
   constructor() {
-    // 백엔드 API URL 설정 (프로젝트 루트의 .env 파일 참조)
+    // Python Backend와 호환성 유지를 위한 URL 설정
+    // locationProvider가 Python API를 직접 사용하므로 이 URL은 레거시 호환용
     const envBase = (process.env.REACT_APP_API_BASE_URL || '').trim();
-    let base = envBase || 'http://localhost:8000/api';
-    // 방어적 정규화: /api 누락 시 자동 보정
-    try {
-      const url = new URL(base);
-      if (!url.pathname.endsWith('/api')) {
-        url.pathname = (url.pathname.replace(/\/$/, '')) + '/api';
-      }
-      base = url.toString().replace(/\/$/, '');
-    } catch {
-      // 만약 URL 파싱 실패 시 안전 기본값 사용
-      base = 'http://localhost:8000/api';
-    }
+    let base = envBase || 'http://localhost:8080/api';  // SpringBoot 호환
 
     this.apiBaseUrl = base;
 
-    console.log('LocationService 초기화 (프로젝트 루트 .env 참조):');
-    console.log('API Base URL:', this.apiBaseUrl);
-    console.log('REACT_APP_API_BASE_URL(raw):', process.env.REACT_APP_API_BASE_URL);
-    console.log('프로젝트 루트의 .env 파일에서 환경변수를 로드합니다.');
+    console.log('LocationService 초기화:');
+    console.log('Legacy API Base URL:', this.apiBaseUrl);
   }
-  // 주소/키워드로 좌표 보정 (카카오 키워드 검색 이용)
+  // 주소/키워드로 좌표 보정 (Python 카카오 검색 이용)
   private async fetchCoordsByKeyword(keyword: string, center?: Location, radius: number = 5000): Promise<{ lat: number; lng: number } | null> {
     try {
-      let url = `${this.apiBaseUrl}/kakao/local/search?query=${encodeURIComponent(keyword)}`;
-      if (center) {
-        url += `&x=${center.longitude}&y=${center.latitude}&radius=${radius}`;
-      }
-      const res = await fetch(url);
-      if (!res.ok) return null;
-      const data = await res.json();
+      const data = center
+        ? await locationProvider.searchWithKakao(keyword, center.longitude, center.latitude, radius)
+        : await locationProvider.searchWithKakao(keyword);
+
       const doc = (data.documents || [])[0];
       if (!doc) return null;
       const lat = parseFloat(doc.y);
@@ -180,19 +168,12 @@ class LocationService {
     });
   }
 
-  // 네이버 플레이스 API로 병원 검색 (백엔드 프록시 통해)
+  // 네이버 플레이스 API로 병원 검색 (Python 프록시 통해)
   async searchHospitalsWithNaver(params: SearchParams): Promise<Hospital[]> {
     const { query, location } = params;
 
     try {
-      const response = await fetch(`${this.apiBaseUrl}/naver/local/search?query=${encodeURIComponent(query)}`);
-
-      if (!response.ok) {
-        console.warn('Naver API 호출 실패:', response.status);
-        return [];
-      }
-
-      const data = await response.json();
+      const data = await locationProvider.searchWithNaver(query);
       if ((data as any).error) throw new Error(String((data as any).error));
       return this.transformNaverResults(data.items || [], location, query);
     } catch (error) {
@@ -201,25 +182,15 @@ class LocationService {
     }
   }
 
-  // 카카오 로컬 API로 병원 검색 (백엔드 프록시 통해)
+  // 카카오 로컬 API로 병원 검색 (Python 프록시 통해)
   async searchHospitalsWithKakao(params: SearchParams): Promise<Hospital[]> {
     const { query, location, radius = 5000 } = params;
 
     try {
-      let url = `${this.apiBaseUrl}/kakao/local/search?query=${encodeURIComponent(query)}`;
+      const data = location
+        ? await locationProvider.searchWithKakao(query, location.longitude, location.latitude, radius)
+        : await locationProvider.searchWithKakao(query);
 
-      if (location) {
-        url += `&x=${location.longitude}&y=${location.latitude}&radius=${radius}`;
-      }
-
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        console.warn('Kakao API 호출 실패:', response.status);
-        return [];
-      }
-
-      const data = await response.json();
       if ((data as any).error) throw new Error(String((data as any).error));
       return this.transformKakaoResults(data.documents || [], location, query);
     } catch (error) {
@@ -951,24 +922,13 @@ class LocationService {
     }
   }
 
-  // 백엔드 서버 상태 확인
+  // Python 백엔드 서버 상태 확인
   private async checkBackendServer(): Promise<boolean> {
     try {
-      // 1차: 새로운 엔드포인트 (/api/location/status)
-      let response = await fetch(`${this.apiBaseUrl}/location/status`, {
-        method: 'GET',
-        signal: AbortSignal.timeout(5000)
-      });
-      if (response.ok) return true;
-
-      // 2차: 과거 호환 (/config)
-      response = await fetch(`${this.apiBaseUrl}/config`, {
-        method: 'GET',
-        signal: AbortSignal.timeout(5000)
-      });
-      return response.ok;
+      const status = await locationProvider.checkLocationServiceStatus();
+      return status.status === 'ok';
     } catch (error) {
-      console.error('백엔드 서버 연결 실패:', error);
+      console.error('Python 백엔드 서버 연결 실패:', error);
       return false;
     }
   }
