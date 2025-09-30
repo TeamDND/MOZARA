@@ -5,6 +5,8 @@ import com.example.springboot.component.CustomAuthEntryPoint;
 import com.example.springboot.jwt.JwtFilter;
 import com.example.springboot.jwt.JwtLoginFilter;
 import com.example.springboot.jwt.JwtUtil;
+import com.example.springboot.service.user.CustomOAuth2UserService;
+import com.example.springboot.data.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +33,7 @@ public class SecurityConfig {
     private final CustomAuthEntryPoint customAuthEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -40,6 +43,11 @@ public class SecurityConfig {
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
+    }
+
+    @Bean
+    public CustomOAuth2UserService customOAuth2UserService() {
+        return new CustomOAuth2UserService(userRepository, jwtUtil);
     }
 
     @Bean
@@ -93,6 +101,14 @@ public class SecurityConfig {
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/oauth2/authorization/google")
+                        .defaultSuccessUrl("/oauth2/success", true)
+                        .failureUrl("/oauth2/fail")
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService())
+                        )
+                )
 
                 .addFilterBefore(new JwtFilter(jwtUtil), JwtLoginFilter.class)
                 .addFilterAt(new JwtLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
