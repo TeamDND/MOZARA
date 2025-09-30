@@ -21,7 +21,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class GeminiCheckService {
+public class SwinCheckService {
 
     @Value("${ai.python.base-url:http://localhost:8000}")
     private String pythonBaseUrl;
@@ -31,13 +31,18 @@ public class GeminiCheckService {
     private final UserRepository userRepository;
 
     /**
-     * Gemini 기반 탈모 이미지 분석 (Python /hair_gemini_check 프록시)
+     * Swin 기반 탈모 이미지 분석 (Python /hair_swin_check 프록시)
+     * Top + Side 이미지 동시 분석 (Side는 optional)
      */
-    public Map<String, Object> analyzeHairWithGemini(MultipartFile image) throws Exception {
-        log.info("Gemini 탈모 분석 요청 - 이미지: {}", image.getOriginalFilename());
+    public Map<String, Object> analyzeHairWithSwin(MultipartFile topImage, MultipartFile sideImage,
+                                                   String gender, String age, String familyHistory,
+                                                   String recentHairLoss, String stress) throws Exception {
+        log.info("Swin 탈모 분석 요청 - Top: {}, Side: {}",
+            topImage.getOriginalFilename(),
+            sideImage != null ? sideImage.getOriginalFilename() : "없음 (여성)");
 
-        // Python API의 URL을 그대로 사용
-        String url = pythonBaseUrl + "/hair_gemini_check";
+        // Python API의 URL을 hair_swin_check로 변경
+        String url = pythonBaseUrl + "/hair_swin_check";
 
         // HTTP 헤더를 MULTIPART_FORM_DATA로 설정
         HttpHeaders headers = new HttpHeaders();
@@ -46,13 +51,32 @@ public class GeminiCheckService {
         // MultiValueMap을 사용하여 요청 본문(body)을 구성
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
-        body.add("file", new ByteArrayResource(image.getBytes()) {
+        // Top 이미지 추가
+        body.add("top_image", new ByteArrayResource(topImage.getBytes()) {
             @Override
             public String getFilename() {
-                // 원본 파일명을 유지하도록 오버라이드
-                return image.getOriginalFilename();
+                return topImage.getOriginalFilename();
             }
         });
+
+        // Side 이미지 추가 (있는 경우만)
+        if (sideImage != null && !sideImage.isEmpty()) {
+            body.add("side_image", new ByteArrayResource(sideImage.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return sideImage.getOriginalFilename();
+                }
+            });
+        }
+
+        // 설문 데이터 추가
+        if (gender != null) body.add("gender", gender);
+        if (age != null) body.add("age", age);
+        if (familyHistory != null) body.add("familyHistory", familyHistory);
+        if (recentHairLoss != null) body.add("recentHairLoss", recentHairLoss);
+        if (stress != null) body.add("stress", stress);
+
+        log.info("설문 데이터 - 나이: {}, 가족력: {}, 최근탈모: {}, 스트레스: {}", age, familyHistory, recentHairLoss, stress);
 
         // 요청 엔티티 생성
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
@@ -62,25 +86,25 @@ public class GeminiCheckService {
             ResponseEntity<Map> response = restTemplate.postForEntity(url, requestEntity, Map.class);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                log.info("Python Gemini 분석 응답 성공");
+                log.info("Python Swin 분석 응답 성공");
                 return response.getBody();
             } else {
-                throw new Exception("Python Gemini 응답 오류: " + response.getStatusCode());
+                throw new Exception("Python Swin 응답 오류: " + response.getStatusCode());
             }
         } catch (Exception e) {
-            log.error("Python Gemini 통신 오류: {}", e.getMessage());
-            throw new Exception("Gemini 분석 서비스 연결 오류: " + e.getMessage());
+            log.error("Python Swin 통신 오류: {}", e.getMessage());
+            throw new Exception("Swin 분석 서비스 연결 오류: " + e.getMessage());
         }
     }
 
     /**
-     * Gemini 분석 결과를 데이터베이스에 저장
+     * Swin 분석 결과를 데이터베이스에 저장
      */
-    public Map<String, Object> saveAnalysisResult(Map<String, Object> geminiResult, Integer userId, String imageUrl) throws Exception {
-        log.info("Gemini 분석 결과 저장 요청 - 사용자: {}", userId);
+    public Map<String, Object> saveAnalysisResult(Map<String, Object> swinResult, Integer userId, String imageUrl) throws Exception {
+        log.info("Swin 분석 결과 저장 요청 - 사용자: {}", userId);
         System.out.println("=== 저장 요청 ===");
         System.out.println("userId: " + userId);
-        System.out.println("geminiResult: " + geminiResult);
+        System.out.println("swinResult: " + swinResult);
 
         try {
             // user_id가 없으면 저장하지 않음
@@ -99,13 +123,13 @@ public class GeminiCheckService {
                 throw new Exception("사용자를 찾을 수 없습니다: " + userId);
             }
 
-            // Gemini 결과를 데이터베이스 형식으로 변환
-            String title = (String) geminiResult.get("title");
-            String description = (String) geminiResult.get("description");
+            // Swin 결과를 데이터베이스 형식으로 변환
+            String title = (String) swinResult.get("title");
+            String description = (String) swinResult.get("description");
             String analysisSummary = title + "\n" + description;
-            
+
             // advice 배열을 문자열로 변환
-            Object adviceObj = geminiResult.get("advice");
+            Object adviceObj = swinResult.get("advice");
             String advice = "";
             if (adviceObj instanceof java.util.List) {
                 java.util.List<?> adviceList = (java.util.List<?>) adviceObj;
@@ -117,23 +141,23 @@ public class GeminiCheckService {
             entity.setInspectionDate(LocalDate.now());
             entity.setAnalysisSummary(analysisSummary);
             entity.setAdvice(advice);
-            entity.setGrade((Integer) geminiResult.get("stage"));
+            entity.setGrade((Integer) swinResult.get("stage"));
             entity.setImageUrl(imageUrl != null ? imageUrl : "");
             entity.setUserEntityIdForeign(user);
 
             // 데이터베이스에 저장
             AnalysisResultEntity savedEntity = analysisResultRepository.save(entity);
-            
-            log.info("Gemini 분석 결과 저장 성공: ID {}", savedEntity.getId());
-            
+
+            log.info("Swin 분석 결과 저장 성공: ID {}", savedEntity.getId());
+
             return Map.of(
                 "message", "분석 완료 및 저장 완료",
                 "saved", true,
                 "saved_id", savedEntity.getId()
             );
-            
+
         } catch (Exception e) {
-            log.error("Gemini 분석 결과 저장 오류: {}", e.getMessage());
+            log.error("Swin 분석 결과 저장 오류: {}", e.getMessage());
             throw new Exception("분석 결과 저장 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
