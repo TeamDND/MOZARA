@@ -27,9 +27,13 @@ public class OAuth2Controller {
 
     @GetMapping("/success")
     public void oauth2Success(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        log.info("OAuth2 로그인 성공");
+        log.info("=== OAuth2 Success 엔드포인트 호출됨 ===");
+        log.info("Request URL: {}", request.getRequestURL());
+        log.info("Request Parameters: {}", request.getQueryString());
         
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.info("Authentication 객체: {}", authentication);
+        log.info("Authentication Principal: {}", authentication != null ? authentication.getPrincipal() : "null");
         
         if (authentication != null && authentication.getPrincipal() instanceof CustomOAuth2UserService.CustomOAuth2User) {
             CustomOAuth2UserService.CustomOAuth2User oauth2User = 
@@ -50,7 +54,12 @@ public class OAuth2Controller {
             
             response.sendRedirect(redirectUrl);
         } else {
-            log.error("OAuth2 인증 정보를 찾을 수 없습니다.");
+            log.error("=== OAuth2 인증 실패 ===");
+            log.error("Authentication이 null이거나 CustomOAuth2User가 아님");
+            log.error("Authentication: {}", authentication);
+            if (authentication != null) {
+                log.error("Principal 타입: {}", authentication.getPrincipal().getClass().getName());
+            }
             response.sendRedirect("https://hairfit.duckdns.org/oauth2/callback?success=false&error=auth_failed");
         }
     }
