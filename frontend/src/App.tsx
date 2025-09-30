@@ -46,6 +46,7 @@ const App: React.FC = () => {
           <Route path="landing" element={<LandingPage />} />
           <Route path="login" element={<LogIn />} />
           <Route path="oauth2/authorization/google" element={<OAuth2Proxy />} />
+          <Route path="login/oauth2/code/google" element={<OAuth2Callback />} />
           <Route path="oauth2/callback" element={<OAuth2Callback />} />
           <Route path="integrated-diagnosis" element={<IntegratedDiagnosis />} />
           <Route path="diagnosis-results" element={<DiagnosisResults />} />
