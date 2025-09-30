@@ -97,8 +97,8 @@ const DailyCare: React.FC = () => {
 
   // 대시보드 카드 상태 (분석 결과 연동)
   const [scalpScore, setScalpScore] = useState<number>(78);
-  const [dandruffLabel, setDandruffLabel] = useState<string>('양호');
-  const [dandruffSub, setDandruffSub] = useState<string>('깨끗함');
+  const [oilinessLabel, setOilinessLabel] = useState<string>('양호');
+  const [oilinessSub, setOilinessSub] = useState<string>('균형');
   const [flakeLabel, setFlakeLabel] = useState<string>('양호');
   const [flakeSub, setFlakeSub] = useState<string>('개선됨');
   const [rednessLabel, setRednessLabel] = useState<string>('양호');
@@ -112,6 +112,40 @@ const DailyCare: React.FC = () => {
     const primarySeverity = res.analysis.primary_severity;
     const avgConfidence = res.analysis.average_confidence;
     const diagnosisScores = res.analysis.diagnosis_scores;
+    
+    // 비듬과 탈모 관련 내용 필터링
+    const category = primaryCategory.toLowerCase();
+    if (category.includes('비듬') || category.includes('탈모')) {
+      // 비듬이나 탈모가 주요 카테고리인 경우 "양호"로 처리
+      const filteredCategory = "0.양호";
+      const filteredSeverity = "0.양호";
+      
+      // 필터링된 데이터로 계속 처리
+      const filteredAnalysis = {
+        ...res.analysis,
+        primary_category: filteredCategory,
+        primary_severity: filteredSeverity,
+        diagnosis_scores: Object.fromEntries(
+          Object.entries(diagnosisScores).filter(([key]) => 
+            !key.includes('비듬') && !key.includes('탈모')
+          )
+        )
+      };
+      
+      // 필터링된 분석으로 대시보드 업데이트
+      updateDashboardWithFilteredData(filteredAnalysis);
+      return;
+    }
+    
+    // 비듬/탈모가 아닌 경우 정상 처리
+    updateDashboardWithFilteredData(res.analysis);
+  };
+  
+  const updateDashboardWithFilteredData = (analysis: any) => {
+    const primaryCategory = analysis.primary_category;
+    const primarySeverity = analysis.primary_severity;
+    const avgConfidence = analysis.average_confidence;
+    const diagnosisScores = analysis.diagnosis_scores;
 
     // 심각도에 따른 단계 계산 (0.양호=0, 1.경증=1, 2.중등도=2, 3.중증=3)
     const severityLevel = parseInt(primarySeverity.split('.')[0]) || 0;
@@ -126,20 +160,24 @@ const DailyCare: React.FC = () => {
     
     // 진단 점수 기반 조정
     if (diagnosisScores) {
-      const avgDiagnosisScore = Object.values(diagnosisScores).reduce((sum, score) => sum + score, 0) / Object.keys(diagnosisScores).length;
+      const scores = Object.values(diagnosisScores) as number[];
+      const avgDiagnosisScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
       baseScore -= (avgDiagnosisScore - 0.5) * 30; // 진단 점수 기반 조정
     }
     
     // 신뢰도 기반 보정
     baseScore += (conf - 0.5) * 20; // 신뢰도 기반 보정
     
-    // 카테고리별 특별 감점
+    // 카테고리별 특별 감점 (비듬/탈모는 이미 필터링됨)
     const category = primaryCategory.toLowerCase();
-    if (category.includes('비듬') || category.includes('탈모')) {
-      baseScore -= 15; // 비듬/탈모는 추가 감점
-    }
     if (category.includes('홍반') || category.includes('농포')) {
       baseScore -= 10; // 염증 관련 추가 감점
+    }
+    if (category.includes('피지과다')) {
+      baseScore -= 8; // 피지과다는 추가 감점
+    }
+    if (category.includes('미세각질')) {
+      baseScore -= 6; // 미세각질은 추가 감점
     }
     
     const finalScore = Math.max(0, Math.min(100, Math.round(baseScore)));
@@ -147,16 +185,16 @@ const DailyCare: React.FC = () => {
 
     // 카테고리와 심각도에 따른 상태 추정 (새로운 카테고리)
     
-    // 비듬 상태 판정
-    if (category.includes('비듬') || stage01to03 >= 2) {
-      setDandruffLabel('주의');
-      setDandruffSub('관리 필요');
+    // 피지 상태 판정
+    if (category.includes('피지과다') || stage01to03 >= 2) {
+      setOilinessLabel('주의');
+      setOilinessSub('관리 필요');
     } else if (stage01to03 === 1) {
-      setDandruffLabel('보통');
-      setDandruffSub('관찰중');
+      setOilinessLabel('보통');
+      setOilinessSub('관찰중');
     } else {
-      setDandruffLabel('양호');
-      setDandruffSub('깨끗함');
+      setOilinessLabel('양호');
+      setOilinessSub('균형');
     }
 
     // 각질 상태 판정
@@ -186,7 +224,7 @@ const DailyCare: React.FC = () => {
     // 분석 결과 기반 맞춤형 케어 팁 생성
     const buildSolutions = (
       score: number,
-      dandruff: string,
+      oiliness: string,
       flake: string,
       redness: string
     ): string[] => {
@@ -207,12 +245,12 @@ const DailyCare: React.FC = () => {
         s.push('🏥 피부과 전문의와 상담하여 정확한 진단을 받아보세요.');
       }
       
-      // 비듬 상태별 맞춤 케어
-      if (dandruff === '주의') {
-        s.push('🧴 항비듬 성분(피리티온아연, 셀레늄) 샴푸를 주 2-3회 사용하세요.');
+      // 피지 상태별 맞춤 케어
+      if (oiliness === '주의') {
+        s.push('🧴 지성 두피 전용 샴푸로 깊은 클렌징을 하세요.');
         s.push('🚿 샴푸 시 두피를 부드럽게 마사지하며 충분히 헹구세요.');
-      } else if (dandruff === '보통') {
-        s.push('🧽 두피 클렌징을 강화하고 비듬 예방 샴푸를 주 1-2회 사용하세요.');
+      } else if (oiliness === '보통') {
+        s.push('🧽 두피 클렌징을 강화하고 피지 조절 샴푸를 주 1-2회 사용하세요.');
       }
       
       // 각질 상태별 맞춤 케어
@@ -234,7 +272,7 @@ const DailyCare: React.FC = () => {
       return s.slice(0, 6);
     };
 
-    setTips(buildSolutions(finalScore, dandruffLabel, flakeLabel, rednessLabel));
+    setTips(buildSolutions(finalScore, oilinessLabel, flakeLabel, rednessLabel));
   };
   const todayStr = new Date().toLocaleDateString('ko-KR', {
     year: 'numeric',
@@ -393,9 +431,9 @@ const DailyCare: React.FC = () => {
               <p className="mt-1 text-xs text-green-600">LLM 종합 분석</p>
             </div>
             <div className="bg-white p-4 rounded-xl shadow-md">
-              <p className="text-xs text-gray-500">비듬 상태</p>
-              <div className="mt-1 text-xl font-bold text-gray-800">{dandruffLabel}</div>
-              <p className="mt-1 text-xs text-emerald-600">{dandruffSub}</p>
+              <p className="text-xs text-gray-500">피지 상태</p>
+              <div className="mt-1 text-xl font-bold text-gray-800">{oilinessLabel}</div>
+              <p className="mt-1 text-xs text-emerald-600">{oilinessSub}</p>
             </div>
             <div className="bg-white p-4 rounded-xl shadow-md">
               <p className="text-xs text-gray-500">각질 상태</p>
