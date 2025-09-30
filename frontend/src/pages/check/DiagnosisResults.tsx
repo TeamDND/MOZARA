@@ -128,7 +128,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
   // 컴포넌트 마운트 시 Swin 단계에 맞는 영상 로드
   useEffect(() => {
     if (swinResult && swinResult.stage !== undefined) {
-      const recommendation = stageRecommendations[stage];
+      const recommendation = stageRecommendations[swinResult.stage];
       if (recommendation) {
         fetchYouTubeVideos(recommendation.query);
       }
@@ -265,7 +265,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
       if (swinResult && swinResult.advice && swinResult.advice.length > 0) {
         baseGuides.push({
           title: "🧠 AI 맞춤 가이드",
-          description: swinDescription,
+          description: swinResult.description || "AI 분석 결과를 바탕으로 한 맞춤형 가이드",
           icon: <Brain className="w-5 h-5 text-purple-500" />,
           tips: swinResult.advice
         });
@@ -542,6 +542,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                 <p className="text-sm text-gray-600 mb-4">
                   {swinResult && stageRecommendations[swinResult.stage]
                     ? stageRecommendations[swinResult.stage].description
+                    : "탈모 관리와 예방에 도움이 되는 영상을 추천합니다"
                   }
                 </p>
 

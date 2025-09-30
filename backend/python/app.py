@@ -870,18 +870,25 @@ class QuizQuestion(BaseModel):
     question: str
     answer: str
 
+class PaperDetail(BaseModel):
+    id: str
+    title: str
+    source: str
+    full_summary: str
+
+class PaperAnalysis(BaseModel):
+    id: str
+    title: str
+    source: str
+    main_topics: List[str]
+    key_conclusions: str
+    section_summaries: List[dict]
+
+class QuizGenerateResponse(BaseModel):
+    items: List[QuizQuestion]
+
 @app.get("/")
-<<<<<<<<< Temporary merge branch 1
-async def root():
-    if not index:
-        return {"message": "Hair Encyclopedia Service - Main Project", "papers_count": 0, "status": "thesis_search_disabled"}
-    
-    try:
-        results = index.query(
-            vector=[0.0] * 1536,
-            top_k=10000,
-            include_metadata=True
-=========
+
 def read_root():
     """루트 경로 - 서버 상태 확인"""
     return {
@@ -899,6 +906,255 @@ def read_root():
 def health_check():
     """헬스 체크 엔드포인트"""
     return {"status": "healthy", "service": "python-backend-integrated"}
+
+# --- Gemini 탈모 사진 분석 전용 엔드포인트 ---
+@app.post("/hair_gemini_check")
+async def api_hair_gemini_check(file: Annotated[UploadFile, File(...)]):
+    """
+    multipart/form-data로 전송된 이미지를 Gemini로 분석하여 표준 결과를 반환
+    """
+    if not GEMINI_HAIR_CHECK_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Gemini 분석 모듈이 활성화되지 않았습니다.")
+
+    try:
+        image_bytes = await file.read()
+        print(f"--- [DEBUG] File received. Size: {len(image_bytes)} bytes ---")
+
+        # bytes 데이터를 직접 전달
+        result = analyze_hair_with_gemini(image_bytes)
+
+        return result
+    except Exception as e:
+        print(f"--- [DEBUG] Main Error: {str(e)} ---")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# 프리플라이트 요청 처리 (특정 브라우저/프록시 환경 대응)
+# @app.options("/api/hair_gemini_check")
+# def options_hair_gemini_check():
+#     return {"ok": True}
+
+# @app.get("/api/hair_gemini_check/ping")
+# def get_hair_gemini_check_ping():
+#     return {"status": "ok"}
+
+# --- 네이버 지역 검색 API 프록시 ---
+@app.get("/api/naver/local/search")
+async def search_naver_local(query: str):
+    """네이버 지역 검색 API 프록시"""
+    naver_client_id = os.getenv("NAVER_CLIENT_ID") or os.getenv("REACT_APP_NAVER_CLIENT_ID")
+    naver_client_secret = os.getenv("NAVER_CLIENT_SECRET") or os.getenv("REACT_APP_NAVER_CLIENT_SECRET")
+
+    if not naver_client_id or not naver_client_secret:
+        raise HTTPException(status_code=503, detail="네이버 API 키가 설정되지 않았습니다.")
+
+    try:
+        import requests
+        # 카테고리별로 다른 검색어 전략 사용
+        if "미용실" in query or "헤어살롱" in query or "탈모전용" in query:
+            # 탈모미용실 검색 시 더 광범위한 미용실 검색
+            search_query = "탈모 미용실 헤어살롱"
+        elif "가발" in query or "증모술" in query:
+            search_query = f"{query}"
+        elif "문신" in query or "smp" in query.lower():
+            search_query = f"두피문신 SMP"
+        elif "약국" in query:
+            # 탈모약국 검색
+            search_query = "약국"
+        else:
+            # 탈모병원 검색 시 탈모 관련 의료기관 검색
+            if "탈모" in query or "병원" in query or "의원" in query:
+                search_query = "탈모 병원 의원 클리닉 피부과 모발"
+            else:
+                search_query = f"{query} 병원"
+
+        api_url = f"https://openapi.naver.com/v1/search/local.json"
+        params = {
+            "query": search_query,
+            "display": 20,
+            "sort": "comment"
+        }
+
+        headers = {
+            "X-Naver-Client-Id": naver_client_id,
+            "X-Naver-Client-Secret": naver_client_secret
+        }
+
+        response = requests.get(api_url, params=params, headers=headers)
+        response.raise_for_status()
+
+        data = response.json()
+        
+        # 각 항목에 이미지 URL 추가 (네이버 API 우선 활용)
+        if 'items' in data:
+            for item in data['items']:
+                # 네이버 지역검색 결과에서 이미지 정보 추출 시도 (동기 버전)
+                try:
+                    import asyncio
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    image_url = loop.run_until_complete(get_naver_place_detail_image(item))
+                    loop.close()
+                    
+                    if not image_url:
+                        # 네이버에서 이미지를 찾지 못한 경우 다른 소스 시도
+                        image_url = get_best_image_url(
+                            item.get('title', ''), 
+                            item.get('address', ''), 
+                            item.get('category', '')
+                        )
+                    item['imageUrl'] = image_url
+                except Exception as e:
+                    print(f"네이버 이미지 추출 오류: {e}")
+                    # 오류 발생 시 기본 이미지 사용
+                    item['imageUrl'] = get_best_image_url(
+                        item.get('title', ''), 
+                        item.get('address', ''), 
+                        item.get('category', '')
+                    )
+        
+        return data
+
+    except Exception as e:
+        print(f"네이버 지역 검색 API 오류: {e}")
+        raise HTTPException(status_code=500, detail=f"네이버 API 호출 실패: {str(e)}")
+
+# --- 카카오 좌표-주소 변환 API 프록시 (정식/호환 엔드포인트 제공) ---
+@app.get("/api/kakao/local/geo/coord2address")
+@app.get("/api/kakao/geo/coord2address")
+async def get_address_from_coordinates(x: float, y: float):
+    """카카오 좌표-주소 변환 API 프록시"""
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY") or os.getenv("REACT_APP_KAKAO_REST_API_KEY")
+
+    if not kakao_api_key:
+        raise HTTPException(status_code=503, detail="카카오 API 키가 설정되지 않았습니다.")
+
+    try:
+        import requests
+
+        api_url = "https://dapi.kakao.com/v2/local/geo/coord2address.json"
+        params = {
+            "x": x,
+            "y": y
+        }
+
+        headers = {
+            "Authorization": f"KakaoAK {kakao_api_key}"
+        }
+
+        response = requests.get(api_url, params=params, headers=headers, timeout=10)
+        response.raise_for_status()
+
+        return response.json()
+
+    except Exception as e:
+        print(f"카카오 좌표-주소 변환 API 오류: {e}")
+        raise HTTPException(status_code=500, detail=f"카카오 좌표-주소 변환 실패: {str(e)}")
+
+# 대안: 좌표-행정구역 코드 변환 프록시
+@app.get("/api/kakao/local/geo/coord2regioncode")
+async def get_region_from_coordinates(x: float, y: float):
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY") or os.getenv("REACT_APP_KAKAO_REST_API_KEY")
+    if not kakao_api_key:
+        raise HTTPException(status_code=503, detail="카카오 API 키가 설정되지 않았습니다.")
+    try:
+        import requests
+        api_url = "https://dapi.kakao.com/v2/local/geo/coord2regioncode.json"
+        params = {"x": x, "y": y}
+        headers = {"Authorization": f"KakaoAK {kakao_api_key}"}
+        response = requests.get(api_url, params=params, headers=headers, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        print(f"카카오 좌표-행정구역 변환 API 오류: {e}")
+        raise HTTPException(status_code=500, detail=f"카카오 좌표-행정구역 변환 실패: {str(e)}")
+
+# --- 카카오 지역 검색 API 프록시 ---
+@app.get("/api/kakao/local/search")
+async def search_kakao_local(
+    query: str,
+    x: Optional[float] = None,
+    y: Optional[float] = None,
+    radius: Optional[int] = 5000
+):
+    """카카오 지역 검색 API 프록시"""
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY") or os.getenv("REACT_APP_KAKAO_REST_API_KEY")
+
+    if not kakao_api_key:
+        raise HTTPException(status_code=503, detail="카카오 API 키가 설정되지 않았습니다.")
+
+    try:
+        import requests
+        # 카테고리별로 다른 검색어 전략 사용
+        if "미용실" in query or "헤어살롱" in query or "탈모전용" in query:
+            # 탈모미용실 검색 시 더 광범위한 미용실 검색
+            search_query = "탈모 미용실 헤어살롱"
+        elif "가발" in query or "증모술" in query:
+            search_query = f"{query}"
+        elif "문신" in query or "smp" in query.lower():
+            search_query = f"두피문신 SMP"
+        elif "약국" in query:
+            # 탈모약국 검색
+            search_query = "약국"
+        else:
+            # 탈모병원 검색 시 탈모 관련 의료기관 검색
+            if "탈모" in query or "병원" in query or "의원" in query:
+                search_query = "탈모 병원 의원 클리닉 피부과 모발"
+            else:
+                search_query = f"{query} 병원"
+
+        api_url = f"https://dapi.kakao.com/v2/local/search/keyword.json"
+        params = {
+            "query": search_query,
+            "size": 15
+        }
+
+        if x is not None and y is not None:
+            params["x"] = x
+            params["y"] = y
+            params["radius"] = radius
+
+        headers = {
+            "Authorization": f"KakaoAK {kakao_api_key}"
+        }
+
+        response = requests.get(api_url, params=params, headers=headers)
+        response.raise_for_status()
+
+        data = response.json()
+        
+        # 각 항목에 이미지 URL 추가 (카카오 API 우선 활용)
+        if 'documents' in data:
+            for doc in data['documents']:
+                # 카카오 장소 상세 정보에서 이미지 추출 시도
+                try:
+                    import asyncio
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    image_url = loop.run_until_complete(get_kakao_place_detail_image(doc.get('id')))
+                    loop.close()
+                    
+                    if not image_url:
+                        # 카카오에서 이미지를 찾지 못한 경우 다른 소스 시도
+                        image_url = get_best_image_url(
+                            doc.get('place_name', ''), 
+                            doc.get('address_name', ''), 
+                            doc.get('category_name', '')
+                        )
+                    doc['imageUrl'] = image_url
+                except Exception as e:
+                    print(f"카카오 이미지 추출 오류: {e}")
+                    # 오류 발생 시 기본 이미지 사용
+                    doc['imageUrl'] = get_best_image_url(
+                        doc.get('place_name', ''), 
+                        doc.get('address_name', ''), 
+                        doc.get('category_name', '')
+                    )
+        
+        return data
+
+    except Exception as e:
+        print(f"카카오 지역 검색 API 오류: {e}")
+        raise HTTPException(status_code=500, detail=f"카카오 API 호출 실패: {str(e)}")
 
 # --- YouTube API 프록시 (조건부) ---
 @app.get("/youtube/search")
@@ -1050,8 +1306,7 @@ async def refresh_token():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-=========
->>>>>>>>> Temporary merge branch 2
+
 
 @app.get("/paper/{paper_id}", response_model=PaperDetail)
 async def get_paper_detail(paper_id: str):

@@ -23,7 +23,7 @@ const StoreFinder: React.FC = () => {
 
   // 4개 카테고리 정의
   const categories = [
-    { name: "탈모병원", icon: "🏥", searchTerm: "탈모병원", category: "탈모병원" },
+    { name: "탈모병원", icon: "🏥", searchTerm: "탈모", category: "탈모병원" },
     { name: "탈모미용실", icon: "💇", searchTerm: "탈모미용실", category: "탈모미용실" },
     { name: "가발전문점", icon: "🎭", searchTerm: "가발전문점", category: "가발전문점" },
     { name: "두피문신", icon: "🎨", searchTerm: "두피문신", category: "두피문신" }
@@ -316,13 +316,13 @@ const StoreFinder: React.FC = () => {
           <div className="mb-6">
             <div className="bg-[#1F0101]/5 border border-[#1F0101] rounded-lg p-4">
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex items-center gap-3">
                   <h3 className="text-lg font-semibold text-[#1F0101]">
                     {selectedStage}단계: {HAIR_LOSS_STAGES[selectedStage]?.name}
                   </h3>
-                  <p className="text-[#1F0101] text-sm mt-1 opacity-80">
+                  <span className="text-sm text-[#1F0101] opacity-80">
                     {STAGE_RECOMMENDATIONS[selectedStage as keyof typeof STAGE_RECOMMENDATIONS]?.message}
-                  </p>
+                  </span>
                 </div>
                 <button
                   onClick={() => setSelectedStage(null)}
@@ -330,30 +330,6 @@ const StoreFinder: React.FC = () => {
                 >
                   단계 초기화
                 </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Stage-based Map Preview */}
-        {selectedStage !== null && (
-          <div className="mb-6">
-            <div className="bg-white rounded-lg shadow-sm p-4">
-              <h3 className="text-sm font-semibold text-gray-800 mb-3">현재 단계 추천 장소 미리보기</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {getStagePreviewTargets().map((h) => (
-                  <MapPreview
-                    key={`preview-${h.id}`}
-                    latitude={h.latitude ?? (currentLocation?.latitude as number)}
-                    longitude={h.longitude ?? (currentLocation?.longitude as number)}
-                    title={h.name}
-                    className=""
-                    zoom={15}
-                  />
-                ))}
-                {getStagePreviewTargets().length === 0 && (
-                  <div className="text-sm text-gray-500">추천 미리보기 대상을 찾지 못했습니다. 검색을 입력해 보세요.</div>
-                )}
               </div>
             </div>
           </div>
@@ -389,6 +365,36 @@ const StoreFinder: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* 검색 결과 통합 지도 */}
+        {!isLoading && effectiveHospitals.length > 0 && currentLocation && (
+          <div className="mb-6">
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+              <div className="px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 border-b">
+                <div className="flex items-center justify-between text-white">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">📍</span>
+                    <div>
+                      <h3 className="text-lg font-bold">검색 결과 지도</h3>
+                      <p className="text-xs opacity-90">{effectiveHospitals.length}개 장소</p>
+                    </div>
+                  </div>
+                  <div className="text-sm bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
+                    {searchTerm}
+                  </div>
+                </div>
+              </div>
+              <MapPreview
+                latitude={currentLocation.latitude}
+                longitude={currentLocation.longitude}
+                hospitals={effectiveHospitals}
+                userLocation={currentLocation}
+                zoom={13}
+                className="h-[400px]"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Category Buttons - 단계별 가시성 제어 */}
         {showCategoryButtons && (
@@ -567,6 +573,7 @@ const StoreFinder: React.FC = () => {
           address={directionTarget?.roadAddress || directionTarget?.address}
           latitude={directionTarget?.latitude}
           longitude={directionTarget?.longitude}
+          userLocation={currentLocation || undefined}
         />
       </div>
     </div>

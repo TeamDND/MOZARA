@@ -28,7 +28,8 @@ class LocationProvider {
    */
   async searchWithNaver(query: string): Promise<any> {
     try {
-      const url = `${this.pythonBaseUrl}/location/naver/search?query=${encodeURIComponent(query)}`;
+      const url = `${this.pythonBaseUrl}/api/naver/local/search?query=${encodeURIComponent(query)}`;
+      console.log('네이버 API 호출:', url);
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -44,10 +45,12 @@ class LocationProvider {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
+        console.error('네이버 API 응답 오류:', response.status, response.statusText);
         throw new Error(`네이버 API 호출 실패: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('네이버 API 결과:', data);
       return data;
     } catch (error: any) {
       console.error('네이버 검색 중 오류:', error);
@@ -70,11 +73,13 @@ class LocationProvider {
     radius: number = 5000
   ): Promise<any> {
     try {
-      let url = `${this.pythonBaseUrl}/location/kakao/search?query=${encodeURIComponent(query)}`;
+      let url = `${this.pythonBaseUrl}/api/kakao/local/search?query=${encodeURIComponent(query)}`;
 
       if (x !== undefined && y !== undefined) {
         url += `&x=${x}&y=${y}&radius=${radius}`;
       }
+
+      console.log('카카오 API 호출:', url);
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -90,10 +95,12 @@ class LocationProvider {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
+        console.error('카카오 API 응답 오류:', response.status, response.statusText);
         throw new Error(`카카오 API 호출 실패: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('카카오 API 결과:', data);
       return data;
     } catch (error: any) {
       console.error('카카오 검색 중 오류:', error);
@@ -116,7 +123,7 @@ class LocationProvider {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const response = await fetch(`${this.pythonBaseUrl}/location/status`, {
+      const response = await fetch(`${this.pythonBaseUrl}/api/location/status`, {
         method: 'GET',
         signal: controller.signal,
       });
@@ -124,10 +131,12 @@ class LocationProvider {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
+        console.error('위치 서비스 상태 확인 실패:', response.status);
         throw new Error(`상태 확인 실패: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('Python 위치 서비스 상태:', data);
       return data;
     } catch (error: any) {
       console.error('Python 위치 서비스 상태 확인 실패:', error);
