@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { User, Activity } from 'lucide-react';
+import apiClient from '../../services/apiClient';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../utils/store';
 
 // TypeScript: UserInfoEdit 컴포넌트 타입 정의
 interface UserInfo {
@@ -26,27 +29,170 @@ interface UserInfoEditProps {
 const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
   const [activeTab, setActiveTab] = useState<'basic' | 'analysis'>('basic');
 
+  // Redux에서 username 가져오기
+  const username = useSelector((state: RootState) => state.user.username);
+
+  // 기본 정보 상태
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+
+  // 분석 정보 상태
+  const [gender, setGender] = useState("");
+  const [age, setAge] = useState<number>(0);
+  const [recentHairLoss, setRecentHairLoss] = useState(false);
+  const [familyHistory, setFamilyHistory] = useState(false);
+
+  // 비밀번호 변경 상태
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  // userInfo 변경 시 상태 업데이트
+  useEffect(() => {
+    if (userInfo) {
+      setName(userInfo.name || "");
+      setEmail(userInfo.email || "");
+      setGender(userInfo.gender || "");
+      setAge(userInfo.age || 0);
+      setRecentHairLoss(userInfo.recentHairLoss || false);
+      setFamilyHistory(userInfo.familyHistory || false);
+    }
+  }, [userInfo]);
+
+  // 기본 정보 수정 핸들러
+  const handleBasicInfoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!email) {
+      alert("이메일을 입력해주세요.");
+      return;
+    }
+
+    if (userInfo.name === name && userInfo.email === email) {
+      alert("변경된 내용이 없습니다.");
+      return;
+    }
+
+    try {
+      const res = await apiClient.put(`/userinfo/basic/${username}`, {
+        email,
+        nickname: name // UserBasicInfoDTO는 nickname 필드 사용
+      });
+
+      if (res?.data) {
+        alert('정보가 수정되었습니다.');
+        // 필요시 페이지 새로고침 또는 상태 업데이트
+      }
+    } catch (error: any) {
+      console.error(error);
+      const errorMessage = error.response?.data?.error || "정보 수정 중 오류가 발생했습니다.";
+      alert(errorMessage);
+    }
+  };
+
+  // 분석 정보 수정 핸들러
+  const handleAnalysisInfoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (userInfo.gender === gender && userInfo.age === age &&
+        userInfo.recentHairLoss === recentHairLoss && userInfo.familyHistory === familyHistory) {
+      alert("변경된 내용이 없습니다.");
+      return;
+    }
+
+    try {
+      const res = await apiClient.put(`/userinfo/${username}`, {
+        gender,
+        age,
+        isLoss: recentHairLoss,
+        familyHistory,
+        stress: null // 필요시 추가
+      });
+
+      if (res?.data) {
+        alert('정보가 수정되었습니다.');
+        // 필요시 페이지 새로고침 또는 상태 업데이트
+      }
+    } catch (error: any) {
+      console.error(error);
+      const errorMessage = error.response?.data?.error || "정보 수정 중 오류가 발생했습니다.";
+      alert(errorMessage);
+    }
+  };
+
+  // 비밀번호 변경 토글
+  const togglePasswordChange = () => {
+    setShowPasswordChange(!showPasswordChange);
+    setNewPassword("");
+    setConfirmPassword("");
+  };
+
+  // 비밀번호 변경 핸들러
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!newPassword || !confirmPassword) {
+      alert("모든 필드를 입력해주세요.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      alert("비밀번호는 8자 이상이어야 합니다.");
+      return;
+    }
+
+    try {
+      const res = await apiClient.put(`/password/reset/${username}?password=${newPassword}`);
+
+      if (res?.data) {
+        alert('비밀번호가 변경되었습니다.');
+        setShowPasswordChange(false);
+        setNewPassword("");
+        setConfirmPassword("");
+      }
+    } catch (error: any) {
+      console.error(error);
+      const errorMessage = error.response?.data?.error || "비밀번호 변경 중 오류가 발생했습니다.";
+      alert(errorMessage);
+    }
+  };
+
   const renderBasicInfo = () => (
     <Card className="border-0 shadow-sm bg-white">
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-bold text-gray-900">기본 정보</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">이름</label>
-          <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{userInfo.name}</div>
-        </div>
+        <form onSubmit={handleBasicInfoSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">닉네임</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full p-3 bg-gray-50 rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
+            />
+          </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">이메일</label>
-          <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{userInfo.email}</div>
-        </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">이메일</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-3 bg-gray-50 rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
+            />
+          </div>
 
-        
-
-        <Button className="w-full mt-6 bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium">
-          정보 수정하기
-        </Button>
+          <Button type="submit" className="w-full mt-6 bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium">
+            정보 수정하기
+          </Button>
+        </form>
       </CardContent>
     </Card>
   );
@@ -57,41 +203,58 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
         <CardTitle className="text-base font-bold text-gray-900">분석 정보</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">성별</label>
-          <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{userInfo.gender}</div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">나이</label>
-          <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{userInfo.age > 0 ? `${userInfo.age}세` : "나이 정보 없음"}</div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">최근 머리빠짐</label>
-          <div className={`p-3 rounded-lg text-sm font-medium ${
-            userInfo.recentHairLoss 
-              ? 'bg-red-50 text-red-800 border border-red-200' 
-              : 'bg-gray-50 text-gray-800 border border-gray-200'
-          }`}>
-            {userInfo.recentHairLoss ? '예' : '아니오'}
+        <form onSubmit={handleAnalysisInfoSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">성별</label>
+            <select
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              className="w-full p-3 bg-gray-50 rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
+            >
+              <option value="">선택해주세요</option>
+              <option value="남성">남성</option>
+              <option value="여성">여성</option>
+            </select>
           </div>
-        </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">가족력</label>
-          <div className={`p-3 rounded-lg text-sm font-medium ${
-            userInfo.familyHistory 
-              ? 'bg-red-50 text-red-800 border border-red-200' 
-              : 'bg-gray-50 text-gray-800 border border-gray-200'
-          }`}>
-            {userInfo.familyHistory ? '예' : '아니오'}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">나이</label>
+            <input
+              type="number"
+              value={age}
+              onChange={(e) => setAge(Number(e.target.value))}
+              className="w-full p-3 bg-gray-50 rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
+            />
           </div>
-        </div>
 
-        <Button className="w-full mt-6 bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium">
-          분석 정보 수정하기
-        </Button>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">최근 머리빠짐</label>
+            <select
+              value={recentHairLoss ? "true" : "false"}
+              onChange={(e) => setRecentHairLoss(e.target.value === "true")}
+              className="w-full p-3 bg-gray-50 rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
+            >
+              <option value="false">아니오</option>
+              <option value="true">예</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">가족력</label>
+            <select
+              value={familyHistory ? "true" : "false"}
+              onChange={(e) => setFamilyHistory(e.target.value === "true")}
+              className="w-full p-3 bg-gray-50 rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
+            >
+              <option value="false">아니오</option>
+              <option value="true">예</option>
+            </select>
+          </div>
+
+          <Button type="submit" className="w-full mt-6 bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium">
+            분석 정보 수정하기
+          </Button>
+        </form>
       </CardContent>
     </Card>
   );
@@ -143,10 +306,45 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
         <CardContent className="space-y-3">
           <Button
             variant="outline"
+            onClick={togglePasswordChange}
             className="w-full justify-start bg-white border-gray-200 text-gray-700 hover:bg-gray-50 rounded-lg"
           >
             비밀번호 변경
           </Button>
+
+          {/* 비밀번호 변경 폼 */}
+          {showPasswordChange && (
+            <form onSubmit={handlePasswordChange} className="space-y-4 p-4 bg-gray-50 rounded-lg mt-3">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">새 비밀번호</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full p-3 bg-white rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
+                  placeholder="8자 이상 입력"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">비밀번호 재확인</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full p-3 bg-white rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
+                  placeholder="비밀번호 재입력"
+                />
+              </div>
+
+              <div className="flex justify-center">
+                <Button type="submit" className="bg-[#222222] hover:bg-[#333333] text-white px-8 py-2 rounded-lg font-medium">
+                  수정
+                </Button>
+              </div>
+            </form>
+          )}
+
           <Button
             variant="outline"
             className="w-full justify-start bg-white border-gray-200 text-gray-700 hover:bg-gray-50 rounded-lg"

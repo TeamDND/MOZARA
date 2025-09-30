@@ -3,6 +3,7 @@ package com.example.springboot.controller.user;
 import com.example.springboot.data.dto.user.SignUpDTO;
 import com.example.springboot.data.dto.user.UserInfoDTO;
 import com.example.springboot.data.dto.user.UserAdditionalInfoDTO;
+import com.example.springboot.data.dto.user.UserBasicInfoDTO;
 import com.example.springboot.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -80,6 +81,23 @@ public class UserController {
     }
 
     /**
+     * 사용자 기본 정보 업데이트 (이메일, 닉네임)
+     */
+    @PutMapping("/userinfo/basic/{username}")
+    public ResponseEntity<?> updateBasicUserInfo(@PathVariable String username, @RequestBody UserBasicInfoDTO userBasicInfoDTO) {
+        try {
+            UserInfoDTO updatedUserInfo = userService.updateBasicUserInfo(username, userBasicInfoDTO);
+            return ResponseEntity.ok(updatedUserInfo);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body("{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"사용자 기본 정보 업데이트 중 오류가 발생했습니다.\"}");
+        }
+    }
+
+    /**
      * 사용자 추가 정보 업데이트 (가족력, 탈모 여부, 스트레스)
      */
     @PutMapping("/userinfo/{username}")
@@ -93,6 +111,23 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("{\"error\": \"사용자 정보 업데이트 중 오류가 발생했습니다.\"}");
+        }
+    }
+
+    /**
+     * 비밀번호 변경
+     */
+    @PutMapping("/password/reset/{username}")
+    public ResponseEntity<?> resetPassword(@PathVariable String username, @RequestParam String password) {
+        try {
+            userService.resetPassword(username, password);
+            return ResponseEntity.ok("비밀번호가 변경되었습니다.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body("{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"비밀번호 변경 중 오류가 발생했습니다.\"}");
         }
     }
 }
