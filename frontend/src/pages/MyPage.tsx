@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from "react-router-dom"
 import { RootState } from "../utils/store"
 import { clearToken } from "../utils/tokenSlice"
 import { clearUser } from "../utils/userSlice"
+import apiClient from "../services/apiClient"
 
 import { Card, CardContent } from "../components/ui/card"
 import { Button } from "../components/ui/button"
@@ -63,10 +64,24 @@ export default function MyPage() {
   const dispatch = useDispatch()
 
   // 로그아웃 함수
-  const handleLogout = () => {
-    dispatch(clearToken())
-    dispatch(clearUser())
-    navigate('/')
+  const handleLogout = async () => {
+    try {
+      // 백엔드 API 호출 (refresh 쿠키 삭제)
+      await apiClient.post('/logout')
+    } catch (error) {
+      console.error('로그아웃 API 호출 실패:', error)
+      // API 실패해도 프론트 정리는 진행
+    } finally {
+      // Redux 상태 초기화
+      dispatch(clearToken())
+      dispatch(clearUser())
+
+      // localStorage 초기화
+      localStorage.clear()
+
+      // 메인 페이지로 이동
+      navigate('/')
+    }
   }
 
   // 사용자 추가 정보 상태

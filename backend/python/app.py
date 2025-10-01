@@ -1297,9 +1297,8 @@ if HAIR_CHANGE_AVAILABLE:
         """사용 가능한 가발 스타일 목록 반환"""
         return get_wig_styles_service()
 
-
-
-
+# Hair Loss Products Service Import
+from services.hair_loss_products import build_stage_response, search_11st_products
 
 @app.get("/products")
 async def get_hair_loss_products(
@@ -1348,7 +1347,7 @@ async def get_11st_products(
     try:
         print(f"11번가 제품 검색 요청: keyword={keyword}, page={page}, pageSize={pageSize}")
         
-        # 서비스 계층에서 11번가 제품 검색
+        # 서비스 계층에서 11번가 제품 검색 (이미 위에서 import됨)
         result = search_11st_products(keyword, page, pageSize)
         
         print(f"성공: 11번가에서 {len(result['products'])}개 제품 조회")
