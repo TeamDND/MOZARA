@@ -8,7 +8,7 @@ export interface SwinAnalysisResult {
   stage: number;
   title: string;
   description: string;
-  advice: string[];
+  advice: string;
 }
 
 // API 응답 인터페이스
