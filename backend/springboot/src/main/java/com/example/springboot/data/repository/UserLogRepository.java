@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface UserLogRepository extends JpaRepository<UserLogEntity, Integer> {
     Optional<UserLogEntity> findByUserEntityIdForeign_Username(String username);
+
+    void deleteAllByUserEntityIdForeign(com.example.springboot.data.entity.UserEntity userEntity);
 }

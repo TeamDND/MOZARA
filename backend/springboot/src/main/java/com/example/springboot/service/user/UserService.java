@@ -5,6 +5,7 @@ import com.example.springboot.data.dao.UsersInfoDAO;
 import com.example.springboot.data.dto.user.SignUpDTO;
 import com.example.springboot.data.dto.user.UserInfoDTO;
 import com.example.springboot.data.dto.user.UserAdditionalInfoDTO;
+import com.example.springboot.data.dto.user.UserBasicInfoDTO;
 import com.example.springboot.data.dto.seedling.SeedlingStatusDTO;
 import com.example.springboot.data.entity.UserEntity;
 import com.example.springboot.data.entity.UsersInfoEntity;
@@ -106,6 +107,41 @@ public class UserService {
     }
 
     /**
+     * 사용자 기본 정보 업데이트 (이메일, 닉네임)
+     */
+    public UserInfoDTO updateBasicUserInfo(String username, UserBasicInfoDTO userBasicInfoDTO) {
+        // 사용자 조회
+        UserEntity userEntity = userDAO.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 이메일 업데이트
+        if (userBasicInfoDTO.getEmail() != null && !userBasicInfoDTO.getEmail().trim().isEmpty()) {
+            // 이메일 형식 검증
+            if (!userBasicInfoDTO.getEmail().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+                throw new RuntimeException("이메일 형식이 올바르지 않습니다.");
+            }
+            userEntity.setEmail(userBasicInfoDTO.getEmail());
+        }
+
+        // 닉네임 업데이트
+        if (userBasicInfoDTO.getNickname() != null && !userBasicInfoDTO.getNickname().trim().isEmpty()) {
+            // 닉네임 중복 체크 (자기 자신 제외)
+            userDAO.findByNickname(userBasicInfoDTO.getNickname()).ifPresent(existingUser -> {
+                if (!existingUser.getId().equals(userEntity.getId())) {
+                    throw new RuntimeException("이미 사용 중인 닉네임입니다.");
+                }
+            });
+            userEntity.setNickname(userBasicInfoDTO.getNickname());
+        }
+
+        // 업데이트된 사용자 정보 저장
+        UserEntity updatedUser = userDAO.updateUser(userEntity);
+
+        // 전체 사용자 정보 반환
+        return getUserInfo(username);
+    }
+
+    /**
      * 사용자 추가 정보 업데이트 (가족력, 탈모 여부, 스트레스)
      */
     public UserInfoDTO updateUserInfo(String username, UserAdditionalInfoDTO userAdditionalInfoDTO) {
@@ -155,6 +191,25 @@ public class UserService {
                 .stress(updatedUserInfo.getStress())
                 .seedlingStatus(seedlingStatusDTO)
                 .build();
+    }
+
+    /**
+     * 비밀번호 변경
+     */
+    public void resetPassword(String username, String password) {
+        userDAO.resetPassword(username, password);
+    }
+
+    /**
+     * 회원 탈퇴
+     */
+    public String deleteMember(String username) {
+        UserEntity userEntity = userDAO.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        userDAO.deleteMember(userEntity);
+
+        return "회원 탈퇴가 완료되었습니다.";
     }
 
     /**

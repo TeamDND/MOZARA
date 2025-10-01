@@ -19,6 +19,8 @@ public interface SeedlingStatusRepository extends JpaRepository<SeedlingStatusEn
      * 사용자 ID로 새싹 상태 조회 (ID로)
      */
     Optional<SeedlingStatusEntity> findByUserEntityIdForeign_Id(Integer userId);
+
+    void deleteAllByUserEntityIdForeign(com.example.springboot.data.entity.UserEntity userEntity);
 }
 
 

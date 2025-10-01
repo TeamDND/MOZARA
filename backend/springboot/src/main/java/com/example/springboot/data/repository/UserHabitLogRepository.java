@@ -28,4 +28,6 @@ public interface UserHabitLogRepository extends JpaRepository<UserHabitLogEntity
      * 사용자의 모든 완료 로그 조회
      */
     List<UserHabitLogEntity> findByUserEntityIdForeignOrderByCompletionDateDesc(UserEntity user);
+
+    void deleteAllByUserEntityIdForeign(UserEntity userEntity);
 }
