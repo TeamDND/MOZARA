@@ -123,7 +123,7 @@ class ImprovedHairLossRAGChatbot:
     def setup_llm(self):
         """LLM 설정 - ChatGoogleGenerativeAI 사용"""
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-2.0-flash-exp",
+            model="gemini-1.5-flash",
             google_api_key=self.google_api_key,
             temperature=0.3,
             convert_system_message_to_human=True

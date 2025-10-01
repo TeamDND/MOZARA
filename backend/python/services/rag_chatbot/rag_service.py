@@ -63,7 +63,7 @@ class HairLossRAGChatbot:
 
         # Gemini 설정
         genai.configure(api_key=self.google_api_key)
-        self.gemini_model = genai.GenerativeModel('gemini-2.5-flash-lite')
+        self.gemini_model = genai.GenerativeModel('gemini-1.5-flash')
 
         logger.info("✅ API 키 설정 완료")
 

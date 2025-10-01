@@ -9,9 +9,20 @@ from datetime import datetime
 from dotenv import load_dotenv
 from pathlib import Path
 
-# 환경변수 로드
-load_dotenv("../../../../.env")
-load_dotenv("../../.env")
+# 로깅 설정 (먼저 설정)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# 환경변수 로드 - 프로젝트 루트의 .env 파일 찾기
+current_dir = Path(__file__).resolve().parent  # services/rag_chatbot/
+project_root = current_dir.parent.parent.parent.parent  # MOZARA/
+env_path = project_root / ".env"
+
+if env_path.exists():
+    load_dotenv(str(env_path))
+    logger.info(f"✅ .env 파일 로드: {env_path}")
+else:
+    logger.warning(f"⚠️ .env 파일 없음: {env_path}")
 
 # LangChain imports
 from langchain_pinecone import PineconeVectorStore
@@ -25,10 +36,6 @@ from langchain.schema import Document
 
 # Pinecone imports
 from pinecone import Pinecone
-
-# 로깅 설정
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 class HairLossRAGChatbotWithMemory:
     """사용자별 메모리 관리를 지원하는 RAG 챗봇"""
@@ -56,6 +63,7 @@ class HairLossRAGChatbotWithMemory:
         if not self.openai_api_key:
             raise ValueError("OPENAI_API_KEY가 설정되지 않았습니다.")
 
+        # GOOGLE_API_KEY 사용
         self.google_api_key = os.getenv("GOOGLE_API_KEY")
         if not self.google_api_key:
             raise ValueError("GOOGLE_API_KEY가 설정되지 않았습니다.")
@@ -65,6 +73,7 @@ class HairLossRAGChatbotWithMemory:
     def setup_vectorstores(self):
         """Pinecone 벡터스토어 설정"""
         try:
+            logger.info("🔄 Pinecone 초기화 시작...")
             pc = Pinecone(api_key=self.pinecone_api_key)
 
             self.embeddings = OpenAIEmbeddings(
@@ -78,20 +87,21 @@ class HairLossRAGChatbotWithMemory:
             }
 
             self.vectorstores = {}
+
+            # list_indexes() 호출 제거하고 직접 연결 시도
             for name, index_name in index_names.items():
                 try:
-                    if index_name in pc.list_indexes().names():
-                        vectorstore = PineconeVectorStore(
-                            index_name=index_name,
-                            embedding=self.embeddings,
-                            pinecone_api_key=self.pinecone_api_key
-                        )
-                        self.vectorstores[name] = vectorstore
-                        logger.info(f"✅ {name} 벡터스토어 연결: {index_name}")
-                    else:
-                        logger.warning(f"⚠️  인덱스 없음: {index_name}")
+                    logger.info(f"🔄 {name} 벡터스토어 연결 시도: {index_name}")
+                    vectorstore = PineconeVectorStore(
+                        index_name=index_name,
+                        embedding=self.embeddings,
+                        pinecone_api_key=self.pinecone_api_key
+                    )
+                    self.vectorstores[name] = vectorstore
+                    logger.info(f"✅ {name} 벡터스토어 연결 성공: {index_name}")
                 except Exception as e:
-                    logger.error(f"❌ {name} 연결 실패: {e}")
+                    logger.warning(f"⚠️  {name} 연결 실패 (건너뜀): {e}")
+                    continue
 
             if not self.vectorstores:
                 raise ValueError("사용 가능한 벡터스토어가 없습니다.")
@@ -106,18 +116,21 @@ class HairLossRAGChatbotWithMemory:
             logger.info("✅ 벡터스토어 설정 완료")
 
         except Exception as e:
-            logger.error(f"벡터스토어 설정 실패: {e}")
+            logger.error(f"❌ 벡터스토어 설정 실패: {e}")
             raise
 
     def setup_llm(self):
         """LLM 설정"""
+        # 환경변수로도 설정
+        os.environ["GOOGLE_API_KEY"] = self.google_api_key
+
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-2.0-flash-exp",
+            model="gemini-2.5-flash",
             google_api_key=self.google_api_key,
             temperature=0.3,
-            convert_system_message_to_human=True
+            convert_system_message_to_human=False
         )
-        logger.info("✅ Gemini LLM 설정 완료")
+        logger.info("✅ Gemini LLM 설정 완료 (model: gemini-2.5-flash)")
 
     def get_or_create_chain(self, conversation_id: str) -> ConversationalRetrievalChain:
         """사용자별 체인 가져오기 또는 생성"""
@@ -135,35 +148,60 @@ class HairLossRAGChatbotWithMemory:
         )
         self.user_memories[conversation_id] = memory
 
-        # 프롬프트 템플릿
-        system_template = """당신은 탈모 전문 상담사입니다. 아래 제공된 의학 논문과 전문 자료를 **반드시 참고하여** 답변을 작성해주세요.
+        # Condense Question Prompt - 대화 기록을 고려하여 독립적인 질문으로 변환
+        condense_template = """이전 대화 기록과 후속 질문이 주어졌을 때, 독립적이고 완전한 질문으로 변환하세요.
 
-중요한 규칙:
-1. **제공된 참고 문서의 내용을 기반으로** 구체적으로 답변하세요
-2. 문서에서 찾은 정보를 인용하고, 출처를 명시하세요
-3. 문서에 관련 내용이 없으면 "제공된 자료에서는 해당 정보를 찾을 수 없습니다"라고 답변하세요
-4. 의학적 조언은 전문의 상담을 권장하고, 연구 기반 정보만 제공하세요
-5. 친근하고 이해하기 쉬운 한국어로 답변하세요
-6. 답변은 300자 이내로 간결하게 해주세요
-7. **이전 대화 내용을 기억하고 연속적인 대화를 진행하세요**
+중요:
+- 대화 기록에 있는 정보를 질문에 포함시키세요
+- "내 이름"처럼 대화 맥락을 참조하는 부분은 실제 값으로 대체하세요
+- 대화 기록에만 답이 있는 질문이라면 그대로 유지하세요
+
+이전 대화 기록:
+{chat_history}
+
+후속 질문: {question}
+독립적인 질문:"""
+
+        condense_question_prompt = PromptTemplate.from_template(condense_template)
+
+        # QA Prompt - 답변 생성용 (이전 대화 기록 포함)
+        qa_template = """당신은 탈모 전문 상담사입니다.
+
+답변 규칙:
+1. 질문이 이전 대화 내용을 참조하는 경우, 대화 기록을 우선적으로 확인하세요
+2. 탈모 관련 의학 질문은 제공된 참고 문서를 기반으로 답변하세요
+3. 문서에 관련 내용이 없으면 일반적인 정보로 답변하되, 전문의 상담을 권장하세요
+4. 친근하고 이해하기 쉬운 한국어로 답변하세요
+5. 답변은 300자 이내로 간결하게 해주세요
 
 참고 문서:
-{context}"""
+{context}
 
-        messages = [
-            SystemMessagePromptTemplate.from_template(system_template),
-            HumanMessagePromptTemplate.from_template("{question}")
-        ]
-        qa_prompt = ChatPromptTemplate.from_messages(messages)
+질문: {question}
 
-        # 새 체인 생성
+답변:"""
+
+        qa_prompt = PromptTemplate.from_template(qa_template)
+
+        # 새 체인 생성 - get_chat_history 추가
+        def get_chat_history(inputs) -> str:
+            """대화 기록을 문자열로 변환"""
+            res = []
+            for msg in inputs:
+                if hasattr(msg, 'content'):
+                    role = "사용자" if msg.__class__.__name__ == "HumanMessage" else "AI"
+                    res.append(f"{role}: {msg.content}")
+            return "\n".join(res) if res else "이전 대화 없음"
+
         chain = ConversationalRetrievalChain.from_llm(
             llm=self.llm,
             retriever=self.retriever,
             memory=memory,
             return_source_documents=True,
+            condense_question_prompt=condense_question_prompt,
             combine_docs_chain_kwargs={"prompt": qa_prompt},
-            verbose=False
+            get_chat_history=get_chat_history,
+            verbose=True
         )
 
         self.user_chains[conversation_id] = chain
@@ -207,13 +245,19 @@ class HairLossRAGChatbotWithMemory:
             logger.info(f"✅ [{conversation_id}] 답변 생성 완료")
             logger.info(f"📖 출처: {sources}")
 
+            # 응답 후 메모리 카운트 (체인이 메모리에 저장한 후)
+            final_memory = self.user_memories.get(conversation_id)
+            final_count = len(final_memory.chat_memory.messages) if final_memory and hasattr(final_memory, 'chat_memory') else 0
+
+            logger.info(f"💾 [{conversation_id}] 최종 메시지 수: {final_count}")
+
             return {
                 "response": answer,
                 "sources": sources,
                 "conversation_id": conversation_id,
                 "timestamp": datetime.now().isoformat(),
                 "context_used": len(source_docs) > 0,
-                "message_count": len(memory.chat_memory.messages) if memory else 0
+                "message_count": final_count
             }
 
         except Exception as e:
