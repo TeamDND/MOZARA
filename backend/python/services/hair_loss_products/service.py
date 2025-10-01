@@ -196,8 +196,13 @@ def search_11st_products(keyword: str, page: int = 1, pageSize: int = 20) -> Dic
             'sortCd': 'CP'  # CP: 인기도순
         }
         
+        # 보안을 위해 API 키를 마스킹하여 출력
+        safe_params = params.copy()
+        if 'key' in safe_params and safe_params['key']:
+            safe_params['key'] = safe_params['key'][:4] + '*' * (len(safe_params['key']) - 4)
+        
         print(f"11번가 API 호출 URL: {api_url}")
-        print(f"11번가 API 파라미터: {params}")
+        print(f"11번가 API 파라미터: {safe_params}")
         
         try:
             # requests가 자동으로 한글 키워드 인코딩 처리
