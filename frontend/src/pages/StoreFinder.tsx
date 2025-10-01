@@ -23,7 +23,7 @@ const StoreFinder: React.FC = () => {
 
   // 4개 카테고리 정의
   const categories = [
-    { name: "탈모병원", icon: "🏥", searchTerm: "탈모", category: "탈모병원" },
+    { name: "탈모병원", icon: "🏥", searchTerm: "탈모병원", category: "탈모병원" },
     { name: "탈모미용실", icon: "💇", searchTerm: "탈모미용실", category: "탈모미용실" },
     { name: "가발전문점", icon: "🎭", searchTerm: "가발전문점", category: "가발전문점" },
     { name: "두피문신", icon: "🎨", searchTerm: "두피문신", category: "두피문신" }
