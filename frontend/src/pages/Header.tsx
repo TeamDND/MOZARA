@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../utils/store';
+import { User } from 'lucide-react';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -14,6 +15,10 @@ export default function Header() {
     } else {
       navigate('/');
     }
+  };
+
+  const handleUserClick = () => {
+    navigate('/mypage');
   };
 
   return (
@@ -43,8 +48,13 @@ export default function Header() {
           HairFit
         </button>
         
-        {/* 우측 공간 비우기용 div */}
-        <div className="w-8"></div>
+        <button 
+          onClick={handleUserClick}
+          className="flex items-center justify-center active:scale-95"
+          aria-label="마이페이지"
+        >
+          <User className="h-5 w-5 mb-1 text-[#222222]" />
+        </button>
       </div>
     </header>
   );
