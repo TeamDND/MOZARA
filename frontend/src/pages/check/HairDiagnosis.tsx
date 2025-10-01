@@ -26,11 +26,14 @@ interface StageRecommendations {
 }
 
 const HairDiagnosis: React.FC = () => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [topImage, setTopImage] = useState<File | null>(null);
+  const [sideImage, setSideImage] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [topImagePreview, setTopImagePreview] = useState<string | null>(null);
+  const [sideImagePreview, setSideImagePreview] = useState<string | null>(null);
+  const topFileInputRef = useRef<HTMLInputElement>(null);
+  const sideFileInputRef = useRef<HTMLInputElement>(null);
   
   // Redux에서 사용자 정보 가져오기
   const { userId } = useSelector((state: RootState) => state.user);
@@ -69,9 +72,10 @@ const HairDiagnosis: React.FC = () => {
   };
 
   // Spring Boot 프록시를 통해 Python 분석 호출 (multipart/form-data) - apiClient 사용
-  const analyzeImageWithGemini = async (file: File): Promise<AnalysisResult> => {
+  const analyzeImageWithSwin = async (topFile: File, sideFile: File): Promise<AnalysisResult> => {
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('top_image', topFile);
+    formData.append('side_image', sideFile);
     
     // 로그인한 사용자의 user_id 추가
     if (userId) {
@@ -80,10 +84,9 @@ const HairDiagnosis: React.FC = () => {
     } else {
       console.log('로그인하지 않은 사용자 - user_id 없음');
     }
+    console.log('API 호출 시작: /ai/swin-check/analyze');
 
-    console.log('API 호출 시작: /ai/gemini-check/analyze');
-
-    const { data: result } = await apiClient.post('/ai/gemini-check/analyze', formData, {
+    const { data: result } = await apiClient.post('/ai/swin-check/analyze', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     console.log('API 응답 성공:', result);
@@ -135,36 +138,50 @@ const HairDiagnosis: React.FC = () => {
     };
   };
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTopImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setSelectedFile(file);
+      setTopImage(file);
       setAnalysisResult(null);
-      
+
       // 이미지 미리보기 생성
       const reader = new FileReader();
       reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
+        setTopImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSideImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSideImage(file);
+      setAnalysisResult(null);
+
+      // 이미지 미리보기 생성
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setSideImagePreview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleStartAnalysis = async () => {
-    if (!selectedFile) {
-      alert('먼저 사진 파일을 선택해주세요.');
+    if (!topImage || !sideImage) {
+      alert('두피 상단과 측면 사진을 모두 선택해주세요.');
       return;
     }
-
 
     setIsAnalyzing(true);
     setAnalysisResult(null);
 
     try {
-      const result = await analyzeImageWithGemini(selectedFile);
+      const result = await analyzeImageWithSwin(topImage, sideImage);
       setAnalysisResult(result);
     } catch (error) {
-      console.error('Gemini 분석 중 오류 발생:', error);
+      console.error('Swin 분석 중 오류 발생:', error);
       alert(`분석에 실패했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
     } finally {
       setIsAnalyzing(false);
@@ -342,34 +359,67 @@ const HairDiagnosis: React.FC = () => {
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">AI 두피 사진 분석</h2>
           
           {/* 파일 업로드 섹션 */}
-          <div className="text-center border-2 border-dashed border-gray-300 rounded-lg p-8 mb-8">
-            <p className="text-gray-600 mb-4">두피가 잘 보이도록 선명하게 찍은 사진을 업로드해주세요.</p>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-            >
-              파일 선택
-            </button>
-            {selectedFile && (
-              <p className="mt-3 text-gray-600">{selectedFile.name}</p>
-            )}
+
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            {/* Top View 업로드 */}
+            <div className="text-center border-2 border-dashed border-gray-300 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">📸 Top View - 머리 상단</h3>
+              <p className="text-gray-600 mb-4 text-sm">머리 정수리 부분이 잘 보이도록 위에서 찍은 사진</p>
+              <input
+                ref={topFileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleTopImageSelect}
+                className="hidden"
+              />
+              <button
+                onClick={() => topFileInputRef.current?.click()}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors mb-3"
+              >
+                Top View 선택
+              </button>
+              {topImage && (
+                <p className="text-gray-600 text-sm">{topImage.name}</p>
+              )}
+              {topImagePreview && (
+                <img src={topImagePreview} alt="Top View 미리보기" className="mt-3 w-full max-w-48 mx-auto rounded-lg border" />
+              )}
+            </div>
+
+            {/* Side View 업로드 */}
+            <div className="text-center border-2 border-dashed border-gray-300 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">📸 Side View - 머리 측면</h3>
+              <p className="text-gray-600 mb-4 text-sm">헤어라인과 측면이 잘 보이도록 옆에서 찍은 사진</p>
+              <input
+                ref={sideFileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleSideImageSelect}
+                className="hidden"
+              />
+              <button
+                onClick={() => sideFileInputRef.current?.click()}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors mb-3"
+              >
+                Side View 선택
+              </button>
+              {sideImage && (
+                <p className="text-gray-600 text-sm">{sideImage.name}</p>
+              )}
+              {sideImagePreview && (
+                <img src={sideImagePreview} alt="Side View 미리보기" className="mt-3 w-full max-w-48 mx-auto rounded-lg border" />
+              )}
+            </div>
           </div>
 
           {/* 분석 시작 버튼 */}
           <div className="text-center mb-8">
             <button
               onClick={handleStartAnalysis}
-              disabled={!selectedFile || isAnalyzing}
-              className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              disabled={!topImage || !sideImage || isAnalyzing}
+              className="bg-purple-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-purple-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {isAnalyzing ? '분석 중...' : '분석 시작'}
+              {isAnalyzing ? 'Swin 모델로 분석 중...' : 'AI 분석 시작 (Swin Transformer)'}
             </button>
           </div>
 
@@ -377,20 +427,33 @@ const HairDiagnosis: React.FC = () => {
           {isAnalyzing && (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">AI가 사진을 정밀하게 분석하고 있습니다...</p>
+              <p className="text-gray-600">Swin Transformer 모델이 두 장의 사진을 정밀하게 분석하고 있습니다...</p>
             </div>
           )}
 
           {/* 분석 결과 */}
           {analysisResult && (
             <div>
-              <div className="grid md:grid-cols-2 gap-8 mb-8">
-                {/* 이미지 */}
+              <div className="grid md:grid-cols-3 gap-8 mb-8">
+                {/* Top View 이미지 */}
                 <div>
-                  {imagePreview && (
+                  <h4 className="text-lg font-semibold text-gray-800 mb-3 text-center">Top View</h4>
+                  {topImagePreview && (
                     <img
-                      src={imagePreview}
-                      alt="업로드된 두피 사진"
+                      src={topImagePreview}
+                      alt="Top View 사진"
+                      className="w-full rounded-lg border border-gray-300"
+                    />
+                  )}
+                </div>
+
+                {/* Side View 이미지 */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-3 text-center">Side View</h4>
+                  {sideImagePreview && (
+                    <img
+                      src={sideImagePreview}
+                      alt="Side View 사진"
                       className="w-full rounded-lg border border-gray-300"
                     />
                   )}

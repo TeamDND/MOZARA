@@ -1,14 +1,11 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { ImageWithFallback } from '../hooks/ImageWithFallback';
 
 export default function Home() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("solutions");
   
-  // 솔루션 카테고리
-  const solutions = [
+  // 모든 기능 통합
+  const allFeatures = [
     { 
       name: "탈모 PT", 
       description: "새싹 키우기를 통한 생활습관 챌린지로 헤어 관리 동기부여",
@@ -27,10 +24,6 @@ export default function Home() {
       badge: "NEW",
       image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300&h=300&fit=crop&crop=center" // 화장품/제품
     },
-  ];
-
-  // 컨텐츠 카테고리
-  const contents = [
     { 
       name: "머리스타일 변경", 
       description: "AI를 통한 가상 헤어스타일 체험과 시뮬레이션",
@@ -48,6 +41,12 @@ export default function Home() {
       description: "탈모에 대한 과학적 정보와 전문 지식을 한눈에",
       badge: "NEW",
       useIcon: true
+    },
+    { 
+      name: "탈모 OX 퀴즈", 
+      description: "AI가 만드는 매일 새로운 탈모 상식 퀴즈로 지식을 쌓아보세요",
+      badge: "NEW",
+      image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=300&h=300&fit=crop&crop=center" // 퀴즈/학습 느낌
     },
   ];
 
@@ -71,6 +70,9 @@ export default function Home() {
         break;
       case "탈모 맵":
         navigate('/store-finder');
+        break;
+      case "탈모 OX 퀴즈":
+        navigate('/hair-quiz');
         break;
       default:
         break;
@@ -134,57 +136,15 @@ export default function Home() {
       <div className="max-w-md mx-auto min-h-screen bg-white">
         {/* Main Content */}
         <main className="px-4 py-6">
-          {/* 탭 네비게이션 */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4">
-            <div className="space-y-3">
-              <div className="flex gap-6 w-full pb-2">
-                <button
-                  onClick={() => setActiveTab("solutions")}
-                  className={`text-sm font-medium transition-colors ${
-                    activeTab === "solutions" 
-                      ? "text-gray-900 border-b-2 border-gray-900" 
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  솔루션
-                </button>
-                <button
-                  onClick={() => setActiveTab("contents")}
-                  className={`text-sm font-medium transition-colors ${
-                    activeTab === "contents" 
-                      ? "text-gray-900 border-b-2 border-gray-900" 
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  컨텐츠
-                </button>
-              </div>
-              {/* 구분선 */}
-              <div className="border-b border-gray-200"></div>
+          <div className="w-full space-y-4">
+            <div className="text-center mb-4">
+              <h2 className="text-lg font-bold text-gray-900 mb-2">헤어케어 도구</h2>
+              <p className="text-sm text-gray-600">탈모 개선을 위한 다양한 솔루션과 컨텐츠</p>
             </div>
-
-            {/* 솔루션 탭 */}
-            <TabsContent value="solutions" className="space-y-4">
-              <div className="text-center mb-4">
-                <h2 className="text-lg font-bold text-gray-900 mb-2">솔루션</h2>
-                <p className="text-sm text-gray-600">탈모 개선을 위한 실용적인 솔루션들</p>
-              </div>
-              <div className="space-y-3">
-                {solutions.map((tool, index) => renderToolCard(tool, index))}
-              </div>
-            </TabsContent>
-
-            {/* 컨텐츠 탭 */}
-            <TabsContent value="contents" className="space-y-4">
-              <div className="text-center mb-4">
-                <h2 className="text-lg font-bold text-gray-900 mb-2">컨텐츠</h2>
-                <p className="text-sm text-gray-600">유익하고 재미있는 헤어 관련 컨텐츠들</p>
-              </div>
-              <div className="space-y-3">
-                {contents.map((tool, index) => renderToolCard(tool, index))}
-              </div>
-            </TabsContent>
-          </Tabs>
+            <div className="space-y-3">
+              {allFeatures.map((tool, index) => renderToolCard(tool, index))}
+            </div>
+          </div>
 
           {/* Bottom Spacing for Mobile Navigation */}
           <div className="h-20"></div>

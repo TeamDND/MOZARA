@@ -3,20 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { HairProduct, HairProductResponse, hairProductApi } from '../../services/hairProductApi';
 import { elevenStApi } from '../../services/elevenStApi';
-import { RootState } from '../../utils/store';
 import {
   setSelectedStage,
   clearSelectedStage,
   addRecentProduct,
   addProductHistory,
-  setBaspResult,
   selectSelectedStage,
-  selectBaspResult,
 } from '../../utils/hairProductSlice';
 import StageSelector from '../check/StageSelector';
 import ProductList from '../hair_solutions/ProductList';
 import Header from '../Header';
-import Footer from '../Footer';
 
 /**
  * 탈모 단계별 제품 추천 페이지
@@ -92,7 +88,6 @@ const HairLossProducts: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const selectedStage = useSelector(selectSelectedStage);
-  const baspResult = useSelector(selectBaspResult);
   
   // 로컬 상태 관리
   const [products, setProducts] = useState<HairProduct[]>([]);
@@ -189,11 +184,6 @@ const HairLossProducts: React.FC = () => {
     }));
     
     // 제품 상세 정보를 모달이나 새 페이지로 표시할 수 있음
-  };
-
-  // BASP 진단으로 이동
-  const handleGoToBaspCheck = () => {
-    navigate('/basp-check');
   };
 
   // 다시 선택하기
@@ -393,7 +383,7 @@ const HairLossProducts: React.FC = () => {
         </div>
       </div>
       
-      <Footer />
+      
     </div>
   );
 };

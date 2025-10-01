@@ -2,6 +2,7 @@ package com.example.springboot.controller.ai;
 
 import com.example.springboot.service.ai.HairLossDailyService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/api/ai/hair-loss-daily")
 @CrossOrigin(origins = "*")
 public class HairLossDailyController {
@@ -23,7 +25,8 @@ public class HairLossDailyController {
     @PostMapping("/analyze")
     public ResponseEntity<Map<String, Object>> analyzeHairImage(
             @RequestParam("image") MultipartFile image,
-            @RequestParam(value = "top_k", defaultValue = "10") int topK) {
+            @RequestParam(value = "top_k", defaultValue = "10") int topK,
+            @RequestParam(value = "user_id", required = false) Integer userId) {
         
         try {
             // 이미지 파일 유효성 검사
@@ -38,6 +41,19 @@ public class HairLossDailyController {
             }
             
             Map<String, Object> result = hairLossDailyService.analyzeHairImage(image, topK);
+            
+            // user_id가 있으면 분석 결과를 자동으로 저장
+            if (userId != null && userId > 0) {
+                try {
+                    result.put("user_id", userId);
+                    Map<String, Object> saveResult = hairLossDailyService.saveAnalysisResult(result);
+                    result.put("save_result", saveResult);
+                } catch (Exception e) {
+                    log.warn("분석 결과 저장 실패: {}", e.getMessage());
+                    result.put("save_error", "분석 결과 저장 중 오류가 발생했습니다: " + e.getMessage());
+                }
+            }
+            
             return ResponseEntity.ok(result);
             
         } catch (Exception e) {

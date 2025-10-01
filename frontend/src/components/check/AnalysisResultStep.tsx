@@ -1,10 +1,10 @@
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { CheckCircle } from 'lucide-react';
-import { GeminiAnalysisResult, getStageDescription, getStageColor } from '../../services/geminiAnalysisService';
+import { SwinAnalysisResult, getStageDescription, getStageColor } from '../../services/swinAnalysisService';
 
 interface AnalysisResultStepProps {
-  analysisResult: GeminiAnalysisResult | null;
+  analysisResult: SwinAnalysisResult | null;
   onComplete: () => void;
 }
 
@@ -22,7 +22,7 @@ const AnalysisResultStep: React.FC<AnalysisResultStepProps> = ({ analysisResult,
       <div className="space-y-4">
         <div className="bg-white p-4 rounded-xl border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-800 mb-3">
-            🧠 Gemini AI 분석 결과
+            🧠 Swin Transformer AI 분석 결과
           </h3>
           {analysisResult ? (
             <div className="space-y-3">

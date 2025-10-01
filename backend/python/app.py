@@ -861,6 +861,24 @@ try:
 except ImportError as e:
     print(f"Hair Encyclopedia Paper API 라우터 마운트 실패: {e}")
 
+# Gemini Hair Check 모듈
+try:
+    from services.hair_gemini_check import analyze_hair_with_gemini
+    GEMINI_HAIR_CHECK_AVAILABLE = True
+    print("Gemini Hair Check 모듈 로드 성공")
+except ImportError as e:
+    print(f"Gemini Hair Check 모듈 로드 실패: {e}")
+    GEMINI_HAIR_CHECK_AVAILABLE = False
+
+# Swin Hair Classification 모듈
+try:
+    from services.swin_hair_classification.hair_swin_check import analyze_hair_with_swin
+    SWIN_HAIR_CHECK_AVAILABLE = True
+    print("Swin Hair Check 모듈 로드 성공")
+except ImportError as e:
+    print(f"Swin Hair Check 모듈 로드 실패: {e}")
+    SWIN_HAIR_CHECK_AVAILABLE = False
+
 # Gemini Hair Analysis Models
 class HairAnalysisRequest(BaseModel):
     image_base64: str
@@ -875,25 +893,26 @@ class HairAnalysisResponse(BaseModel):
 class QuizQuestion(BaseModel):
     question: str
     answer: str
-    explanation: str
+
+class PaperDetail(BaseModel):
+    id: str
+    title: str
+    source: str
+    full_summary: str
+
+class PaperAnalysis(BaseModel):
+    id: str
+    title: str
+    source: str
+    main_topics: List[str]
+    key_conclusions: str
+    section_summaries: List[dict]
 
 class QuizGenerateResponse(BaseModel):
     items: List[QuizQuestion]
 
-from services.hair_loss_products import (
-    build_stage_response,
-    search_11st_products,
-)
-
-# Gemini 탈모 사진 분석 (퀴즈 모듈과 동일한 분석 로직 분리본)
-try:
-    from services.hair_gemini_check import analyze_hair_with_gemini
-    GEMINI_HAIR_CHECK_AVAILABLE = True
-except Exception as _e:
-    GEMINI_HAIR_CHECK_AVAILABLE = False
-
-# API 엔드포인트 정의
 @app.get("/")
+
 def read_root():
     """루트 경로 - 서버 상태 확인"""
     return {
@@ -902,89 +921,11 @@ def read_root():
         "modules": {
             "hair_loss_daily": "/hair-loss-daily" if HAIR_ANALYSIS_AVAILABLE else "unavailable",
             "hair_change": "/generate_hairstyle" if HAIR_CHANGE_AVAILABLE else "unavailable",
-            "hair_encyclopedia": "/paper" if openai_api_key else "unavailable",
-            "gemini_hair_analysis": "/hair-analysis" if google_api_key else "unavailable"
+            "basp_diagnosis": "/api/basp/evaluate" if BASP_AVAILABLE else "unavailable",
+            "hair_gemini_check": "/hair_gemini_check" if GEMINI_HAIR_CHECK_AVAILABLE else "unavailable",
+            "hair_swin_check": "/hair_swin_check" if SWIN_HAIR_CHECK_AVAILABLE else "unavailable"
         }
     }
-
-@app.get("/test/naver-image/{place_name}")
-async def test_naver_image(place_name: str, address: str = None):
-    """네이버 API를 사용한 이미지 수집 테스트"""
-    try:
-        # 네이버 지역검색 API 테스트
-        naver_client_id = os.getenv("NAVER_CLIENT_ID")
-        naver_client_secret = os.getenv("NAVER_CLIENT_SECRET")
-        
-        if not naver_client_id or not naver_client_secret:
-            return {
-                "error": "네이버 API 키가 설정되지 않았습니다.",
-                "naver_client_id": bool(naver_client_id),
-                "naver_client_secret": bool(naver_client_secret)
-            }
-        
-        # 네이버 지역검색 API 호출
-        import requests
-        
-        search_query = f"{place_name} {address or ''}"
-        naver_api_url = "https://openapi.naver.com/v1/search/local.json"
-        
-        headers = {
-            'X-Naver-Client-Id': naver_client_id,
-            'X-Naver-Client-Secret': naver_client_secret,
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-        
-        params = {
-            'query': search_query,
-            'display': 5,
-            'start': 1,
-            'sort': 'comment'
-        }
-        
-        response = requests.get(naver_api_url, params=params, headers=headers, timeout=10)
-        
-        if response.status_code == 200:
-            data = response.json()
-            
-            results = []
-            if 'items' in data:
-                for item in data['items']:
-                    if is_medical_place(item.get('category', ''), item.get('title', '')):
-                        # 이미지 URL 추출 시도
-                        image_url = await get_naver_place_detail_image(item)
-                        
-                        results.append({
-                            "title": item.get('title', '').replace('<b>', '').replace('</b>', ''),
-                            "address": item.get('address', ''),
-                            "category": item.get('category', ''),
-                            "imageUrl": image_url,
-                            "is_medical": True
-                        })
-                    else:
-                        results.append({
-                            "title": item.get('title', '').replace('<b>', '').replace('</b>', ''),
-                            "address": item.get('address', ''),
-                            "category": item.get('category', ''),
-                            "imageUrl": None,
-                            "is_medical": False
-                        })
-            
-            return {
-                "query": search_query,
-                "total_results": len(results),
-                "medical_results": len([r for r in results if r['is_medical']]),
-                "results": results
-            }
-        else:
-            return {
-                "error": f"네이버 API 호출 실패: {response.status_code}",
-                "response": response.text
-            }
-            
-    except Exception as e:
-        return {
-            "error": f"테스트 중 오류 발생: {str(e)}"
-        }
 
 @app.get("/health")
 
@@ -1022,6 +963,55 @@ async def api_hair_gemini_check(file: Annotated[UploadFile, File(...)]):
 # def get_hair_gemini_check_ping():
 #     return {"status": "ok"}
 
+# --- Swin 탈모 사진 분석 전용 엔드포인트 ---
+@app.post("/hair_swin_check")
+async def api_hair_swin_check(
+    top_image: Annotated[UploadFile, File(...)],
+    side_image: Optional[UploadFile] = File(None),
+    gender: Optional[str] = Form(None),
+    age: Optional[str] = Form(None),
+    familyHistory: Optional[str] = Form(None),
+    recentHairLoss: Optional[str] = Form(None),
+    stress: Optional[str] = Form(None)
+):
+    """
+    multipart/form-data로 전송된 Top/Side 이미지를 Swin으로 분석하여 표준 결과를 반환
+    Side 이미지는 optional (여성의 경우 없을 수 있음)
+    설문 데이터도 함께 받아서 동적 가중치 계산에 사용
+    """
+    if not SWIN_HAIR_CHECK_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Swin 분석 모듈이 활성화되지 않았습니다.")
+
+    try:
+        top_image_bytes = await top_image.read()
+        side_image_bytes = None
+
+        if side_image:
+            side_image_bytes = await side_image.read()
+            print(f"--- [DEBUG] Files received. Top: {len(top_image_bytes)} bytes, Side: {len(side_image_bytes)} bytes ---")
+        else:
+            print(f"--- [DEBUG] Files received. Top: {len(top_image_bytes)} bytes, Side: None (여성) ---")
+
+        # 설문 데이터 구성
+        survey_data = None
+        if age and familyHistory:
+            survey_data = {
+                'gender': gender,
+                'age': age,
+                'familyHistory': familyHistory,
+                'recentHairLoss': recentHairLoss,
+                'stress': stress
+            }
+            print(f"--- [DEBUG] Survey data: {survey_data} ---")
+
+        # bytes 데이터와 설문 데이터를 함께 전달
+        result = analyze_hair_with_swin(top_image_bytes, side_image_bytes, survey_data)
+
+        return result
+    except Exception as e:
+        print(f"--- [DEBUG] Swin Error: {str(e)} ---")
+        raise HTTPException(status_code=500, detail=str(e))
+        
 # --- 네이버 지역 검색 API 프록시 ---
 @app.get("/api/naver/local/search")
 async def search_naver_local(query: str):
@@ -1037,15 +1027,18 @@ async def search_naver_local(query: str):
         # 카테고리별로 다른 검색어 전략 사용
         if "미용실" in query or "헤어살롱" in query or "탈모전용" in query:
             # 탈모미용실 검색 시 더 광범위한 미용실 검색
-            search_query = "미용실 헤어살롱"
+            search_query = "탈모 미용실 헤어살롱"
         elif "가발" in query or "증모술" in query:
             search_query = f"{query}"
         elif "문신" in query or "smp" in query.lower():
-            search_query = f"{query} 문신"
+            search_query = f"두피문신 SMP"
+        elif "약국" in query:
+            # 탈모약국 검색
+            search_query = "약국"
         else:
-            # 탈모병원 검색 시 더 광범위한 의료기관 검색
-            if "탈모병원" in query or "탈모" in query or "병원" in query:
-                search_query = "병원 의원 클리닉 피부과"
+            # 탈모병원 검색 시 탈모 관련 의료기관 검색
+            if "탈모" in query or "병원" in query or "의원" in query:
+                search_query = "탈모 병원 의원 클리닉 피부과 모발"
             else:
                 search_query = f"{query} 병원"
 
@@ -1169,15 +1162,18 @@ async def search_kakao_local(
         # 카테고리별로 다른 검색어 전략 사용
         if "미용실" in query or "헤어살롱" in query or "탈모전용" in query:
             # 탈모미용실 검색 시 더 광범위한 미용실 검색
-            search_query = "미용실 헤어살롱"
+            search_query = "탈모 미용실 헤어살롱"
         elif "가발" in query or "증모술" in query:
             search_query = f"{query}"
         elif "문신" in query or "smp" in query.lower():
-            search_query = f"{query} 문신"
+            search_query = f"두피문신 SMP"
+        elif "약국" in query:
+            # 탈모약국 검색
+            search_query = "약국"
         else:
-            # 탈모병원 검색 시 더 광범위한 의료기관 검색
-            if "탈모병원" in query or "탈모" in query or "병원" in query:
-                search_query = "병원 의원 클리닉 피부과"
+            # 탈모병원 검색 시 탈모 관련 의료기관 검색
+            if "탈모" in query or "병원" in query or "의원" in query:
+                search_query = "탈모 병원 의원 클리닉 피부과 모발"
             else:
                 search_query = f"{query} 병원"
 
@@ -1384,27 +1380,164 @@ async def refresh_token():
             "status": "success"
         }
     except Exception as e:
-        print(f"토큰 갱신 중 오류: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="토큰 갱신 중 오류가 발생했습니다."
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/paper/{paper_id}", response_model=PaperDetail)
+async def get_paper_detail(paper_id: str):
+    if not index:
+        raise HTTPException(status_code=503, detail="Thesis search service is not available")
+    
+    try:
+        results = index.fetch(ids=[paper_id])
+        vectors = results.vectors
+        if not vectors:
+            raise HTTPException(status_code=404, detail="Paper not found")
+        
+        vector_obj = vectors.get(paper_id)
+        if vector_obj is None:
+            raise HTTPException(status_code=404, detail="Paper not found")
+        
+        metadata = getattr(vector_obj, 'metadata', None)
+        if metadata is None and isinstance(vector_obj, dict):
+            metadata = vector_obj.get('metadata', {})
+        if metadata is None:
+            metadata = {}
+        
+        full_summary = (
+            metadata.get('summary') or
+            metadata.get('full_summary') or
+            metadata.get('text', '')
+        )
+        
+        title_safe = str(metadata.get('title', 'Unknown')).encode('utf-8', errors='ignore').decode('utf-8')
+        source_safe = str(metadata.get('source', 'Unknown')).encode('utf-8', errors='ignore').decode('utf-8')
+        summary_safe = str(full_summary).encode('utf-8', errors='ignore').decode('utf-8')
+        
+        return PaperDetail(
+            id=paper_id,
+            title=title_safe,
+            source=source_safe,
+            full_summary=summary_safe
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/papers/count")
+async def get_papers_count():
+    if not index:
+        return {"count": 0, "system": "service_disabled"}
+    
+    try:
+        results = index.query(
+            vector=[0.0] * 1536,
+            top_k=10000,
+            include_metadata=True
+        )
+        
+        unique_papers = set()
+        for match in results['matches']:
+            metadata = match.get('metadata', {})
+            file_path = metadata.get('file_path')
+            if file_path:
+                unique_papers.add(file_path)
+        
+        return {"count": len(unique_papers), "system": "pinecone_deduped"}
+    except Exception as e:
+        return {"count": 0, "system": "error", "error": str(e)}
+
+@app.get("/paper/{paper_id}/analysis", response_model=PaperAnalysis)
+async def get_paper_analysis(paper_id: str):
+    if not index:
+        raise HTTPException(status_code=503, detail="Thesis search service is not available")
+    
+    try:
+        results = index.fetch(ids=[paper_id])
+        vectors = results.vectors
+        if not vectors:
+            raise HTTPException(status_code=404, detail="Chunk not found")
+
+        clicked_chunk_metadata = vectors[paper_id].metadata if paper_id in vectors else {}
+        original_file_path = clicked_chunk_metadata.get('file_path')
+        original_title = clicked_chunk_metadata.get('title')
+
+        if not original_file_path:
+            raise HTTPException(status_code=404, detail="Original paper path not found for this chunk.")
+
+        analysis_results = index.query(
+            vector=[0.0] * 1536,
+            top_k=1,
+            include_metadata=True,
+            filter={
+                "file_path": original_file_path,
+                "chunk_index": 0
+            }
         )
 
-@app.get("/api/config")
-async def get_config():
-    """프론트엔드에서 필요한 환경변수 설정 조회"""
-    try:
-        youtube_api_key = os.getenv("YOUTUBE_API_KEY")
-        eleven_st_api_key = os.getenv("ELEVEN_ST_API_KEY")
-        api_base_url = os.getenv("API_BASE_URL", "http://localhost:8000/api")
+        if not analysis_results['matches']:
+            raise HTTPException(status_code=404, detail="Structured analysis for paper not found.")
 
-        return {
-            "apiBaseUrl": api_base_url,
-            "youtubeApiKey": youtube_api_key if youtube_api_key else None,
-            "hasYouTubeKey": bool(youtube_api_key),
-            "elevenStApiKey": eleven_st_api_key if eleven_st_api_key else None,
-            "hasElevenStKey": bool(eleven_st_api_key),
-        }
+        paper_analysis_metadata = analysis_results['matches'][0].metadata
+
+        main_topics_parsed = []
+        raw_main_topics = paper_analysis_metadata.get('main_topics')
+        if isinstance(raw_main_topics, list):
+            main_topics_parsed = [str(t).encode('utf-8', errors='ignore').decode('utf-8') for t in raw_main_topics if isinstance(t, str)]
+        elif isinstance(raw_main_topics, str):
+            safe_topics = raw_main_topics.encode('utf-8', errors='ignore').decode('utf-8')
+            main_topics_parsed = [safe_topics]
+
+        raw_conclusions = paper_analysis_metadata.get('key_conclusions', '')
+        key_conclusions_parsed = str(raw_conclusions).encode('utf-8', errors='ignore').decode('utf-8')
+
+        section_summaries_parsed = []
+        raw_section_summaries = paper_analysis_metadata.get('section_summaries')
+        
+        if isinstance(raw_section_summaries, str):
+            try:
+                safe_json_string = raw_section_summaries.encode('utf-8', errors='ignore').decode('utf-8')
+                temp_parsed = json.loads(safe_json_string)
+                if isinstance(temp_parsed, list):
+                    section_summaries_parsed = []
+                    for s in temp_parsed:
+                        if isinstance(s, dict):
+                            safe_section = {}
+                            for key, value in s.items():
+                                safe_key = str(key).encode('utf-8', errors='ignore').decode('utf-8')
+                                safe_value = str(value).encode('utf-8', errors='ignore').decode('utf-8')
+                                safe_section[safe_key] = safe_value
+                            section_summaries_parsed.append(safe_section)
+            except json.JSONDecodeError:
+                pass
+        elif isinstance(raw_section_summaries, list):
+            section_summaries_parsed = []
+            for s in raw_section_summaries:
+                if isinstance(s, dict):
+                    safe_section = {}
+                    for key, value in s.items():
+                        safe_key = str(key).encode('utf-8', errors='ignore').decode('utf-8')
+                        safe_value = str(value).encode('utf-8', errors='ignore').decode('utf-8')
+                        safe_section[safe_key] = safe_value
+                    section_summaries_parsed.append(safe_section)
+        
+        if not section_summaries_parsed:
+            section_summaries_parsed = []
+
+        title_raw = paper_analysis_metadata.get('title', original_title or 'Unknown')
+        title_safe = str(title_raw).encode('utf-8', errors='ignore').decode('utf-8')
+        
+        source_raw = paper_analysis_metadata.get('source', 'Unknown')
+        source_safe = str(source_raw).encode('utf-8', errors='ignore').decode('utf-8')
+
+        return PaperAnalysis(
+            id=paper_id,
+            title=title_safe,
+            source=source_safe,
+            main_topics=main_topics_parsed,
+            key_conclusions=key_conclusions_parsed,
+            section_summaries=section_summaries_parsed
+        )
+
     except Exception as e:
         print(f"설정 조회 중 오류: {e}")
         raise HTTPException(
@@ -1427,32 +1560,6 @@ async def get_location_status():
     }
 
 
-# --- Gemini Hair Analysis API ---
-@app.post("/hair-analysis", response_model=HairAnalysisResponse)
-async def analyze_hair_with_gemini_endpoint(request: HairAnalysisRequest):
-    """Gemini API를 사용한 두피/탈모 분석 (서비스로 위임)"""
-    try:
-        # base64 문자열을 bytes로 변환하여 hair_gemini_check 함수 사용
-        import base64
-        image_bytes = base64.b64decode(request.image_base64)
-        result = analyze_hair_with_gemini(image_bytes)
-        return HairAnalysisResponse(**result)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except RuntimeError as e:
-        raise HTTPException(status_code=503, detail=str(e))
-    except Exception as e:
-        print(f"Gemini 분석 중 오류: {e}")
-        raise HTTPException(status_code=500, detail=f"분석 중 오류가 발생했습니다: {str(e)}")
-
-@app.get("/hair-analysis/health")
-async def hair_analysis_health_check():
-    """두피 분석 서비스 헬스체크"""
-    return {
-        "status": "healthy" if genai else "unavailable",
-        "service": "gemini-hair-analysis",
-        "timestamp": datetime.now().isoformat()
-    }
 
 # --- Gemini Hair Quiz API ---
 @app.post("/hair-quiz/generate", response_model=QuizGenerateResponse)
@@ -1620,8 +1727,121 @@ async def clear_conversation(request: dict):
     except Exception as e:
         print(f"대화 기록 삭제 오류: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+# --- Location Services API ---
+@app.get("/location/naver/search")
+async def search_naver_local(query: str):
+    """네이버 로컬 검색 API 프록시"""
+    try:
+        naver_client_id = os.getenv("NAVER_CLIENT_ID")
+        naver_client_secret = os.getenv("NAVER_CLIENT_SECRET")
 
+        if not naver_client_id or not naver_client_secret:
+            return {
+                "error": "네이버 API 키가 설정되지 않았습니다.",
+                "items": []
+            }
 
+        import requests
+
+        url = "https://openapi.naver.com/v1/search/local.json"
+        headers = {
+            'X-Naver-Client-Id': naver_client_id,
+            'X-Naver-Client-Secret': naver_client_secret,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+
+        params = {
+            'query': query,
+            'display': 20,
+            'sort': 'comment'
+        }
+
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+
+        if response.status_code == 200:
+            data = response.json()
+            return data
+        else:
+            return {
+                "error": f"네이버 API 호출 실패: {response.status_code}",
+                "items": []
+            }
+
+    except Exception as e:
+        print(f"네이버 로컬 검색 오류: {e}")
+        return {
+            "error": f"네이버 API 호출 중 오류가 발생했습니다: {str(e)}",
+            "items": []
+        }
+
+@app.get("/location/kakao/search")
+async def search_kakao_local(
+    query: str,
+    x: Optional[float] = None,
+    y: Optional[float] = None,
+    radius: Optional[int] = 5000
+):
+    """카카오 로컬 검색 API 프록시"""
+    try:
+        kakao_api_key = os.getenv("KAKAO_REST_API_KEY")
+
+        if not kakao_api_key:
+            return {
+                "error": "카카오 API 키가 설정되지 않았습니다.",
+                "documents": []
+            }
+
+        import requests
+
+        url = "https://dapi.kakao.com/v2/local/search/keyword.json"
+        headers = {
+            'Authorization': f'KakaoAK {kakao_api_key}',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+
+        params = {
+            'query': query,
+            'size': 15
+        }
+
+        # 좌표 기반 검색이 요청된 경우
+        if x is not None and y is not None:
+            params['x'] = x
+            params['y'] = y
+            params['radius'] = radius
+
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+
+        if response.status_code == 200:
+            data = response.json()
+            return data
+        else:
+            return {
+                "error": f"카카오 API 호출 실패: {response.status_code}",
+                "documents": []
+            }
+
+    except Exception as e:
+        print(f"카카오 로컬 검색 오류: {e}")
+        return {
+            "error": f"카카오 API 호출 중 오류가 발생했습니다: {str(e)}",
+            "documents": []
+        }
+
+@app.get("/location/status")
+async def location_service_status():
+    """위치 서비스 상태 확인"""
+    naver_client_id = os.getenv("NAVER_CLIENT_ID")
+    naver_client_secret = os.getenv("NAVER_CLIENT_SECRET")
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY")
+
+    return {
+        "status": "ok",
+        "message": "Python 위치 서비스가 정상적으로 동작 중입니다.",
+        "naverApiConfigured": bool(naver_client_id and naver_client_secret),
+        "kakaoApiConfigured": bool(kakao_api_key),
+        "timestamp": datetime.now().isoformat()
+    }
 
 
 if __name__ == "__main__":

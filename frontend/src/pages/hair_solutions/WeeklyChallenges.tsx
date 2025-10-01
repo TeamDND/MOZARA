@@ -5,7 +5,6 @@ import { Badge } from '../../components/ui/badge';
 import { Progress } from '../../components/ui/progress';
 import { Checkbox } from '../../components/ui/checkbox';
 import { ArrowLeft, Award, Target, Clock, Flame, CheckCircle, Star } from 'lucide-react';
-import { ImageWithFallback } from '../../hooks/ImageWithFallback';
 
 interface WeeklyChallengesProps {
   setCurrentView?: (view: string) => void;

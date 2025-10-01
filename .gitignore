@@ -34,6 +34,7 @@ env/
 venv/
 .venv/
 .cursor/
+.cursor/
 # Build outputs
 build/
 dist/
@@ -123,7 +124,15 @@ wheels/
 *.egg
 MANIFEST
 
+
+# IDE
+
 # IDE
 .claude/
-# Claude Code settings
-.claude/
+
+# Model files (too large for git)
+*.pth
+*.pkl
+*.h5
+*.ckpt
+*.safetensors

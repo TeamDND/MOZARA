@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '../../utils/store';
+import { fetchSeedlingInfo, updateSeedlingNickname, setSeedling } from '../../utils/seedlingSlice';
 import { hairProductApi, HairProduct } from '../../services/hairProductApi';
 import apiClient from '../../services/apiClient';
-import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
-import { Target, Camera, Award, Sprout } from 'lucide-react';
+import { Target, Camera, Award, Sprout, MapPin, Video, HelpCircle } from 'lucide-react';
+import { locationService, Location } from '../../services/locationService';
+import MapPreview from '../../components/ui/MapPreview';
 
 // 분석 결과 타입 정의
 interface HairAnalysisResponse {
@@ -40,12 +44,75 @@ interface HairAnalysisResponse {
 
 // TypeScript: DailyCare 페이지 컴포넌트
 const DailyCare: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const { seedlingId, seedlingName, currentPoint, loading: seedlingLoading, error: seedlingError } = useSelector((state: RootState) => state.seedling);
+  const { username, userId } = useSelector((state: RootState) => state.user);
+  
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<HairAnalysisResponse | null>(null);
   const [products, setProducts] = useState<HairProduct[] | null>(null);
   const [tips, setTips] = useState<string[]>([]);
+  const [seedlingPoints, setSeedlingPoints] = useState(0);
+  const [seedlingLevel, setSeedlingLevel] = useState(1);
+  const [plantTitle, setPlantTitle] = useState<string>('새싹 키우기');
+  const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+
+  // 새싹 단계 정의
+  const plantStages = {
+    1: { emoji: '🌱', name: '새싹' },
+    2: { emoji: '🌿', name: '어린 나무' },
+    3: { emoji: '🌳', name: '나무' },
+    4: { emoji: '🍎', name: '열매 나무' }
+  };
+
+  // 포인트에 따른 새싹 레벨 계산
+  const calculateSeedlingLevel = (points: number): number => {
+    if (points >= 200) return 4; // 열매 나무
+    if (points >= 100) return 3; // 나무
+    if (points >= 50) return 2;  // 어린 나무
+    return 1; // 새싹
+  };
+
+  // 새싹 정보 로드 (HairPT.tsx에서 가져옴)
+  const loadSeedlingInfo = useCallback(async () => {
+    if (!userId) {
+      console.log('사용자 ID가 없습니다.');
+      return;
+    }
+
+    try {
+      console.log('새싹 정보 로드 시도:', userId);
+      
+      const result = await dispatch(fetchSeedlingInfo(userId)).unwrap();
+      console.log('Redux 새싹 정보:', result);
+      
+      if (result) {
+        // 새싹 포인트 설정
+        if (result.currentPoint) {
+          setSeedlingPoints(result.currentPoint);
+          setSeedlingLevel(calculateSeedlingLevel(result.currentPoint));
+        }
+        // 새싹 이름 설정 (백엔드에서 가져온 이름이 있으면 사용, 없으면 로컬 스토리지 사용)
+        if (result.seedlingName) {
+          setPlantTitle(result.seedlingName);
+        } else {
+          const savedTitle = localStorage.getItem('plantTitle');
+          if (savedTitle) setPlantTitle(savedTitle);
+        }
+      }
+    } catch (error: any) {
+      console.error('새싹 정보 로드 실패:', error);
+      console.error('에러 상세:', error.response?.data);
+      console.error('에러 상태:', error.response?.status);
+      
+      // 에러 시 로컬 스토리지에서 제목 로드
+      const savedTitle = localStorage.getItem('plantTitle');
+      if (savedTitle) setPlantTitle(savedTitle);
+    }
+  }, [dispatch, userId]);
 
   // 다음 액션 결정 함수 (Dashboard에서 가져옴)
   const getNextAction = () => {
@@ -89,7 +156,8 @@ const DailyCare: React.FC = () => {
     overallImprovement: 15,
     lastPhotoDate: null as string | null,
     completedChallenges: 8,
-    level: 'bronze'
+    level: 'bronze',
+    hasCompletedInitialAnalysis: false // 최초 탈모분석 완료 여부
   });
 
   const progress = userProgress;
@@ -97,12 +165,14 @@ const DailyCare: React.FC = () => {
 
   // 대시보드 카드 상태 (분석 결과 연동)
   const [scalpScore, setScalpScore] = useState<number>(78);
-  const [dandruffLabel, setDandruffLabel] = useState<string>('양호');
-  const [dandruffSub, setDandruffSub] = useState<string>('깨끗함');
+  const [oilinessLabel, setOilinessLabel] = useState<string>('양호');
+  const [oilinessSub, setOilinessSub] = useState<string>('균형');
   const [flakeLabel, setFlakeLabel] = useState<string>('양호');
   const [flakeSub, setFlakeSub] = useState<string>('개선됨');
   const [rednessLabel, setRednessLabel] = useState<string>('양호');
   const [rednessSub, setRednessSub] = useState<string>('정상');
+  const [dandruffLabel, setDandruffLabel] = useState<string>('양호');
+  const [dandruffSub, setDandruffSub] = useState<string>('정상');
 
   const updateDashboardFromAnalysis = (res: HairAnalysisResponse) => {
     // LLM 기반 종합 두피 점수 계산
@@ -112,6 +182,40 @@ const DailyCare: React.FC = () => {
     const primarySeverity = res.analysis.primary_severity;
     const avgConfidence = res.analysis.average_confidence;
     const diagnosisScores = res.analysis.diagnosis_scores;
+    
+    // 비듬과 탈모 관련 내용 필터링
+    const category = primaryCategory.toLowerCase();
+    if (category.includes('비듬') || category.includes('탈모')) {
+      // 비듬이나 탈모가 주요 카테고리인 경우 "양호"로 처리
+      const filteredCategory = "0.양호";
+      const filteredSeverity = "0.양호";
+      
+      // 필터링된 데이터로 계속 처리
+      const filteredAnalysis = {
+        ...res.analysis,
+        primary_category: filteredCategory,
+        primary_severity: filteredSeverity,
+        diagnosis_scores: Object.fromEntries(
+          Object.entries(diagnosisScores).filter(([key]) => 
+            !key.includes('비듬') && !key.includes('탈모')
+          )
+        )
+      };
+      
+      // 필터링된 분석으로 대시보드 업데이트
+      updateDashboardWithFilteredData(filteredAnalysis);
+      return;
+    }
+    
+    // 비듬/탈모가 아닌 경우 정상 처리
+    updateDashboardWithFilteredData(res.analysis);
+  };
+  
+  const updateDashboardWithFilteredData = (analysis: any) => {
+    const primaryCategory = analysis.primary_category;
+    const primarySeverity = analysis.primary_severity;
+    const avgConfidence = analysis.average_confidence;
+    const diagnosisScores = analysis.diagnosis_scores;
 
     // 심각도에 따른 단계 계산 (0.양호=0, 1.경증=1, 2.중등도=2, 3.중증=3)
     const severityLevel = parseInt(primarySeverity.split('.')[0]) || 0;
@@ -126,20 +230,24 @@ const DailyCare: React.FC = () => {
     
     // 진단 점수 기반 조정
     if (diagnosisScores) {
-      const avgDiagnosisScore = Object.values(diagnosisScores).reduce((sum, score) => sum + score, 0) / Object.keys(diagnosisScores).length;
+      const scores = Object.values(diagnosisScores) as number[];
+      const avgDiagnosisScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
       baseScore -= (avgDiagnosisScore - 0.5) * 30; // 진단 점수 기반 조정
     }
     
     // 신뢰도 기반 보정
     baseScore += (conf - 0.5) * 20; // 신뢰도 기반 보정
     
-    // 카테고리별 특별 감점
+    // 카테고리별 특별 감점 (비듬/탈모는 이미 필터링됨)
     const category = primaryCategory.toLowerCase();
-    if (category.includes('비듬') || category.includes('탈모')) {
-      baseScore -= 15; // 비듬/탈모는 추가 감점
-    }
     if (category.includes('홍반') || category.includes('농포')) {
       baseScore -= 10; // 염증 관련 추가 감점
+    }
+    if (category.includes('피지과다')) {
+      baseScore -= 8; // 피지과다는 추가 감점
+    }
+    if (category.includes('미세각질')) {
+      baseScore -= 6; // 미세각질은 추가 감점
     }
     
     const finalScore = Math.max(0, Math.min(100, Math.round(baseScore)));
@@ -147,16 +255,16 @@ const DailyCare: React.FC = () => {
 
     // 카테고리와 심각도에 따른 상태 추정 (새로운 카테고리)
     
-    // 비듬 상태 판정
-    if (category.includes('비듬') || stage01to03 >= 2) {
-      setDandruffLabel('주의');
-      setDandruffSub('관리 필요');
+    // 피지 상태 판정
+    if (category.includes('피지과다') || stage01to03 >= 2) {
+      setOilinessLabel('주의');
+      setOilinessSub('관리 필요');
     } else if (stage01to03 === 1) {
-      setDandruffLabel('보통');
-      setDandruffSub('관찰중');
+      setOilinessLabel('보통');
+      setOilinessSub('관찰중');
     } else {
-      setDandruffLabel('양호');
-      setDandruffSub('깨끗함');
+      setOilinessLabel('양호');
+      setOilinessSub('균형');
     }
 
     // 각질 상태 판정
@@ -183,10 +291,22 @@ const DailyCare: React.FC = () => {
       setRednessSub('정상');
     }
 
+    // 비듬 상태 판정
+    if (category.includes('비듬') || stage01to03 >= 2) {
+      setDandruffLabel('주의');
+      setDandruffSub('관리 필요');
+    } else if (stage01to03 === 1) {
+      setDandruffLabel('보통');
+      setDandruffSub('관찰중');
+    } else {
+      setDandruffLabel('양호');
+      setDandruffSub('정상');
+    }
+
     // 분석 결과 기반 맞춤형 케어 팁 생성
     const buildSolutions = (
       score: number,
-      dandruff: string,
+      oiliness: string,
       flake: string,
       redness: string
     ): string[] => {
@@ -207,12 +327,12 @@ const DailyCare: React.FC = () => {
         s.push('🏥 피부과 전문의와 상담하여 정확한 진단을 받아보세요.');
       }
       
-      // 비듬 상태별 맞춤 케어
-      if (dandruff === '주의') {
-        s.push('🧴 항비듬 성분(피리티온아연, 셀레늄) 샴푸를 주 2-3회 사용하세요.');
+      // 피지 상태별 맞춤 케어
+      if (oiliness === '주의') {
+        s.push('🧴 지성 두피 전용 샴푸로 깊은 클렌징을 하세요.');
         s.push('🚿 샴푸 시 두피를 부드럽게 마사지하며 충분히 헹구세요.');
-      } else if (dandruff === '보통') {
-        s.push('🧽 두피 클렌징을 강화하고 비듬 예방 샴푸를 주 1-2회 사용하세요.');
+      } else if (oiliness === '보통') {
+        s.push('🧽 두피 클렌징을 강화하고 피지 조절 샴푸를 주 1-2회 사용하세요.');
       }
       
       // 각질 상태별 맞춤 케어
@@ -234,7 +354,7 @@ const DailyCare: React.FC = () => {
       return s.slice(0, 6);
     };
 
-    setTips(buildSolutions(finalScore, dandruffLabel, flakeLabel, rednessLabel));
+    setTips(buildSolutions(finalScore, oilinessLabel, flakeLabel, rednessLabel));
   };
   const todayStr = new Date().toLocaleDateString('ko-KR', {
     year: 'numeric',
@@ -244,10 +364,44 @@ const DailyCare: React.FC = () => {
   });
   const [streak, setStreak] = useState<number>(1);
 
-  // 연속 케어 일수 계산 (로컬 스토리지 기반)
+  // 위치 정보 가져오기
   React.useEffect(() => {
-    const key = 'dailyCareStreak';
-    const stored = localStorage.getItem(key);
+    const initializeLocation = async () => {
+      try {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const location = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+              };
+              setCurrentLocation(location);
+              setLocationError(null);
+            },
+            (error) => {
+              console.error('위치 정보를 가져올 수 없습니다:', error);
+              setLocationError('위치 정보를 가져올 수 없습니다.');
+            }
+          );
+        } else {
+          setLocationError('이 브라우저는 위치 정보를 지원하지 않습니다.');
+        }
+      } catch (error) {
+        console.error('위치 초기화 오류:', error);
+        setLocationError('위치 정보 초기화에 실패했습니다.');
+      }
+    };
+
+    initializeLocation();
+  }, []);
+
+  // 연속 케어 일수 계산 및 최초 분석 상태 확인 (로컬 스토리지 기반)
+  React.useEffect(() => {
+    const streakKey = 'dailyCareStreak';
+    const analysisKey = 'hasCompletedInitialAnalysis';
+    
+    // 연속 케어 일수 계산
+    const stored = localStorage.getItem(streakKey);
     const today = new Date();
     const yyyyMmDd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
@@ -274,8 +428,18 @@ const DailyCare: React.FC = () => {
     }
 
     setStreak(count);
-    localStorage.setItem(key, JSON.stringify({ count, lastDate: lastDateStr }));
-  }, []);
+    localStorage.setItem(streakKey, JSON.stringify({ count, lastDate: lastDateStr }));
+
+    // 최초 분석 완료 상태 확인
+    const hasCompletedAnalysis = localStorage.getItem(analysisKey) === 'true';
+    setUserProgress(prev => ({
+      ...prev,
+      hasCompletedInitialAnalysis: hasCompletedAnalysis
+    }));
+
+    // 새싹 정보 로드
+    loadSeedlingInfo();
+  }, [loadSeedlingInfo]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -283,7 +447,7 @@ const DailyCare: React.FC = () => {
       <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col">
         
         {/* 상단 그라데이션 배너 (Mobile-First) */}
-        <div className="bg-gradient-to-r from-[#222222] to-[#333333] text-white p-4">
+        <div className="bg-gradient-to-r from-[#1F0101] to-[#2A0202] text-white p-4">
           <div className="text-center">
             <p className="text-sm opacity-90">{todayStr}</p>
             <h1 className="text-xl font-bold mt-1">좋은 하루예요! 데일리 케어를 시작해볼까요?</h1>
@@ -293,38 +457,38 @@ const DailyCare: React.FC = () => {
 
         {/* 메인 컨텐츠 */}
         <div className="flex-1 p-4 overflow-y-auto space-y-4">
-          {/* 다음 액션 카드 (Mobile-First) */}
-          <div className={`bg-white p-4 rounded-xl shadow-md ${nextAction.urgent ? 'ring-2 ring-gray-200 bg-gray-50' : ''}`}>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-[#222222]" />
-                <h3 className="text-lg font-semibold text-gray-800">{nextAction.title}</h3>
-              </div>
-              <p className="text-sm text-gray-600">{nextAction.description}</p>
-              <Button 
-                onClick={() => {
-                  if (nextAction.action === 'diagnosis') {
+          {/* 0. 탈모분석 (최초 기준이고 한번이라도 분석하면 안보임) */}
+          {!userProgress.hasCompletedInitialAnalysis && (
+            <div className="bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded-xl border-2 border-red-200">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Target className="w-5 h-5 text-red-600" />
+                  <h3 className="text-lg font-semibold text-red-800">최초 탈모 분석</h3>
+                </div>
+                <p className="text-sm text-red-700">AI 분석과 설문을 통한 종합적인 두피 상태 파악을 시작해보세요</p>
+                <Button 
+                  onClick={() => {
+                    // 최초 분석 완료 상태 저장
+                    localStorage.setItem('hasCompletedInitialAnalysis', 'true');
+                    setUserProgress(prev => ({
+                      ...prev,
+                      hasCompletedInitialAnalysis: true
+                    }));
                     navigate('/integrated-diagnosis');
-                  } else {
-                    console.log(`Action: ${nextAction.action}`);
-                  }
-                }}
-                className={`w-full h-12 rounded-xl font-semibold ${
-                  nextAction.urgent 
-                    ? 'bg-[#222222] hover:bg-[#333333] text-white' 
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                } active:scale-[0.98] transition-all`}
-              >
-                {nextAction.buttonText}
-              </Button>
+                  }}
+                  className="w-full h-12 bg-[#1F0101] hover:bg-[#2A0202] text-white rounded-xl font-semibold active:scale-[0.98] transition-all"
+                >
+                  지금 분석하기
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* 메인 카드: 두피 촬영하기 (Mobile-First) */}
+          {/* 1. 두피 분석 (오늘의 두피분석) */}
           <div className="bg-white p-4 rounded-xl shadow-md">
             <div className="space-y-4">
               <div>
-                <h2 className="text-lg font-semibold text-gray-800">두피 촬영하기</h2>
+                <h2 className="text-lg font-semibold text-gray-800">오늘의 두피 분석</h2>
                 <p className="text-sm text-gray-600 mt-1">오늘의 두피 상태를 확인해보세요</p>
               </div>
               
@@ -347,6 +511,14 @@ const DailyCare: React.FC = () => {
                       formData.append('image', selectedImage);
                       formData.append('top_k', '10');
                       formData.append('use_preprocessing', 'true');
+                      
+                      // 로그인한 사용자의 user_id 추가
+                      if (userId) {
+                        formData.append('user_id', userId.toString());
+                        console.log('Daily 분석에 user_id 추가:', userId);
+                      } else {
+                        console.log('로그인하지 않은 사용자 - user_id 없음');
+                      }
                       
                       const response = await apiClient.post('/ai/hair-loss-daily/analyze', formData, {
                         headers: { 'Content-Type': 'multipart/form-data' },
@@ -377,7 +549,7 @@ const DailyCare: React.FC = () => {
                     }
                   }}
                   disabled={isAnalyzing}
-                  className="w-full h-12 px-4 bg-[#222222] text-white rounded-xl hover:bg-[#333333] disabled:opacity-50 font-semibold active:scale-[0.98] transition-all"
+                  className="w-full h-12 px-4 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] disabled:opacity-50 font-semibold active:scale-[0.98] transition-all"
                 >
                   {isAnalyzing ? '분석 중...' : '사진으로 AI 분석'}
                 </button>
@@ -385,31 +557,201 @@ const DailyCare: React.FC = () => {
             </div>
           </div>
 
-          {/* 통계 카드 (Mobile-First) */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white p-4 rounded-xl shadow-md">
-              <p className="text-xs text-gray-500">두피 점수</p>
-              <div className="mt-1 text-2xl font-bold text-gray-800">{scalpScore}</div>
-              <p className="mt-1 text-xs text-green-600">LLM 종합 분석</p>
-            </div>
-            <div className="bg-white p-4 rounded-xl shadow-md">
-              <p className="text-xs text-gray-500">비듬 상태</p>
-              <div className="mt-1 text-xl font-bold text-gray-800">{dandruffLabel}</div>
-              <p className="mt-1 text-xs text-emerald-600">{dandruffSub}</p>
-            </div>
-            <div className="bg-white p-4 rounded-xl shadow-md">
-              <p className="text-xs text-gray-500">각질 상태</p>
-              <div className="mt-1 text-xl font-bold text-gray-800">{flakeLabel}</div>
-              <p className="mt-1 text-xs text-teal-600">{flakeSub}</p>
-            </div>
-            <div className="bg-white p-4 rounded-xl shadow-md">
-              <p className="text-xs text-gray-500">홍반 상태</p>
-              <div className="mt-1 text-xl font-bold text-gray-800">{rednessLabel}</div>
-              <p className="mt-1 text-xs text-green-600">{rednessSub}</p>
+          {/* 2. 탈모 PT (오늘의 미션) - 새싹 키우기 UI */}
+          <div className="bg-[#1F0101] text-white p-4 rounded-xl">
+            <div className="space-y-4">
+              {/* 헤더: 새싹 아이콘과 제목 */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{plantStages[seedlingLevel as keyof typeof plantStages].emoji}</span>
+                  <h3 className="text-lg font-semibold">{seedlingName || plantTitle || '새싹 키우기'}</h3>
+                </div>
+                <button className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center hover:bg-white/30 transition-colors">
+                  <i className="fas fa-pen text-sm"></i>
+                </button>
+              </div>
+              
+              {/* 새싹 이미지 */}
+              <div className="text-center">
+                <div className="text-6xl mb-3">{plantStages[seedlingLevel as keyof typeof plantStages].emoji}</div>
+              </div>
+              
+              {/* 동기부여 메시지 */}
+              <div className="bg-white/20 rounded-xl p-3 text-center">
+                <p className="text-sm text-white/90">오늘의 건강한 습관을 실천하고 새싹을 키워보세요!</p>
+              </div>
+              
+              {/* 진행률 바 */}
+              <div className="flex items-center bg-white/20 rounded-2xl p-3">
+                <span className="bg-white text-[#1F0101] px-3 py-1 rounded-full text-sm font-bold">
+                  Lv.{seedlingLevel}
+                </span>
+                <div className="flex-1 h-2 bg-white/30 rounded-full mx-3 overflow-hidden">
+                  <div 
+                    className="h-full bg-green-500 rounded-full transition-all duration-500"
+                    style={{ width: `${((currentPoint || seedlingPoints) % 50) * 2}%` }}
+                  />
+                </div>
+                <span className="text-xs text-white/90">{(currentPoint || seedlingPoints) % 50}/50</span>
+              </div>
+              
+              {/* PT 시작 버튼 */}
+              <Button 
+                onClick={() => navigate('/hair-pt')}
+                className="w-full h-12 bg-white text-[#1F0101] hover:bg-gray-100 rounded-xl font-semibold active:scale-[0.98] transition-all"
+              >
+                PT 시작하기
+              </Button>
             </div>
           </div>
 
-          {/* 오늘의 케어 팁 (Mobile-First) */}
+          {/* 3. 탈모 맵 (내 위치기반 지도 화면) */}
+          <div className="bg-white p-4 rounded-xl shadow-md">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-[#1F0101]" />
+                <h3 className="text-lg font-semibold text-gray-800">탈모 맵</h3>
+              </div>
+              <p className="text-sm text-gray-600">내 위치 기반 근처 탈모 관련 장소들을 찾아보세요</p>
+              
+              {/* 지도 영역 */}
+              {currentLocation ? (
+                <div className="relative bg-gray-100 rounded-lg overflow-hidden">
+                  <MapPreview
+                    latitude={currentLocation.latitude}
+                    longitude={currentLocation.longitude}
+                    hospitals={[]}
+                    userLocation={currentLocation}
+                    zoom={13}
+                    className="h-48"
+                  />
+                </div>
+              ) : locationError ? (
+                <div className="relative bg-gray-100 rounded-lg h-48 flex items-center justify-center">
+                  <div className="text-center text-gray-500">
+                    <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">{locationError}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative bg-gray-100 rounded-lg h-48 flex items-center justify-center">
+                  <div className="text-center text-gray-500">
+                    <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">위치 정보를 가져오는 중...</p>
+                  </div>
+                </div>
+              )}
+              
+              <Button 
+                variant="outline"
+                className="w-full h-12 border-2 border-[#1F0101] hover:border-[#2A0202] text-[#1F0101] rounded-xl font-semibold active:scale-[0.98] transition-all"
+                onClick={() => navigate('/store-finder')}
+              >
+                더 알아보기
+              </Button>
+            </div>
+          </div>
+
+          {/* 분석 결과 통계 카드 */}
+          {analysis && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white p-4 rounded-xl shadow-md">
+                <p className="text-xs text-gray-500">두피 점수</p>
+                <div className="mt-1 text-2xl font-bold text-gray-800">{scalpScore}</div>
+                <p className="mt-1 text-xs text-green-600">LLM 종합 분석</p>
+              </div>
+              <div className="bg-white p-4 rounded-xl shadow-md">
+                <p className="text-xs text-gray-500">비듬 상태</p>
+                <div className="mt-1 text-xl font-bold text-gray-800">{dandruffLabel}</div>
+                <p className="mt-1 text-xs text-emerald-600">{dandruffSub}</p>
+              </div>
+              <div className="bg-white p-4 rounded-xl shadow-md">
+                <p className="text-xs text-gray-500">각질 상태</p>
+                <div className="mt-1 text-xl font-bold text-gray-800">{flakeLabel}</div>
+                <p className="mt-1 text-xs text-teal-600">{flakeSub}</p>
+              </div>
+              <div className="bg-white p-4 rounded-xl shadow-md">
+                <p className="text-xs text-gray-500">홍반 상태</p>
+                <div className="mt-1 text-xl font-bold text-gray-800">{rednessLabel}</div>
+                <p className="mt-1 text-xs text-green-600">{rednessSub}</p>
+              </div>
+            </div>
+          )}
+
+          {/* 4. 탈모 OX (오늘의 퀴즈) */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200">
+            <div className="flex items-center gap-2 mb-3">
+              <HelpCircle className="w-5 h-5 text-[#1F0101]" />
+              <h3 className="text-lg font-semibold text-gray-800">오늘의 탈모 OX 퀴즈</h3>
+            </div>
+            <div className="bg-gray-50 p-3 rounded-lg mb-3">
+              <p className="text-sm font-medium text-gray-800 mb-4">
+                탈모를 예방하기 위해 매일 샴푸를 하는 것이 좋다.
+              </p>
+              <div className="flex gap-2">
+                <button className="flex-1 h-12 px-4 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] font-semibold active:scale-[0.98] transition-all">
+                  O
+                </button>
+                <button className="flex-1 h-12 px-4 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] font-semibold active:scale-[0.98] transition-all">
+                  X
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500">정답 해설을 보려면 버튼을 눌러보세요!</p>
+          </div>
+
+          {/* 5. 탈모 영상 (오늘의 영상) */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200">
+            <div className="flex items-center gap-2 mb-3">
+              <Video className="w-5 h-5 text-[#1F0101]" />
+              <h3 className="text-lg font-semibold text-gray-800">오늘의 탈모 영상</h3>
+            </div>
+            <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video mb-3">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-white">
+                  <div className="text-4xl mb-2">▶️</div>
+                  <p className="text-sm font-medium">두피 마사지 방법 알아보기</p>
+                  <p className="text-xs opacity-75 mt-1">2분 30초</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button className="flex-1 h-12 px-4 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] font-semibold active:scale-[0.98] transition-all">
+                영상 보기
+              </button>
+              <button className="flex-1 h-12 px-4 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] font-semibold active:scale-[0.98] transition-all">
+                다음 영상
+              </button>
+            </div>
+          </div>
+
+          {/* 6. 헤어스타일 바꾸기 */}
+          <div className="bg-white p-4 rounded-xl shadow-md">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="text-2xl">💇‍♀️</div>
+                <h3 className="text-lg font-semibold text-gray-800">헤어스타일 바꾸기</h3>
+              </div>
+              <p className="text-sm text-gray-600">새로운 헤어스타일을 시도해보세요</p>
+              
+              {/* 물음표 그림 영역 */}
+              <div className="relative bg-gray-100 rounded-lg h-48 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <div className="text-6xl mb-2">❓</div>
+                  <p className="text-sm">새로운 스타일을 찾아보세요</p>
+                </div>
+              </div>
+              
+              <Button 
+                onClick={() => navigate('/hair-change')}
+                className="w-full h-12 bg-[#1F0101] hover:bg-[#2A0202] text-white rounded-xl font-semibold active:scale-[0.98] transition-all"
+              >
+                페이지 이동하기
+              </Button>
+            </div>
+          </div>
+
+          {/* 오늘의 케어 팁 */}
           {tips.length > 0 && (
             <div className="bg-white p-4 rounded-xl shadow-md">
               <h3 className="text-lg font-semibold text-gray-800 mb-3">오늘의 케어 팁</h3>
@@ -418,104 +760,6 @@ const DailyCare: React.FC = () => {
               </ol>
             </div>
           )}
-
-          {/* 케어 가이드 섹션 (Mobile-First) */}
-          <div className="space-y-3">
-            <div className="bg-green-50 p-4 rounded-xl">
-              <h3 className="text-lg font-semibold text-green-800 mb-3">🌱 모발 건강 습관</h3>
-              <ul className="space-y-2 text-sm text-green-700">
-                <li>• 정기적인 샴푸와 컨디셔너 사용</li>
-                <li>• 두피 마사지로 혈액순환 개선</li>
-                <li>• 충분한 수면과 스트레스 관리</li>
-                <li>• 영양가 있는 식단 섭취</li>
-              </ul>
-            </div>
-
-            <div className="bg-gray-50 p-4 rounded-xl">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">💪 건강한 라이프스타일</h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li>• 규칙적인 운동과 신체 활동</li>
-                <li>• 충분한 수분 섭취</li>
-                <li>• 금연과 금주</li>
-                <li>• 정기적인 건강 검진</li>
-              </ul>
-            </div>
-          </div>
-
-          {/* 추천 습관 카드들 (Mobile-First) */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">오늘의 추천 습관</h2>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { icon: "🧴", title: "샴푸하기", desc: "머리를 깨끗하게 씻어주세요" },
-                { icon: "💧", title: "수분 섭취", desc: "하루 8잔 이상 물 마시기" },
-                { icon: "😴", title: "충분한 수면", desc: "7-8시간의 휴식" },
-                { icon: "🏃", title: "운동하기", desc: "30분 이상 신체 활동" },
-                { icon: "🥗", title: "건강한 식단", desc: "신선한 채소와 과일" },
-                { icon: "🧘", title: "스트레스 관리", desc: "명상이나 휴식 시간" }
-              ].map((habit, index) => (
-                <div key={index} className="bg-white p-3 rounded-xl shadow-md">
-                  <div className="text-center">
-                    <div className="text-2xl mb-2">{habit.icon}</div>
-                    <h3 className="text-sm font-semibold text-gray-800 mb-1">{habit.title}</h3>
-                    <p className="text-xs text-gray-600">{habit.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 진행률 표시 (Mobile-First) */}
-          <div className="bg-gray-50 p-4 rounded-xl">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">오늘의 진행률</h3>
-            <div className="flex items-center mb-2">
-              <div className="flex-grow bg-gray-200 rounded-full h-2 mr-3">
-                <div className="bg-green-500 h-2 rounded-full transition-all duration-300" style={{width: '60%'}}></div>
-              </div>
-              <span className="text-sm font-medium text-gray-700">6 / 10 완료</span>
-            </div>
-            <p className="text-sm text-gray-600">훌륭해요! 오늘도 건강한 하루를 보내고 계시네요! 🌟</p>
-          </div>
-
-          {/* 빠른 액션 버튼들 (Mobile-First) */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button 
-              variant="outline" 
-              className="h-16 flex flex-col items-center gap-2 rounded-xl"
-              onClick={() => navigate('/integrated-diagnosis')}
-            >
-              <Target className="w-5 h-5" />
-              <span className="text-sm">재진단</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-16 flex flex-col items-center gap-2 rounded-xl"
-              onClick={() => navigate('/hair-pt')}
-            >
-              <Camera className="w-5 h-5" />
-              <span className="text-sm">탈모 PT</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-16 flex flex-col items-center gap-2 rounded-xl"
-              onClick={() => {
-                console.log('챌린지 페이지로 이동');
-              }}
-            >
-              <Award className="w-5 h-5" />
-              <span className="text-sm">챌린지</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-16 flex flex-col items-center gap-2 rounded-xl"
-              onClick={() => {
-                console.log('케어 기록 페이지로 이동');
-              }}
-            >
-              <Sprout className="w-5 h-5" />
-              <span className="text-sm">케어 기록</span>
-            </Button>
-          </div>
 
         </div>
       </div>

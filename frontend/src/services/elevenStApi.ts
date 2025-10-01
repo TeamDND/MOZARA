@@ -1,5 +1,4 @@
 import apiClient from './apiClient';
-import { configApi } from './configApi';
 import { HairProduct } from './hairProductApi';
 
 // TypeScript: 11번가 제품 검색 요청 인터페이스

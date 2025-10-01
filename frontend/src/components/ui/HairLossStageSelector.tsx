@@ -107,21 +107,21 @@ const HairLossStageSelector: React.FC<HairLossStageSelectorProps> = ({
             return (
               <div className="space-y-4">
                 {/* 단계 정보 헤더 */}
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
                     <h3 className="text-xl font-bold text-gray-800">
                       {selectedStage}단계: {stage.name}
                     </h3>
-                    <p className="text-gray-600">{stage.description}</p>
+                    <div className={`px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap ${
+                      recommendation.color === 'green' ? 'bg-green-100 text-green-800' :
+                      recommendation.color === 'blue' ? 'bg-blue-100 text-blue-800' :
+                      recommendation.color === 'orange' ? 'bg-orange-100 text-orange-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {recommendation.urgency} 우선순위
+                    </div>
                   </div>
-                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    recommendation.color === 'green' ? 'bg-green-100 text-green-800' :
-                    recommendation.color === 'blue' ? 'bg-blue-100 text-blue-800' :
-                    recommendation.color === 'orange' ? 'bg-orange-100 text-orange-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {recommendation.urgency} 우선순위
-                  </div>
+                  <p className="text-gray-600">{stage.description}</p>
                 </div>
 
                 {/* 추천 메시지 */}

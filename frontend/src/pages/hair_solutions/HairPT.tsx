@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { RootState, AppDispatch } from '../../utils/store';
 import { fetchSeedlingInfo, updateSeedlingNickname, setSeedling } from '../../utils/seedlingSlice';
 import apiClient from '../../services/apiClient';
@@ -63,6 +64,7 @@ interface BadHabitsState {
 
 const HairPT: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { seedlingId, seedlingName, currentPoint, loading: seedlingLoading, error: seedlingError } = useSelector((state: RootState) => state.seedling);
   const { username, userId } = useSelector((state: RootState) => state.user);
   
@@ -119,6 +121,7 @@ const HairPT: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [seedlingPoints, setSeedlingPoints] = useState(0);
   const [seedlingLevel, setSeedlingLevel] = useState(1);
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   const plantStages = {
     1: { emoji: '🌱', name: '새싹' },
@@ -343,16 +346,24 @@ const HairPT: React.FC = () => {
 
   // 진행률 계산 함수
   const calculateProgress = () => {
-    const totalMissions = 18; // 총 미션 수
+    if (missionData.length === 0) return 0;
+    
     let completedMissions = 0;
+    const totalMissions = missionData.length;
 
-    // 카운터 미션 (물 7잔, 이펙터 4번)
-    if (counters.water >= 7) completedMissions++;
-    if (counters.effector >= 4) completedMissions++;
-
-    // 체크박스 미션들
-    Object.values(missionState).forEach(completed => {
-      if (completed) completedMissions++;
+    // 각 미션의 완료 상태 확인 (백엔드 데이터 우선)
+    missionData.forEach(mission => {
+      if (mission.completed !== undefined) {
+        // 백엔드에서 완료 상태가 있으면 사용
+        if (mission.completed) {
+          completedMissions++;
+        }
+      } else {
+        // 백엔드 데이터가 없으면 로컬 상태 사용
+        if (missionState[mission.key]) {
+          completedMissions++;
+        }
+      }
     });
 
     return Math.round((completedMissions / totalMissions) * 100);
@@ -772,7 +783,17 @@ const HairPT: React.FC = () => {
         {/* Header */}
         <header className="p-4 bg-white border-b border-gray-200">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-xl font-bold text-gray-800">탈모 PT</h1>
+            <div className="flex items-center space-x-2">
+              <h1 className="text-xl font-bold text-gray-800">탈모 PT</h1>
+              <button
+                className="w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors"
+                onMouseEnter={() => setShowInfoModal(true)}
+                onMouseLeave={() => setShowInfoModal(false)}
+                title="탈모 PT 정보"
+              >
+                <i className="fas fa-question text-sm"></i>
+              </button>
+            </div>
             <div className="flex items-center space-x-2 text-sm text-gray-500">
               <span>진행률</span>
               <span className="text-[#1F0101] font-bold">{progressPercentage}%</span>
@@ -790,16 +811,16 @@ const HairPT: React.FC = () => {
         <div className="p-4 bg-white border-b border-gray-200">
           <div className="flex justify-around text-center">
             <div>
-              <div className="text-lg font-bold text-[#1F0101]">0</div>
-              <div className="text-xs text-gray-600">연속일</div>
-            </div>
-            <div>
               <div className="text-lg font-bold text-[#1F0101]">{currentPoint || seedlingPoints}</div>
               <div className="text-xs text-gray-600">새싹 포인트</div>
             </div>
-            <div>
-              <div className="text-lg font-bold text-[#1F0101]">{Math.round((Object.values(missionState).filter(v => v).length / Object.keys(missionState).length) * 100)}%</div>
-              <div className="text-xs text-gray-600">달성률</div>
+            <div className="flex items-center">
+              <button 
+                className="px-3 py-1.5 bg-[#1F0101] hover:bg-[#2A0202] text-white rounded-lg text-sm font-medium transition-colors"
+                onClick={() => navigate('/point-exchange')}
+              >
+                새싹 포인트 교환
+              </button>
             </div>
           </div>
         </div>
@@ -999,6 +1020,32 @@ const HairPT: React.FC = () => {
               </button>
             </div>
           </>
+        )}
+
+        {/* Info Modal */}
+        {showInfoModal && (
+          <div className="fixed top-20 left-4 right-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 max-w-sm mx-auto">
+              <div className="flex items-start space-x-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <i className="fas fa-info-circle text-blue-500 text-sm"></i>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-800 mb-2">탈모 PT란?</h3>
+                  <p className="text-sm text-gray-600 mb-3">
+                    개인 맞춤형 탈모 예방 및 개선을 위한 체계적인 관리 프로그램입니다. 
+                    루틴, 영양, 청결 세 가지 영역의 습관을 통해 건강한 모발을 기를 수 있어요.
+                  </p>
+                  <div className="border-t border-gray-100 pt-3">
+                    <h4 className="font-medium text-gray-800 mb-2">포인트 사용처</h4>
+                    <p className="text-sm text-gray-600">
+                      새싹을 전부 키우면 상품을 드립니다!
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Toast */}

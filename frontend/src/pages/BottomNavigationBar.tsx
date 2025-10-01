@@ -8,7 +8,7 @@ import { openChatBotModal, closeChatBotModal } from "../components/ChatBot/ChatB
 const BottomNavigationBar: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  
+
   // 로그인 상태 가져오기 (토큰 존재 여부로 판단)
   const token = useSelector((state: RootState) => state.token.token)
   const isLoggedIn = !!token
@@ -29,7 +29,35 @@ const BottomNavigationBar: React.FC = () => {
         <div className="bg-white/90 backdrop-blur rounded-t-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
 
           <div className="flex items-center justify-around pt-2 pb-2 px-4">
-            {/* 홈 */}
+            {/* 분석 */}
+            <button
+              onClick={() => {
+                closeChatBotModal();
+                navigate('/integrated-diagnosis')
+              }}
+              className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
+            >
+              <Search className="h-5 w-5 mb-1 text-[#222222]" />
+              <span className="text-xs font-medium text-[#222222]">
+                분석
+              </span>
+            </button>
+
+            {/* 기능 */}
+            <button
+              onClick={() => {
+                closeChatBotModal();
+                navigate('/main-contents')
+              }}
+              className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
+            >
+              <Layers3 className="h-5 w-5 mb-1 text-[#222222]" />
+              <span className="text-xs font-medium text-[#222222]">
+                기능
+              </span>
+            </button>
+
+            {/* 홈 (가운데) */}
             <button
               onClick={() => {
                 closeChatBotModal();
@@ -39,94 +67,34 @@ const BottomNavigationBar: React.FC = () => {
                   navigate('/')
                 }
               }}
-              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
-                isActive('/') || (isLoggedIn && isActive('/daily-care'))
-                  ? 'text-[#222222]' 
-                  : 'text-gray-600'
-              }`}
+              className="flex flex-col items-center py-2 px-3 bg-[#222222] rounded-full w-12 h-12 justify-center transition-all hover:bg-[#333333]"
             >
-              <Home className={`h-5 w-5 mb-1 ${
-                isActive('/') || (isLoggedIn && isActive('/daily-care')) ? 'text-[#222222]' : 'text-gray-600'
-              }`} />
-              <span className={`text-xs font-medium ${
-                isActive('/') || (isLoggedIn && isActive('/daily-care')) ? 'text-[#222222]' : 'text-gray-600'
-              }`}>
-                홈
-              </span>
+              <Home className="h-6 w-6 text-white" />
             </button>
-
-            {/* 기능 */}
-            <button
-              onClick={() => {
-                closeChatBotModal();
-                navigate('/main-contents');
-              }}
-              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
-                isActive('/main-contents')
-                  ? 'text-[#222222]' 
-                  : 'text-gray-600'
-              }`}
-            >
-              <Layers3 className={`h-5 w-5 mb-1 ${
-                isActive('/main-contents') ? 'text-[#222222]' : 'text-gray-600'
-              }`} />
-              <span className={`text-xs font-medium ${
-                isActive('/main-contents') ? 'text-[#222222]' : 'text-gray-600'
-              }`}>
-                기능
-              </span>
-            </button>
-
-            {/* 챗봇 (아이콘만) - 모달 열기 */}
-            <button
-              onClick={() => openChatBotModal()}
-              className="flex flex-col items-center py-2 px-3 bg-[#222222] rounded-full w-12 h-12 justify-center transition-all hover:bg-[#333333] hover:scale-110"
-            >
-              <Bot className="h-6 w-6 text-white" />
-            </button>
-
-            {/* 분석 */}
-            <button
-              onClick={() => {
-                closeChatBotModal();
-                navigate('/integrated-diagnosis');
-              }}
-              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
-                isActive('/integrated-diagnosis')
-                  ? 'text-[#222222]' 
-                  : 'text-gray-600'
-              }`}
-            >
-              <Search className={`h-5 w-5 mb-1 ${
-                isActive('/integrated-diagnosis') ? 'text-[#222222]' : 'text-gray-600'
-              }`} />
-              <span className={`text-xs font-medium ${
-                isActive('/integrated-diagnosis') ? 'text-[#222222]' : 'text-gray-600'
-              }`}>
-                분석
-              </span>
-            </button>
-
 
             {/* 프로필 */}
             <button
               onClick={() => {
                 closeChatBotModal();
-                navigate('/mypage');
-              }}
-              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
-                isActive('/mypage')
-                  ? 'text-[#222222]' 
-                  : 'text-gray-600'
-              }`}
+                navigate('/mypage')
+                }
+              }
+              className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
-              <User className={`h-5 w-5 mb-1 ${
-                isActive('/mypage') ? 'text-[#222222]' : 'text-gray-600'
-              }`} />
-              <span className={`text-xs font-medium ${
-                isActive('/mypage') ? 'text-[#222222]' : 'text-gray-600'
-              }`}>
+              <User className="h-5 w-5 mb-1 text-[#222222]" />
+              <span className="text-xs font-medium text-[#222222]">
                 MY
+              </span>
+            </button>
+
+            {/* 챗봇 */}
+            <button
+              onClick={() => openChatBotModal()}
+              className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
+            >
+              <Bot className="h-5 w-5 mb-1 text-[#222222]" />
+              <span className="text-xs font-medium text-[#222222]">
+                챗봇
               </span>
             </button>
           </div>
