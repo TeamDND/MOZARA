@@ -87,8 +87,8 @@ class LocationService {
       '병원 추천', '탈모 치료 병원', '피부과', '모발이식 전문 병원', '탈모 클리닉', '탈모병원', '탈모 전문 병원'
     ];
     if (hospitalSynonyms.some(s => q.includes(s.toLowerCase()))) {
-      // 병원 + 의원을 아우르는 키워드로 검색
-      return { canonicalCategory: '탈모병원', searchQuery: '탈모병원의원' };
+      // 병원을 위한 단순하고 효과적인 검색어
+      return { canonicalCategory: '탈모병원', searchQuery: '피부과' };
     }
 
     // 전용 미용/관리 계열
@@ -96,7 +96,7 @@ class LocationService {
       '전용 미용', '두피 관리 센터', '탈모 전문 헤어살롱', '헤드 스파', '탈모미용실', '탈모 전용 미용실'
     ];
     if (salonSynonyms.some(s => q.includes(s.toLowerCase()))) {
-      return { canonicalCategory: '탈모미용실', searchQuery: '탈모 전용 미용실' };
+      return { canonicalCategory: '탈모미용실', searchQuery: '두피 미용실' };
     }
 
     // 두피문신(SMP)
@@ -105,7 +105,7 @@ class LocationService {
     ];
     if (smpSynonyms.some(s => q.includes(s.toLowerCase()))) {
       // 두피문신 검색 시 SMP 키워드를 반드시 포함하여 정확도 향상
-      return { canonicalCategory: '두피문신', searchQuery: '두피문신 SMP' };
+      return { canonicalCategory: '두피문신', searchQuery: '두피문신' };
     }
 
     // 가발/증모술
@@ -113,7 +113,7 @@ class LocationService {
       '가발 전문점', '맞춤 가발', '탈모 보완 가발', '증모술', '가발전문점'
     ];
     if (wigSynonyms.some(s => q.includes(s.toLowerCase()))) {
-      return { canonicalCategory: '가발전문점', searchQuery: '맞춤 가발 전문점' };
+      return { canonicalCategory: '가발전문점', searchQuery: '가발' };
     }
 
     return { canonicalCategory: null, searchQuery: rawQuery };

@@ -8,6 +8,42 @@ from typing import Dict, Any, List
 from .products_data import HAIR_LOSS_STAGE_PRODUCTS, STAGE_DESCRIPTIONS
 
 
+def get_product_image_url(product) -> str:
+    """11번가 제품 이미지 URL 처리"""
+    try:
+        # 11번가 API에서 이미지 URL 가져오기
+        image_element = product.find('ProductImage')
+        if image_element is not None and image_element.text:
+            image_url = image_element.text.strip()
+            
+            # 이미지 URL 유효성 검증
+            if image_url and image_url.startswith(('http://', 'https://')):
+                # 11번가 이미지 URL 최적화 (크기 조정)
+                if '11st.co.kr' in image_url:
+                    # 11번가 이미지 URL에 크기 파라미터 추가
+                    if '?' in image_url:
+                        image_url += '&w=300&h=300&fit=crop'
+                    else:
+                        image_url += '?w=300&h=300&fit=crop'
+                
+                return image_url
+        
+        # 대체 이미지 필드 확인
+        for alt_field in ['ProductImageLarge', 'ProductImageSmall', 'ImageUrl']:
+            alt_element = product.find(alt_field)
+            if alt_element is not None and alt_element.text:
+                alt_url = alt_element.text.strip()
+                if alt_url and alt_url.startswith(('http://', 'https://')):
+                    return alt_url
+        
+        # 모든 방법이 실패하면 기본 이미지 반환
+        return "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop&crop=center"
+        
+    except Exception as e:
+        print(f"이미지 URL 처리 중 오류: {e}")
+        return "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop&crop=center"
+
+
 def get_products_by_stage(stage: int) -> list:
     if stage not in HAIR_LOSS_STAGE_PRODUCTS:
         raise ValueError("지원하지 않는 탈모 단계입니다. 0-3단계 중 선택해주세요.")
@@ -43,7 +79,7 @@ def search_11st_products(keyword: str, page: int = 1, pageSize: int = 20) -> Dic
                     "productPrice": 15000 + (i * 5000),
                     "productRating": 4.0 + (i * 0.1),
                     "productReviewCount": 100 + (i * 50),
-                    "productImage": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=200&h=200&fit=crop&crop=center",
+                    "productImage": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop&crop=center",
                     "productUrl": f"https://www.11st.co.kr/products/dummy-{i}",
                     "mallName": "11번가",
                     "maker": "제조사",
@@ -106,7 +142,7 @@ def search_11st_products(keyword: str, page: int = 1, pageSize: int = 20) -> Dic
                         "productPrice": int(product.find('ProductPrice').text) if product.find('ProductPrice') is not None else 0,
                         "productRating": float(product.find('ReviewRating').text) if product.find('ReviewRating') is not None else 4.0,
                         "productReviewCount": int(product.find('ReviewCount').text) if product.find('ReviewCount') is not None else 0,
-                        "productImage": product.find('ProductImage').text if product.find('ProductImage') is not None else "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=200&h=200&fit=crop&crop=center",
+                        "productImage": get_product_image_url(product),
                         "productUrl": product.find('ProductUrl').text if product.find('ProductUrl') is not None else f"https://www.11st.co.kr/products/{product.find('ProductCode').text if product.find('ProductCode') is not None else ''}",
                         "mallName": "11번가",
                         "maker": product.find('Maker').text if product.find('Maker') is not None else "제조사",
@@ -134,7 +170,7 @@ def search_11st_products(keyword: str, page: int = 1, pageSize: int = 20) -> Dic
                         "productPrice": 20000 + (i * 3000),
                         "productRating": 4.2 + (i * 0.1),
                         "productReviewCount": 150 + (i * 30),
-                        "productImage": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=200&h=200&fit=crop&crop=center",
+                        "productImage": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop&crop=center",
                         "productUrl": f"https://www.11st.co.kr/products/11st-dummy-{i}",
                         "mallName": "11번가",
                         "maker": "11번가 판매자",
@@ -169,7 +205,7 @@ def search_11st_products(keyword: str, page: int = 1, pageSize: int = 20) -> Dic
                     "productPrice": 20000 + (i * 3000),
                     "productRating": 4.2 + (i * 0.1),
                     "productReviewCount": 150 + (i * 30),
-                    "productImage": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=200&h=200&fit=crop&crop=center",
+                    "productImage": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop&crop=center",
                     "productUrl": f"https://www.11st.co.kr/products/11st-fallback-{i}",
                     "mallName": "11번가",
                     "maker": "11번가 판매자",

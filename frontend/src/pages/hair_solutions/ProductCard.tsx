@@ -68,124 +68,86 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <div 
-      className="bg-white/70 backdrop-blur rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group"
+      className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
       onClick={() => onProductClick?.(product)}
     >
       {/* 제품 이미지 */}
-      <div className="relative h-48 bg-gray-100 overflow-hidden">
+      <div className="relative h-36 bg-gray-100 overflow-hidden">
         <img
           src={product.productImage}
           alt={product.productName}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
-            target.src = 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=200&fit=crop&crop=center';
+            target.src = 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop&crop=center';
           }}
+          loading="lazy"
         />
         
-        {/* 카테고리 배지 */}
-        <div className="absolute top-3 left-3 bg-white bg-opacity-90 rounded-full px-3 py-1 flex items-center gap-1">
-          <span className="text-lg">{getCategoryIcon(product.category2)}</span>
-          <span className="text-xs font-medium text-gray-700">{product.category2}</span>
-        </div>
-
         {/* 브랜드 배지 */}
-        <div className="absolute top-3 right-3 bg-[#1F0101] text-white rounded-full px-2 py-1">
-          <span className="text-xs font-medium">{product.brand}</span>
+        <div className="absolute top-2 left-2">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold text-white bg-[#1F0101]/90 rounded-full">
+            ⭐ {product.brand}
+          </span>
         </div>
         
         {/* 즐겨찾기 버튼 */}
         <button
           onClick={handleFavoriteToggle}
-          className="absolute bottom-3 right-3 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center hover:bg-white transition-colors"
+          className="absolute bottom-2 right-2 w-7 h-7 bg-white/95 backdrop-blur rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm"
         >
-          <span className={`text-lg ${isFavorite ? 'text-red-500' : 'text-gray-400'}`}>
+          <span className={`text-base ${isFavorite ? 'text-red-500' : 'text-gray-400'}`}>
             {isFavorite ? '❤️' : '🤍'}
           </span>
         </button>
       </div>
 
       {/* 제품 정보 */}
-      <div className="p-4">
+      <div className="p-3">
         {/* 제품명 */}
-        <h3 className="font-semibold text-gray-800 text-lg mb-2 line-clamp-2 group-hover:text-[#1F0101] transition-colors">
+        <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2 leading-snug">
           {product.productName}
         </h3>
 
-        {/* 설명 */}
-        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-          {product.description}
-        </p>
-
-        {/* 평점 및 리뷰 */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            {renderStars(product.productRating)}
-            <span className="text-sm text-gray-600">
-              {product.productRating.toFixed(1)}
-            </span>
-          </div>
-          <span className="text-xs text-gray-500">
-            리뷰 {product.productReviewCount.toLocaleString()}개
+        {/* 평점 */}
+        <div className="flex items-center gap-1 mb-2">
+          {renderStars(product.productRating)}
+          <span className="text-[10px] text-gray-600 ml-1">
+            ({product.productRating.toFixed(1)})
           </span>
         </div>
 
         {/* 가격 */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-xl font-bold text-gray-800">
-            {formatPrice(product.productPrice)}원
-          </div>
-          <div className="text-xs text-gray-500">
-            {product.mallName}
-          </div>
+        <div className="text-base font-bold text-gray-900 mb-2">
+          {formatPrice(product.productPrice)}원
         </div>
 
-        {/* 성분 정보 */}
-        {product.ingredients && product.ingredients.length > 0 && (
-          <div className="mb-3">
-            <div className="text-xs text-gray-500 mb-1">주요 성분</div>
-            <div className="flex flex-wrap gap-1">
-              {product.ingredients.slice(0, 3).map((ingredient, index) => (
-                <span
-                  key={index}
-                  className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
-                >
-                  {ingredient}
-                </span>
-              ))}
-              {product.ingredients.length > 3 && (
-                <span className="text-xs text-gray-500">
-                  +{product.ingredients.length - 3}개
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* 적합 단계 */}
-        <div className="mb-3">
-          <div className="text-xs text-gray-500 mb-1">적합 단계</div>
-          <div className="flex gap-1">
-            {product.suitableStages.map((stage) => (
-              <span
-                key={stage}
-                className="text-xs bg-[#1F0101]/10 text-[#1F0101] px-2 py-1 rounded-full font-medium"
-              >
-                {stage}단계
-              </span>
-            ))}
-          </div>
+        {/* 적합 단계 배지 */}
+        <div className="flex flex-wrap gap-1 mb-2">
+          {product.suitableStages.slice(0, 2).map((stage) => (
+            <span
+              key={stage}
+              className="text-[10px] bg-[#1F0101]/10 text-[#1F0101] px-2 py-0.5 rounded-full font-medium"
+            >
+              {stage}단계
+            </span>
+          ))}
+          {product.suitableStages.length > 2 && (
+            <span className="text-[10px] text-gray-500">
+              +{product.suitableStages.length - 2}
+            </span>
+          )}
         </div>
 
-        {/* 구매 버튼 */}
+        {/* 구매 버튼 - 간소화 */}
         <button
-          className="w-full bg-[#1F0101] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#2A0202] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1F0101] focus:ring-offset-2"
+          className="w-full bg-[#1F0101] text-white py-2 px-3 rounded-lg font-medium hover:bg-[#2A0202] transition-colors text-xs"
           onClick={(e) => {
             e.stopPropagation();
             window.open(product.productUrl, '_blank');
           }}
         >
-          제품 보러가기
+          구매하기
         </button>
       </div>
     </div>

@@ -89,10 +89,14 @@ const HairQuiz: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">AI가 오늘의 퀴즈를<br />새롭게 만들고 있습니다...</p>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-md mx-auto min-h-screen bg-white">
+          <main className="px-4 py-6 flex flex-col items-center justify-center min-h-screen">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-14 w-14 border-4 border-[#222222] border-t-transparent mx-auto mb-4"></div>
+              <p className="text-sm text-gray-600 font-medium">AI가 오늘의 퀴즈를<br />새롭게 만들고 있습니다...</p>
+            </div>
+          </main>
         </div>
       </div>
     );
@@ -100,17 +104,42 @@ const HairQuiz: React.FC = () => {
 
   if (showResult) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4 text-center">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">퀴즈 결과</h3>
-          <p className="text-lg mb-4">총 {quizData.length}문제 중 {score}문제를 맞혔습니다!</p>
-          <p className="text-blue-600 font-semibold mb-6">{getResultMessage()}</p>
-          <button
-            onClick={initQuiz}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-          >
-            새로운 퀴즈 풀기
-          </button>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-md mx-auto min-h-screen bg-white">
+          <main className="px-4 py-6 flex flex-col items-center justify-center min-h-screen">
+            <div className="w-full">
+              {/* 결과 헤더 */}
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                  <span className="text-3xl">🎉</span>
+                </div>
+                <h2 className="text-lg font-bold text-gray-900 mb-2">퀴즈 완료!</h2>
+              </div>
+
+              {/* 점수 카드 */}
+              <div className="bg-white border border-gray-100 rounded-xl p-6 mb-4 shadow-sm">
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-[#222222] mb-2">
+                    {score} / {quizData.length}
+                  </div>
+                  <p className="text-sm text-gray-600 mb-4">
+                    총 {quizData.length}문제 중 {score}문제를 맞혔습니다!
+                  </p>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm text-gray-700 font-medium">{getResultMessage()}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 다시 풀기 버튼 */}
+              <button
+                onClick={initQuiz}
+                className="w-full bg-[#222222] text-white py-3.5 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-all active:scale-[0.98]"
+              >
+                새로운 퀴즈 풀기
+              </button>
+            </div>
+          </main>
         </div>
       </div>
     );
@@ -118,14 +147,27 @@ const HairQuiz: React.FC = () => {
 
   if (quizData.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <button
-            onClick={initQuiz}
-            className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors"
-          >
-            퀴즈 시작하기
-          </button>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-md mx-auto min-h-screen bg-white">
+          <main className="px-4 py-6 flex flex-col items-center justify-center min-h-screen">
+            <div className="text-center w-full">
+              <div className="mb-6">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4">
+                  <span className="text-4xl">❓</span>
+                </div>
+                <h2 className="text-lg font-bold text-gray-900 mb-2">탈모 OX 퀴즈</h2>
+                <p className="text-sm text-gray-600">
+                  AI가 만드는 매일 새로운<br />탈모 상식 퀴즈에 도전하세요!
+                </p>
+              </div>
+              <button
+                onClick={initQuiz}
+                className="w-full bg-[#222222] text-white py-3.5 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-all active:scale-[0.98]"
+              >
+                퀴즈 시작하기
+              </button>
+            </div>
+          </main>
         </div>
       </div>
     );
@@ -134,68 +176,87 @@ const HairQuiz: React.FC = () => {
   const currentQuestion = quizData[currentQuestionIndex];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-2xl mx-auto px-4">
-        {/* Progress Bar */}
-        <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-          <div 
-            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
-        
-        {/* Question Counter */}
-        <p className="text-right text-gray-600 mb-6">
-          {currentQuestionIndex + 1} / {quizData.length}
-        </p>
-
-        {/* Question */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <p className="text-xl font-bold text-center text-gray-900 min-h-[80px] flex items-center justify-center">
-            {currentQuestion.question}
-          </p>
-        </div>
-
-        {/* O/X Options */}
-        <div className="flex justify-center gap-8 mb-8">
-          <button
-            onClick={() => selectAnswer('O')}
-            disabled={showExplanation}
-            className={`w-32 h-32 rounded-full border-4 text-6xl font-bold transition-all ${
-              showExplanation && selectedAnswer === 'O'
-                ? isCorrect 
-                  ? 'bg-green-100 border-green-500 text-green-600' 
-                  : 'bg-red-100 border-red-500 text-red-600'
-                : 'border-gray-300 text-blue-600 hover:scale-110 hover:border-blue-500'
-            } ${showExplanation ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-          >
-            O
-          </button>
-          
-          <button
-            onClick={() => selectAnswer('X')}
-            disabled={showExplanation}
-            className={`w-32 h-32 rounded-full border-4 text-6xl font-bold transition-all ${
-              showExplanation && selectedAnswer === 'X'
-                ? isCorrect 
-                  ? 'bg-green-100 border-green-500 text-green-600' 
-                  : 'bg-red-100 border-red-500 text-red-600'
-                : 'border-gray-300 text-red-600 hover:scale-110 hover:border-red-500'
-            } ${showExplanation ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-          >
-            X
-          </button>
-        </div>
-
-        {/* Explanation */}
-        {showExplanation && (
-          <div className="bg-gray-100 rounded-lg p-6 text-center">
-            <h3 className={`text-xl font-bold mb-3 ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-              {isCorrect ? '정답입니다!' : '오답입니다!'}
-            </h3>
-            <p className="text-gray-700">{currentQuestion.explanation}</p>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-md mx-auto min-h-screen bg-white">
+        <main className="px-4 py-6">
+          {/* 헤더 */}
+          <div className="text-center mb-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-2">탈모 OX 퀴즈</h2>
+            <p className="text-sm text-gray-600">
+              {currentQuestionIndex + 1} / {quizData.length} 문제
+            </p>
           </div>
-        )}
+
+          {/* Progress Bar */}
+          <div className="w-full bg-gray-100 rounded-full h-2 mb-6">
+            <div 
+              className="bg-[#222222] h-2 rounded-full transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+
+          {/* Question Card */}
+          <div className="bg-white border border-gray-100 rounded-xl p-6 mb-6 shadow-sm">
+            <div className="min-h-[120px] flex items-center justify-center">
+              <p className="text-base font-semibold text-center text-gray-900 leading-relaxed">
+                {currentQuestion.question}
+              </p>
+            </div>
+          </div>
+
+          {/* O/X Options */}
+          <div className="flex justify-center gap-4 mb-6">
+            <button
+              onClick={() => selectAnswer('O')}
+              disabled={showExplanation}
+              className={`w-28 h-28 rounded-full border-4 text-5xl font-bold transition-all ${
+                showExplanation && selectedAnswer === 'O'
+                  ? isCorrect 
+                    ? 'bg-green-100 border-green-500 text-green-600' 
+                    : 'bg-red-100 border-red-500 text-red-600'
+                  : 'bg-white border-gray-200 text-blue-600 hover:border-blue-500 active:scale-95'
+              } ${showExplanation ? 'cursor-not-allowed opacity-75' : 'cursor-pointer shadow-sm'}`}
+            >
+              O
+            </button>
+            
+            <button
+              onClick={() => selectAnswer('X')}
+              disabled={showExplanation}
+              className={`w-28 h-28 rounded-full border-4 text-5xl font-bold transition-all ${
+                showExplanation && selectedAnswer === 'X'
+                  ? isCorrect 
+                    ? 'bg-green-100 border-green-500 text-green-600' 
+                    : 'bg-red-100 border-red-500 text-red-600'
+                  : 'bg-white border-gray-200 text-red-600 hover:border-red-500 active:scale-95'
+              } ${showExplanation ? 'cursor-not-allowed opacity-75' : 'cursor-pointer shadow-sm'}`}
+            >
+              X
+            </button>
+          </div>
+
+          {/* Explanation */}
+          {showExplanation && (
+            <div className={`rounded-xl p-5 ${
+              isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+            }`}>
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 text-2xl">
+                  {isCorrect ? '✅' : '❌'}
+                </div>
+                <div className="flex-1">
+                  <h3 className={`text-sm font-bold mb-2 ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+                    {isCorrect ? '정답입니다!' : '오답입니다!'}
+                  </h3>
+                  <p className="text-sm text-gray-700 leading-relaxed">{currentQuestion.explanation}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Bottom Spacing for Mobile Navigation */}
+          <div className="h-20"></div>
+        </main>
       </div>
     </div>
   );

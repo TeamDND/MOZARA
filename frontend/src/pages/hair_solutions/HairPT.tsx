@@ -565,7 +565,7 @@ const HairPT: React.FC = () => {
     return iconMap[missionName] || { icon: 'fas fa-check', bgColor: 'bg-blue-100', textColor: 'text-blue-500' };
   };
 
-  // 미션 카드 렌더링 함수 (Mobile-First)
+  // 미션 카드 렌더링 함수 (MainContent 스타일)
   const renderMissionCard = (mission: MissionInfo) => {
     // 백엔드에서 가져온 완료 상태를 우선 사용, 없으면 로컬 상태 사용
     const isCompleted = mission.completed !== undefined ? mission.completed : missionState[mission.key];
@@ -578,7 +578,7 @@ const HairPT: React.FC = () => {
       const isCounterCompleted = currentCount >= targetCount;
       
       return (
-        <div key={mission.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+        <div key={mission.id} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
           {/* 헤더 영역: 좌측 정보 / 우측 완료 배지 */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-4">
@@ -642,9 +642,9 @@ const HairPT: React.FC = () => {
       );
     }
     
-    // 일반 미션들 (Mobile-First)
+    // 일반 미션들 (MainContent 스타일)
     return (
-      <div key={mission.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+      <div key={mission.id} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
         {/* 헤더: 좌측 정보 / 우측 컨트롤(완료 배지 또는 시작 버튼) */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center space-x-4">
@@ -676,212 +676,210 @@ const HairPT: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile-First 컨테이너 */}
-      <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col">
+      {/* Mobile-First Container - PC에서도 모바일 레이아웃 중앙 정렬 */}
+      <div className="max-w-md mx-auto min-h-screen bg-white">
         
-        {/* Plant Display 영역 (상단 배치) */}
-        <div className="bg-[#1F0101] text-white p-4">
-          <div className="flex justify-between items-center mb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold">🌱</span>
-              {isEditingTitle ? (
-                <input
-                  type="text"
-                  value={plantTitle}
-                  onChange={(e) => {
-                    const newName = e.target.value;
-                    setPlantTitle(newName);
-                    setIsUserTyping(true);
-                    if (userId && seedlingId) {
-                      dispatch(setSeedling({
-                        seedlingId: seedlingId,
-                        seedlingName: newName,
-                        currentPoint: currentPoint || seedlingPoints || 0,
-                        userId: userId
-                      }));
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && isUserTyping) {
-                      const finalName = plantTitle.trim() || '새싹 키우기';
-                      setPlantTitle(finalName);
-                      if (originalTitle !== finalName) {
-                        handleSeedlingNameChange(finalName);
-                      }
-                      setIsEditingTitle(false);
-                    }
-                  }}
-                  placeholder="새싹 이름을 입력하세요"
-                  className="px-2 py-1 rounded-md text-gray-800"
-                  ref={titleInputRef}
-                />
-              ) : (
-                <h2 className="text-lg font-bold" onDoubleClick={startEditTitle}>
-                  {seedlingName || plantTitle || '새싹 키우기'}
-                </h2>
-              )}
-              {!isEditingTitle ? (
-                <button
-                  title="제목 편집"
-                  onClick={startEditTitle}
-                  disabled={seedlingLoading}
-                  className="ml-1 p-1 rounded-md bg-white/20 hover:bg-white/30 disabled:opacity-50 cursor-pointer"
-                  style={{ minWidth: '32px', minHeight: '32px' }}
-                >
-                  {seedlingLoading ? (
-                    <i className="fas fa-spinner fa-spin"></i>
-                  ) : (
-                    <i className="fas fa-pen"></i>
-                  )}
-                </button>
-              ) : (
-                <button
-                  title="저장"
-                  onMouseDown={(e) => { e.preventDefault(); }}
-                  onClick={() => {
-                    const finalName = plantTitle.trim() || '새싹 키우기';
-                    setPlantTitle(finalName);
-                    if (originalTitle !== finalName) {
-                      handleSeedlingNameChange(finalName);
-                    }
-                    setIsEditingTitle(false);
-                  }}
-                  disabled={seedlingLoading}
-                  className="ml-1 px-2 py-1 rounded-md bg-white text-indigo-600 font-semibold hover:bg-gray-100 disabled:opacity-50"
-                >
-                  {seedlingLoading ? '저장중...' : '저장'}
-                </button>
-              )}
-            </div>
+        {/* Main Content */}
+        <main className="px-4 py-6">
+          {/* Page Title */}
+          <div className="text-center mb-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-2">탈모 PT</h2>
+            <p className="text-sm text-gray-600">새싹을 키우며 탈모 개선 습관을 만들어보세요</p>
           </div>
-          
-          {/* Plant Display */}
-          <div className="text-center mb-4">
-            <div className="text-6xl transition-transform duration-500 hover:scale-110 animate-bounce mb-3">
-              {plantStages[seedlingLevel as keyof typeof plantStages].emoji}
-            </div>
-            <div className="p-2 bg-white/90 rounded-xl text-xs text-gray-700">
-              {statusMessage}
-            </div>
-          </div>
-          
-          {/* Progress Bar */}
-          <div className="flex items-center bg-white/20 rounded-2xl p-3">
-            <span className="bg-white text-[#1F0101] px-3 py-1 rounded-full text-sm font-bold">
-              Lv.{seedlingLevel}
-            </span>
-            <div className="flex-1 h-2 bg-white/30 rounded-full mx-3 overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full transition-all duration-500"
-                style={{ width: `${((currentPoint || seedlingPoints) % 50) * 2}%` }}
-              />
-            </div>
-            <span className="text-xs">{(currentPoint || seedlingPoints) % 50}/50</span>
-          </div>
-        </div>
 
-        {/* Header */}
-        <header className="p-4 bg-white border-b border-gray-200">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center space-x-2">
-              <h1 className="text-xl font-bold text-gray-800">탈모 PT</h1>
+          {/* Plant Display Card */}
+          <div className="bg-gradient-to-br from-[#1F0101] to-[#2A0202] rounded-xl p-6 mb-4 shadow-md hover:shadow-lg transition-shadow">
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex items-center gap-2 flex-1">
+                <span className="text-lg">🌱</span>
+                {isEditingTitle ? (
+                  <div className="flex items-center gap-2 flex-1">
+                    <input
+                      type="text"
+                      value={plantTitle}
+                      onChange={(e) => {
+                        const newName = e.target.value;
+                        setPlantTitle(newName);
+                        setIsUserTyping(true);
+                        if (userId && seedlingId) {
+                          dispatch(setSeedling({
+                            seedlingId: seedlingId,
+                            seedlingName: newName,
+                            currentPoint: currentPoint || seedlingPoints || 0,
+                            userId: userId
+                          }));
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && isUserTyping) {
+                          const finalName = plantTitle.trim() || '새싹 키우기';
+                          setPlantTitle(finalName);
+                          if (originalTitle !== finalName) {
+                            handleSeedlingNameChange(finalName);
+                          }
+                          setIsEditingTitle(false);
+                        }
+                      }}
+                      placeholder="새싹 이름"
+                      className="px-2 py-1 rounded-md text-sm text-gray-800 flex-1"
+                      ref={titleInputRef}
+                    />
+                    <button
+                      onMouseDown={(e) => { e.preventDefault(); }}
+                      onClick={() => {
+                        const finalName = plantTitle.trim() || '새싹 키우기';
+                        setPlantTitle(finalName);
+                        if (originalTitle !== finalName) {
+                          handleSeedlingNameChange(finalName);
+                        }
+                        setIsEditingTitle(false);
+                      }}
+                      disabled={seedlingLoading}
+                      className="px-2 py-1 rounded-md bg-white text-[#1F0101] text-xs font-semibold hover:bg-gray-100"
+                    >
+                      저장
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <h3 className="text-base font-bold text-white">{seedlingName || plantTitle || '새싹 키우기'}</h3>
+                    <button
+                      onClick={startEditTitle}
+                      disabled={seedlingLoading}
+                      className="p-1 rounded-md bg-white/20 hover:bg-white/30 disabled:opacity-50"
+                    >
+                      <i className="fas fa-pen text-white text-xs"></i>
+                    </button>
+                  </>
+                )}
+              </div>
               <button
-                className="w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors"
+                className="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
                 onMouseEnter={() => setShowInfoModal(true)}
                 onMouseLeave={() => setShowInfoModal(false)}
-                title="탈모 PT 정보"
               >
-                <i className="fas fa-question text-sm"></i>
+                <i className="fas fa-question text-white text-xs"></i>
               </button>
             </div>
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
-              <span>진행률</span>
-              <span className="text-[#1F0101] font-bold">{progressPercentage}%</span>
+            
+            <div className="text-center mb-4">
+              <div className="text-6xl mb-3 transition-transform duration-500 hover:scale-110">
+                {plantStages[seedlingLevel as keyof typeof plantStages].emoji}
+              </div>
+              <div className="bg-white/90 rounded-lg px-3 py-2">
+                <p className="text-xs text-gray-700">{statusMessage}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center bg-white/20 rounded-full p-2">
+              <span className="bg-white text-[#1F0101] px-2 py-1 rounded-full text-xs font-bold">
+                Lv.{seedlingLevel}
+              </span>
+              <div className="flex-1 h-2 bg-white/30 rounded-full mx-2">
+                <div 
+                  className="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full transition-all"
+                  style={{ width: `${((currentPoint || seedlingPoints) % 50) * 2}%` }}
+                />
+              </div>
+              <span className="text-xs text-white">{(currentPoint || seedlingPoints) % 50}/50</span>
             </div>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-3">
-            <div className="bg-[#1F0101] h-3 rounded-full transition-all duration-500" style={{ width: `${progressPercentage}%` }}></div>
-          </div>
-          <p className="text-sm text-center text-gray-600 mt-3">
-            오늘의 미션 <span className="text-[#1F0101] font-bold">{progressPercentage}%</span> 완료했어요
-          </p>
-        </header>
 
-        {/* Statistics */}
-        <div className="p-4 bg-white border-b border-gray-200">
-          <div className="flex justify-around text-center">
-            <div>
-              <div className="text-lg font-bold text-[#1F0101]">{currentPoint || seedlingPoints}</div>
-              <div className="text-xs text-gray-600">새싹 포인트</div>
-            </div>
-            <div className="flex items-center">
+          {/* Stats Card */}
+          <div className="bg-white rounded-xl border border-gray-100 p-4 mb-4 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-center mb-3">
+              <div className="flex items-center gap-6">
+                <div>
+                  <div className="text-xs text-gray-600 mb-1">새싹 포인트</div>
+                  <div className="text-lg font-bold text-[#1F0101]">{currentPoint || seedlingPoints}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-600 mb-1">오늘의 진행률</div>
+                  <div className="text-lg font-bold text-[#1F0101]">{progressPercentage}%</div>
+                </div>
+              </div>
               <button 
-                className="px-3 py-1.5 bg-[#1F0101] hover:bg-[#2A0202] text-white rounded-lg text-sm font-medium transition-colors"
+                className="px-3 py-2 bg-[#1F0101] hover:bg-[#2A0202] text-white rounded-lg text-sm font-medium transition-all active:scale-[0.98]"
                 onClick={() => navigate('/point-exchange')}
               >
-                새싹 포인트 교환
+                포인트 교환
               </button>
             </div>
-          </div>
-        </div>
-
-        {/* Date Navigation */}
-        <nav className="bg-white py-3 px-4 shadow-sm">
-          <div className="flex justify-center gap-2 text-center text-sm font-medium overflow-x-auto pb-2">
-            {dateData.map((dateInfo, index) => (
+            <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
-                key={index}
-                className={`flex-shrink-0 px-2 py-2 rounded-lg transition-colors min-w-[50px] ${
-                  dateInfo.isToday 
-                    ? 'text-[#1F0101] bg-gray-100' 
-                    : 'text-gray-400 hover:bg-gray-50'
-                }`}
-              >
-                <p className={`text-base ${dateInfo.isToday ? 'font-semibold' : ''}`}>
-                  {dateInfo.date}
-                </p>
-                <p className="text-xs">{dateInfo.day}</p>
-              </div>
-            ))}
-          </div>
-        </nav>
-
-        {/* Main Content Tabs */}
-        <div className="flex items-center bg-white px-4 py-3 space-x-2 text-sm font-semibold text-gray-600 overflow-x-auto">
-          <div 
-            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-3 py-2 rounded-lg transition-colors ${activeTab === 'routine' ? 'text-[#1F0101] bg-gray-100' : 'text-gray-600 hover:bg-gray-50'}`}
-            onClick={() => showContent('routine')}
-          >
-            <i className="fas fa-check-square text-green-500 text-sm"></i>
-            <span>루틴</span>
-          </div>
-          <div 
-            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-3 py-2 rounded-lg transition-colors ${activeTab === 'nutrition' ? 'text-[#1F0101] bg-gray-100' : 'text-gray-600 hover:bg-gray-50'}`}
-            onClick={() => showContent('nutrition')}
-          >
-            <i className="fas fa-pills text-red-500 text-sm"></i>
-            <span>영양</span>
-          </div>
-          <div 
-            className={`flex items-center space-x-1 cursor-pointer whitespace-nowrap px-3 py-2 rounded-lg transition-colors ${activeTab === 'clean' ? 'text-[#1F0101] bg-gray-100' : 'text-gray-600 hover:bg-gray-50'}`}
-            onClick={() => showContent('clean')}
-          >
-            <i className="fas fa-magnifying-glass text-blue-400 text-sm"></i>
-            <span>청결</span>
-          </div>
-        </div>
-
-        {/* Main Content (Tasks) */}
-        <main className="flex-1 p-4 overflow-y-auto">
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1F0101] mx-auto mb-4"></div>
-                <p className="text-gray-600">습관 데이터를 불러오는 중...</p>
-              </div>
+                className="bg-[#1F0101] h-2 rounded-full transition-all"
+                style={{ width: `${progressPercentage}%` }}
+              />
             </div>
-          ) : (
-            <div className="space-y-4">
+          </div>
+
+          {/* Date Selector Card */}
+          <div className="bg-white rounded-xl border border-gray-100 p-3 mb-4 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex justify-between gap-1 overflow-x-auto">
+              {dateData.map((dateInfo, index) => (
+                <div 
+                  key={index}
+                  className={`flex-shrink-0 px-2 py-2 rounded-lg transition-all text-center min-w-[48px] cursor-pointer ${
+                    dateInfo.isToday 
+                      ? 'bg-[#1F0101] text-white' 
+                      : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
+                  }`}
+                >
+                  <p className="text-sm font-semibold">{dateInfo.date}</p>
+                  <p className="text-xs">{dateInfo.day}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Category Tabs */}
+          <div className="flex gap-2 mb-4">
+            <button 
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all active:scale-[0.98] ${
+                activeTab === 'routine' 
+                  ? 'bg-[#1F0101] text-white shadow-md' 
+                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+              onClick={() => showContent('routine')}
+            >
+              <i className={`fas fa-check-square text-sm ${activeTab === 'routine' ? 'text-white' : 'text-green-500'}`}></i>
+              <span>루틴</span>
+            </button>
+            <button 
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all active:scale-[0.98] ${
+                activeTab === 'nutrition' 
+                  ? 'bg-[#1F0101] text-white shadow-md' 
+                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+              onClick={() => showContent('nutrition')}
+            >
+              <i className={`fas fa-pills text-sm ${activeTab === 'nutrition' ? 'text-white' : 'text-red-500'}`}></i>
+              <span>영양</span>
+            </button>
+            <button 
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all active:scale-[0.98] ${
+                activeTab === 'clean' 
+                  ? 'bg-[#1F0101] text-white shadow-md' 
+                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+              onClick={() => showContent('clean')}
+            >
+              <i className={`fas fa-magnifying-glass text-sm ${activeTab === 'clean' ? 'text-white' : 'text-blue-400'}`}></i>
+              <span>청결</span>
+            </button>
+          </div>
+
+          {/* Mission List */}
+          <div className="space-y-3">
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1F0101] mx-auto mb-4"></div>
+                  <p className="text-gray-600">습관 데이터를 불러오는 중...</p>
+                </div>
+              </div>
+            ) : (
+              <>
               {/* Routine Content */}
               {activeTab === 'routine' && (
                 <>
@@ -889,7 +887,7 @@ const HairPT: React.FC = () => {
                   {getMissionsByCategory('routine').map(mission => renderMissionCard(mission))}
 
                   {/* 두피 사진 촬영 (특별 기능) */}
-                  <div className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                  <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
                     <div className="flex items-center space-x-4 mb-4">
                       <div className="w-14 h-14 flex items-center justify-center bg-purple-100 rounded-lg">
                         <i className="fas fa-camera text-purple-500 text-lg"></i>
@@ -929,7 +927,7 @@ const HairPT: React.FC = () => {
                       const missionIcon = getMissionIcon(mission.name);
                       
                       return (
-                        <div key={mission.id} className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                        <div key={mission.id} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
                           <div className="flex items-center space-x-4 mb-4">
                             <div className={`w-14 h-14 flex items-center justify-center ${missionIcon.bgColor} rounded-lg`}>
                               <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
@@ -969,8 +967,12 @@ const HairPT: React.FC = () => {
                   })}
                 </>
               )}
-            </div>
-          )}
+              </>
+            )}
+          </div>
+          
+          {/* Bottom Spacing for Mobile Navigation */}
+          <div className="h-20"></div>
         </main>
 
         {/* Video Modal */}
