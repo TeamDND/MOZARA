@@ -31,6 +31,7 @@ import { PlantGrowth } from './components/PlantGrowth';
 import MyPage from './pages/MyPage';
 import MyReportPage from './pages/MyReportPage';
 import Chat from './pages/Chat';
+import PointExchange from './pages/PointExchange';
 
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
@@ -70,6 +71,7 @@ const App: React.FC = () => {
           <Route path="my-report" element={<MyReportPage />} />
           <Route path="store-finder" element={<StoreFinder />} />
           <Route path="chat" element={<Chat />} />
+          <Route path="point-exchange" element={<PointExchange />} />
         </Route>
       </Routes>
     </ErrorBoundary>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { RootState, AppDispatch } from '../../utils/store';
 import { fetchSeedlingInfo, updateSeedlingNickname, setSeedling } from '../../utils/seedlingSlice';
 import apiClient from '../../services/apiClient';
@@ -63,6 +64,7 @@ interface BadHabitsState {
 
 const HairPT: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { seedlingId, seedlingName, currentPoint, loading: seedlingLoading, error: seedlingError } = useSelector((state: RootState) => state.seedling);
   const { username, userId } = useSelector((state: RootState) => state.user);
   
@@ -815,10 +817,7 @@ const HairPT: React.FC = () => {
             <div className="flex items-center">
               <button 
                 className="px-3 py-1.5 bg-[#1F0101] hover:bg-[#2A0202] text-white rounded-lg text-sm font-medium transition-colors"
-                onClick={() => {
-                  // 포인트 교환 기능은 추후 구현
-                  console.log('포인트 교환 클릭');
-                }}
+                onClick={() => navigate('/point-exchange')}
               >
                 새싹 포인트 교환
               </button>
