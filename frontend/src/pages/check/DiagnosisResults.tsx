@@ -21,7 +21,9 @@ import {
   BookOpen,
   Heart,
   Award,
-  Brain
+  Brain,
+  HelpCircle,
+  X
 } from 'lucide-react';
 
 interface DiagnosisResultsProps {
@@ -50,6 +52,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
   const [youtubeVideos, setYoutubeVideos] = useState<Video[]>([]);
   const [videosLoading, setVideosLoading] = useState(false);
   const [videosError, setVideosError] = useState<string | null>(null);
+  const [showStageInfo, setShowStageInfo] = useState(false);
   // URL state 또는 props에서 Swin 분석 결과 가져오기
   const swinResult = location.state?.swinResult || diagnosisData?.photo?.swinResult;
   const stageRecommendations: Record<number, StageRecommendation> = {
@@ -270,7 +273,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
           title: "🧠 AI 맞춤 가이드",
           description: swinResult.description || "AI 분석 결과를 바탕으로 한 맞춤형 가이드",
           icon: <Brain className="w-5 h-5 text-purple-500" />,
-          tips: swinResult.advice
+          tips: swinResult.advice.split('\n')
         });
       }
 
@@ -312,7 +315,16 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             
             <div className="grid grid-cols-3 gap-3">
               <div className="text-center p-3 bg-white rounded-lg">
-                <p className="text-xs text-gray-600">🧠 Swin AI 분석</p>
+                <div className="flex items-center justify-center gap-1 mb-1">
+                  <p className="text-xs text-gray-600">🧠 Swin AI 분석</p>
+                  <button
+                    onClick={() => setShowStageInfo(true)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    aria-label="단계 기준 보기"
+                  >
+                    <HelpCircle className="w-3 h-3" />
+                  </button>
+                </div>
                 <p className="text-xl font-bold text-gray-800">
                   {swinResult ? `${swinResult.stage}단계` : '분석 중'}
                 </p>
@@ -343,7 +355,18 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                   <Brain className="w-4 h-4 text-blue-600" />
                   <h3 className="text-sm font-semibold text-blue-800">{swinResult.title}</h3>
                 </div>
-                <p className="text-xs text-blue-700">{swinResult.description}</p>
+                <p className="text-xs text-blue-700 mb-3">{swinResult.description}</p>
+                {swinResult.advice && (
+                  <div className="space-y-1 pt-2 border-t border-blue-200">
+                    <p className="text-xs font-semibold text-blue-800 mb-1">AI 추천 조언:</p>
+                    {swinResult.advice.split('\n').map((advice: string, index: number) => (
+                      <p key={index} className="text-xs text-blue-700 flex items-start gap-1">
+                        <span className="text-blue-500">•</span>
+                        <span>{advice}</span>
+                      </p>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -684,6 +707,136 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
           </Tabs>
         </div>
       </div>
+
+      {/* 단계 기준 설명 모달 */}
+      {showStageInfo && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full max-h-[80vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center rounded-t-2xl">
+              <h3 className="text-lg font-bold text-gray-800">탈모 단계 분석 기준</h3>
+              <button
+                onClick={() => setShowStageInfo(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-4">
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <p className="text-xs text-blue-800 mb-2">
+                  🤖 AI 분석은 다음 요소들을 종합적으로 고려합니다:
+                </p>
+                <ul className="text-xs text-blue-700 space-y-1">
+                  <li>• 이미지 분석 (정수리, 측면)</li>
+                  <li>• 나이 및 성별</li>
+                  <li>• 가족력 유무</li>
+                  <li>• 최근 탈모 증상</li>
+                  <li>• 스트레스 수준</li>
+                </ul>
+              </div>
+
+              {/* 0단계 */}
+              <div className="border-l-4 border-green-500 pl-3 py-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge className="bg-green-100 text-green-800 border-green-300">
+                    0단계 - 정상
+                  </Badge>
+                </div>
+                <p className="text-xs text-gray-700 mb-2">
+                  탈모 징후가 관찰되지 않는 건강한 모발 상태
+                </p>
+                <div className="bg-gray-50 p-2 rounded text-xs text-gray-600">
+                  <p className="font-semibold mb-1">분석 기준:</p>
+                  <ul className="space-y-1">
+                    <li>• 모발 밀도 정상 범위</li>
+                    <li>• 탈모 증상 없음</li>
+                    <li>• 두피 건강 상태 양호</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* 1단계 */}
+              <div className="border-l-4 border-yellow-500 pl-3 py-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                    1단계 - 초기
+                  </Badge>
+                </div>
+                <p className="text-xs text-gray-700 mb-2">
+                  초기 단계의 모발 변화가 감지되는 상태
+                </p>
+                <div className="bg-gray-50 p-2 rounded text-xs text-gray-600">
+                  <p className="font-semibold mb-1">분석 기준:</p>
+                  <ul className="space-y-1">
+                    <li>• 경미한 모발 밀도 감소</li>
+                    <li>• 최근 탈모 증상 시작</li>
+                    <li>• 가족력이 있는 경우 주의</li>
+                    <li>• 예방 관리로 진행 지연 가능</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* 2단계 */}
+              <div className="border-l-4 border-orange-500 pl-3 py-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge className="bg-orange-100 text-orange-800 border-orange-300">
+                    2단계 - 중등도
+                  </Badge>
+                </div>
+                <p className="text-xs text-gray-700 mb-2">
+                  중등도의 탈모가 진행되고 있는 상태
+                </p>
+                <div className="bg-gray-50 p-2 rounded text-xs text-gray-600">
+                  <p className="font-semibold mb-1">분석 기준:</p>
+                  <ul className="space-y-1">
+                    <li>• 뚜렷한 모발 밀도 감소</li>
+                    <li>• 탈모 진행 속도 증가</li>
+                    <li>• 전문적 치료 필요</li>
+                    <li>• 미녹시딜 등 치료제 고려</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* 3단계 */}
+              <div className="border-l-4 border-red-500 pl-3 py-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge className="bg-red-100 text-red-800 border-red-300">
+                    3단계 - 심각
+                  </Badge>
+                </div>
+                <p className="text-xs text-gray-700 mb-2">
+                  상당히 진행된 탈모 상태
+                </p>
+                <div className="bg-gray-50 p-2 rounded text-xs text-gray-600">
+                  <p className="font-semibold mb-1">분석 기준:</p>
+                  <ul className="space-y-1">
+                    <li>• 현저한 모발 손실</li>
+                    <li>• 두피 노출 부위 확대</li>
+                    <li>• 즉시 전문의 진료 필요</li>
+                    <li>• 모발이식 등 적극적 치료 고려</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-xs text-gray-600">
+                  ⚠️ 이 결과는 AI 분석에 기반한 참고용이며, 정확한 진단을 위해서는 반드시 전문의 상담이 필요합니다.
+                </p>
+              </div>
+            </div>
+
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 rounded-b-2xl">
+              <Button
+                onClick={() => setShowStageInfo(false)}
+                className="w-full h-10 bg-[#222222] hover:bg-[#333333] text-white rounded-lg"
+              >
+                확인
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

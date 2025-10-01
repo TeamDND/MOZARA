@@ -47,4 +47,19 @@ public class AnalysisResultDAO {
     public Optional<AnalysisResultEntity> findById(Integer id) {
         return analysisResultRepository.findById(id);
     }
+
+    /**
+     * 사용자 ID와 분석 타입으로 분석 결과 존재 여부 조회
+     */
+    public boolean existsByUserIdAndAnalysisType(Integer userId, String analysisType) {
+        System.out.println("=== AnalysisResultDAO.existsByUserIdAndAnalysisType ===");
+        System.out.println("userId: " + userId);
+        System.out.println("analysisType: " + analysisType);
+        
+        boolean exists = analysisResultRepository.existsByUserEntityIdForeign_IdAndAnalysisType(userId, analysisType);
+        
+        System.out.println("Repository 결과: " + exists);
+        
+        return exists;
+    }
 }

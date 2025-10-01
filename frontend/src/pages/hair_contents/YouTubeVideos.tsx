@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import Header from '../Header';
 import apiClient from '../../services/apiClient';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../utils/store';
@@ -191,211 +190,169 @@ export default function YouTubeVideos() {
   }, [fetchVideosFromYouTube, fetchLikedVideos]);
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: "#f9f9f9" }}>
-
-      {/* 배경 효과 */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute top-20 left-10 w-32 h-32 rounded-full blur-xl"
-          style={{ backgroundColor: "rgba(0,115,255,0.2)" }}
-        ></div>
-        <div
-          className="absolute top-40 right-20 w-24 h-24 rounded-full blur-lg"
-          style={{ backgroundColor: "rgba(0,115,255,0.3)" }}
-        ></div>
-        <div
-          className="absolute bottom-40 left-1/4 w-40 h-40 rounded-full blur-2xl"
-          style={{ backgroundColor: "rgba(0,115,255,0.2)" }}
-        ></div>
-        <div
-          className="absolute bottom-20 right-1/3 w-28 h-28 rounded-full blur-xl"
-          style={{ backgroundColor: "rgba(0,115,255,0.25)" }}
-        ></div>
-        <div
-          className="absolute top-1/3 left-1/2 w-20 h-20 rounded-full blur-lg"
-          style={{ backgroundColor: "rgba(0,115,255,0.3)" }}
-        ></div>
-      </div>
-
-      <div className="max-w-7xl mx-auto pt-16 relative z-10">
-        <main className="px-8 py-12">
-          <div className="max-w-4xl mx-auto">
-            {/* 로고와 검색 */}
-            <section className="min-h-screen flex items-center justify-center px-4">
-              <div className="container mx-auto max-w-6xl">
-                <div className="grid lg:grid-cols-2 gap-12 items-center">
-                  <div className="space-y-8">
-                    <div className="space-y-6">
-                      <div className="flex items-center gap-2 mb-8">
-                        <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                          📺
-                        </div>
-                        <h1 className="text-4xl font-bold text-gray-800">MOAMO</h1>
-                      </div>
-                      <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
-                        AI 맞춤
-                        <br />
-                        탈모 콘텐츠
-                        <br />
-                        추천 서비스
-                      </h1>
-                      <p className="text-lg text-gray-600 max-w-md">
-                        개인맞춤화된 AI 기술로 탈모 단계별 맞춤 영상을 추천받으세요.
-                      </p>
-                    </div>
-                    
-                    <div className="max-w-2xl">
-                      <div className="relative mb-4">
-                        <input
-                          type="text"
-                          placeholder="'M자 탈모', '여성 탈모' 등 검색..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full px-6 py-4 text-lg border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="relative">
-                    <div className="bg-white/70 backdrop-blur rounded-2xl p-8 shadow-lg border border-gray-200">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">AI 분석 기반 맞춤 영상 추천</h3>
-                      <div className="space-y-4">
-                        <select
-                          value={selectedStage}
-                          onChange={(e) => setSelectedStage(e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                        >
-                          <option value="stage0">0단계 (정상)</option>
-                          <option value="stage1">1단계 (초기)</option>
-                          <option value="stage2">2단계 (중기)</option>
-                          <option value="stage3">3단계 (심화)</option>
-                        </select>
-                        <button
-                          onClick={handleStageRecommendation}
-                          className="w-full px-6 py-3 text-white rounded-lg hover:opacity-90 transition-colors font-semibold text-base"
-                          style={{ backgroundColor: "rgb(0,115,255)" }}
-                        >
-                          맞춤 영상 보기
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* 영상 피드 섹션 */}
-            <section className="min-h-screen flex items-center justify-center px-4 bg-white/20">
-              <div className="container mx-auto max-w-6xl">
-                <div className="bg-white/70 backdrop-blur rounded-2xl p-8 shadow-lg border border-gray-200">
-                  <h3 className="text-2xl font-bold mb-8 text-center text-gray-900">{feedTitle}</h3>
-                  
-                  {loading && (
-                    <div className="text-center py-12">
-                      <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                      <p className="mt-4 text-gray-600 text-lg">영상을 불러오는 중입니다...</p>
-                    </div>
-                  )}
-
-                  {error && (
-                    <div className="text-center py-12">
-                      <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-                        <p className="text-red-600 font-semibold text-lg">API 호출 실패: {error}</p>
-                        <p className="text-sm text-gray-500 mt-2">F12를 눌러 Console 탭에서 더 자세한 오류를 확인하세요.</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {!loading && !error && videos.length === 0 && (
-                    <div className="text-center py-12">
-                      <p className="text-gray-600 text-lg">표시할 영상이 없습니다.</p>
-                    </div>
-                  )}
-
-                  {!loading && !error && videos.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {videos
-                        .sort((a, b) => {
-                          // 찜한 영상을 맨 위로 정렬
-                          const aIsLiked = likedVideos.has(a.videoId);
-                          const bIsLiked = likedVideos.has(b.videoId);
-                          
-                          if (aIsLiked && !bIsLiked) return -1; // a가 찜한 영상이면 위로
-                          if (!aIsLiked && bIsLiked) return 1;  // b가 찜한 영상이면 위로
-                          return 0; // 둘 다 찜한 영상이거나 둘 다 아닌 경우 원래 순서 유지
-                        })
-                        .map((video) => (
-                        <div
-                          key={video.videoId}
-                          className="group bg-white rounded-xl border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
-                        >
-                          <div className="relative">
-                            <a
-                              href={`https://www.youtube.com/watch?v=${video.videoId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block"
-                            >
-                              <img
-                                src={video.thumbnailUrl}
-                                alt={video.title}
-                                className="w-full aspect-video object-cover"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.src = 'https://placehold.co/300x168/E8E8E8/424242?text=Image+Error';
-                                }}
-                              />
-                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
-                            </a>
-                            {/* 찜 버튼 */}
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                toggleLike(video.videoId);
-                              }}
-                              className="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-all duration-200 shadow-lg hover:shadow-xl"
-                              title={likedVideos.has(video.videoId) ? "찜 취소" : "찜하기"}
-                            >
-                              <span className={`text-xl transition-colors duration-200 ${
-                                likedVideos.has(video.videoId) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
-                              }`}>
-                                {likedVideos.has(video.videoId) ? '❤️' : '🤍'}
-                              </span>
-                            </button>
-                          </div>
-                          <div className="p-4">
-                            <div className="flex items-start gap-3">
-                              <div className="w-10 h-10 bg-gray-200 rounded-full flex-shrink-0 flex items-center justify-center">
-                                <span className="text-gray-600 text-sm">📺</span>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <a
-                                  href={`https://www.youtube.com/watch?v=${video.videoId}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="block"
-                                >
-                                  <h4 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors text-sm leading-tight">
-                                    {video.title}
-                                  </h4>
-                                </a>
-                                <p className="text-xs text-gray-600 mt-2">{video.channelName}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile-First Container - PC에서도 모바일 레이아웃 중앙 정렬 */}
+      <div className="max-w-md mx-auto min-h-screen bg-white">
+        {/* Main Content */}
+        <main className="px-4 py-6">
+          {/* 페이지 헤더 */}
+          <div className="text-center mb-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-2">YouTube 영상</h2>
+            <p className="text-sm text-gray-600">탈모 단계별 맞춤 영상 추천</p>
           </div>
+
+          {/* 검색 입력 */}
+          <div className="mb-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="'M자 탈모', '여성 탈모' 등 검색..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-3 pr-10 border border-gray-100 rounded-xl focus:ring-2 focus:ring-[#222222] focus:border-transparent text-sm"
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* 단계별 추천 */}
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">AI 분석 기반 맞춤 추천</h3>
+            <div className="space-y-2">
+              <select
+                value={selectedStage}
+                onChange={(e) => setSelectedStage(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-[#222222] focus:border-transparent bg-white text-gray-700 text-sm"
+              >
+                <option value="stage0">0단계 (정상) - 예방 및 두피 관리</option>
+                <option value="stage1">1단계 (초기) - 초기 증상 및 관리법</option>
+                <option value="stage2">2단계 (중기) - 약물 치료 및 전문 관리</option>
+                <option value="stage3">3단계 (심화) - 모발이식 및 시술 정보</option>
+              </select>
+              <button
+                onClick={handleStageRecommendation}
+                className="w-full bg-[#222222] text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-all active:scale-[0.98]"
+              >
+                맞춤 영상 보기
+              </button>
+            </div>
+          </div>
+
+          {/* 피드 타이틀 */}
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-gray-900">{feedTitle}</h3>
+          </div>
+
+          {/* 에러 메시지 */}
+          {error && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
+              <div className="flex items-start gap-2">
+                <span className="text-yellow-500 text-xl flex-shrink-0">ℹ️</span>
+                <div>
+                  <p className="text-sm text-yellow-700 font-medium">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 로딩 상태 */}
+          {loading && (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#222222] border-t-transparent mb-4"></div>
+              <p className="text-sm text-gray-600">영상을 불러오는 중입니다...</p>
+            </div>
+          )}
+
+          {/* 영상 없음 */}
+          {!loading && !error && videos.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 text-4xl mb-4">📺</div>
+              <p className="text-sm text-gray-600">표시할 영상이 없습니다.</p>
+            </div>
+          )}
+
+          {/* 영상 그리드 */}
+          {!loading && videos.length > 0 && (
+            <div className="space-y-3">
+              {videos
+                .sort((a, b) => {
+                  const aIsLiked = likedVideos.has(a.videoId);
+                  const bIsLiked = likedVideos.has(b.videoId);
+                  if (aIsLiked && !bIsLiked) return -1;
+                  if (!aIsLiked && bIsLiked) return 1;
+                  return 0;
+                })
+                .map((video) => (
+                  <div
+                    key={video.videoId}
+                    className="bg-white rounded-xl border border-gray-100 hover:shadow-md transition-all overflow-hidden"
+                  >
+                    <a
+                      href={`https://www.youtube.com/watch?v=${video.videoId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
+                      <div className="relative">
+                        <img
+                          src={video.thumbnailUrl}
+                          alt={video.title}
+                          className="w-full aspect-video object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = 'https://placehold.co/400x225/E8E8E8/424242?text=Image+Error';
+                          }}
+                        />
+                        {/* 찜 버튼 */}
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleLike(video.videoId);
+                          }}
+                          className="absolute top-2 right-2 w-8 h-8 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-all shadow-md"
+                          title={likedVideos.has(video.videoId) ? "찜 취소" : "찜하기"}
+                        >
+                          <span className={`text-lg ${
+                            likedVideos.has(video.videoId) ? 'text-red-500' : 'text-gray-400'
+                          }`}>
+                            {likedVideos.has(video.videoId) ? '❤️' : '🤍'}
+                          </span>
+                        </button>
+                        {/* 찜한 영상 배지 */}
+                        {likedVideos.has(video.videoId) && (
+                          <div className="absolute top-2 left-2">
+                            <span className="inline-flex items-center gap-1 px-2 py-1 text-[10px] leading-none text-white bg-red-500/90 rounded-full">
+                              ❤️ 찜
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h4 className="font-semibold text-gray-900 line-clamp-2 text-sm leading-tight mb-2">
+                          {video.title}
+                        </h4>
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-xs">📺</span>
+                          </div>
+                          <p className="text-xs text-gray-600 truncate">{video.channelName}</p>
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                ))}
+            </div>
+          )}
+
+          {/* Bottom Spacing for Mobile Navigation */}
+          <div className="h-20"></div>
         </main>
       </div>
-
     </div>
   );
 }

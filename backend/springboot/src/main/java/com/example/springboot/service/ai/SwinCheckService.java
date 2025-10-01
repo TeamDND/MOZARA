@@ -1,8 +1,8 @@
 package com.example.springboot.service.ai;
 
+import com.example.springboot.data.dao.AnalysisResultDAO;
 import com.example.springboot.data.entity.AnalysisResultEntity;
 import com.example.springboot.data.entity.UserEntity;
-import com.example.springboot.data.repository.AnalysisResultRepository;
 import com.example.springboot.data.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ public class SwinCheckService {
     private String pythonBaseUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final AnalysisResultRepository analysisResultRepository;
+    private final AnalysisResultDAO analysisResultDAO;
     private final UserRepository userRepository;
 
     /**
@@ -128,12 +128,20 @@ public class SwinCheckService {
             String description = (String) swinResult.get("description");
             String analysisSummary = title + "\n" + description;
 
-            // advice 배열을 문자열로 변환
-            Object adviceObj = swinResult.get("advice");
-            String advice = "";
-            if (adviceObj instanceof java.util.List) {
-                java.util.List<?> adviceList = (java.util.List<?>) adviceObj;
-                advice = String.join("|", adviceList.stream().map(String::valueOf).toArray(String[]::new));
+            // advice는 이미 Python에서 문자열로 변환되어 옴
+            String advice = (String) swinResult.getOrDefault("advice", "");
+            
+            // 디버깅: 데이터 길이 확인
+            log.info("=== 저장 데이터 길이 확인 ===");
+            log.info("analysisSummary 길이: {} 바이트", analysisSummary.getBytes("UTF-8").length);
+            log.info("advice 길이: {} 바이트", advice.getBytes("UTF-8").length);
+            log.info("analysisSummary 내용: {}", analysisSummary);
+            log.info("advice 내용: {}", advice);
+
+            // analysis_type 추출
+            String analysisType = (String) swinResult.get("analysis_type");
+            if (analysisType == null || analysisType.isEmpty()) {
+                analysisType = "swin_analysis";
             }
 
             // AnalysisResultEntity 생성
@@ -143,10 +151,11 @@ public class SwinCheckService {
             entity.setAdvice(advice);
             entity.setGrade((Integer) swinResult.get("stage"));
             entity.setImageUrl(imageUrl != null ? imageUrl : "");
+            entity.setAnalysisType(analysisType);
             entity.setUserEntityIdForeign(user);
 
-            // 데이터베이스에 저장
-            AnalysisResultEntity savedEntity = analysisResultRepository.save(entity);
+            // AnalysisResultDAO를 통해 데이터베이스에 저장
+            AnalysisResultEntity savedEntity = analysisResultDAO.save(entity);
 
             log.info("Swin 분석 결과 저장 성공: ID {}", savedEntity.getId());
 

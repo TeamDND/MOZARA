@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { HairProduct, HairProductResponse, hairProductApi } from '../../services/hairProductApi';
 import { elevenStApi } from '../../services/elevenStApi';
@@ -10,9 +10,9 @@ import {
   addProductHistory,
   selectSelectedStage,
 } from '../../utils/hairProductSlice';
-import StageSelector from '../check/StageSelector';
 import ProductList from '../hair_solutions/ProductList';
 import Header from '../Header';
+import { HAIR_LOSS_STAGES, STAGE_RECOMMENDATIONS } from '../../utils/hairLossStages';
 
 /**
  * 탈모 단계별 제품 추천 페이지
@@ -87,7 +87,12 @@ const HairLossProducts: React.FC = () => {
   // Redux 상태 관리
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const selectedStage = useSelector(selectSelectedStage);
+  
+  // 진단 결과 가져오기 (URL state 또는 localStorage)
+  const diagnosisResult = location.state?.diagnosisResult || 
+    (typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('lastDiagnosisResult') || 'null') : null);
   
   // 로컬 상태 관리
   const [products, setProducts] = useState<HairProduct[]>([]);
@@ -101,19 +106,28 @@ const HairLossProducts: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showProducts, setShowProducts] = useState(false);
   const [searchMode, setSearchMode] = useState<'recommended' | '11st'>('recommended');
+  const [searchKeyword, setSearchKeyword] = useState<string>('탈모 샴푸');
 
-  // URL 파라미터에서 단계 정보 가져오기 (BASP 진단 결과에서 넘어온 경우)
+  // URL 파라미터 및 진단 결과에서 단계 정보 가져오기
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const stageParam = urlParams.get('stage');
-    if (stageParam) {
+    
+    // 진단 결과가 있으면 우선적으로 적용
+    if (diagnosisResult?.stage !== undefined) {
+      const stage = diagnosisResult.stage; // 0~3 단계 그대로 사용
+      if (stage >= 0 && stage <= 3) {
+        dispatch(setSelectedStage(stage));
+        handleStageSelect(stage);
+      }
+    } else if (stageParam) {
       const stage = parseInt(stageParam);
-      if (stage >= 1 && stage <= 6) {
+      if (stage >= 0 && stage <= 3) {
         dispatch(setSelectedStage(stage));
         handleStageSelect(stage);
       }
     }
-  }, [dispatch]);
+  }, [diagnosisResult, dispatch]);
 
   // 단계 선택 핸들러
   const handleStageSelect = async (stage: number) => {
@@ -121,27 +135,13 @@ const HairLossProducts: React.FC = () => {
     setError(null);
     setIsLoading(true);
     setShowProducts(false);
+    setSearchMode('recommended'); // 단계 선택 시에는 추천 모드
 
     try {
       console.log(`${stage}단계 제품 조회 시작`);
       
-      let response: HairProductResponse;
-      
-      if (searchMode === 'recommended') {
-        // 추천 제품 조회
-        response = await hairProductApi.getProductsByStage(stage);
-      } else {
-        // 11번가 제품 검색
-        const elevenStResponse = await elevenStApi.searchProductsByStage(stage);
-        response = {
-          products: elevenStResponse.products,
-          totalCount: elevenStResponse.totalCount,
-          stage: stage,
-          stageDescription: `${stage}단계 탈모 관련 제품`,
-          recommendation: `11번가에서 ${stage}단계 탈모 관련 제품 ${elevenStResponse.totalCount}개를 찾았습니다.`,
-          disclaimer: "11번가에서 제공하는 제품 정보입니다. 구매 전 제품 상세 정보를 확인해주세요."
-        };
-      }
+      // 추천 제품 조회
+      const response = await hairProductApi.getProductsByStage(stage);
       
       setProducts(response.products);
       setStageInfo({
@@ -196,46 +196,135 @@ const HairLossProducts: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: "#f9f9f9" }}>
+    <div className="min-h-screen bg-gray-50">
       <Header />
 
-      {/* 배경 효과 제거 */}
-      
-      <div className="relative z-10 pt-20 pb-20">
-        <div className="max-w-7xl mx-auto px-8">
-          {/* 페이지 헤더 - 기존 패턴과 일치 */}
-          <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 text-balance">
-              <span style={{ color: "#1F0101" }}>단계별 제품 추천</span>
-            </h1>
-            <p className="text-base md:text-lg text-gray-700 mb-6 max-w-2xl mx-auto text-pretty">
-              현재 상태에 맞는 제품을 빠르게 찾아보세요. 
-              단계만 선택하면 개인별 맞춤 추천을 받아볼 수 있습니다.
-            </p>
+      {/* Mobile-First Container - MainContent 스타일 적용 */}
+      <div className="max-w-md mx-auto min-h-screen bg-white">
+        {/* Main Content */}
+        <main className="px-4 py-6">
+          {/* 페이지 헤더 - MainContent 스타일 */}
+          <div className="text-center mb-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-2">제품 추천</h2>
+            <p className="text-sm text-gray-600">탈모 단계에 맞는 제품을 추천받으세요</p>
           </div>
 
-          {/* 에러 메시지 - 기존 패턴과 일치 */}
+          {/* 검색창 - 항상 표시 */}
+          <div className="mb-4">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                placeholder="11번가 검색 (예: 탈모 샴푸, 두피 토닉)"
+                className="w-full px-4 py-3 pr-20 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#1F0101] focus:border-transparent"
+                onKeyPress={async (e) => {
+                  if (e.key === 'Enter' && searchKeyword.trim()) {
+                    setIsLoading(true);
+                    setError(null);
+                    setSearchMode('11st');
+                    try {
+                      console.log(`11번가 검색 시작 (Enter): ${searchKeyword}`);
+                      const response = await elevenStApi.searchProducts(searchKeyword, 1, 20);
+                      console.log(`11번가 검색 결과:`, response);
+                      setProducts(response.products || []);
+                      setShowProducts(true);
+                      setStageInfo({
+                        stage: 0,
+                        stageDescription: `"${searchKeyword}" 검색 결과`,
+                        recommendation: `11번가에서 ${response.products?.length || 0}개의 제품을 찾았습니다.`,
+                        disclaimer: '실시간 검색 결과이며, 가격과 재고는 변동될 수 있습니다.'
+                      });
+                    } catch (err: any) {
+                      console.error('11번가 검색 오류:', err);
+                      setError(err.message || '검색 중 오류가 발생했습니다.');
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }
+                }}
+              />
+              <button
+                onClick={async () => {
+                  if (searchKeyword.trim()) {
+                    setIsLoading(true);
+                    setError(null);
+                    setSearchMode('11st');
+                    try {
+                      console.log(`11번가 검색 시작: ${searchKeyword}`);
+                      const response = await elevenStApi.searchProducts(searchKeyword, 1, 20);
+                      console.log(`11번가 검색 결과:`, response);
+                      setProducts(response.products || []);
+                      setShowProducts(true);
+                      setStageInfo({
+                        stage: 0,
+                        stageDescription: `"${searchKeyword}" 검색 결과`,
+                        recommendation: `11번가에서 ${response.products?.length || 0}개의 제품을 찾았습니다.`,
+                        disclaimer: '실시간 검색 결과이며, 가격과 재고는 변동될 수 있습니다.'
+                      });
+                    } catch (err: any) {
+                      console.error('11번가 검색 오류:', err);
+                      setError(err.message || '검색 중 오류가 발생했습니다.');
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }
+                }}
+                disabled={isLoading}
+                className="absolute right-2 top-2 px-4 py-2 bg-[#1F0101] text-white text-xs font-medium rounded-lg hover:bg-[#2A0202] transition-colors disabled:opacity-50"
+              >
+                검색
+              </button>
+            </div>
+          </div>
+
+          {/* 단계별 추천 - YouTube Videos 스타일 */}
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">AI 분석 기반 맞춤 추천</h3>
+            <div className="space-y-2">
+              <select
+                value={selectedStage !== null && selectedStage !== undefined ? `stage${selectedStage}` : ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    dispatch(clearSelectedStage());
+                    setShowProducts(false);
+                  } else {
+                    const stage = parseInt(value.replace('stage', ''));
+                    handleStageSelect(stage);
+                  }
+                }}
+                className="w-full px-4 py-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-[#1F0101] focus:border-transparent bg-white text-gray-700 text-sm max-w-full overflow-hidden text-ellipsis"
+              >
+                <option value="">단계를 선택하세요</option>
+                <option value="stage0">0단계 - 정상 (예방 관리)</option>
+                <option value="stage1">1단계 - 초기 (증상 관리)</option>
+                <option value="stage2">2단계 - 중기 (약물 치료)</option>
+                <option value="stage3">3단계 - 심화 (시술 정보)</option>
+                </select>
+            </div>
+          </div>
+
+          {/* 에러 메시지 - 간소화 */}
           {error && (
-            <div className="mb-8 bg-white/70 backdrop-blur rounded-2xl p-6 border border-red-200 shadow-lg">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-                  <span className="text-red-600 text-xl">⚠️</span>
-                </div>
+            <div className="mb-4 bg-red-50 border border-red-200 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <span className="text-xl">⚠️</span>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-red-800 text-lg mb-1">오류가 발생했습니다</h4>
-                  <p className="text-red-700">{error}</p>
+                  <h4 className="font-semibold text-red-800 text-sm mb-1">오류 발생</h4>
+                  <p className="text-xs text-red-700">{error}</p>
                 </div>
               </div>
-              <div className="mt-4 flex gap-3">
+              <div className="mt-3 flex gap-2">
                 <button
                   onClick={() => selectedStage && handleStageSelect(selectedStage)}
-                  className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+                  className="px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors"
                 >
                   다시 시도
                 </button>
                 <button
                   onClick={handleReset}
-                  className="px-4 py-2 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors"
+                  className="px-3 py-1.5 bg-gray-600 text-white text-xs font-medium rounded-lg hover:bg-gray-700 transition-colors"
                 >
                   처음부터
                 </button>
@@ -243,149 +332,85 @@ const HairLossProducts: React.FC = () => {
             </div>
           )}
 
-          {/* 단계 선택 섹션 - 기존 패턴과 일치 */}
-          {!showProducts && (
-            <div className="bg-white/70 backdrop-blur rounded-2xl shadow-lg p-8 mb-8 border border-gray-200">
-              {/* 검색 모드 토글 */}
-              <div className="mb-6">
-                <div className="flex items-center justify-center gap-4">
-                  <span className="text-base font-medium text-gray-700">검색 모드:</span>
-                  <div className="flex bg-gray-100 rounded-lg p-1">
-                    <button
-                      onClick={() => setSearchMode('recommended')}
-                      className={`px-4 py-2 md:px-5 md:py-2.5 rounded-md text-sm md:text-base font-medium transition-colors ${
-                        searchMode === 'recommended'
-                          ? 'bg-white text-[#1F0101] shadow-sm'
-                          : 'text-gray-600 hover:text-gray-800'
-                      }`}
-                    >
-                      추천 제품
-                    </button>
-                    <button
-                      onClick={() => setSearchMode('11st')}
-                      className={`px-4 py-2 md:px-5 md:py-2.5 rounded-md text-sm md:text-base font-medium transition-colors ${
-                        searchMode === '11st'
-                          ? 'bg-white text-[#1F0101] shadow-sm'
-                          : 'text-gray-600 hover:text-gray-800'
-                      }`}
-                    >
-                      11번가 검색
-                    </button>
-                  </div>
-                </div>
-                <p className="text-xs md:text-sm text-gray-500 text-center mt-2">
-                  {searchMode === 'recommended' 
-                    ? '전문가가 선별한 탈모 단계별 추천 제품' 
-                    : '11번가에서 실시간 검색한 탈모 관련 제품'
-                  }
-                </p>
-              </div>
-
-              <StageSelector
-                selectedStage={selectedStage}
-                onStageSelect={handleStageSelect}
-                disabled={isLoading}
-              />
-              
-              {/* BASP 진단 안내 제거됨 */}
-            </div>
-          )}
-
-          {/* 제품 목록 섹션 - 기존 패턴과 일치 */}
+          {/* 제품 목록 섹션 - 간소화 */}
           {showProducts && stageInfo && (
-            <div className="mb-8">
-              {/* 상단 액션 버튼 */}
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={handleReset}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm md:text-base"
-                  >
-                    <span>←</span>
-                    <span>다시 선택</span>
-                  </button>
-                  <div className="text-xs md:text-sm text-gray-500">
-                    {stageInfo.stage}단계 탈모 제품 추천
-                  </div>
-                </div>
-                
-                {/* BASP 진단하기 버튼 제거됨 */}
-              </div>
+            <div className="mb-4">
 
               {/* 제품 목록 */}
               <ProductList
                 products={products}
+                totalCount={products.length}
                 stage={stageInfo.stage}
                 stageDescription={stageInfo.stageDescription}
                 recommendation={stageInfo.recommendation}
                 disclaimer={stageInfo.disclaimer}
                 isLoading={isLoading}
+                isSearchMode={searchMode === '11st'}
                 onProductClick={handleProductClick}
               />
             </div>
           )}
 
-          {/* 로딩 상태 (전체 화면) - 기존 패턴과 일치 */}
+          {/* 로딩 상태 - 간소화 */}
           {isLoading && !showProducts && (
-            <div className="bg-white/70 backdrop-blur rounded-2xl shadow-lg p-8 border border-gray-200">
-              <div className="animate-pulse">
-                <div className="h-8 bg-gray-200 rounded-lg w-1/3 mb-6"></div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {[...Array(6)].map((_, index) => (
-                    <div key={index} className="h-32 bg-gray-200 rounded-xl"></div>
+            <div className="bg-white rounded-xl border border-gray-100 p-6">
+              <div className="animate-pulse space-y-4">
+                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                <div className="space-y-3">
+                  {[...Array(3)].map((_, index) => (
+                    <div key={index} className="h-20 bg-gray-200 rounded-xl"></div>
                   ))}
                 </div>
               </div>
             </div>
           )}
 
-          {/* 추가 정보 섹션 - 기존 패턴과 일치 */}
-          <div className="bg-white/70 backdrop-blur rounded-2xl shadow-lg p-8 border border-gray-200">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6 text-center">
-              탈모 관리 가이드
-            </h2>
+          {/* 탈모 관리 가이드 - 간소화 */}
+          <div className="bg-gradient-to-br from-[#1F0101]/5 to-gray-50 rounded-xl p-4 mt-6">
+            <h3 className="text-sm font-bold text-gray-800 mb-3 text-center">
+              💡 탈모 관리 가이드
+            </h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* 생활습관 */}
-              <div className="text-center">
-                <div className="w-16 h-16 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <span className="text-red-600 text-2xl">🏃‍♂️</span>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3 bg-white rounded-lg p-3">
+                <span className="text-lg">🏃‍♂️</span>
+                <div>
+                  <h4 className="font-semibold text-xs text-gray-800 mb-1">생활습관 개선</h4>
+                  <p className="text-xs text-gray-600">
+                    규칙적인 생활과 충분한 수면이 중요합니다
+                  </p>
                 </div>
-                <h3 className="font-semibold text-gray-800 text-base md:text-lg mb-2">생활습관 개선</h3>
-                <p className="text-sm md:text-base text-gray-600">
-                  규칙적인 생활, 충분한 수면, 스트레스 관리가 중요합니다.
-                </p>
               </div>
 
-              {/* 영양 관리 */}
-              <div className="text-center">
-                <div className="w-16 h-16 bg-[#1F0101]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <span className="text-[#1F0101] text-2xl">🥗</span>
+              <div className="flex items-start gap-3 bg-white rounded-lg p-3">
+                <span className="text-lg">🥗</span>
+                <div>
+                  <h4 className="font-semibold text-xs text-gray-800 mb-1">영양 관리</h4>
+                  <p className="text-xs text-gray-600">
+                    비오틴, 아연, 철분 등 필수 영양소 섭취
+                  </p>
                 </div>
-                <h3 className="font-semibold text-gray-800 text-base md:text-lg mb-2">영양 관리</h3>
-                <p className="text-sm md:text-base text-gray-600">
-                  비오틴, 아연, 철분 등 모발 건강에 필요한 영양소를 충분히 석취하세요.
-                </p>
               </div>
 
-              {/* 전문의 상담 */}
-              <div className="text-center">
-                <div className="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <span className="text-purple-600 text-2xl">👨‍⚕️</span>
+              <div className="flex items-start gap-3 bg-white rounded-lg p-3">
+                <span className="text-lg">👨‍⚕️</span>
+                <div>
+                  <h4 className="font-semibold text-xs text-gray-800 mb-1">전문의 상담</h4>
+                  <p className="text-xs text-gray-600">
+                    정확한 진단을 위해 전문의 상담 권장
+                  </p>
                 </div>
-                <h3 className="font-semibold text-gray-800 text-base md:text-lg mb-2">전문의 상담</h3>
-                <p className="text-sm md:text-base text-gray-600">
-                  정확한 진단과 치료를 위해 피부과 전문의 상담을 받으시기 바랍니다.
-                </p>
               </div>
             </div>
           </div>
-        </div>
+
+          {/* Bottom Spacing for Mobile Navigation */}
+          <div className="h-20"></div>
+        </main>
       </div>
-      
-      
     </div>
   );
 };
 
 export default HairLossProducts;
+
