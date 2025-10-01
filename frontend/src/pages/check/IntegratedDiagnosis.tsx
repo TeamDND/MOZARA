@@ -300,7 +300,16 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
               수정을 원하시면 <span className="font-semibold text-gray-800">마이페이지</span>의 분석정보를 수정해주세요.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="sm:justify-center">
+          <AlertDialogFooter className="sm:justify-center gap-3">
+            <AlertDialogAction 
+              onClick={() => {
+                setShowAutoFillModal(false);
+                navigate('/mypage', { state: { activeTab: 'profile', activeSubTab: 'analysis' } });
+              }}
+              className="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-800 px-8"
+            >
+              수정하기
+            </AlertDialogAction>
             <AlertDialogAction 
               onClick={handleAutoFillConfirm}
               className="w-full sm:w-auto bg-[#222222] hover:bg-[#333333] text-white px-8"

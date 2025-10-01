@@ -21,10 +21,11 @@ interface UserInfo {
 
 interface UserInfoEditProps {
   userInfo: UserInfo;
+  initialTab?: 'basic' | 'analysis';
 }
 
-const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
-  const [activeTab, setActiveTab] = useState<'basic' | 'analysis'>('basic');
+const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'basic' }) => {
+  const [activeTab, setActiveTab] = useState<'basic' | 'analysis'>(initialTab);
 
   const renderBasicInfo = () => (
     <Card className="border-0 shadow-sm bg-white">

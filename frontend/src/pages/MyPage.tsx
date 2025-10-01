@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { RootState } from "../utils/store"
 import { clearToken } from "../utils/tokenSlice"
 import { clearUser } from "../utils/userSlice"
@@ -51,7 +51,8 @@ interface AnalysisResult {
 
 export default function MyPage() {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState("reports")
+  const location = useLocation()
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || "reports")
   const [totalAnalysis, setTotalAnalysis] = useState(0)
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([])
   const [loading, setLoading] = useState(true)
@@ -526,7 +527,7 @@ export default function MyPage() {
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">
-            <UserInfoEdit userInfo={userInfo} />
+            <UserInfoEdit userInfo={userInfo} initialTab={location.state?.activeSubTab as 'basic' | 'analysis' | undefined} />
           </TabsContent>
         </Tabs>
       </div>
