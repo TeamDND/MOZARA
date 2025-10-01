@@ -122,6 +122,7 @@ const HairPT: React.FC = () => {
   const [seedlingPoints, setSeedlingPoints] = useState(0);
   const [seedlingLevel, setSeedlingLevel] = useState(1);
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   const plantStages = {
     1: { emoji: '🌱', name: '새싹' },
@@ -141,8 +142,8 @@ const HairPT: React.FC = () => {
     }
   }, [lastResetDate]);
 
-  // daily_habits 데이터 로드
-  const loadDailyHabits = async () => {
+  // daily_habits 데이터 로드 (날짜별)
+  const loadDailyHabits = async (date?: Date) => {
     if (!userId) {
       console.log('사용자 ID가 없어서 습관 데이터를 로드할 수 없습니다.');
       return;
@@ -151,13 +152,26 @@ const HairPT: React.FC = () => {
     try {
       setLoading(true);
       
+      // 로드할 날짜 결정
+      const targetDate = date || selectedDate;
+      const dateString = targetDate.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+      const isToday = targetDate.toDateString() === new Date().toDateString();
+      
       // 모든 습관 데이터 가져오기
       const response = await apiClient.get('/habit/daily-habits');
       setDailyHabits(response.data);
       
-      // 오늘 완료된 습관들 가져오기
-      const completedResponse = await apiClient.get(`/habit/completed/${userId}`);
-      const completedHabits = completedResponse.data || [];
+      // 선택된 날짜의 완료된 습관들 가져오기
+      let completedHabits = [];
+      if (isToday) {
+        const completedResponse = await apiClient.get(`/habit/completed/${userId}`);
+        completedHabits = completedResponse.data || [];
+      } else {
+        const completedResponse = await apiClient.get(`/habit/completed/${userId}/date`, {
+          params: { date: dateString }
+        });
+        completedHabits = completedResponse.data || [];
+      }
       
       // DailyHabit을 MissionInfo로 변환하면서 완료 상태도 설정
       const convertedMissions: MissionInfo[] = response.data.map((habit: DailyHabit) => {
@@ -180,9 +194,14 @@ const HairPT: React.FC = () => {
       
       if (waterMission?.completed) {
         setCounters(prev => ({ ...prev, water: 7 }));
+      } else if (isToday) {
+        setCounters(prev => ({ ...prev, water: 0 }));
       }
+      
       if (effectorMission?.completed) {
         setCounters(prev => ({ ...prev, effector: 4 }));
+      } else if (isToday) {
+        setCounters(prev => ({ ...prev, effector: 0 }));
       }
     } catch (error) {
       console.error('습관 데이터 로드 실패:', error);
@@ -273,6 +292,13 @@ const HairPT: React.FC = () => {
     loadSeedlingInfo();
   }, [resetDailyMissions, loadSeedlingInfo]);
 
+  // 선택된 날짜가 변경될 때마다 데이터 로드
+  useEffect(() => {
+    if (userId) {
+      loadDailyHabits(selectedDate);
+    }
+  }, [selectedDate, userId]);
+
 
   const startEditTitle = () => {
     setOriginalTitle(plantTitle); // 편집 시작 시 원래 제목 저장
@@ -322,6 +348,7 @@ const HairPT: React.FC = () => {
   // 이번 주(일요일~토요일) 날짜 데이터 생성
   const generateDateData = () => {
     const today = new Date();
+    today.setHours(0, 0, 0, 0); // 시간을 00:00:00으로 설정하여 정확한 날짜 비교
     const dates: any[] = [];
     const startOfWeek = new Date(today);
     // 일요일부터 시작 (0: 일요일)
@@ -330,12 +357,17 @@ const HairPT: React.FC = () => {
     for (let i = 0; i < 7; i++) {
       const date = new Date(startOfWeek);
       date.setDate(startOfWeek.getDate() + i);
+      date.setHours(0, 0, 0, 0); // 시간을 00:00:00으로 설정
+
+      const isFuture = date > today;
 
       dates.push({
         date: date.getDate(),
         day: date.toLocaleDateString('ko-KR', { weekday: 'short' }),
         fullDate: date,
-        isToday: date.toDateString() === today.toDateString()
+        isToday: date.toDateString() === today.toDateString(),
+        isSelected: date.toDateString() === selectedDate.toDateString(),
+        isFuture: isFuture
       });
     }
 
@@ -343,6 +375,17 @@ const HairPT: React.FC = () => {
   };
 
   const dateData = generateDateData();
+
+  // 날짜 선택 핸들러
+  const handleDateSelect = (date: Date, isFuture: boolean) => {
+    // 미래 날짜는 선택 불가
+    if (isFuture) {
+      setToast({ visible: true, message: '미래 날짜는 선택할 수 없습니다.' });
+      setTimeout(() => setToast({ visible: false, message: '' }), 2000);
+      return;
+    }
+    setSelectedDate(date);
+  };
 
   // 진행률 계산 함수
   const calculateProgress = () => {
@@ -570,6 +613,8 @@ const HairPT: React.FC = () => {
     // 백엔드에서 가져온 완료 상태를 우선 사용, 없으면 로컬 상태 사용
     const isCompleted = mission.completed !== undefined ? mission.completed : missionState[mission.key];
     const missionIcon = getMissionIcon(mission.name);
+    const isToday = selectedDate.toDateString() === new Date().toDateString();
+    const isPastDate = selectedDate < new Date() && !isToday;
     
     // 물마시기와 이펙터 사용은 카운터 방식으로 처리
     if (mission.key === 'water' || mission.key === 'effector') {
@@ -612,8 +657,8 @@ const HairPT: React.FC = () => {
             </div>
           </div>
           
-          {/* 하단 조작 버튼 (완료 전에는 카운터, 완료 시 버튼 없음) */}
-          {!isCounterCompleted && (
+          {/* 하단 조작 버튼 (완료 전에는 카운터, 완료 시 버튼 없음, 과거 날짜는 비활성화) */}
+          {!isCounterCompleted && isToday && (
             <div className="flex gap-3 justify-end">
               <button 
                 className="w-12 h-12 rounded-xl font-bold bg-gray-400 hover:bg-gray-500 text-white transition-colors flex items-center justify-center active:scale-[0.95]"
@@ -636,6 +681,11 @@ const HairPT: React.FC = () => {
               >
                 +1
               </button>
+            </div>
+          )}
+          {isPastDate && !isCounterCompleted && (
+            <div className="text-center text-xs text-gray-400 mt-2">
+              📜 과거 기록 조회 모드
             </div>
           )}
         </div>
@@ -661,13 +711,15 @@ const HairPT: React.FC = () => {
           </div>
           {isCompleted ? (
             <span className="px-3 py-1.5 rounded-lg font-bold bg-green-500 text-white whitespace-nowrap text-sm">완료됨</span>
-          ) : (
+          ) : isToday ? (
             <button 
               className="px-3 py-1.5 rounded-lg font-bold bg-[#1F0101] hover:bg-[#2A0202] text-white active:scale-[0.98] whitespace-nowrap text-sm"
               onClick={() => !isCompleted && toggleMission(mission.key)}
             >
               미션 시작
             </button>
+          ) : (
+            <span className="px-3 py-1.5 rounded-lg font-bold bg-gray-300 text-gray-500 whitespace-nowrap text-sm">미완료</span>
           )}
         </div>
       </div>
@@ -819,17 +871,28 @@ const HairPT: React.FC = () => {
               {dateData.map((dateInfo, index) => (
                 <div 
                   key={index}
-                  className={`flex-shrink-0 px-2 py-2 rounded-lg transition-all text-center min-w-[48px] cursor-pointer ${
-                    dateInfo.isToday 
-                      ? 'bg-[#1F0101] text-white' 
-                      : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
+                  onClick={() => handleDateSelect(dateInfo.fullDate, dateInfo.isFuture)}
+                  className={`flex-shrink-0 px-2 py-2 rounded-lg transition-all text-center min-w-[48px] ${
+                    dateInfo.isFuture
+                      ? 'bg-gray-100 text-gray-300 cursor-not-allowed opacity-50'
+                      : dateInfo.isSelected 
+                        ? 'bg-[#1F0101] text-white shadow-md cursor-pointer' 
+                        : 'bg-gray-50 text-gray-400 hover:bg-gray-100 cursor-pointer'
                   }`}
                 >
                   <p className="text-sm font-semibold">{dateInfo.date}</p>
                   <p className="text-xs">{dateInfo.day}</p>
+                  {dateInfo.isFuture && (
+                    <div className="text-[8px] text-gray-300 mt-0.5">🔒</div>
+                  )}
                 </div>
               ))}
             </div>
+            {selectedDate.toDateString() !== new Date().toDateString() && !dateData.find((d: any) => d.isSelected)?.isFuture && (
+              <div className="mt-2 text-center text-xs text-gray-500">
+                📅 {selectedDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })} 기록 조회 중
+              </div>
+            )}
           </div>
 
           {/* Category Tabs */}
@@ -898,12 +961,21 @@ const HairPT: React.FC = () => {
                       </div>
                     </div>
                     <div className="flex justify-end">
-                      <button 
-                        className="px-4 py-2 rounded-xl font-bold transition-colors bg-gray-200 hover:bg-gray-300 text-[#1F0101] active:scale-[0.98]"
-                        onClick={takeScalpPhoto}
-                      >
-                        사진 촬영하기
-                      </button>
+                      {selectedDate.toDateString() === new Date().toDateString() ? (
+                        <button 
+                          className="px-4 py-2 rounded-xl font-bold transition-colors bg-gray-200 hover:bg-gray-300 text-[#1F0101] active:scale-[0.98]"
+                          onClick={takeScalpPhoto}
+                        >
+                          사진 촬영하기
+                        </button>
+                      ) : (
+                        <button 
+                          className="px-4 py-2 rounded-xl font-bold bg-gray-100 text-gray-400 cursor-not-allowed"
+                          disabled
+                        >
+                          오늘만 촬영 가능
+                        </button>
+                      )}
                     </div>
                   </div>
                 </>
@@ -925,6 +997,7 @@ const HairPT: React.FC = () => {
                     if (mission.name === '백회혈/사신총혈 마사지') {
                       const isCompleted = missionState[mission.key];
                       const missionIcon = getMissionIcon(mission.name);
+                      const isToday = selectedDate.toDateString() === new Date().toDateString();
                       
                       return (
                         <div key={mission.id} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
@@ -944,7 +1017,7 @@ const HairPT: React.FC = () => {
                           <div className="flex justify-end">
                             {isCompleted ? (
                               <span className="px-3 py-1.5 rounded-lg font-bold bg-green-500 text-white whitespace-nowrap text-sm">완료됨</span>
-                            ) : (
+                            ) : isToday ? (
                               <button 
                                 className="px-3 py-1.5 rounded-lg font-bold bg-[#1F0101] hover:bg-[#2A0202] text-white active:scale-[0.98] whitespace-nowrap text-sm"
                                 onClick={() => {
@@ -956,6 +1029,8 @@ const HairPT: React.FC = () => {
                               >
                                 시작하기
                               </button>
+                            ) : (
+                              <span className="px-3 py-1.5 rounded-lg font-bold bg-gray-300 text-gray-500 whitespace-nowrap text-sm">미완료</span>
                             )}
                           </div>
                         </div>

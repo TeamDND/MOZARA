@@ -14,12 +14,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const dispatch = useDispatch();
   const isFavorite = useSelector(selectIsFavorite(product.productId));
-  // 가격 포맷팅
+  
+  // 가격 포맷팅 (수정 없음)
   const formatPrice = (price: number): string => {
     return new Intl.NumberFormat('ko-KR').format(price);
   };
 
-  // 평점 별 표시
+  // 평점 별 표시 (수정 없음)
   const renderStars = (rating: number): React.ReactElement => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -47,7 +48,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
     return <div className="flex">{stars}</div>;
   };
 
-  // 카테고리 아이콘
+  // 카테고리 아이콘 (수정 없음)
   const getCategoryIcon = (category: string): string => {
     switch (category) {
       case '탈모샴푸': return '🧴';
@@ -60,11 +61,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
     }
   };
 
-  // 즐겨찾기 토글 핸들러
+  // 즐겨찾기 토글 핸들러 (수정 없음)
   const handleFavoriteToggle = (e: React.MouseEvent) => {
     e.stopPropagation(); // 제품 클릭 이벤트 방지
     dispatch(toggleFavoriteProduct(product.productId));
   };
+  
+  // 이미지 오류 발생 시 대체 이미지
+  const defaultImageUrl = 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop&crop=center';
 
   return (
     <div 
@@ -74,12 +78,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
       {/* 제품 이미지 */}
       <div className="relative h-36 bg-gray-100 overflow-hidden">
         <img
-          src={product.productImage}
+          src={product.productImage || defaultImageUrl} // product.productImage가 없을 경우 대비
           alt={product.productName}
           className="w-full h-full object-cover"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
-            target.src = 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop&crop=center';
+            target.src = defaultImageUrl; // 이미지 로드 실패 시 대체 이미지
           }}
           loading="lazy"
         />
@@ -87,7 +91,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         {/* 브랜드 배지 */}
         <div className="absolute top-2 left-2">
           <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold text-white bg-[#1F0101]/90 rounded-full">
-            ⭐ {product.brand}
+            ⭐ {product.brand || product.mallName} {/* 브랜드 정보 없을 경우 쇼핑몰 이름 표시 */}
           </span>
         </div>
         
@@ -100,6 +104,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             {isFavorite ? '❤️' : '🤍'}
           </span>
         </button>
+        
       </div>
 
       {/* 제품 정보 */}
@@ -139,15 +144,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </div>
 
-        {/* 구매 버튼 - 간소화 */}
+        {/* 구매 버튼 - 11번가 링크는 product.productUrl을 사용 (수정 없음) */}
         <button
           className="w-full bg-[#1F0101] text-white py-2 px-3 rounded-lg font-medium hover:bg-[#2A0202] transition-colors text-xs"
           onClick={(e) => {
             e.stopPropagation();
-            window.open(product.productUrl, '_blank');
+            if (product.productUrl) {
+                window.open(product.productUrl, '_blank');
+            } else {
+                alert('연결된 11번가 제품 페이지가 없습니다.');
+            }
           }}
         >
-          구매하기
+          {product.mallName || '11번가'}에서 구매하기
         </button>
       </div>
     </div>

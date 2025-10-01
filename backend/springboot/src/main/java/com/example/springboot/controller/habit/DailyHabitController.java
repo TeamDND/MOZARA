@@ -96,4 +96,24 @@ public class DailyHabitController {
             return ResponseEntity.status(500).body(error);
         }
     }
+
+    /**
+     * 사용자의 특정 날짜 완료한 습관 조회
+     */
+    @GetMapping("/completed/{userId}/date")
+    public ResponseEntity<?> getCompletedHabitsByDate(
+            @PathVariable Integer userId,
+            @RequestParam String date) {
+        try {
+            List<DailyHabitDTO> completedHabits = dailyHabitService.getCompletedHabitsByDate(userId, date);
+            return ResponseEntity.ok(completedHabits);
+        } catch (Exception ex) {
+            log.error("[DailyHabit] 특정 날짜 완료 습관 조회 실패 - userId: {}, date: {}, error: {}", 
+                    userId, date, ex.getMessage(), ex);
+            Map<String, Object> error = new HashMap<>();
+            error.put("message", "완료한 습관 정보를 불러오는데 실패했습니다.");
+            error.put("reason", "completed_habits_fetch_error");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
 }

@@ -135,27 +135,13 @@ const HairLossProducts: React.FC = () => {
     setError(null);
     setIsLoading(true);
     setShowProducts(false);
+    setSearchMode('recommended'); // 단계 선택 시에는 추천 모드
 
     try {
       console.log(`${stage}단계 제품 조회 시작`);
       
-      let response: HairProductResponse;
-      
-      if (searchMode === 'recommended') {
-        // 추천 제품 조회
-        response = await hairProductApi.getProductsByStage(stage);
-      } else {
-        // 11번가 제품 검색
-        const elevenStResponse = await elevenStApi.searchProductsByStage(stage);
-        response = {
-          products: elevenStResponse.products,
-          totalCount: elevenStResponse.totalCount,
-          stage: stage,
-          stageDescription: `${stage}단계 탈모 관련 제품`,
-          recommendation: `11번가에서 ${stage}단계 탈모 관련 제품 ${elevenStResponse.totalCount}개를 찾았습니다.`,
-          disclaimer: "11번가에서 제공하는 제품 정보입니다. 구매 전 제품 상세 정보를 확인해주세요."
-        };
-      }
+      // 추천 제품 조회
+      const response = await hairProductApi.getProductsByStage(stage);
       
       setProducts(response.products);
       setStageInfo({
@@ -236,8 +222,11 @@ const HairLossProducts: React.FC = () => {
                   if (e.key === 'Enter' && searchKeyword.trim()) {
                     setIsLoading(true);
                     setError(null);
+                    setSearchMode('11st');
                     try {
+                      console.log(`11번가 검색 시작 (Enter): ${searchKeyword}`);
                       const response = await elevenStApi.searchProducts(searchKeyword, 1, 20);
+                      console.log(`11번가 검색 결과:`, response);
                       setProducts(response.products || []);
                       setShowProducts(true);
                       setStageInfo({
@@ -247,6 +236,7 @@ const HairLossProducts: React.FC = () => {
                         disclaimer: '실시간 검색 결과이며, 가격과 재고는 변동될 수 있습니다.'
                       });
                     } catch (err: any) {
+                      console.error('11번가 검색 오류:', err);
                       setError(err.message || '검색 중 오류가 발생했습니다.');
                     } finally {
                       setIsLoading(false);
@@ -259,8 +249,11 @@ const HairLossProducts: React.FC = () => {
                   if (searchKeyword.trim()) {
                     setIsLoading(true);
                     setError(null);
+                    setSearchMode('11st');
                     try {
+                      console.log(`11번가 검색 시작: ${searchKeyword}`);
                       const response = await elevenStApi.searchProducts(searchKeyword, 1, 20);
+                      console.log(`11번가 검색 결과:`, response);
                       setProducts(response.products || []);
                       setShowProducts(true);
                       setStageInfo({
@@ -270,6 +263,7 @@ const HairLossProducts: React.FC = () => {
                         disclaimer: '실시간 검색 결과이며, 가격과 재고는 변동될 수 있습니다.'
                       });
                     } catch (err: any) {
+                      console.error('11번가 검색 오류:', err);
                       setError(err.message || '검색 중 오류가 발생했습니다.');
                     } finally {
                       setIsLoading(false);
@@ -345,11 +339,13 @@ const HairLossProducts: React.FC = () => {
               {/* 제품 목록 */}
               <ProductList
                 products={products}
+                totalCount={products.length}
                 stage={stageInfo.stage}
                 stageDescription={stageInfo.stageDescription}
                 recommendation={stageInfo.recommendation}
                 disclaimer={stageInfo.disclaimer}
                 isLoading={isLoading}
+                isSearchMode={searchMode === '11st'}
                 onProductClick={handleProductClick}
               />
             </div>
@@ -417,3 +413,4 @@ const HairLossProducts: React.FC = () => {
 };
 
 export default HairLossProducts;
+
