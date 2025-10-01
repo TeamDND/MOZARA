@@ -7,16 +7,8 @@ const AllCategoriesPage = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Mobile Header */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <Link
-            to="/hair-encyclopedia"
-            className="flex items-center text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            <span className="text-sm">탈모 백과</span>
-          </Link>
+        <div className="flex items-center justify-center">
           <h1 className="text-lg font-bold text-gray-900">전체 카테고리</h1>
-          <div className="w-16"></div>
         </div>
       </div>
 

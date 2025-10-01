@@ -128,18 +128,21 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
       setVideosLoading(false);
     }
   }, []);
+  
   // 컴포넌트 마운트 시 Swin 단계에 맞는 영상 로드
   useEffect(() => {
+    let query = '탈모 관리 예방 두피케어'; // 기본 검색어
+    
     if (swinResult && swinResult.stage !== undefined) {
       const recommendation = stageRecommendations[swinResult.stage];
       if (recommendation) {
-        fetchYouTubeVideos(recommendation.query);
+        query = recommendation.query;
       }
-    } else {
-      // 기본값으로 일반적인 탈모 관리 영상 로드
-      fetchYouTubeVideos('탈모 관리 예방 두피케어');
     }
-  }, [swinResult, fetchYouTubeVideos]);
+    
+    fetchYouTubeVideos(query);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [swinResult?.stage]); // swinResult.stage가 변경될 때만 실행
 
   // 진단 결과에 따른 추천 데이터 생성 (Swin 결과 반영)
   const getRecommendations = () => {
