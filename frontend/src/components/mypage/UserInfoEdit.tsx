@@ -268,15 +268,30 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
             <form onSubmit={handleAnalysisInfoSubmit} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">성별</label>
-            <select
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              className="w-full p-3 bg-gray-50 rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
-            >
-              <option value="">선택해주세요</option>
-              <option value="남성">남성</option>
-              <option value="여성">여성</option>
-            </select>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                onClick={() => setGender("남")}
+                className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
+                  gender === "남" || gender === "남성" || gender === "male"
+                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
+                }`}
+              >
+                남
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setGender("여")}
+                className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
+                  gender === "여" || gender === "여성" || gender === "female"
+                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
+                }`}
+              >
+                여
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -291,26 +306,58 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">최근 머리빠짐</label>
-            <select
-              value={recentHairLoss ? "true" : "false"}
-              onChange={(e) => setRecentHairLoss(e.target.value === "true")}
-              className="w-full p-3 bg-gray-50 rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
-            >
-              <option value="false">아니오</option>
-              <option value="true">예</option>
-            </select>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                onClick={() => setRecentHairLoss(true)}
+                className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
+                  recentHairLoss
+                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
+                }`}
+              >
+                예
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setRecentHairLoss(false)}
+                className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
+                  !recentHairLoss
+                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
+                }`}
+              >
+                아니오
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">가족력</label>
-            <select
-              value={familyHistory ? "true" : "false"}
-              onChange={(e) => setFamilyHistory(e.target.value === "true")}
-              className="w-full p-3 bg-gray-50 rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
-            >
-              <option value="false">아니오</option>
-              <option value="true">예</option>
-            </select>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                onClick={() => setFamilyHistory(true)}
+                className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
+                  familyHistory
+                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
+                }`}
+              >
+                예
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setFamilyHistory(false)}
+                className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
+                  !familyHistory
+                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
+                }`}
+              >
+                아니오
+              </Button>
+            </div>
           </div>
 
           <Button type="submit" className="w-full mt-6 bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium">

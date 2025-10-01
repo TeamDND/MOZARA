@@ -87,7 +87,7 @@ public class MyPageService {
                 .advice(entity.getAdvice())
                 .grade(entity.getGrade())
                 .imageUrl(entity.getImageUrl())
-                .type(determineAnalysisType(entity.getAnalysisSummary()))
+                .type(entity.getAnalysisType() != null ? entity.getAnalysisType() : determineAnalysisType(entity.getAnalysisSummary()))
                 .improvement(calculateImprovement(entity.getGrade()))
                 .build();
     }
@@ -126,5 +126,20 @@ public class MyPageService {
         } else {
             return "5% 개선됨";
         }
+    }
+
+    /**
+     * 사용자 ID와 분석 타입으로 분석 결과 존재 여부 확인
+     */
+    public boolean hasAnalysisByType(Integer userId, String analysisType) {
+        System.out.println("=== MyPageService.hasAnalysisByType ===");
+        System.out.println("userId: " + userId);
+        System.out.println("analysisType: " + analysisType);
+        
+        boolean exists = analysisResultDAO.existsByUserIdAndAnalysisType(userId, analysisType);
+        
+        System.out.println("exists: " + exists);
+        
+        return exists;
     }
 }

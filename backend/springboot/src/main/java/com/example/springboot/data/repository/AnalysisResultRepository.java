@@ -24,5 +24,10 @@ public interface AnalysisResultRepository extends JpaRepository<AnalysisResultEn
      */
     AnalysisResultEntity findFirstByUserEntityIdForeign_IdOrderByInspectionDateDesc(Integer userId);
 
+    /**
+     * 사용자 ID와 분석 타입으로 분석 결과 존재 여부 조회
+     */
+    boolean existsByUserEntityIdForeign_IdAndAnalysisType(Integer userId, String analysisType);
+
     void deleteAllByUserEntityIdForeign(com.example.springboot.data.entity.UserEntity userEntity);
 }

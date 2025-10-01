@@ -395,10 +395,9 @@ const DailyCare: React.FC = () => {
     initializeLocation();
   }, []);
 
-  // 연속 케어 일수 계산 및 최초 분석 상태 확인 (로컬 스토리지 기반)
+  // 연속 케어 일수 계산 및 최초 분석 상태 확인 (DB 기반)
   React.useEffect(() => {
     const streakKey = 'dailyCareStreak';
-    const analysisKey = 'hasCompletedInitialAnalysis';
     
     // 연속 케어 일수 계산
     const stored = localStorage.getItem(streakKey);
@@ -430,16 +429,51 @@ const DailyCare: React.FC = () => {
     setStreak(count);
     localStorage.setItem(streakKey, JSON.stringify({ count, lastDate: lastDateStr }));
 
-    // 최초 분석 완료 상태 확인
-    const hasCompletedAnalysis = localStorage.getItem(analysisKey) === 'true';
-    setUserProgress(prev => ({
-      ...prev,
-      hasCompletedInitialAnalysis: hasCompletedAnalysis
-    }));
+    // DB에서 최초 분석 완료 상태 확인
+    const checkInitialAnalysis = async () => {
+      if (!userId) {
+        console.log('사용자 ID가 없습니다.');
+        return;
+      }
+
+      try {
+        console.log('=== 탈모 분석 완료 여부 확인 시작 ===');
+        console.log('userId:', userId);
+        console.log('API URL:', `/has-analysis/${userId}/hairloss`);
+        
+        const response = await apiClient.get(`/has-analysis/${userId}/hairloss`);
+        console.log('API 응답 전체:', response);
+        console.log('API 응답 데이터:', response.data);
+        
+        const hasAnalysis = response.data.hasAnalysis;
+        console.log('탈모 분석 완료 여부:', hasAnalysis);
+        console.log('타입:', typeof hasAnalysis);
+        
+        setUserProgress(prev => ({
+          ...prev,
+          hasCompletedInitialAnalysis: hasAnalysis
+        }));
+        
+        console.log('=== 상태 업데이트 완료 ===');
+      } catch (error: any) {
+        console.error('=== 분석 결과 확인 실패 ===');
+        console.error('에러 전체:', error);
+        console.error('에러 응답:', error.response);
+        console.error('에러 메시지:', error.message);
+        
+        // 에러 시 기본값은 false (최초 분석 안내 표시)
+        setUserProgress(prev => ({
+          ...prev,
+          hasCompletedInitialAnalysis: false
+        }));
+      }
+    };
+
+    checkInitialAnalysis();
 
     // 새싹 정보 로드
     loadSeedlingInfo();
-  }, [loadSeedlingInfo]);
+  }, [loadSeedlingInfo, userId]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -467,15 +501,7 @@ const DailyCare: React.FC = () => {
                 </div>
                 <p className="text-sm text-red-700">AI 분석과 설문을 통한 종합적인 두피 상태 파악을 시작해보세요</p>
                 <Button 
-                  onClick={() => {
-                    // 최초 분석 완료 상태 저장
-                    localStorage.setItem('hasCompletedInitialAnalysis', 'true');
-                    setUserProgress(prev => ({
-                      ...prev,
-                      hasCompletedInitialAnalysis: true
-                    }));
-                    navigate('/integrated-diagnosis');
-                  }}
+                  onClick={() => navigate('/integrated-diagnosis')}
                   className="w-full h-12 bg-[#1F0101] hover:bg-[#2A0202] text-white rounded-xl font-semibold active:scale-[0.98] transition-all"
                 >
                   지금 분석하기
@@ -556,6 +582,32 @@ const DailyCare: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* 분석 결과 통계 카드 */}
+          {analysis && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white p-4 rounded-xl shadow-md">
+                <p className="text-xs text-gray-500">두피 점수</p>
+                <div className="mt-1 text-2xl font-bold text-gray-800">{scalpScore}</div>
+                <p className="mt-1 text-xs text-green-600">LLM 종합 분석</p>
+              </div>
+              <div className="bg-white p-4 rounded-xl shadow-md">
+                <p className="text-xs text-gray-500">비듬 상태</p>
+                <div className="mt-1 text-xl font-bold text-gray-800">{dandruffLabel}</div>
+                <p className="mt-1 text-xs text-emerald-600">{dandruffSub}</p>
+              </div>
+              <div className="bg-white p-4 rounded-xl shadow-md">
+                <p className="text-xs text-gray-500">각질 상태</p>
+                <div className="mt-1 text-xl font-bold text-gray-800">{flakeLabel}</div>
+                <p className="mt-1 text-xs text-teal-600">{flakeSub}</p>
+              </div>
+              <div className="bg-white p-4 rounded-xl shadow-md">
+                <p className="text-xs text-gray-500">홍반 상태</p>
+                <div className="mt-1 text-xl font-bold text-gray-800">{rednessLabel}</div>
+                <p className="mt-1 text-xs text-green-600">{rednessSub}</p>
+              </div>
+            </div>
+          )}
 
           {/* 2. 탈모 PT (오늘의 미션) - 새싹 키우기 UI */}
           <div className="bg-[#1F0101] text-white p-4 rounded-xl">
@@ -652,31 +704,7 @@ const DailyCare: React.FC = () => {
             </div>
           </div>
 
-          {/* 분석 결과 통계 카드 */}
-          {analysis && (
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white p-4 rounded-xl shadow-md">
-                <p className="text-xs text-gray-500">두피 점수</p>
-                <div className="mt-1 text-2xl font-bold text-gray-800">{scalpScore}</div>
-                <p className="mt-1 text-xs text-green-600">LLM 종합 분석</p>
-              </div>
-              <div className="bg-white p-4 rounded-xl shadow-md">
-                <p className="text-xs text-gray-500">비듬 상태</p>
-                <div className="mt-1 text-xl font-bold text-gray-800">{dandruffLabel}</div>
-                <p className="mt-1 text-xs text-emerald-600">{dandruffSub}</p>
-              </div>
-              <div className="bg-white p-4 rounded-xl shadow-md">
-                <p className="text-xs text-gray-500">각질 상태</p>
-                <div className="mt-1 text-xl font-bold text-gray-800">{flakeLabel}</div>
-                <p className="mt-1 text-xs text-teal-600">{flakeSub}</p>
-              </div>
-              <div className="bg-white p-4 rounded-xl shadow-md">
-                <p className="text-xs text-gray-500">홍반 상태</p>
-                <div className="mt-1 text-xl font-bold text-gray-800">{rednessLabel}</div>
-                <p className="mt-1 text-xs text-green-600">{rednessSub}</p>
-              </div>
-            </div>
-          )}
+          
 
           {/* 4. 탈모 OX (오늘의 퀴즈) */}
           <div className="bg-white p-4 rounded-xl border border-gray-200">
