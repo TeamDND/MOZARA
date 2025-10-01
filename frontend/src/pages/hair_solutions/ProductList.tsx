@@ -77,48 +77,36 @@ const ProductList: React.FC<ProductListProps> = ({
 
   return (
     <div className="w-full">
-      {/* 헤더 정보 */}
-      <div className="bg-white/70 backdrop-blur rounded-2xl shadow-lg p-6 mb-6 border border-gray-200">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              {stage}단계 탈모 제품 추천
-            </h2>
-            <p className="text-gray-600">
-              {stageDescription} - {recommendation}
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="text-3xl font-bold text-[#1F0101]">
-              {products.length}개
-            </div>
-            <div className="text-sm text-gray-500">추천 제품</div>
-          </div>
+      {/* 헤더 정보 - 모바일 우선 간소화 */}
+      <div className="bg-white rounded-xl border border-gray-100 p-4 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-base font-bold text-gray-900">
+            {stage}단계 제품 추천
+          </h2>
+          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+            {products.length}개
+          </span>
         </div>
 
-        {/* 단계별 안내 */}
-        <div className="bg-[#1F0101]/5 border border-[#1F0101] rounded-lg p-4">
-          <div className="flex items-start gap-3">
-            <div className="text-[#1F0101] text-lg">💡</div>
-            <div>
-              <h4 className="font-semibold text-[#1F0101] mb-1">
-                {stage}단계 탈모 관리 가이드
-              </h4>
-              <p className="text-sm text-[#1F0101] opacity-80">
-                {stage === 1 && '두피 건강 관리와 예방에 중점을 둔 제품들을 추천합니다.'}
-                {stage === 2 && '모발 강화와 탈모 억제에 효과적인 제품들을 추천합니다.'}
-                {stage === 3 && '탈모 진행 억제와 치료에 도움이 되는 제품들을 추천합니다.'}
-                {stage === 4 && '집중적인 탈모 치료를 위한 강력한 제품들을 추천합니다.'}
-                {stage === 5 && '전문가 처방용 제품과 고농도 성분의 제품들을 추천합니다.'}
-                {stage === 6 && '의료진 상담 후 사용하실 수 있는 전문 치료 제품들을 추천합니다.'}
-              </p>
-            </div>
+        {/* 단계별 안내 - 간소화 */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-start gap-2">
+            <div className="text-blue-600 text-base flex-shrink-0">💡</div>
+            <p className="text-xs text-blue-800 leading-relaxed">
+              {stage === 0 && '두피 건강 유지와 예방에 효과적인 기본 케어 제품들을 추천합니다.'}
+              {stage === 1 && '두피 건강 관리와 예방에 중점을 둔 제품들을 추천합니다.'}
+              {stage === 2 && '모발 강화와 탈모 억제에 효과적인 제품들을 추천합니다.'}
+              {stage === 3 && '탈모 진행 억제와 치료에 도움이 되는 제품들을 추천합니다.'}
+              {stage === 4 && '집중적인 탈모 치료를 위한 강력한 제품들을 추천합니다.'}
+              {stage === 5 && '전문가 처방용 제품과 고농도 성분의 제품들을 추천합니다.'}
+              {stage === 6 && '의료진 상담 후 사용하실 수 있는 전문 치료 제품들을 추천합니다.'}
+            </p>
           </div>
         </div>
       </div>
 
-      {/* 제품 그리드 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {/* 제품 그리드 - 모바일 우선 */}
+      <div className="grid grid-cols-2 gap-3">
         {products.map((product) => (
           <ProductCard
             key={product.productId}
@@ -128,46 +116,15 @@ const ProductList: React.FC<ProductListProps> = ({
         ))}
       </div>
 
-      {/* 디스클레이머 */}
-      <div className="mt-8 bg-red-50 border border-red-200 rounded-xl p-6">
-        <div className="flex items-start gap-3">
-          <div className="text-red-600 text-lg">⚠️</div>
+      {/* 디스클레이머 - 간소화 */}
+      <div className="mt-4 bg-red-50 border border-red-200 rounded-xl p-3">
+        <div className="flex items-start gap-2">
+          <div className="text-red-600 text-base flex-shrink-0">⚠️</div>
           <div>
-            <h4 className="font-bold text-red-800 mb-2">중요 안내사항</h4>
-            <p className="text-sm text-red-700 mb-2">
-              {disclaimer}
+            <h4 className="font-semibold text-red-800 mb-1 text-xs">중요 안내사항</h4>
+            <p className="text-[10px] text-red-700 leading-relaxed">
+              제품 사용 전 피부과 전문의 상담을 권장합니다. 본 추천은 참고용이며 개인차가 있을 수 있습니다.
             </p>
-            <ul className="text-sm text-red-700 space-y-1">
-              <li>• 본 추천은 참고용이며, 개인차가 있을 수 있습니다.</li>
-              <li>• 제품 사용 전 피부과 전문의 상담을 권장합니다.</li>
-              <li>• 알레르기 반응이 있을 경우 즉시 사용을 중단하세요.</li>
-              <li>• 지속적인 사용과 올바른 생활습관이 중요합니다.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* 추가 정보 */}
-      <div className="mt-6 bg-gray-50 rounded-xl p-6">
-        <h4 className="font-semibold text-gray-800 mb-3">추가 정보</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-          <div>
-            <h5 className="font-medium mb-2">제품 선택 기준</h5>
-            <ul className="space-y-1">
-              <li>• 탈모 단계별 적합성</li>
-              <li>• 사용자 리뷰 및 평점</li>
-              <li>• 성분의 안전성</li>
-              <li>• 가격 대비 효과</li>
-            </ul>
-          </div>
-          <div>
-            <h5 className="font-medium mb-2">사용 시 주의사항</h5>
-            <ul className="space-y-1">
-              <li>• 정확한 사용법 준수</li>
-              <li>• 꾸준한 사용 필요</li>
-              <li>• 부작용 발생 시 중단</li>
-              <li>• 전문의 상담 권장</li>
-            </ul>
           </div>
         </div>
       </div>

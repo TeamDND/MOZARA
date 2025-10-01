@@ -53,83 +53,68 @@ const StageSelector: React.FC<StageSelectorProps> = ({
 }) => {
   return (
     <div className="w-full">
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+      <div className="mb-4">
+        <h3 className="text-sm font-semibold text-gray-800 mb-2 text-center">
           탈모 단계를 선택해주세요
         </h3>
-        <p className="text-sm text-gray-600">
+        <p className="text-xs text-gray-600 text-center">
           현재 탈모 상태에 맞는 제품을 추천해드립니다
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 목록 형태로 변경 - MainContent 배너 스타일 */}
+      <div className="space-y-3">
         {HAIR_LOSS_STAGES.map((stageInfo) => {
           const isSelected = selectedStage === stageInfo.stage;
           
           return (
-            <button
-              key={stageInfo.stage}
-              onClick={() => !disabled && onStageSelect(stageInfo.stage)}
-              disabled={disabled}
-              className={`
-                relative p-4 rounded-2xl border-2 transition-all duration-200
-                ${isSelected 
-                  ? `${stageInfo.color} border-2 shadow-lg transform scale-105` 
-                  : `bg-white/70 backdrop-blur border-gray-200 text-gray-700 ${stageInfo.hoverColor} hover:shadow-md`
-                }
-                ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-              `}
-            >
-              {/* 선택 표시 */}
+            <div key={stageInfo.stage} className="relative">
               {isSelected && (
-                <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">✓</span>
+                <div className="absolute top-2 right-2 z-10">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold text-white bg-[#1F0101] rounded-full">
+                    ✓ 선택됨
+                  </span>
                 </div>
               )}
-
-              {/* 아이콘 */}
-              <div className="text-3xl mb-3 text-center">
-                {stageInfo.icon}
-              </div>
-
-              {/* 단계 정보 */}
-              <div className="text-center">
-                <div className="font-bold text-lg mb-1">
-                  {stageInfo.title}
+              <button
+                onClick={() => !disabled && onStageSelect(stageInfo.stage)}
+                disabled={disabled}
+                className={`
+                  w-full bg-white rounded-xl border transition-all
+                  ${isSelected 
+                    ? 'border-[#1F0101] ring-2 ring-[#1F0101]/10 shadow-md' 
+                    : 'border-gray-100 hover:shadow-md'
+                  }
+                  ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-[0.98]'}
+                `}
+              >
+                <div className="flex items-center p-4">
+                  {/* 아이콘 영역 */}
+                  <div className={`w-16 h-16 rounded-lg flex-shrink-0 mr-4 flex items-center justify-center text-3xl ${stageInfo.color}`}>
+                    {stageInfo.icon}
+                  </div>
+                  
+                  {/* 텍스트 영역 */}
+                  <div className="flex-1 text-left">
+                    <h3 className="text-base font-semibold text-gray-900 mb-1">
+                      {stageInfo.title} - {stageInfo.description}
+                    </h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {stageInfo.subtitle}
+                    </p>
+                  </div>
+                  
+                  {/* 화살표 */}
+                  <div className="flex-shrink-0 ml-2">
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
                 </div>
-                <div className="text-sm font-medium mb-1">
-                  {stageInfo.description}
-                </div>
-                <div className="text-xs opacity-75">
-                  {stageInfo.subtitle}
-                </div>
-              </div>
-
-              {/* 단계별 설명 */}
-              <div className="mt-3 text-xs text-center opacity-75">
-                {stageInfo.stage === 0 && '두피 건강 관리와 예방'}
-                {stageInfo.stage === 1 && '모발 강화와 탈모 억제'}
-                {stageInfo.stage === 2 && '탈모 진행 억제와 치료'}
-                {stageInfo.stage === 3 && '전문가 처방 치료'}
-              </div>
-            </button>
+              </button>
+            </div>
           );
         })}
-      </div>
-
-      {/* 안내 메시지 */}
-      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <div className="flex items-start gap-3">
-          <div className="text-blue-600 text-lg">💡</div>
-          <div>
-            <h4 className="font-semibold text-blue-800 mb-1">단계 선택 안내</h4>
-            <p className="text-sm text-blue-700">
-              정확한 탈모 단계를 모르신다면 <strong>BASP 자가진단</strong>을 먼저 진행해보세요. 
-              전문의 상담을 통해 정확한 진단을 받으시는 것을 권장합니다.
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   );
