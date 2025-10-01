@@ -38,20 +38,6 @@ const CategoryPage = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Mobile Header */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <Link
-            to="/hair-encyclopedia"
-            className="flex items-center text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            <span className="text-sm">탈모 백과</span>
-          </Link>
-          <h1 className="text-lg font-semibold text-gray-800">{category.name}</h1>
-          <div className="w-16"></div>
-        </div>
-      </div>
 
       {/* Main Content */}
       <div className="px-4 py-6">

@@ -179,55 +179,75 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
       {/* Mobile-First 컨테이너 */}
       <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col">
         
-        {/* 헤더 */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
-          <div className="flex items-center justify-between">
-            <Button 
-              onClick={() => navigate('/mypage')}
-              variant="ghost"
-              className="p-2 hover:bg-gray-100 rounded-lg"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div className="flex-1 text-center">
-              <h1 className="text-lg font-bold text-gray-800">AI 분석 리포트</h1>
-              <p className="text-xs text-gray-600 mt-1">
-                {analysisResult.type} • {analysisResult.inspectionDate}
-              </p>
-            </div>
-            <div className="w-9"></div> {/* 균형을 위한 빈 공간 */}
-          </div>
-        </div>
-
         {/* 메인 컨텐츠 (Mobile-First) */}
         <div className="flex-1 p-4 overflow-y-auto space-y-4">
-          {/* 분석 결과 요약 (Mobile-First) */}
-          <div className="bg-gradient-to-r from-gray-50 to-green-50 p-4 rounded-xl">
-            <div className="flex items-center gap-3 mb-4">
-              <CheckCircle className="w-8 h-8 text-green-500" />
-              <div>
-                <h2 className="text-lg font-semibold text-gray-800">분석 결과</h2>
-                <p className="text-sm text-gray-600">
-                  {analysisResult.analysisSummary || '종합 분석 결과'}
-                </p>
-              </div>
+          {/* 레포트 헤더 */}
+          <div className="text-center py-4">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">AI 분석 리포트</h1>
+            <p className="text-sm text-gray-500">{analysisResult.type}</p>
+          </div>
+
+          {/* 분석 결과 정보 카드 */}
+          <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100">
+            <div className="mb-4 pb-3 border-b-2 border-gray-200">
+              <h2 className="text-lg font-bold text-gray-800">분석 결과</h2>
             </div>
-            
-            <div className="grid grid-cols-3 gap-3">
-              <div className="text-center p-3 bg-white rounded-lg">
-                <p className="text-xs text-gray-600">분석 점수</p>
-                <p className="text-xl font-bold text-gray-800">{analysisResult.grade}</p>
-                <Badge variant="secondary" className="text-xs px-2 py-1">{analysisResult.type}</Badge>
+            <div className="space-y-4">
+              {/* HairFit 분석 단계 */}
+              <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[#222222] rounded-lg flex items-center justify-center">
+                    <Award className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">HairFit 분석 단계</p>
+                    <p className="text-lg font-bold text-gray-800">{analysisResult.grade}단계</p>
+                  </div>
+                </div>
+                <Badge variant="secondary" className="text-sm px-3 py-1">{analysisResult.type}</Badge>
               </div>
-              <div className="text-center p-3 bg-white rounded-lg">
-                <p className="text-xs text-gray-600">개선 정도</p>
-                <p className="text-xl font-bold text-gray-800">{analysisResult.improvement}</p>
-                <Badge variant="outline" className="text-xs px-2 py-1">진행중</Badge>
+
+              {/* 분석일 */}
+              <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <Calendar className="w-5 h-5 text-gray-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">분석일</p>
+                    <p className="text-base font-semibold text-gray-800">{analysisResult.inspectionDate}</p>
+                  </div>
+                </div>
               </div>
-              <div className="text-center p-3 bg-white rounded-lg">
-                <p className="text-xs text-gray-600">분석일</p>
-                <p className="text-xl font-bold text-gray-800">{analysisResult.inspectionDate}</p>
-                <Badge variant="default" className="text-xs px-2 py-1">완료</Badge>
+
+              {/* 분석요약 */}
+              <div className="py-3 border-b border-gray-100">
+                <div className="flex items-start gap-3 mb-2">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <BookOpen className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 mb-2">분석요약</p>
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      {analysisResult.analysisSummary || '분석 결과 요약이 없습니다.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* HairFit 제안 */}
+              <div className="py-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Target className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 mb-2">HairFit 제안</p>
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      {analysisResult.advice || '개선 방안이 제시되지 않았습니다.'}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -235,7 +255,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
           {/* 분석 이미지 */}
           {analysisResult.imageUrl && (
             <div className="bg-white p-4 rounded-xl shadow-md">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">분석 이미지</h3>
+              <h3 className="text-base font-semibold text-gray-800 mb-3">분석 이미지</h3>
               <div className="aspect-video rounded-lg overflow-hidden bg-gray-200">
                 <ImageWithFallback 
                   src={analysisResult.imageUrl}
@@ -246,59 +266,49 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
             </div>
           )}
 
-          {/* 분석 상세 내용 */}
-          <div className="bg-white p-4 rounded-xl shadow-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">상세 분석</h3>
-            <div className="space-y-3">
-              <div>
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">분석 요약</h4>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {analysisResult.analysisSummary || '분석 결과 요약이 없습니다.'}
-                </p>
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">개선 방안</h4>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {analysisResult.advice || '개선 방안이 제시되지 않았습니다.'}
-                </p>
-              </div>
-            </div>
+          {/* 레포트 제목 */}
+          <div className="bg-white p-5 rounded-xl shadow-md border-l-4 border-[#222222]">
+            <h2 className="text-xl font-bold text-gray-800 mb-2">맞춤형 케어 추천</h2>
+            <p className="text-sm text-gray-600">분석 결과를 기반으로 한 개인 맞춤 솔루션</p>
           </div>
 
           {/* 맞춤 추천 탭 (Mobile-First) */}
-          <Tabs defaultValue="hospitals" className="space-y-4 flex items-center">
-            <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
+          <Tabs defaultValue="hospitals" className="space-y-4">
+            <TabsList className="grid grid-cols-4 gap-2 bg-transparent p-0">
               <TabsTrigger 
                 value="hospitals" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-[#222222] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
+                className="px-3 py-2.5 text-xs font-medium rounded-lg bg-[#222222] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
               >
-                탈모 맵
+                병원
               </TabsTrigger>
               <TabsTrigger 
                 value="products" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="px-3 py-2.5 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
-                제품 추천
+                제품
               </TabsTrigger>
               <TabsTrigger 
                 value="videos" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="px-3 py-2.5 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
-                영상 컨텐츠
+                영상
               </TabsTrigger>
               <TabsTrigger 
                 value="lifestyle" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="px-3 py-2.5 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
-                생활습관
+                생활
               </TabsTrigger>
             </TabsList>
 
             {/* 병원 추천 (Mobile-First) */}
             <TabsContent value="hospitals" className="space-y-4">
               <div className="bg-white p-4 rounded-xl shadow-md">
+                <div className="mb-4 pb-3 border-b border-gray-200">
+                  <h3 className="text-base font-bold text-gray-800 mb-1">추천 전문 병원</h3>
+                  <p className="text-xs text-gray-500">회원님의 분석 결과 기반 병원 추천</p>
+                </div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800">내 주변 탈모 맵</h3>
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-gray-600" />
                     <select 
@@ -376,10 +386,10 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
             {/* 제품 추천 (Mobile-First) */}
             <TabsContent value="products" className="space-y-4">
               <div className="bg-white p-4 rounded-xl shadow-md">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">맞춤형 제품 추천</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  분석 결과에 따라 선별된 헤어케어 제품들입니다
-                </p>
+                <div className="mb-4 pb-3 border-b border-gray-200">
+                  <h3 className="text-base font-bold text-gray-800 mb-1">추천 케어 제품</h3>
+                  <p className="text-xs text-gray-500">분석 결과에 따라 선별된 헤어케어 제품</p>
+                </div>
                 
                 <div className="space-y-4">
                   {recommendations.products.map((product, index) => (
@@ -427,10 +437,10 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
             {/* 영상 가이드 (Mobile-First) */}
             <TabsContent value="videos" className="space-y-4">
               <div className="bg-white p-4 rounded-xl shadow-md">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">추천 영상 가이드</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  전문가들이 추천하는 탈모 관리 영상들
-                </p>
+                <div className="mb-4 pb-3 border-b border-gray-200">
+                  <h3 className="text-base font-bold text-gray-800 mb-1">관리 영상 가이드</h3>
+                  <p className="text-xs text-gray-500">전문가 추천 케어 영상 자료</p>
+                </div>
                 
                 <div className="space-y-4">
                   {recommendations.youtubeVideos.map((video, index) => (
@@ -472,24 +482,31 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
 
             {/* 생활습관 가이드 (Mobile-First) */}
             <TabsContent value="lifestyle" className="space-y-4">
+              <div className="bg-white p-4 rounded-xl shadow-md mb-4">
+                <div className="mb-4 pb-3 border-b border-gray-200">
+                  <h3 className="text-base font-bold text-gray-800 mb-1">생활습관 개선 가이드</h3>
+                  <p className="text-xs text-gray-500">일상에서 실천 가능한 케어 방법</p>
+                </div>
+              </div>
+              
               <div className="space-y-4">
                 {recommendations.lifestyleGuides.map((guide, index) => (
                   <div key={index} className="bg-white p-4 rounded-xl shadow-md">
                     <div className="flex items-center gap-3 mb-3">
                       {guide.icon}
-                      <h3 className="text-lg font-semibold text-gray-800">{guide.title}</h3>
+                      <h3 className="text-base font-bold text-gray-800">{guide.title}</h3>
                     </div>
                     <p className="text-sm text-gray-600 mb-4">
                       {guide.description}
                     </p>
                     
                     <div className="space-y-2">
-                      <h4 className="text-sm font-semibold text-gray-800">실천 방법:</h4>
-                      <ul className="space-y-2">
+                      <h4 className="text-sm font-semibold text-gray-700">• 실천 방법</h4>
+                      <ul className="space-y-2 ml-2">
                         {guide.tips.map((tip, tipIndex) => (
                           <li key={tipIndex} className="text-sm flex items-center gap-2">
                             <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                            <span className="text-gray-700">{tip}</span>
+                            <span className="text-gray-600">{tip}</span>
                           </li>
                         ))}
                       </ul>
@@ -498,31 +515,6 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
                 ))}
               </div>
 
-              {/* 맞춤형 루틴 제안 (Mobile-First) */}
-              <div className="bg-gradient-to-r from-purple-50 to-gray-50 p-4 rounded-xl">
-                <div className="text-center space-y-4">
-                  <Award className="w-12 h-12 text-purple-600 mx-auto" />
-                  <h3 className="text-lg font-semibold text-gray-800">나만의 맞춤 루틴 시작하기</h3>
-                  <p className="text-sm text-gray-600">
-                    분석 결과를 바탕으로 개인 맞춤형 관리 루틴을 시작해보세요
-                  </p>
-                  <div className="space-y-3">
-                    <Button 
-                      onClick={() => navigate('/daily-care')}
-                      className="w-full h-12 bg-purple-600 hover:bg-purple-700 text-white rounded-xl active:scale-[0.98]"
-                    >
-                      데일리 케어 시작
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => navigate('/progress-tracking')}
-                      className="w-full h-12 rounded-xl active:scale-[0.98]"
-                    >
-                      진행 상황 추적
-                    </Button>
-                  </div>
-                </div>
-              </div>
             </TabsContent>
           </Tabs>
         </div>

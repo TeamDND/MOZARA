@@ -33,7 +33,11 @@ const BottomNavigationBar: React.FC = () => {
             <button
               onClick={() => {
                 closeChatBotModal();
-                navigate('/integrated-diagnosis')
+                if (isLoggedIn) {
+                  navigate('/integrated-diagnosis')
+                } else {
+                  navigate('/login')
+                }
               }}
               className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
@@ -47,7 +51,11 @@ const BottomNavigationBar: React.FC = () => {
             <button
               onClick={() => {
                 closeChatBotModal();
-                navigate('/main-contents')
+                if (isLoggedIn) {
+                  navigate('/main-contents')
+                } else {
+                  navigate('/login')
+                }
               }}
               className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
@@ -76,9 +84,12 @@ const BottomNavigationBar: React.FC = () => {
             <button
               onClick={() => {
                 closeChatBotModal();
-                navigate('/mypage')
+                if (isLoggedIn) {
+                  navigate('/mypage')
+                } else {
+                  navigate('/login')
                 }
-              }
+              }}
               className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
               <User className="h-5 w-5 mb-1 text-[#222222]" />
