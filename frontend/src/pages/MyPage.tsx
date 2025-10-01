@@ -17,7 +17,6 @@ import HospitalMap from "../components/mypage/HospitalMap"
 import ProductRecommendation from "../components/mypage/ProductRecommendation"
 import VideoContent from "../components/mypage/VideoContent"
 import UserInfoEdit from "../components/mypage/UserInfoEdit"
-import apiClient from "../services/apiClient"
 import {
   FileText,
   Heart,
@@ -328,8 +327,8 @@ export default function MyPage() {
     gender: formatGender(userAdditionalInfo.gender), // API에서 조회한 성별 변환
     age: user.age || 0,
     role: user.role || "일반 사용자",
-    recentHairLoss: formatIsLoss(userAdditionalInfo.isLoss), // API에서 조회한 최근 머리빠짐 변환
-    familyHistory: formatFamilyHistory(userAdditionalInfo.familyHistory) // API에서 조회한 가족력 변환
+    recentHairLoss: userAdditionalInfo.isLoss ?? false, // boolean 값 그대로 전달
+    familyHistory: userAdditionalInfo.familyHistory ?? false // boolean 값 그대로 전달
   }
 
   return (
