@@ -5,6 +5,8 @@ import com.example.springboot.data.dto.user.UserInfoDTO;
 import com.example.springboot.data.dto.user.UserAdditionalInfoDTO;
 import com.example.springboot.data.dto.user.UserBasicInfoDTO;
 import com.example.springboot.service.user.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -132,12 +134,33 @@ public class UserController {
     }
 
     /**
+     * 로그아웃
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("refresh", null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
+        return ResponseEntity.ok("로그아웃 되었습니다.");
+    }
+
+    /**
      * 회원 탈퇴
      */
     @DeleteMapping("/delete-member/{username}")
-    public ResponseEntity<String> deleteMember(@PathVariable String username) {
+    public ResponseEntity<String> deleteMember(@PathVariable String username, HttpServletResponse response) {
         try {
             String result = userService.deleteMember(username);
+
+            // refresh 쿠키 삭제
+            Cookie cookie = new Cookie("refresh", null);
+            cookie.setMaxAge(0);
+            cookie.setPath("/");
+            cookie.setHttpOnly(true);
+            response.addCookie(cookie);
+
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()

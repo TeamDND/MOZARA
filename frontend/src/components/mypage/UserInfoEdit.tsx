@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { User, Activity } from 'lucide-react';
 import apiClient from '../../services/apiClient';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../utils/store';
 import { useNavigate } from 'react-router-dom';
+import { clearToken } from '../../utils/tokenSlice';
+import { clearUser } from '../../utils/userSlice';
 
 // TypeScript: UserInfoEdit 컴포넌트 타입 정의
 interface UserInfo {
@@ -30,6 +32,7 @@ interface UserInfoEditProps {
 const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
   const [activeTab, setActiveTab] = useState<'basic' | 'analysis'>('basic');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // Redux에서 username 가져오기
   const username = useSelector((state: RootState) => state.user.username);
@@ -183,8 +186,15 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
 
       if (res?.data) {
         alert('회원 탈퇴가 완료되었습니다.');
-        // 로그아웃 처리 및 메인 페이지로 이동
+
+        // Redux 상태 초기화
+        dispatch(clearToken());
+        dispatch(clearUser());
+
+        // localStorage 초기화
         localStorage.clear();
+
+        // 메인 페이지로 이동
         window.location.href = '/';
       }
     } catch (error: any) {
