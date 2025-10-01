@@ -13,7 +13,9 @@ const StoreFinder: React.FC = () => {
   const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isUsingSampleData, setIsUsingSampleData] = useState(false);
-  const [selectedStage, setSelectedStage] = useState<number | null>(null);
+  const [selectedStage, setSelectedStage] = use
+  
+  State<number | null>(null);
   const [showStageSelector, setShowStageSelector] = useState(true);
   const [imageLoadErrors, setImageLoadErrors] = useState<Set<string>>(new Set());
 
