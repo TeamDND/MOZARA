@@ -370,7 +370,7 @@ const StoreFinder: React.FC = () => {
         {!isLoading && effectiveHospitals.length > 0 && currentLocation && (
           <div className="mb-6">
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
-              <div className="px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 border-b">
+              <div className="px-4 py-3 bg-gradient-to-r from-gray-800 to-[#1F0101] border-b">
                 <div className="flex items-center justify-between text-white">
                   <div className="flex items-center gap-2">
                     <span className="text-2xl">📍</span>
