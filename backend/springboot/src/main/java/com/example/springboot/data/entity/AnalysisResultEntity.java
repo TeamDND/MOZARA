@@ -22,12 +22,10 @@ public class AnalysisResultEntity {
     @Column(name = "inspection_date")
     private LocalDate inspectionDate;
 
-    @Lob
-    @Column(name = "analysis_summary")
+    @Column(name = "analysis_summary", length = 5000)
     private String analysisSummary;
 
-    @Lob
-    @Column(name = "advice")
+    @Column(name = "advice", length = 5000)
     private String advice;
 
     @Column(name = "grade")

@@ -1,14 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Button } from '../../components/ui/button';
 import { Progress } from '../../components/ui/progress';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Info } from 'lucide-react';
 import { analyzeHairWithSwin, getStageDescription, getStageColor, SwinAnalysisResult } from '../../services/swinAnalysisService';
 import SelfCheckStep from '../../components/check/SelfCheckStep';
 import ImageUploadStep from '../../components/check/ImageUploadStep';
 import AnalysisProgressStep from '../../components/check/AnalysisProgressStep';
 import AnalysisResultStep from '../../components/check/AnalysisResultStep';
+import apiClient from '../../services/apiClient';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../components/ui/alert-dialog';
 
 interface IntegratedDiagnosisProps {
   setCurrentView?: (view: string) => void;
@@ -42,8 +52,49 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
   const [analysisResult, setAnalysisResult] = useState<SwinAnalysisResult | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showAutoFillModal, setShowAutoFillModal] = useState(false);
+  const [showLoginRequiredModal, setShowLoginRequiredModal] = useState(false);
 
   const totalSteps = 4;
+
+  // 사용자 정보 불러오기
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      if (user?.username && token) {
+        try {
+          const response = await apiClient.get(`/userinfo/${user.username}`);
+          const userInfo = response.data;
+
+          // DB에 저장된 값이 있으면 자동으로 채우기
+          if (userInfo.gender || userInfo.age || userInfo.familyHistory !== null || userInfo.isLoss !== null || userInfo.stress) {
+            setBaspAnswers(prev => ({
+              ...prev,
+              gender: userInfo.gender || '',
+              age: userInfo.age ? String(userInfo.age) : '',
+              familyHistory: userInfo.familyHistory === true ? 'yes' : userInfo.familyHistory === false ? 'no' : '',
+              recentHairLoss: userInfo.isLoss === true ? 'yes' : userInfo.isLoss === false ? 'no' : '',
+              stress: userInfo.stress || ''
+            }));
+
+            // 필수 필드가 모두 채워져 있으면 모달 표시
+            if (userInfo.gender && userInfo.age && userInfo.familyHistory !== null && userInfo.isLoss !== null && userInfo.stress) {
+              setShowAutoFillModal(true);
+            }
+          }
+        } catch (error) {
+          console.error('사용자 정보 로드 실패:', error);
+        }
+      }
+    };
+
+    loadUserInfo();
+  }, [user?.username, token]);
+
+  // 모달 확인 버튼 클릭 시 다음 단계로 이동
+  const handleAutoFillConfirm = () => {
+    setShowAutoFillModal(false);
+    setTimeout(() => setCurrentStep(2), 300);
+  };
 
   // 이미지 업로드 핸들러는 ImageUploadStep 컴포넌트로 이동됨
 
@@ -87,7 +138,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
           const result = await analyzeHairWithSwin(
             uploadedPhotoFile,
             uploadedSidePhotoFile!, // 여성의 경우 null일 수 있음
-            undefined, // 현재는 userId 없이 (로그인 구현 후 추가 가능)
+            user?.userId || undefined, // 로그인한 사용자의 ID (비로그인시 undefined)
             undefined, // imageUrl 없이
             {
               gender: baspAnswers.gender,
@@ -129,8 +180,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
     // 로그인 상태 확인
     const isLoggedIn = !!(user.username && token);
     if (!isLoggedIn) {
-      alert('로그인 후 확인하실 수 있습니다');
-      navigate('/login');
+      setShowLoginRequiredModal(true);
       return;
     }
 
@@ -231,6 +281,78 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* 기존 분석 정보 자동 입력 알림 모달 */}
+      <AlertDialog open={showAutoFillModal} onOpenChange={setShowAutoFillModal}>
+        <AlertDialogContent className="max-w-[90%] sm:max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center justify-center mb-2">
+              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                <Info className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+            <AlertDialogTitle className="text-center text-xl">
+              기존 분석 정보 확인
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-base leading-relaxed pt-2">
+              기존 분석 정보가 존재하여 데이터를 자동으로 입력했습니다.
+              <br />
+              <br />
+              수정을 원하시면 <span className="font-semibold text-gray-800">마이페이지</span>의 분석정보를 수정해주세요.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center gap-3">
+            <AlertDialogAction 
+              onClick={() => {
+                setShowAutoFillModal(false);
+                navigate('/mypage', { state: { activeTab: 'profile', activeSubTab: 'analysis' } });
+              }}
+              className="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-800 px-8"
+            >
+              수정하기
+            </AlertDialogAction>
+            <AlertDialogAction 
+              onClick={handleAutoFillConfirm}
+              className="w-full sm:w-auto bg-[#222222] hover:bg-[#333333] text-white px-8"
+            >
+              확인
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* 로그인 필요 안내 모달 */}
+      <AlertDialog open={showLoginRequiredModal} onOpenChange={setShowLoginRequiredModal}>
+        <AlertDialogContent className="max-w-[90%] sm:max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center justify-center mb-2">
+              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                <Info className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+            <AlertDialogTitle className="text-center text-xl">
+              로그인이 필요합니다
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-base leading-relaxed pt-2">
+              맞춤 정보는 로그인 후 이용이 가능합니다
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center gap-3">
+            <AlertDialogAction 
+              onClick={() => setShowLoginRequiredModal(false)}
+              className="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-800 px-8"
+            >
+              확인
+            </AlertDialogAction>
+            <AlertDialogAction 
+              onClick={() => navigate('/login')}
+              className="w-full sm:w-auto bg-[#222222] hover:bg-[#333333] text-white px-8"
+            >
+              로그인
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Mobile-First 컨테이너 */}
       <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col">
         

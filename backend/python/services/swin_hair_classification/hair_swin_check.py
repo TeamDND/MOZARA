@@ -654,13 +654,18 @@ def analyze_hair_with_swin(top_image_data: bytes, side_image_data: bytes = None,
         log_message(f"  - 제목: {llm_result['title']}")
         log_message(f"  - 설명: {llm_result['description'][:50]}...")
         log_message(f"  - 조언 개수: {len(llm_result['advice'])}")
+        for i, advice in enumerate(llm_result['advice'], 1):
+            log_message(f"    [{i}] {advice}")
         log_message("=" * 50)
 
+        # advice 배열을 하나의 텍스트로 합치기 (구분자: 줄바꿈)
+        advice_text = "\n".join(llm_result['advice']) if isinstance(llm_result['advice'], list) else str(llm_result['advice'])
+        
         result = {
             "stage": final_stage,
             "title": llm_result['title'],
             "description": llm_result['description'],
-            "advice": llm_result['advice'],
+            "advice": advice_text,
             "confidence": final_confidence,
             "analysis_type": "swin_dual_model_llm_enhanced"
         }

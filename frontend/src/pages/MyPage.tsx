@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { RootState } from "../utils/store"
 import { clearToken } from "../utils/tokenSlice"
 import { clearUser } from "../utils/userSlice"
@@ -51,7 +51,8 @@ interface AnalysisResult {
 
 export default function MyPage() {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState("reports")
+  const location = useLocation()
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || "reports")
   const [totalAnalysis, setTotalAnalysis] = useState(0)
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([])
   const [loading, setLoading] = useState(true)
@@ -82,72 +83,22 @@ export default function MyPage() {
     }
   }
 
+  // 사용자 추가 정보 상태
+  const [userAdditionalInfo, setUserAdditionalInfo] = useState<{
+    gender: string
+    familyHistory: boolean | null
+    isLoss: boolean | null
+  }>({
+    gender: '',
+    familyHistory: null,
+    isLoss: null
+  })
+
   // 분석 결과 개수 및 리스트 조회
   useEffect(() => {
     const fetchAnalysisData = async () => {
       console.log('분석 결과 데이터 조회 시작:', { userId: user.userId, token: token ? '있음' : '없음' });
       
-      // 샘플 데이터로 테스트 (실제 API 호출 전에 샘플 데이터 표시)
-      const sampleResults: AnalysisResult[] = [
-        {
-          id: 1,
-          inspectionDate: '2024.09.25',
-          analysisSummary: '전반적인 두피 건강 상태 양호. 모근 강도 개선 필요.',
-          advice: '비타민 B 복합체 섭취 및 두피 마사지 권장',
-          grade: 75,
-          imageUrl: '/sam1.png',
-          type: '종합 진단',
-          improvement: '12% 개선됨'
-        },
-        {
-          id: 2,
-          inspectionDate: '2024.09.20',
-          analysisSummary: '정수리 부분 모발 밀도 감소 감지. 조기 관리 필요.',
-          advice: 'DHT 차단 샴푸 사용 및 전문의 상담 권장',
-          grade: 65,
-          imageUrl: '/sam2.png',
-          type: '탈모 진단',
-          improvement: '8% 개선됨'
-        },
-        {
-          id: 3,
-          inspectionDate: '2024.09.15',
-          analysisSummary: '두피 염증 및 각질 문제 발견. 세정 관리 강화 필요.',
-          advice: '저자극 샴푸 사용 및 주 2회 두피 스케일링',
-          grade: 70,
-          imageUrl: '/sam3.png',
-          type: '두피 건강',
-          improvement: '15% 개선됨'
-        },
-        {
-          id: 4,
-          inspectionDate: '2024.09.10',
-          analysisSummary: '모발 굵기 및 탄력성 양호. 지속적인 관리 유지 권장.',
-          advice: '프로틴 함유 헤어케어 제품 사용',
-          grade: 85,
-          imageUrl: '/sam1.png',
-          type: '모발 품질',
-          improvement: '20% 개선됨'
-        },
-        {
-          id: 5,
-          inspectionDate: '2024.09.05',
-          analysisSummary: '이마선 후퇴 초기 단계 감지. 적극적인 관리 필요.',
-          advice: '미녹시딜 5% 솔루션 사용 및 생활습관 개선',
-          grade: 60,
-          imageUrl: '/sam2.png',
-          type: '탈모 진행',
-          improvement: '5% 개선됨'
-        }
-      ];
-
-      // 샘플 데이터 설정
-      setTotalAnalysis(sampleResults.length);
-      setAnalysisResults(sampleResults);
-      setLoading(false);
-
-      // 실제 API 호출은 주석 처리 (필요시 활성화)
-      /*
       if (!user.userId || !token) {
         console.log('사용자 ID 또는 토큰이 없음:', { userId: user.userId, token: token });
         setLoading(false)
@@ -213,17 +164,41 @@ export default function MyPage() {
       } finally {
         setLoading(false)
       }
-      */
     }
 
     fetchAnalysisData()
-  }, [user.userId, token])
+  }, [user.userId, token, dispatch])
+
+  // 사용자 추가 정보 조회 (성별, 가족력, 최근 머리빠짐)
+  useEffect(() => {
+    const fetchUserAdditionalInfo = async () => {
+      if (!user.username || !token) {
+        return
+      }
+
+      try {
+        console.log('API 호출: 사용자 추가 정보 조회', `/userinfo/${user.username}`);
+        const response = await apiClient.get(`/userinfo/${user.username}`)
+        console.log('사용자 추가 정보 API 응답:', response.data);
+        
+        setUserAdditionalInfo({
+          gender: response.data.gender || '',
+          familyHistory: response.data.familyHistory,
+          isLoss: response.data.isLoss
+        })
+      } catch (error: any) {
+        console.error('사용자 추가 정보 조회 실패:', error);
+      }
+    }
+
+    fetchUserAdditionalInfo()
+  }, [user.username, token])
 
   // 분석 결과를 리포트 형태로 변환하는 함수
   const formatAnalysisResults = (results: AnalysisResult[]) => {
     return results.map((result, index) => ({
       id: result.id,
-      title: `AI 탈모 분석 리포트 #${String(result.id).padStart(3, '0')}`,
+      title: `AI 탈모 분석 리포트 #${index + 1}`,
       date: result.inspectionDate,
       status: "완료",
       score: result.grade,
@@ -320,6 +295,26 @@ export default function MyPage() {
 
   const recommendations = getRecommendations();
 
+  // 성별 변환 함수
+  const formatGender = (gender: string | null | undefined): string => {
+    if (!gender) return "정보 없음"
+    if (gender.toLowerCase() === 'male') return "남"
+    if (gender.toLowerCase() === 'female') return "여"
+    return gender
+  }
+
+  // 가족력 변환 함수
+  const formatFamilyHistory = (familyHistory: boolean | null | undefined): string => {
+    if (familyHistory === null || familyHistory === undefined) return "정보 없음"
+    return familyHistory ? "있음" : "없음"
+  }
+
+  // 최근 머리빠짐 변환 함수
+  const formatIsLoss = (isLoss: boolean | null | undefined): string => {
+    if (isLoss === null || isLoss === undefined) return "정보 없음"
+    return isLoss ? "있음" : "없음"
+  }
+
   // 실제 유저 정보로 구성 (기본값 제공)
   const userInfo = {
     name: user.nickname || user.username || "사용자",
@@ -329,11 +324,11 @@ export default function MyPage() {
     totalAnalysis: loading ? 0 : totalAnalysis, // API에서 가져온 실제 분석 결과 개수
     satisfaction: 0, // UserState에 satisfaction 속성이 없음
     address: user.address || "주소 정보 없음",
-    gender: user.gender || "성별 정보 없음",
+    gender: formatGender(userAdditionalInfo.gender), // API에서 조회한 성별 변환
     age: user.age || 0,
     role: user.role || "일반 사용자",
-    recentHairLoss: false, // 기본값: 최근 머리빠짐 없음
-    familyHistory: false // 기본값: 가족력 없음
+    recentHairLoss: userAdditionalInfo.isLoss ?? false, // boolean 값 그대로 전달
+    familyHistory: userAdditionalInfo.familyHistory ?? false // boolean 값 그대로 전달
   }
 
   return (
@@ -398,7 +393,10 @@ export default function MyPage() {
                   </CardContent>
                 </Card>
                 
-                <Button className="w-full bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium">
+                <Button 
+                  onClick={() => navigate('/integrated-diagnosis')}
+                  className="w-full bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium"
+                >
                   새로운 AI 분석 시작하기
                 </Button>
               </div>
@@ -490,7 +488,10 @@ export default function MyPage() {
                 
                 {/* 새로운 분석 시작 버튼 영역 */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-                  <Button className="w-full bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium">
+                  <Button 
+                    onClick={() => navigate('/integrated-diagnosis')}
+                    className="w-full bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium"
+                  >
                     새로운 AI 분석 시작하기
                   </Button>
                 </div>
@@ -540,7 +541,7 @@ export default function MyPage() {
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">
-            <UserInfoEdit userInfo={userInfo} />
+            <UserInfoEdit userInfo={userInfo} initialTab={location.state?.activeSubTab as 'basic' | 'analysis' | undefined} />
           </TabsContent>
         </Tabs>
       </div>

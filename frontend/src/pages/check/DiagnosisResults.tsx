@@ -273,7 +273,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
           title: "🧠 AI 맞춤 가이드",
           description: swinResult.description || "AI 분석 결과를 바탕으로 한 맞춤형 가이드",
           icon: <Brain className="w-5 h-5 text-purple-500" />,
-          tips: swinResult.advice
+          tips: swinResult.advice.split('\n')
         });
       }
 
@@ -355,7 +355,18 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                   <Brain className="w-4 h-4 text-blue-600" />
                   <h3 className="text-sm font-semibold text-blue-800">{swinResult.title}</h3>
                 </div>
-                <p className="text-xs text-blue-700">{swinResult.description}</p>
+                <p className="text-xs text-blue-700 mb-3">{swinResult.description}</p>
+                {swinResult.advice && (
+                  <div className="space-y-1 pt-2 border-t border-blue-200">
+                    <p className="text-xs font-semibold text-blue-800 mb-1">AI 추천 조언:</p>
+                    {swinResult.advice.split('\n').map((advice: string, index: number) => (
+                      <p key={index} className="text-xs text-blue-700 flex items-start gap-1">
+                        <span className="text-blue-500">•</span>
+                        <span>{advice}</span>
+                      </p>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
