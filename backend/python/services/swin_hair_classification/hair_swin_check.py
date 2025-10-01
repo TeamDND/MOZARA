@@ -10,12 +10,19 @@ import sys
 from typing import Dict, Any, List
 from datetime import datetime
 import io
+from dotenv import load_dotenv
+import google.generativeai as genai
 
 # Swin 모델 import
 from services.swin_hair_classification.models.swin_hair_classifier import SwinHairClassifier
 
 # Face parsing 모델 import
 from services.swin_hair_classification.models.face_parsing.model import BiSeNet
+
+# 환경 변수 로드
+load_dotenv("../../../.env")
+load_dotenv("../../.env")
+load_dotenv(".env")
 
 def log_message(message):
     """로깅 함수"""
@@ -406,28 +413,172 @@ def generate_advice(stage: int) -> List[str]:
     }
     return advice_map.get(stage, advice_map[0])
 
-def generate_title_and_description(stage: int) -> tuple:
-    """단계별 제목과 설명 생성"""
+def enhance_with_llm(stage: int, confidence: float, survey_data: Dict[str, Any] = None) -> Dict[str, Any]:
+    """
+    LLM을 사용하여 분석 결과를 자연스럽고 상세하게 포장
+    Args:
+        stage: 분석된 탈모 단계 (0-3)
+        confidence: 분석 신뢰도
+        survey_data: 설문 데이터 (optional)
+    Returns: {"title": str, "description": str, "advice": List[str]}
+    """
+    try:
+        # Gemini API 설정 (결과 포장 전용 키 사용)
+        api_key = os.getenv("GEMINI_API_KEY_1")
+        log_message(f"🔑 API 키 확인: {'존재함' if api_key else '없음'}")
+
+        if not api_key:
+            log_message("⚠️ GEMINI_API_KEY_1 없음 - 기본 템플릿 사용")
+            return generate_title_and_description_fallback(stage)
+
+        log_message("📡 Gemini API 호출 준비 중...")
+        genai.configure(api_key=api_key)
+
+        # 사용 가능한 모델명 시도 (순서대로)
+        model_names = [
+            'gemini-2.5-pro',
+            'gemini-pro',
+            'gemini-1.5-pro-latest',
+            'models/gemini-pro',
+            'gemini-1.0-pro'
+        ]
+
+        model = None
+        for model_name in model_names:
+            try:
+                model = genai.GenerativeModel(model_name)
+                log_message(f"✅ 모델 로드 성공: {model_name}")
+                break
+            except Exception as e:
+                log_message(f"⚠️ {model_name} 실패: {str(e)[:100]}")
+                continue
+
+        if model is None:
+            log_message("❌ 모든 모델 로드 실패 - 기본 템플릿 사용")
+            return generate_title_and_description_fallback(stage)
+
+        # 설문 데이터 정보 추가
+        survey_context = ""
+        if survey_data:
+            age = survey_data.get('age', '알 수 없음')
+            family_history = "있음" if survey_data.get('familyHistory') == 'yes' else "없음"
+            recent_loss = "있음" if survey_data.get('recentHairLoss') == 'yes' else "없음"
+            stress = survey_data.get('stress', 'low')
+            stress_level = {"low": "낮음", "medium": "보통", "high": "높음"}.get(stress, "보통")
+
+            survey_context = f"""
+사용자 정보:
+- 나이: {age}세
+- 가족력: {family_history}
+- 최근 탈모 증상: {recent_loss}
+- 스트레스 수준: {stress_level}
+"""
+
+        # 단계별 기본 정보
+        stage_info = {
+            0: {"level": "정상", "severity": "건강한 상태"},
+            1: {"level": "초기 단계", "severity": "경미한 변화"},
+            2: {"level": "중등도", "severity": "진행 중"},
+            3: {"level": "심각 단계", "severity": "상당히 진행됨"}
+        }
+        info = stage_info.get(stage, stage_info[0])
+
+        # LLM 프롬프트
+        prompt = f"""당신은 경험이 풍부한 탈모 전문의입니다. AI 분석 결과와 환자의 설문조사 정보를 종합적으로 분석하여, 환자 개개인에게 맞춤화된 상세한 설명과 조언을 제공해주세요.
+
+AI 분석 결과:
+- 탈모 단계: {stage}단계 ({info['level']})
+- 심각도: {info['severity']}
+- 분석 신뢰도: {confidence:.1%}
+{survey_context}
+
+다음 JSON 형식으로만 응답해주세요:
+{{
+  "title": "환자 상태를 정확히 표현하는 진단명 (15자 이내)",
+  "description": "현재 상태에 대한 상세하고 전문적인 설명 (100-200자). 반드시 설문조사 정보(나이, 가족력, 최근 탈모 증상, 스트레스 수준)를 언급하며 환자의 상황을 구체적으로 분석해주세요. 단순히 단계만 언급하지 말고, 왜 이 단계로 판단되었는지, 환자의 어떤 요인들이 영향을 미쳤는지 설명하세요.",
+  "advice": [
+    "설문조사 결과를 반영한 구체적이고 실천 가능한 조언 1 (30-50자, 환자의 나이/생활습관 고려)",
+    "환자 맞춤형 조언 2 (30-50자, 가족력/스트레스 수준 반영)",
+    "단계별 필수 관리 방법 조언 3 (30-50자, 즉시 실천 가능한 내용)"
+  ]
+}}
+
+중요 요구사항:
+1. 설문조사 정보를 적극적으로 활용하여 개인 맞춤형 설명 작성
+   - 나이대별 특성 언급 (예: "30대 초반으로 탈모가 시작되기 쉬운 시기입니다")
+   - 가족력이 있으면 유전적 요인 강조
+   - 스트레스 수준이 높으면 스트레스 관리의 중요성 언급
+   - 최근 탈모 증상이 있으면 진행 속도 주의사항 설명
+
+2. description은 최소 100자 이상으로 자세하게 작성
+   - 현재 상태 분석
+   - 설문조사 정보와의 연관성
+   - 향후 전망 및 관리 필요성
+
+3. advice는 환자의 상황에 맞는 구체적인 행동 지침 제공
+   - 일반적인 조언이 아닌 개인화된 조언
+   - 실천 가능한 구체적인 방법 제시
+
+4. 친절하고 희망적인 톤 유지하되, 정확한 정보 전달
+5. 추가 텍스트 없이 JSON만 반환"""
+
+        # LLM 호출
+        log_message("🤖 Gemini에 요청 전송 중...")
+        response = model.generate_content(prompt)
+        response_text = response.text.strip()
+        log_message(f"📥 Gemini 응답 수신 완료 (길이: {len(response_text)})")
+
+        # JSON 추출
+        import re
+        json_match = re.search(r'\{[\s\S]*\}', response_text)
+        if not json_match:
+            log_message(f"❌ JSON 추출 실패 - 응답 내용: {response_text[:200]}")
+            return generate_title_and_description_fallback(stage)
+
+        result = json.loads(json_match.group())
+
+        # 검증
+        if not all(key in result for key in ['title', 'description', 'advice']):
+            log_message(f"❌ 필드 누락 - 응답: {result}")
+            return generate_title_and_description_fallback(stage)
+
+        log_message(f"✅ LLM 포장 완료: {result['title']}")
+        return result
+
+    except Exception as e:
+        log_message(f"LLM 포장 실패: {e} - 기본 템플릿 사용")
+        return generate_title_and_description_fallback(stage)
+
+def generate_title_and_description_fallback(stage: int) -> Dict[str, Any]:
+    """LLM 사용 불가 시 기본 템플릿 (기존 함수)"""
     stage_info = {
         0: {
             'title': '정상 - 건강한 모발 상태',
-            'description': '현재 탈모 징후가 관찰되지 않는 건강한 모발 상태입니다. 지속적인 관리를 통해 현재 상태를 유지하시기 바랍니다.'
+            'description': '현재 탈모 징후가 관찰되지 않는 건강한 모발 상태입니다. 지속적인 관리를 통해 현재 상태를 유지하시기 바랍니다.',
+            'advice': generate_advice(0)
         },
         1: {
             'title': '초기 단계 - 경미한 모발 변화',
-            'description': '초기 단계의 모발 변화가 감지되었습니다. 적절한 예방 관리와 전문의 상담을 통해 진행을 늦출 수 있습니다.'
+            'description': '초기 단계의 모발 변화가 감지되었습니다. 적절한 예방 관리와 전문의 상담을 통해 진행을 늦출 수 있습니다.',
+            'advice': generate_advice(1)
         },
         2: {
             'title': '중등도 - 진행 중인 탈모',
-            'description': '중등도의 탈모가 진행되고 있습니다. 전문적인 치료와 관리가 필요한 시점입니다.'
+            'description': '중등도의 탈모가 진행되고 있습니다. 전문적인 치료와 관리가 필요한 시점입니다.',
+            'advice': generate_advice(2)
         },
         3: {
             'title': '심각 단계 - 진행된 탈모',
-            'description': '상당히 진행된 탈모 상태입니다. 전문의와의 상담을 통한 적극적인 치료가 필요합니다.'
+            'description': '상당히 진행된 탈모 상태입니다. 전문의와의 상담을 통한 적극적인 치료가 필요합니다.',
+            'advice': generate_advice(3)
         }
     }
-    info = stage_info.get(stage, stage_info[0])
-    return info['title'], info['description']
+    return stage_info.get(stage, stage_info[0])
+
+def generate_title_and_description(stage: int) -> tuple:
+    """단계별 제목과 설명 생성 (하위 호환성 유지)"""
+    result = generate_title_and_description_fallback(stage)
+    return result['title'], result['description']
 
 # 글로벌 모델 변수 (모델 로딩 최적화)
 _side_model = None
@@ -490,19 +641,31 @@ def analyze_hair_with_swin(top_image_data: bytes, side_image_data: bytes = None,
 
         # 최종 결과 구성
         final_stage = fused_result['stage']
-        title, description = generate_title_and_description(final_stage)
-        advice = generate_advice(final_stage)
+        final_confidence = fused_result['confidence']
+
+        # LLM으로 결과 포장 (설문 데이터 포함)
+        log_message("=" * 50)
+        log_message("LLM으로 결과 포장 중...")
+        log_message(f"입력 정보 - Stage: {final_stage}, Confidence: {final_confidence:.2%}")
+
+        llm_result = enhance_with_llm(final_stage, final_confidence, survey_data)
+
+        log_message(f"LLM 포장 결과:")
+        log_message(f"  - 제목: {llm_result['title']}")
+        log_message(f"  - 설명: {llm_result['description'][:50]}...")
+        log_message(f"  - 조언 개수: {len(llm_result['advice'])}")
+        log_message("=" * 50)
 
         result = {
             "stage": final_stage,
-            "title": title,
-            "description": description,
-            "advice": advice,
-            "confidence": fused_result['confidence'],
-            "analysis_type": "hairloss"
+            "title": llm_result['title'],
+            "description": llm_result['description'],
+            "advice": llm_result['advice'],
+            "confidence": final_confidence,
+            "analysis_type": "swin_dual_model_llm_enhanced"
         }
 
-        log_message(f"분석 완료: Stage {final_stage}, 신뢰도 {fused_result['confidence']:.2%}")
+        log_message(f"✅ 분석 완료: Stage {final_stage}, 신뢰도 {final_confidence:.2%}")
         return result
 
     except Exception as e:

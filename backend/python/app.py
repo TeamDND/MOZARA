@@ -1362,6 +1362,35 @@ async def get_11st_products(
             detail="제품 검색 중 오류가 발생했습니다."
         )
 
+@app.get("/products/search")
+async def search_products_by_keyword(
+    keyword: str = Query(..., description="검색 키워드")
+):
+    """제품 검색 API - 11번가 검색 결과 반환"""
+    try:
+        print(f"제품 검색 요청: keyword={keyword}")
+        
+        # 11번가에서 제품 검색 (기본 20개)
+        result = search_11st_products(keyword, page=1, pageSize=20)
+        
+        # HairProductSearchResponse 형식으로 반환
+        response = {
+            "products": result['products'],
+            "totalCount": result['totalCount']
+        }
+        
+        print(f"성공: {keyword} 검색 결과 {len(response['products'])}개 반환")
+        return response
+        
+    except Exception as e:
+        print(f"제품 검색 중 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"제품 검색 중 오류가 발생했습니다: {str(e)}"
+        )
+
 @app.post("/refresh")
 async def refresh_token():
     """토큰 갱신 API (임시 구현)"""

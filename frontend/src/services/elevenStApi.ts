@@ -41,7 +41,7 @@ export const elevenStApi = {
     try {
       console.log(`11번가 제품 검색 시작: keyword=${keyword}, page=${page}, pageSize=${pageSize}`);
       
-      // 스프링을 통해 Python API 호출
+      // 스프링을 통해 Python 11번가 API 호출
       const response = await apiClient.get<ElevenStSearchResponse>('/ai/11st/products', {
         params: { 
           keyword: keyword.trim(),

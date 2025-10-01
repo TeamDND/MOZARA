@@ -26,22 +26,6 @@ const ArticlePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile Header */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <Link
-            to={`/hair-encyclopedia/category/${article.category.id}`}
-            className="flex items-center text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            <span className="text-sm">{article.category.name}</span>
-          </Link>
-          <button className="flex items-center space-x-1 px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-            <Share2 className="w-4 h-4" />
-            <span className="text-xs font-medium">공유</span>
-          </button>
-        </div>
-      </div>
 
       {/* Main Content */}
       <div className="px-4 py-6">

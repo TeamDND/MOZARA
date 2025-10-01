@@ -4,7 +4,6 @@ import com.example.springboot.data.repository.DailyHabitRepository;
 import com.example.springboot.data.repository.UserHabitLogRepository;
 import com.example.springboot.data.dto.habit.DailyHabitDTO;
 import com.example.springboot.data.dto.habit.UserHabitLogDTO;
-import com.example.springboot.data.dto.seedling.SeedlingStatusDTO;
 import com.example.springboot.data.entity.DailyHabitEntity;
 import com.example.springboot.data.entity.UserEntity;
 import com.example.springboot.data.entity.UserHabitLogEntity;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -100,6 +98,21 @@ public class DailyHabitService {
         
         LocalDate today = LocalDate.now();
         List<UserHabitLogEntity> completedLogs = userHabitLogRepository.findByUserEntityIdForeignAndCompletionDate(user, today);
+        
+        return completedLogs.stream()
+                .map(log -> convertToDTO(log.getHabitIdForeign()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 사용자의 특정 날짜 완료한 습관 조회
+     */
+    public List<DailyHabitDTO> getCompletedHabitsByDate(Integer userId, String dateStr) {
+        UserEntity user = new UserEntity();
+        user.setId(userId);
+        
+        LocalDate date = LocalDate.parse(dateStr);
+        List<UserHabitLogEntity> completedLogs = userHabitLogRepository.findByUserEntityIdForeignAndCompletionDate(user, date);
         
         return completedLogs.stream()
                 .map(log -> convertToDTO(log.getHabitIdForeign()))
