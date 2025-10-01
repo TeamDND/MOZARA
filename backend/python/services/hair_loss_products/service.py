@@ -52,14 +52,81 @@ def get_product_image_url(product) -> str:
         return "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop&crop=center"
 
 
+# 단계별 검색 키워드 매핑 (여러 키워드로 다양한 제품 검색)
+STAGE_KEYWORDS = {
+    0: ["두피 샴푸", "두피 클렌저"],           # 예방 단계 - 두피 건강 중심
+    1: ["탈모 샴푸", "탈모 영양제"],           # 초기 탈모 - 예방 및 영양 공급
+    2: ["탈모 앰플", "탈모 토닉"],             # 진행 단계 - 적극적 관리
+    3: ["탈모 치료", "두피 앰플"]              # 전문 단계 - 전문 치료
+}
+
+
 def get_products_by_stage(stage: int) -> list:
-    if stage not in HAIR_LOSS_STAGE_PRODUCTS:
+    """
+    단계별 제품을 11번가 API에서 가져오거나, API 사용 불가 시 더미 데이터 반환
+    각 키워드당 3개씩 제품을 가져와 총 6개 제품 반환
+    """
+    if stage not in STAGE_DESCRIPTIONS:
         raise ValueError("지원하지 않는 탈모 단계입니다. 0-3단계 중 선택해주세요.")
-    return HAIR_LOSS_STAGE_PRODUCTS[stage]
+    
+    # 11번가 API 키 확인
+    eleven_st_api_key = os.getenv("ELEVEN_ST_API_KEY")
+    
+    if eleven_st_api_key:
+        # 11번가 API로 실제 제품 검색
+        try:
+            keywords = STAGE_KEYWORDS.get(stage, ["탈모 제품"])
+            all_products = []
+            
+            # 각 키워드로 제품 검색
+            for keyword in keywords:
+                print(f"단계 {stage}: 11번가에서 '{keyword}' 검색 중...")
+                
+                try:
+                    # 각 키워드당 3개씩 제품 가져오기
+                    result = search_11st_products(keyword, page=1, pageSize=3)
+                    
+                    if result.get("products"):
+                        print(f"'{keyword}': {len(result['products'])}개 제품 가져옴")
+                        all_products.extend(result["products"])
+                    else:
+                        print(f"'{keyword}': 제품을 찾지 못함")
+                        
+                except Exception as e:
+                    print(f"'{keyword}' 검색 실패: {e}")
+                    continue
+            
+            # 제품을 찾았으면 반환
+            if all_products:
+                # 중복 제거 (productId 기준)
+                seen_ids = set()
+                unique_products = []
+                for product in all_products:
+                    product_id = product.get("productId")
+                    if product_id and product_id not in seen_ids:
+                        seen_ids.add(product_id)
+                        unique_products.append(product)
+                
+                print(f"단계 {stage}: 중복 제거 후 {len(unique_products)}개 제품 반환")
+                return unique_products[:6]  # 최대 6개만 반환
+            else:
+                print(f"단계 {stage}: 11번가에서 제품을 찾지 못함, 더미 데이터 반환")
+                return HAIR_LOSS_STAGE_PRODUCTS.get(stage, [])
+                
+        except Exception as e:
+            print(f"단계 {stage} 11번가 API 호출 실패: {e}")
+            # API 실패 시 더미 데이터 반환
+            return HAIR_LOSS_STAGE_PRODUCTS.get(stage, [])
+    else:
+        print(f"11번가 API 키 없음, 더미 데이터 반환 (단계 {stage})")
+        # API 키가 없으면 기존 더미 데이터 반환
+        return HAIR_LOSS_STAGE_PRODUCTS.get(stage, [])
 
 
 def build_stage_response(stage: int) -> Dict[str, Any]:
+    """단계별 제품 응답 생성"""
     products = get_products_by_stage(stage)
+    
     return {
         "products": products,
         "totalCount": len(products),
@@ -142,8 +209,28 @@ def search_11st_products(keyword: str, page: int = 1, pageSize: int = 20) -> Dic
                 print(f"11번가 API 오류 응답: {response.text[:500]}")
                 response.raise_for_status()
             
-            # XML 응답 파싱 (UTF-8 인코딩 명시)
-            root = ET.fromstring(response.content.decode('utf-8'))
+            # XML 응답 파싱 (인코딩 자동 감지)
+            # 11번가 API는 EUC-KR 또는 CP949로 응답을 보낼 수 있음
+            try:
+                # 먼저 response.encoding 확인 후 사용
+                if response.encoding:
+                    xml_text = response.content.decode(response.encoding)
+                else:
+                    # 인코딩이 지정되지 않은 경우 여러 인코딩 시도
+                    try:
+                        xml_text = response.content.decode('utf-8')
+                    except UnicodeDecodeError:
+                        try:
+                            xml_text = response.content.decode('euc-kr')
+                        except UnicodeDecodeError:
+                            xml_text = response.content.decode('cp949')
+                
+                root = ET.fromstring(xml_text)
+            except Exception as decode_error:
+                print(f"XML 디코딩 실패: {str(decode_error)}")
+                # 최후의 수단으로 errors='ignore' 사용
+                xml_text = response.content.decode('utf-8', errors='ignore')
+                root = ET.fromstring(xml_text)
             
             # 총 결과 수 확인
             total_count_elem = root.find('.//TotalCount')
