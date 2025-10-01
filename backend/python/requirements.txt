@@ -29,4 +29,5 @@ matplotlib>=3.5.0
 seaborn>=0.11.0
 timm>=0.9.0
 beautifulsoup4
+sentence-transformers
 

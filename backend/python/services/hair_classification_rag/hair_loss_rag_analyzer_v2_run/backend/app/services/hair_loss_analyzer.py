@@ -6,7 +6,7 @@ import logging
 from datetime import datetime
 from .image_processor import ImageProcessor
 from .dual_pinecone_manager import DualPineconeManager
-from .gemini_analyzer import GeminiHairAnalyzer
+from .llm_analyzer import LLMHairAnalyzer
 from ..config import settings
 from ..per_class_config import get_ensemble_config
 from PIL import Image
@@ -17,7 +17,7 @@ class HairLossAnalyzer:
         try:
             self.image_processor = ImageProcessor()
             self.dual_manager = DualPineconeManager()
-            self.llm_analyzer = GeminiHairAnalyzer()
+            self.llm_analyzer = LLMHairAnalyzer()
             self.ensemble_config = get_ensemble_config()
             self.logger = logging.getLogger(__name__)
 
@@ -56,8 +56,8 @@ class HairLossAnalyzer:
                 'timestamp': datetime.now()
             }
 
-    async def analyze_image(self, image: Image.Image, filename: str, top_k: int = 10, use_llm: bool = True, viewpoint: str = None, use_roi: bool = True, survey_data: Dict = None) -> Dict:
-        """PIL Image 객체 분석 (ConvNeXt + ViT-S/16 앙상블, ROI 기반, Gemini LLM)"""
+    async def analyze_image(self, image: Image.Image, filename: str, top_k: int = 10, use_llm: bool = True, viewpoint: str = None, use_roi: bool = True) -> Dict:
+        """PIL Image 객체 분석 (ConvNeXt + ViT-S/16 앙상블, ROI 기반)"""
         try:
             # ROI 듀얼 임베딩 추출 (BiSeNet 세그멘테이션 적용)
             if use_roi:
@@ -87,11 +87,8 @@ class HairLossAnalyzer:
 
             # LLM 분석 수행 여부 결정
             if use_llm:
-                self.logger.info(f"Gemini LLM 분석 시작: {filename}")
-                if survey_data:
-                    self.logger.info(f"설문 데이터 포함: 나이={survey_data.get('age')}, 가족력={survey_data.get('familyHistory')}")
-
-                llm_result = await self.llm_analyzer.analyze_with_llm(image, ensemble_result, survey_data)
+                self.logger.info(f"LLM 분석 시작: {filename}")
+                llm_result = await self.llm_analyzer.analyze_with_llm(image, ensemble_result)
 
                 # 앙상블과 LLM 결과 결합
                 combined_result = self.llm_analyzer.combine_results(ensemble_result, llm_result)
@@ -101,29 +98,24 @@ class HairLossAnalyzer:
                         'success': True,
                         'predicted_stage': combined_result['predicted_stage'],
                         'confidence': round(combined_result['confidence'], 3),
-                        # Swin과 동일한 필드명 사용
-                        'title': combined_result.get('title', f"Stage {combined_result['predicted_stage']} 분석 완료"),
-                        'description': combined_result.get('description', combined_result['stage_description']),
-                        'advice': combined_result.get('advice', '전문의와 상담하시기 바랍니다.'),
-                        # 추가 정보
                         'stage_description': combined_result['stage_description'],
-                        'detailed_explanation': combined_result.get('detailed_explanation', combined_result.get('advice', '')),
                         'stage_scores': {
-                            str(k): round(v, 3) for k, v in ensemble_result.get('stage_scores', {}).items()
+                            str(k): round(v, 3) for k, v in combined_result.get('ensemble_results', {}).get('stage_scores', {}).items()
                         },
-                        'similar_images': ensemble_result.get('similar_images', []),
+                        'similar_images': combined_result.get('ensemble_results', {}).get('similar_images', []),
                         'analysis_details': {
                             'filename': filename,
                             'method': combined_result['method'],
-                            'llm_analysis': combined_result.get('analysis_details', {}).get('llm_analysis', {}),
+                            'llm_analysis': combined_result.get('analysis_details', {}),
                             'llm_reasoning': combined_result.get('analysis_details', {}).get('llm_reasoning', ''),
+                            'token_usage': combined_result.get('analysis_details', {}).get('token_usage', {}),
                             'embedding_dimension': f"ConvNeXt: {len(conv_embedding)}, ViT: {len(vit_embedding)}",
-                            'search_parameters': {'top_k': top_k, 'llm_enabled': True, 'ensemble': True, 'survey_included': survey_data is not None}
+                            'search_parameters': {'top_k': top_k, 'llm_enabled': True, 'ensemble': True}
                         },
-                        'ensemble_details': ensemble_result.get('ensemble_details', {}),
+                        'ensemble_comparison': combined_result.get('ensemble_results', {}),
                         'timestamp': datetime.now()
                     }
-                    self.logger.info(f"Gemini+앙상블 분석 완료: {result['title']} (신뢰도: {result['confidence']:.3f})")
+                    self.logger.info(f"LLM+앙상블 분석 완료: 단계 {result['predicted_stage']} (신뢰도: {result['confidence']:.3f})")
                 else:
                     # LLM 실패 시 앙상블 결과만 사용
                     use_llm = False

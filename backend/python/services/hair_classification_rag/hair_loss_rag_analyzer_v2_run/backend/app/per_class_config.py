@@ -4,9 +4,8 @@ Per-class 앙상블 설정 (ConvNeXt + ViT-S/16)
 """
 
 # Pinecone 인덱스 설정
-import os
-INDEX_CONV = os.getenv("PINECONE_INDEX_NAME_RAG_CONV", "hair-loss-rag-analyzer")  # ConvNeXt용 인덱스
-INDEX_VIT = os.getenv("PINECONE_INDEX_NAME_RAG_VIT", "hair-loss-vit-s16")        # ViT-S/16용 인덱스
+INDEX_CONV = "hair-loss-rag-analyzer"  # ConvNeXt용 인덱스
+INDEX_VIT = "hair-loss-vit-s16"        # ViT-S/16용 인덱스
 
 # 검색 파라미터
 TOP_K = 10

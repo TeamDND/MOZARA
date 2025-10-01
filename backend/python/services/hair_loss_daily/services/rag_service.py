@@ -24,7 +24,7 @@ class RAGService:
             if use_preprocessing:
                 print("🖼️ 사용자 이미지 전처리 중...")
                 processed_image_bytes = image_preprocessing_service.preprocess_for_medical_analysis(image_bytes)
-                print("✅ 이미지 전처리 완료 (빛 반사 처리 포함)")
+                print("[OK] 이미지 전처리 완료 (빛 반사 처리 포함)")
             else:
                 print("🖼️ 전처리 없이 원본 이미지 사용...")
                 processed_image_bytes = image_bytes
@@ -35,7 +35,7 @@ class RAGService:
             # CLIP 앙상블 특징 추출
             hybrid_features = self.clip_service.extract_hybrid_features(processed_image_bytes)
             query_vector = hybrid_features["combined"]
-            print(f"✅ CLIP 앙상블 특징 추출 완료: {len(query_vector)}차원")
+            print(f"[OK] CLIP 앙상블 특징 추출 완료: {len(query_vector)}차원")
             
             if query_vector is None or len(query_vector) == 0:
                 return {
@@ -99,8 +99,8 @@ class RAGService:
             
         except Exception as e:
             import traceback
-            print(f"❌ RAG 분석 오류: {str(e)}")
-            print(f"❌ 오류 상세: {traceback.format_exc()}")
+            print(f"[ERROR] RAG 분석 오류: {str(e)}")
+            print(f"[ERROR] 오류 상세: {traceback.format_exc()}")
             return {
                 "success": False,
                 "error": f"분석 중 오류가 발생했습니다: {str(e)}"
@@ -147,8 +147,8 @@ class RAGService:
             
         except Exception as e:
             import traceback
-            print(f"❌ 일관성 테스트 오류: {str(e)}")
-            print(f"❌ 오류 상세: {traceback.format_exc()}")
+            print(f"[ERROR] 일관성 테스트 오류: {str(e)}")
+            print(f"[ERROR] 오류 상세: {traceback.format_exc()}")
             return {
                 "success": False,
                 "error": f"테스트 중 오류가 발생했습니다: {str(e)}"
@@ -237,8 +237,8 @@ class RAGService:
             
         except Exception as e:
             import traceback
-            print(f"❌ 가중치 조정 앙상블 테스트 오류: {str(e)}")
-            print(f"❌ 오류 상세: {traceback.format_exc()}")
+            print(f"[ERROR] 가중치 조정 앙상블 테스트 오류: {str(e)}")
+            print(f"[ERROR] 오류 상세: {traceback.format_exc()}")
             return {
                 "success": False,
                 "error": f"테스트 중 오류가 발생했습니다: {str(e)}"
@@ -252,7 +252,7 @@ class RAGService:
             # CLIP 앙상블로 이미지 특징 추출 (원본 이미지 사용)
             hybrid_features = self.clip_service.extract_hybrid_features(image_bytes)
             query_vector = hybrid_features["combined"]
-            print(f"✅ CLIP 앙상블 특징 추출 완료: {len(query_vector)}차원")
+            print(f"[OK] CLIP 앙상블 특징 추출 완료: {len(query_vector)}차원")
             
             if query_vector is None or len(query_vector) == 0:
                 return {
@@ -284,8 +284,8 @@ class RAGService:
             
         except Exception as e:
             import traceback
-            print(f"❌ 전처리 없이 분석 오류: {str(e)}")
-            print(f"❌ 오류 상세: {traceback.format_exc()}")
+            print(f"[ERROR] 전처리 없이 분석 오류: {str(e)}")
+            print(f"[ERROR] 오류 상세: {traceback.format_exc()}")
             return {
                 "success": False,
                 "error": f"분석 중 오류가 발생했습니다: {str(e)}"
@@ -371,8 +371,8 @@ class RAGService:
             
         except Exception as e:
             import traceback
-            print(f"⚠️ 검색 결과 분석 오류: {str(e)}")
-            print(f"⚠️ 오류 상세: {traceback.format_exc()}")
+            print(f"[WARN] 검색 결과 분석 오류: {str(e)}")
+            print(f"[WARN] 오류 상세: {traceback.format_exc()}")
             return {"error": str(e)}
     
     def _get_most_common(self, items: List[str]) -> str:
@@ -632,8 +632,8 @@ class RAGService:
             
         except Exception as e:
             import traceback
-            print(f"❌ 카테고리 검색 오류: {str(e)}")
-            print(f"❌ 오류 상세: {traceback.format_exc()}")
+            print(f"[ERROR] 카테고리 검색 오류: {str(e)}")
+            print(f"[ERROR] 오류 상세: {traceback.format_exc()}")
             return {"success": False, "error": str(e)}
 
 # 전역 인스턴스
