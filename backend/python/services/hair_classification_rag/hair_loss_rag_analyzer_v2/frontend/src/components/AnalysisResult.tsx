@@ -11,13 +11,13 @@ const getLevelFromKey = (key: string): number => {
   return match ? parseInt(match[1], 10) : 0;
 };
 
-const getNorwoodDescription = (level: number | undefined): string => {
+const getSinclairDescription = (level: number | undefined): string => {
   if (level === undefined) return 'N/A';
-  if (level === 1) return "0단계(정상 단계)";
-  if (level >= 2 && level <= 3) return "1단계(초기 단계)";
-  if (level >= 4 && level <= 5) return "2단계(중기 단계)";
-  if (level >= 6 && level <= 7) return "3단계(심화 단계)";
-  return "0단계(정상 단계)";
+  if (level === 1) return "1단계(초기 단계)";
+  if (level === 2) return "2단계(중기 단계)";
+  if (level === 3) return "3단계(심화 단계)";
+  if (level === 4 || level === 5) return "4단계(최심화 단계)";
+  return "1단계(초기 단계)";
 };
 
 const AnalysisResult: React.FC<AnalysisResultProps> = ({ result }) => {
@@ -41,7 +41,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result }) => {
     : [];
 
   const llmReasoning = result.detailed_explanation || result.llm_analysis || "LLM 추론 정보가 없습니다.";
-  const norwoodDescription = getNorwoodDescription(result.predicted_stage);
+  const sinclairDescription = getSinclairDescription(result.predicted_stage);
 
   return (
     <div className="w-full max-w-2xl mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
@@ -49,7 +49,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result }) => {
       <div className="text-center bg-blue-50 p-4 rounded-lg mb-6">
         <div className="mb-4 pb-4 border-b border-blue-200">
             <p className="text-md text-gray-600">탈모 단계 스케일</p>
-            <p className="text-2xl font-bold text-blue-800">{norwoodDescription}</p>
+            <p className="text-2xl font-bold text-blue-800">{sinclairDescription}</p>
         </div>
 
         <p className="text-lg text-gray-600">예측 레벨</p>

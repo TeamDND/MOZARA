@@ -109,15 +109,19 @@ class DualPineconeManager:
             raise
 
     def dual_search(self, conv_embedding: np.ndarray, vit_embedding: np.ndarray,
-                   top_k: int = 10, viewpoint: str = None) -> Tuple[List[Dict], List[Dict]]:
-        """ConvNeXt와 ViT 임베딩으로 동시 검색"""
+                   top_k: int = 10, viewpoint: str = None, use_roi: bool = False) -> Tuple[List[Dict], List[Dict]]:
+        """ConvNeXt와 ViT 임베딩으로 동시 검색 (Full 또는 ROI)"""
         try:
             idx_conv, idx_vit = self.get_indices()
 
-            # 필터 구성 (test script처럼 viewpoint 필터 제거하여 RAG 성능 향상)
+            # 필터 구성
             search_filter = {
                 "gender": {"$eq": settings.DEFAULT_GENDER_FILTER}
             }
+
+            # ROI 임베딩 검색 시 embedding_type 필터 추가
+            if use_roi:
+                search_filter["embedding_type"] = {"$eq": "roi"}
 
             # NOTE: viewpoint 필터를 제거하여 test_dual_image_fusion.py와 동일한 방식으로 동작
             # 모든 각도의 이미지를 참조하는 RAG 방식으로 성능 향상
@@ -164,14 +168,14 @@ class DualPineconeManager:
         return processed_matches
 
     def predict_ensemble_stage(self, conv_embedding: np.ndarray, vit_embedding: np.ndarray,
-                             top_k: int = 10, viewpoint: str = None) -> Dict:
-        """앙상블 예측 수행"""
+                             top_k: int = 10, viewpoint: str = None, use_roi: bool = False) -> Dict:
+        """앙상블 예측 수행 (Full 또는 ROI)"""
         try:
             from .ensemble_manager import EnsembleManager
 
-            # 듀얼 검색 수행
+            # 듀얼 검색 수행 (use_roi 파라미터 전달)
             conv_matches, vit_matches = self.dual_search(
-                conv_embedding, vit_embedding, top_k, viewpoint
+                conv_embedding, vit_embedding, top_k, viewpoint, use_roi=use_roi
             )
 
             if not conv_matches and not vit_matches:
@@ -185,14 +189,15 @@ class DualPineconeManager:
 
             # 앙상블 매니저로 예측
             ensemble = EnsembleManager()
-            result = ensemble.predict_with_dual_search(conv_matches, vit_matches)
+            result = ensemble.predict_from_dual_results(conv_matches, vit_matches)
 
             return {
                 'predicted_stage': result['predicted_stage'],
                 'confidence': result['confidence'],
                 'stage_scores': result['stage_scores'],
                 'similar_images': result['similar_images'],
-                'ensemble_details': result.get('ensemble_details', {})
+                'ensemble_details': result.get('ensemble_details', {}),
+                'embedding_type': 'roi' if use_roi else 'full'
             }
 
         except Exception as e:
