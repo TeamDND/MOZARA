@@ -63,8 +63,8 @@ export const analyzeHairWithSwin = async (
     formData.append('top_image', topImageFile);
     formData.append('side_image', sideImageFile);
 
-    // 선택적 파라미터 추가
-    if (userId !== undefined) {
+    // 선택적 파라미터 추가 (로그인 여부 확인)
+    if (userId !== undefined && userId !== null) {
       formData.append('user_id', userId.toString());
     }
     if (imageUrl) {

@@ -15,8 +15,8 @@ interface UserInfo {
   gender: string;
   age: number;
   role: string;
-  recentHairLoss: boolean;
-  familyHistory: boolean;
+  recentHairLoss: string; // "있음", "없음", "정보 없음"
+  familyHistory: string; // "있음", "없음", "정보 없음"
 }
 
 interface UserInfoEditProps {
@@ -70,22 +70,22 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo }) => {
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700">최근 머리빠짐</label>
           <div className={`p-3 rounded-lg text-sm font-medium ${
-            userInfo.recentHairLoss 
+            userInfo.recentHairLoss === '있음'
               ? 'bg-red-50 text-red-800 border border-red-200' 
               : 'bg-gray-50 text-gray-800 border border-gray-200'
           }`}>
-            {userInfo.recentHairLoss ? '예' : '아니오'}
+            {userInfo.recentHairLoss}
           </div>
         </div>
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700">가족력</label>
           <div className={`p-3 rounded-lg text-sm font-medium ${
-            userInfo.familyHistory 
+            userInfo.familyHistory === '있음'
               ? 'bg-red-50 text-red-800 border border-red-200' 
               : 'bg-gray-50 text-gray-800 border border-gray-200'
           }`}>
-            {userInfo.familyHistory ? '예' : '아니오'}
+            {userInfo.familyHistory}
           </div>
         </div>
 

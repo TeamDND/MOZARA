@@ -30,7 +30,13 @@ const BottomNavigationBar: React.FC = () => {
           <div className="flex items-center justify-around pt-2 pb-2 px-4">
             {/* 분석 */}
             <button
-              onClick={() => navigate('/integrated-diagnosis')}
+              onClick={() => {
+                if (isLoggedIn) {
+                  navigate('/integrated-diagnosis')
+                } else {
+                  navigate('/login')
+                }
+              }}
               className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
               <Search className="h-5 w-5 mb-1 text-[#222222]" />
@@ -41,7 +47,13 @@ const BottomNavigationBar: React.FC = () => {
 
             {/* 기능 */}
             <button
-              onClick={() => navigate('/main-contents')}
+              onClick={() => {
+                if (isLoggedIn) {
+                  navigate('/main-contents')
+                } else {
+                  navigate('/login')
+                }
+              }}
               className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
               <Layers3 className="h-5 w-5 mb-1 text-[#222222]" />
@@ -66,7 +78,13 @@ const BottomNavigationBar: React.FC = () => {
 
             {/* 프로필 */}
             <button
-              onClick={() => navigate('/mypage')}
+              onClick={() => {
+                if (isLoggedIn) {
+                  navigate('/mypage')
+                } else {
+                  navigate('/login')
+                }
+              }}
               className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
               <User className="h-5 w-5 mb-1 text-[#222222]" />

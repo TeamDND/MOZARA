@@ -1,8 +1,8 @@
 package com.example.springboot.service.ai;
 
+import com.example.springboot.data.dao.AnalysisResultDAO;
 import com.example.springboot.data.entity.AnalysisResultEntity;
 import com.example.springboot.data.entity.UserEntity;
-import com.example.springboot.data.repository.AnalysisResultRepository;
 import com.example.springboot.data.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ public class SwinCheckService {
     private String pythonBaseUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final AnalysisResultRepository analysisResultRepository;
+    private final AnalysisResultDAO analysisResultDAO;
     private final UserRepository userRepository;
 
     /**
@@ -136,6 +136,12 @@ public class SwinCheckService {
                 advice = String.join("|", adviceList.stream().map(String::valueOf).toArray(String[]::new));
             }
 
+            // analysis_type 추출
+            String analysisType = (String) swinResult.get("analysis_type");
+            if (analysisType == null || analysisType.isEmpty()) {
+                analysisType = "swin_analysis";
+            }
+
             // AnalysisResultEntity 생성
             AnalysisResultEntity entity = new AnalysisResultEntity();
             entity.setInspectionDate(LocalDate.now());
@@ -143,10 +149,11 @@ public class SwinCheckService {
             entity.setAdvice(advice);
             entity.setGrade((Integer) swinResult.get("stage"));
             entity.setImageUrl(imageUrl != null ? imageUrl : "");
+            entity.setAnalysisType(analysisType);
             entity.setUserEntityIdForeign(user);
 
-            // 데이터베이스에 저장
-            AnalysisResultEntity savedEntity = analysisResultRepository.save(entity);
+            // AnalysisResultDAO를 통해 데이터베이스에 저장
+            AnalysisResultEntity savedEntity = analysisResultDAO.save(entity);
 
             log.info("Swin 분석 결과 저장 성공: ID {}", savedEntity.getId());
 
