@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -45,33 +46,56 @@ public class OAuth2Controller {
         log.info("Authentication 객체: {}", authentication);
         log.info("Authentication Principal: {}", authentication != null ? authentication.getPrincipal() : "null");
         
-        if (authentication != null && authentication.getPrincipal() instanceof CustomOAuth2UserService.CustomOAuth2User) {
-            CustomOAuth2UserService.CustomOAuth2User oauth2User = 
-                (CustomOAuth2UserService.CustomOAuth2User) authentication.getPrincipal();
+        if (authentication != null) {
+            String userEmail = null;
+            String userName = null;
             
-            // 실제 구글 사용자 정보 로그 출력
-            log.info("=== OAuth2 Success에서 실제 사용자 정보 확인 ===");
-            log.info("실제 Gmail: {}", oauth2User.getEmail());
-            log.info("실제 Google 이름: {}", oauth2User.getName());
-            log.info("실제 사용자 엔티티: {}", oauth2User.getUserEntity());
+            // CustomOAuth2User 처리
+            if (authentication.getPrincipal() instanceof CustomOAuth2UserService.CustomOAuth2User) {
+                CustomOAuth2UserService.CustomOAuth2User oauth2User = 
+                    (CustomOAuth2UserService.CustomOAuth2User) authentication.getPrincipal();
+                userEmail = oauth2User.getEmail();
+                userName = oauth2User.getName();
+                
+                log.info("=== CustomOAuth2User로 처리됨 ===");
+                log.info("실제 Gmail: {}", userEmail);
+                log.info("실제 Google 이름: {}", userName);
+            }
+            // DefaultOidcUser 처리 (Google OIDC)
+            else if (authentication.getPrincipal() instanceof OidcUser) {
+                OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
+                userEmail = oidcUser.getEmail();
+                userName = oidcUser.getFullName();
+                
+                log.info("=== DefaultOidcUser로 처리됨 ===");
+                log.info("실제 Gmail: {}", userEmail);
+                log.info("실제 Google 이름: {}", userName);
+                log.info("OIDC Attributes: {}", oidcUser.getAttributes());
+            }
             
-            // JWT 토큰 생성
-            log.info("JWT 토큰 생성 시작 - 실제 Gmail: {}", oauth2User.getEmail());
-            String accessToken = jwtUtil.createAccessToken(oauth2User.getEmail());
-            String refreshToken = jwtUtil.createRefreshToken(oauth2User.getEmail());
-            
-            log.info("JWT 토큰 생성 완료 - AccessToken: {}, RefreshToken: {}", 
-                    accessToken.substring(0, 20) + "...", refreshToken.substring(0, 20) + "...");
-            log.info("OAuth2 로그인 성공 - 사용자: {}, 토큰 생성 완료", oauth2User.getEmail());
-            
-            // 프론트엔드로 리다이렉트 (토큰을 쿼리 파라미터로 전달)
-            String redirectUrl = "https://hairfit.duckdns.org/oauth2/callback?access_token=" + accessToken + 
-                               "&refresh_token=" + refreshToken + "&success=true";
-            
-            log.info("프론트엔드로 리다이렉트: {}", redirectUrl);
-            log.info("OAuth2 설정 테스트 - GitHub Actions 트리거");
-            response.sendRedirect(redirectUrl);
-        } else {
+            if (userEmail != null) {
+                // JWT 토큰 생성
+                log.info("JWT 토큰 생성 시작 - 실제 Gmail: {}", userEmail);
+                String accessToken = jwtUtil.createAccessToken(userEmail);
+                String refreshToken = jwtUtil.createRefreshToken(userEmail);
+                
+                log.info("JWT 토큰 생성 완료 - AccessToken: {}, RefreshToken: {}", 
+                        accessToken.substring(0, 20) + "...", refreshToken.substring(0, 20) + "...");
+                log.info("OAuth2 로그인 성공 - 사용자: {}, 토큰 생성 완료", userEmail);
+                
+                // 프론트엔드로 리다이렉트 (토큰을 쿼리 파라미터로 전달)
+                String redirectUrl = "https://hairfit.duckdns.org/oauth2/callback?access_token=" + accessToken + 
+                                   "&refresh_token=" + refreshToken + "&success=true";
+                
+                log.info("프론트엔드로 리다이렉트: {}", redirectUrl);
+                log.info("OAuth2 설정 테스트 - GitHub Actions 트리거");
+                response.sendRedirect(redirectUrl);
+                return;
+            }
+        }
+        
+        // 인증 실패 처리
+        {
             log.error("=== OAuth2 인증 실패 ===");
             log.error("Authentication이 null이거나 CustomOAuth2User가 아님");
             log.error("Authentication: {}", authentication);
