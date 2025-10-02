@@ -16,7 +16,9 @@ import HairEncyclopediaMain from './pages/hair_contents/hairEncyclopedia/HairEnc
 import HairDiagnosis from './pages/check/HairDiagnosis';
 import HairQuiz from './pages/hair_contents/HairQuiz';
 import DailyCare from './pages/hair_solutions/DailyCare';
+import DCare from './pages/hair_solutions/D_care';
 import StoreFinder from './pages/StoreFinder';
+
 
 // new_fn_flow.md에 따른 새로운 컴포넌트들
 import { MainPage } from './pages/MainPage';
@@ -71,6 +73,7 @@ const App: React.FC = () => {
           <Route path="hair-quiz" element={<HairQuiz />} />
           <Route path="signup" element={<SignUp />} />
           <Route path="daily-care" element={<DailyCare />} />
+          <Route path="d-care" element={<DCare />} />
           <Route path="mypage" element={<MyPage />} />
           <Route path="my-report" element={<MyReportPage />} />
           <Route path="store-finder" element={<StoreFinder />} />
