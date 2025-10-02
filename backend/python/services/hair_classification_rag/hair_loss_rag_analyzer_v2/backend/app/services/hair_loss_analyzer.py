@@ -5,109 +5,32 @@ from typing import Dict, List, Any, Optional, Tuple
 import logging
 from datetime import datetime
 from .image_processor import ImageProcessor
-from .pinecone_manager import PineconeManager
 from .dual_pinecone_manager import DualPineconeManager
-from .llm_analyzer import LLMHairAnalyzer
+from .gemini_analyzer import GeminiHairAnalyzer
 from ..config import settings
 from ..per_class_config import get_ensemble_config
 from PIL import Image
 
 class HairLossAnalyzer:
     def __init__(self):
-        """탈모 RAG 분석기 초기화 (ConvNeXt + ViT-S/16 듀얼 이미지 Late Fusion 앙상블)"""
+        """여성형 탈모 RAG 분석기 초기화 (ROI BiSeNet + ConvNeXt + ViT 듀얼 앙상블)"""
         try:
             self.image_processor = ImageProcessor()
-            self.vector_manager = PineconeManager()  # 하위 호환성
-            self.dual_manager = DualPineconeManager()  # 앙상블용
-            self.llm_analyzer = LLMHairAnalyzer()
+            self.dual_manager = DualPineconeManager()
+            self.llm_analyzer = GeminiHairAnalyzer()
             self.ensemble_config = get_ensemble_config()
             self.logger = logging.getLogger(__name__)
 
-            # 앙상블 파라미터
-            self.NUM_CLASSES = 7
+            # Sinclair Scale 파라미터 (Stage 1-5)
+            self.NUM_CLASSES = 5
             self.CLASS_OFFSET = 1
             self.TOP_K = self.ensemble_config["top_k"]
-            self.T_CONV = self.ensemble_config["Tconv"]
-            self.T_VIT = self.ensemble_config["Tvit"]
-            self.USE_OVERRIDE = self.ensemble_config["override"]
 
-            self.logger.info("HairLossAnalyzer 초기화 완료 (듀얼 이미지 Late Fusion 앙상블)")
+            self.logger.info("HairLossAnalyzer 초기화 완료 (여성형 탈모, ROI BiSeNet + 듀얼 앙상블)")
         except Exception as e:
             self.logger.error(f"HairLossAnalyzer 초기화 실패: {e}")
             raise
 
-    def map_to_norwood_stage(self, level: int) -> Tuple[int, str]:
-        """7단계 레벨을 4단계 노우드 스케일로 변환"""
-        if level == 1:
-            return 0, "0단계(정상 단계)"
-        elif 2 <= level <= 3:
-            return 1, "1단계(초기 단계)"
-        elif 4 <= level <= 5:
-            return 2, "2단계(중기 단계)"
-        elif 6 <= level <= 7:
-            return 3, "3단계(심화 단계)"
-        else:
-            return 0, "0단계(정상 단계)"
-
-    async def setup_database(self, recreate_index: bool = False) -> Dict:
-        """데이터베이스 설정 및 임베딩 업로드"""
-        try:
-            self.logger.info("데이터베이스 설정 시작...")
-
-            # 데이터셋 경로 확인
-            if not os.path.exists(settings.DATASET_PATH):
-                return {
-                    'success': False,
-                    'error': f'데이터셋 경로를 찾을 수 없습니다: {settings.DATASET_PATH}',
-                    'timestamp': datetime.now()
-                }
-
-            # 인덱스 생성
-            index_created = self.vector_manager.create_index(delete_if_exists=recreate_index)
-            if not index_created:
-                return {
-                    'success': False,
-                    'error': 'FAISS 인덱스 생성 실패',
-                    'timestamp': datetime.now()
-                }
-
-            # 데이터셋 처리
-            self.logger.info("이미지 임베딩 생성 중...")
-            embeddings_data = self.image_processor.process_dataset(settings.DATASET_PATH)
-
-            if len(embeddings_data['embeddings']) == 0:
-                return {
-                    'success': False,
-                    'error': '처리된 이미지가 없습니다. 데이터셋 경로를 확인하세요.',
-                    'timestamp': datetime.now()
-                }
-
-            # FAISS에 업로드
-            self.logger.info("FAISS에 임베딩 업로드 중...")
-            embeddings_data['recreate'] = recreate_index
-            upload_success = self.vector_manager.upload_embeddings(embeddings_data)
-
-            if not upload_success:
-                return {
-                    'success': False,
-                    'error': 'FAISS 임베딩 업로드 실패',
-                    'timestamp': datetime.now()
-                }
-
-            return {
-                'success': True,
-                'message': '데이터베이스 설정 완료',
-                'total_embeddings': len(embeddings_data['embeddings']),
-                'timestamp': datetime.now()
-            }
-
-        except Exception as e:
-            self.logger.error(f"데이터베이스 설정 실패: {e}")
-            return {
-                'success': False,
-                'error': str(e),
-                'timestamp': datetime.now()
-            }
 
     async def analyze_image_from_base64(self, base64_data: str, filename: str, top_k: int = 10, use_llm: bool = True, viewpoint: str = None) -> Dict:
         """Base64 이미지 데이터 분석"""
@@ -133,11 +56,15 @@ class HairLossAnalyzer:
                 'timestamp': datetime.now()
             }
 
-    async def analyze_image(self, image: Image.Image, filename: str, top_k: int = 10, use_llm: bool = True, viewpoint: str = None) -> Dict:
-        """PIL Image 객체 분석 (ConvNeXt + ViT-S/16 앙상블)"""
+    async def analyze_image(self, image: Image.Image, filename: str, top_k: int = 10, use_llm: bool = True, viewpoint: str = None, use_roi: bool = True, survey_data: Dict = None) -> Dict:
+        """PIL Image 객체 분석 (ConvNeXt + ViT-S/16 앙상블, ROI 기반, Gemini LLM)"""
         try:
-            # 듀얼 임베딩 추출
-            conv_embedding, vit_embedding = self.image_processor.extract_dual_embeddings(image)
+            # ROI 듀얼 임베딩 추출 (BiSeNet 세그멘테이션 적용)
+            if use_roi:
+                conv_embedding, vit_embedding = self.image_processor.extract_roi_dual_embeddings(image)
+            else:
+                # Full 임베딩 (하위 호환성)
+                conv_embedding, vit_embedding = self.image_processor.extract_dual_embeddings(image)
 
             if conv_embedding is None or vit_embedding is None:
                 return {
@@ -146,9 +73,9 @@ class HairLossAnalyzer:
                     'timestamp': datetime.now()
                 }
 
-            # 앙상블 예측 수행
+            # 앙상블 예측 수행 (ROI 임베딩으로 검색)
             ensemble_result = self.dual_manager.predict_ensemble_stage(
-                conv_embedding, vit_embedding, top_k, viewpoint
+                conv_embedding, vit_embedding, top_k, viewpoint, use_roi=use_roi
             )
 
             if ensemble_result['predicted_stage'] is None:
@@ -160,8 +87,11 @@ class HairLossAnalyzer:
 
             # LLM 분석 수행 여부 결정
             if use_llm:
-                self.logger.info(f"LLM 분석 시작: {filename}")
-                llm_result = await self.llm_analyzer.analyze_with_llm(image, ensemble_result)
+                self.logger.info(f"Gemini LLM 분석 시작: {filename}")
+                if survey_data:
+                    self.logger.info(f"설문 데이터 포함: 나이={survey_data.get('age')}, 가족력={survey_data.get('familyHistory')}")
+
+                llm_result = await self.llm_analyzer.analyze_with_llm(image, ensemble_result, survey_data)
 
                 # 앙상블과 LLM 결과 결합
                 combined_result = self.llm_analyzer.combine_results(ensemble_result, llm_result)
@@ -171,24 +101,29 @@ class HairLossAnalyzer:
                         'success': True,
                         'predicted_stage': combined_result['predicted_stage'],
                         'confidence': round(combined_result['confidence'], 3),
+                        # Swin과 동일한 필드명 사용
+                        'title': combined_result.get('title', f"Stage {combined_result['predicted_stage']} 분석 완료"),
+                        'description': combined_result.get('description', combined_result['stage_description']),
+                        'advice': combined_result.get('advice', '전문의와 상담하시기 바랍니다.'),
+                        # 추가 정보
                         'stage_description': combined_result['stage_description'],
+                        'detailed_explanation': combined_result.get('detailed_explanation', combined_result.get('advice', '')),
                         'stage_scores': {
-                            str(k): round(v, 3) for k, v in combined_result.get('ensemble_results', {}).get('stage_scores', {}).items()
+                            str(k): round(v, 3) for k, v in ensemble_result.get('stage_scores', {}).items()
                         },
-                        'similar_images': combined_result.get('ensemble_results', {}).get('similar_images', []),
+                        'similar_images': ensemble_result.get('similar_images', []),
                         'analysis_details': {
                             'filename': filename,
                             'method': combined_result['method'],
-                            'llm_analysis': combined_result.get('analysis_details', {}),
+                            'llm_analysis': combined_result.get('analysis_details', {}).get('llm_analysis', {}),
                             'llm_reasoning': combined_result.get('analysis_details', {}).get('llm_reasoning', ''),
-                            'token_usage': combined_result.get('analysis_details', {}).get('token_usage', {}),
                             'embedding_dimension': f"ConvNeXt: {len(conv_embedding)}, ViT: {len(vit_embedding)}",
-                            'search_parameters': {'top_k': top_k, 'llm_enabled': True, 'ensemble': True}
+                            'search_parameters': {'top_k': top_k, 'llm_enabled': True, 'ensemble': True, 'survey_included': survey_data is not None}
                         },
-                        'ensemble_comparison': combined_result.get('ensemble_results', {}),
+                        'ensemble_details': ensemble_result.get('ensemble_details', {}),
                         'timestamp': datetime.now()
                     }
-                    self.logger.info(f"LLM+앙상블 분석 완료: 단계 {result['predicted_stage']} (신뢰도: {result['confidence']:.3f})")
+                    self.logger.info(f"Gemini+앙상블 분석 완료: {result['title']} (신뢰도: {result['confidence']:.3f})")
                 else:
                     # LLM 실패 시 앙상블 결과만 사용
                     use_llm = False
@@ -269,96 +204,6 @@ class HairLossAnalyzer:
                 'timestamp': datetime.now()
             }
 
-    def detect_viewpoint_from_filename(self, filename: str) -> str:
-        """파일명에서 뷰포인트 추정"""
-        filename_lower = filename.lower()
-        # 하이픈 패턴 우선 확인
-        if '-left' in filename_lower or '_left_' in filename_lower:
-            return 'left'
-        elif '-right' in filename_lower or '_right_' in filename_lower:
-            return 'right'
-        elif '-top' in filename_lower or 'top-down' in filename_lower or '_t_' in filename_lower:
-            return 'top-down'
-        elif '-front' in filename_lower or '_front_' in filename_lower:
-            return 'front'
-        elif '-back' in filename_lower or '_back_' in filename_lower:
-            return 'back'
-        # 기존 일반 패턴 (하이픈 없는 경우)
-        elif 'left' in filename_lower or '_l_' in filename_lower:
-            return 'left'
-        elif 'right' in filename_lower or '_r_' in filename_lower:
-            return 'right'
-        elif 'top' in filename_lower or 'down' in filename_lower:
-            return 'top-down'
-        elif 'front' in filename_lower or '_f_' in filename_lower:
-            return 'front'
-        elif 'back' in filename_lower or '_b_' in filename_lower:
-            return 'back'
-        else:
-            return 'unknown'
-
-    def knn_to_probs(self, matches: List[Dict], T: float = 0.20) -> np.ndarray:
-        """KNN 결과를 확률분포로 변환 (테스터와 동일한 로직)"""
-        if not matches:
-            return np.zeros(self.NUM_CLASSES, dtype=float)
-
-        sims = np.array([m["score"] for m in matches], float)
-        w = np.exp(sims / T)
-        w = w / (w.sum() + 1e-12)
-
-        probs = np.zeros(self.NUM_CLASSES, float)
-        for wi, m in zip(w, matches):
-            md = m.get("metadata", {})
-            # stage 키 우선, 없으면 level/label 추정
-            if "stage" in md:
-                st = int(md["stage"])  # 1..7
-            else:
-                st = None
-                for k in ("level", "class", "label"):
-                    v = md.get(k)
-                    if isinstance(v, str):
-                        mm = re.search(r"(\d+)", v)
-                        if mm:
-                            st = int(mm.group(1))
-                            break
-                if st is None:
-                    src = m.get("id") or ""
-                    mm = re.search(r"(\d+)", str(src))
-                    st = int(mm.group(1)) if mm else 0
-
-            if 1 <= st <= 7:  # Level 1-7
-                probs[st-self.CLASS_OFFSET] += wi
-
-        s = probs.sum()
-        return probs / s if s > 0 else probs
-
-    def apply_ensemble(self, p_conv: np.ndarray, p_vit: np.ndarray) -> Tuple[int, np.ndarray]:
-        """앙상블 적용 (테스터와 동일한 로직)"""
-        # Level 1-7에 해당하는 가중치 사용
-        w_conv = np.array(self.ensemble_config["weights"]["conv"], float)
-        w_vit = np.array(self.ensemble_config["weights"]["vit"], float)
-        P_ens = w_conv * p_conv + w_vit * p_vit
-
-        if self.USE_OVERRIDE:
-            strong_c = np.array(self.ensemble_config["strong"]["conv"], int)
-            strong_v = np.array(self.ensemble_config["strong"]["vit"], int)
-            tau_c = np.array(self.ensemble_config["tau"]["conv"], float)
-            tau_v = np.array(self.ensemble_config["tau"]["vit"], float)
-
-            for c in range(self.NUM_CLASSES):
-                if strong_c[c] and p_conv[c] >= tau_c[c] and tau_c[c] > 0:
-                    P_ens[c] = p_conv[c]
-                if strong_v[c] and p_vit[c] >= tau_v[c] and tau_v[c] > 0:
-                    P_ens[c] = p_vit[c]
-
-        s = P_ens.sum()
-        if s > 0:
-            P_ens = P_ens / s
-        pred = int(np.argmax(P_ens)) + self.CLASS_OFFSET  # level 1-7 indexing
-        return pred, P_ens
-
-
-
     def get_health_status(self) -> Dict:
         """시스템 상태 확인"""
         try:
@@ -400,62 +245,4 @@ class HairLossAnalyzer:
                 'timestamp': datetime.now()
             }
 
-    async def add_data_from_folder(self, folder_path: str, recreate_index: bool = False) -> Dict:
-        """지정된 폴더 경로에서 데이터를 처리하고 Pinecone에 추가합니다."""
-        try:
-            self.logger.info(f"Starting data addition from folder: {folder_path}")
-
-            if not os.path.isdir(folder_path):
-                return {
-                    'success': False,
-                    'error': f'The provided path is not a valid directory: {folder_path}',
-                    'timestamp': datetime.now()
-                }
-
-            # 필요시 인덱스 생성 또는 재생성
-            index_created = self.vector_manager.create_index(delete_if_exists=recreate_index)
-            if not index_created:
-                return {
-                    'success': False,
-                    'error': 'Failed to create or verify FAISS index',
-                    'timestamp': datetime.now()
-                }
-
-            # 동적으로 폴더 처리
-            self.logger.info("Generating embeddings from the folder...")
-            embeddings_data = self.image_processor.process_folder_dynamically(folder_path)
-
-            if not embeddings_data or not embeddings_data['embeddings']:
-                return {
-                    'success': False,
-                    'error': 'No images were processed. Check the folder structure and content.',
-                    'timestamp': datetime.now()
-                }
-
-            # FAISS에 업로드
-            self.logger.info("Uploading embeddings to FAISS...")
-            embeddings_data['recreate'] = recreate_index
-            upload_success = self.vector_manager.upload_embeddings(embeddings_data)
-
-            if not upload_success:
-                return {
-                    'success': False,
-                    'error': 'Failed to upload embeddings to FAISS',
-                    'timestamp': datetime.now()
-                }
-
-            return {
-                'success': True,
-                'message': f"Successfully added data from {folder_path}",
-                'total_embeddings': len(embeddings_data['embeddings']),
-                'timestamp': datetime.now()
-            }
-
-        except Exception as e:
-            self.logger.error(f"Failed to add data from folder: {e}")
-            return {
-                'success': False,
-                'error': str(e),
-                'timestamp': datetime.now()
-            }
 

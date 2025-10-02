@@ -23,6 +23,7 @@ interface UserInfo {
   role: string;
   recentHairLoss: boolean; // true/false
   familyHistory: boolean; // true/false
+  stress?: string; // 스트레스 수준 (low, medium, high)
 }
 
 interface UserInfoEditProps {
@@ -48,6 +49,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
   const [age, setAge] = useState<string>(""); // string으로 변경하여 빈 값 허용
   const [recentHairLoss, setRecentHairLoss] = useState(false);
   const [familyHistory, setFamilyHistory] = useState(false);
+  const [stress, setStress] = useState<string>(""); // 스트레스 수준 추가
 
   // 비밀번호 변경 상태
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -72,6 +74,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
       setAge(userInfo.age ? String(userInfo.age) : "");
       setRecentHairLoss(userInfo.recentHairLoss || false);
       setFamilyHistory(userInfo.familyHistory || false);
+      setStress(userInfo.stress || "");
     }
   }, [userInfo]);
 
@@ -123,7 +126,8 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
     }
 
     if (userInfo.gender === gender && userInfo.age === ageNumber &&
-        userInfo.recentHairLoss === recentHairLoss && userInfo.familyHistory === familyHistory) {
+        userInfo.recentHairLoss === recentHairLoss && userInfo.familyHistory === familyHistory &&
+        userInfo.stress === stress) {
       alert("변경된 내용이 없습니다.");
       return;
     }
@@ -134,7 +138,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
         age: ageNumber,
         isLoss: recentHairLoss,
         familyHistory,
-        stress: null // 필요시 추가
+        stress: stress || null
       });
 
       if (res?.data) {
@@ -384,6 +388,45 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
                 }`}
               >
                 아니오
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">스트레스 수준</label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                onClick={() => setStress("high")}
+                className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
+                  stress === "high"
+                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
+                }`}
+              >
+                높음
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setStress("medium")}
+                className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
+                  stress === "medium"
+                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
+                }`}
+              >
+                보통
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setStress("low")}
+                className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
+                  stress === "low"
+                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
+                }`}
+              >
+                낮음
               </Button>
             </div>
           </div>

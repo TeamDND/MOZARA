@@ -89,11 +89,13 @@ export default function MyPage() {
     age: number
     familyHistory: boolean | null
     isLoss: boolean | null
+    stress: string | null
   }>({
     gender: '',
     age: 0,
     familyHistory: null,
-    isLoss: null
+    isLoss: null,
+    stress: null
   })
 
   // UserInfoEdit 컴포넌트 강제 리렌더링을 위한 key
@@ -114,7 +116,8 @@ export default function MyPage() {
         gender: response.data.gender || '',
         age: response.data.age || 0,
         familyHistory: response.data.familyHistory,
-        isLoss: response.data.isLoss
+        isLoss: response.data.isLoss,
+        stress: response.data.stress || null
       })
 
       // 강제로 컴포넌트 리렌더링을 위해 key 변경
@@ -215,7 +218,8 @@ export default function MyPage() {
           gender: response.data.gender || '',
           age: response.data.age || 0,
           familyHistory: response.data.familyHistory,
-          isLoss: response.data.isLoss
+          isLoss: response.data.isLoss,
+          stress: response.data.stress || null
         })
       } catch (error: any) {
         console.error('사용자 추가 정보 조회 실패:', error);
@@ -359,7 +363,8 @@ export default function MyPage() {
     age: userAdditionalInfo.age || 0, // API에서 조회한 나이 사용
     role: user.role || "일반 사용자",
     recentHairLoss: userAdditionalInfo.isLoss ?? false, // boolean 값 그대로 전달
-    familyHistory: userAdditionalInfo.familyHistory ?? false // boolean 값 그대로 전달
+    familyHistory: userAdditionalInfo.familyHistory ?? false, // boolean 값 그대로 전달
+    stress: userAdditionalInfo.stress || undefined // 스트레스 수준
   }
 
   return (
