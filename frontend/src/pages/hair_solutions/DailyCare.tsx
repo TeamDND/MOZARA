@@ -47,7 +47,7 @@ const DailyCare: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { seedlingId, seedlingName, currentPoint, loading: seedlingLoading, error: seedlingError } = useSelector((state: RootState) => state.seedling);
-  const { username, userId } = useSelector((state: RootState) => state.user);
+  const { username, userId, createdAt } = useSelector((state: RootState) => state.user);
   
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -397,37 +397,25 @@ const DailyCare: React.FC = () => {
 
   // 연속 케어 일수 계산 및 최초 분석 상태 확인 (DB 기반)
   React.useEffect(() => {
-    const streakKey = 'dailyCareStreak';
-    
-    // 연속 케어 일수 계산
-    const stored = localStorage.getItem(streakKey);
-    const today = new Date();
-    const yyyyMmDd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-
-    let count = 1;
-    let lastDateStr = yyyyMmDd(today);
-
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as { count: number; lastDate: string };
-        const last = new Date(parsed.lastDate);
-        const diffMs = today.setHours(0,0,0,0) - new Date(last.setHours(0,0,0,0)).getTime();
-        const diffDays = Math.floor(diffMs / (1000*60*60*24));
-
-        if (diffDays === 0) {
-          count = parsed.count; // 같은 날 재방문
-        } else if (diffDays === 1) {
-          count = parsed.count + 1; // 어제 이후 연속
-        } else {
-          count = 1; // 연속 끊김
-        }
-      } catch {
-        count = 1;
+    // createdAt 기반 연속 케어 일수 계산
+    const calculateStreakFromCreatedAt = () => {
+      if (!createdAt) {
+        return 1; // createdAt이 없으면 기본값 1
       }
-    }
 
-    setStreak(count);
-    localStorage.setItem(streakKey, JSON.stringify({ count, lastDate: lastDateStr }));
+      const today = new Date();
+      const joinDate = new Date(createdAt);
+      
+      // 가입일부터 오늘까지의 일수 계산
+      const diffMs = today.setHours(0,0,0,0) - joinDate.setHours(0,0,0,0);
+      const diffDays = Math.floor(diffMs / (1000*60*60*24));
+      
+      // 최소 1일, 최대 365일로 제한
+      return Math.max(1, Math.min(365, diffDays + 1));
+    };
+
+    const streakCount = calculateStreakFromCreatedAt();
+    setStreak(streakCount);
 
     // DB에서 최초 분석 완료 상태 확인
     const checkInitialAnalysis = async () => {
@@ -473,7 +461,7 @@ const DailyCare: React.FC = () => {
 
     // 새싹 정보 로드
     loadSeedlingInfo();
-  }, [loadSeedlingInfo, userId]);
+  }, [loadSeedlingInfo, userId, createdAt]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -526,59 +514,67 @@ const DailyCare: React.FC = () => {
                   onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
                   className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 hover:file:bg-gray-200"
                 />
-                <button
-                  onClick={async () => {
-                    if (!selectedImage) return alert('두피 사진을 업로드해주세요.');
-                    setIsAnalyzing(true);
-                    setProducts(null);
-                    try {
-                      // 스프링부트 API 호출
-                      const formData = new FormData();
-                      formData.append('image', selectedImage);
-                      formData.append('top_k', '10');
-                      formData.append('use_preprocessing', 'true');
-                      
-                      // 로그인한 사용자의 user_id 추가
-                      if (userId) {
-                        formData.append('user_id', userId.toString());
-                        console.log('Daily 분석에 user_id 추가:', userId);
-                      } else {
-                        console.log('로그인하지 않은 사용자 - user_id 없음');
+                <div className="flex gap-2">
+                  <button
+                    onClick={async () => {
+                      if (!selectedImage) return alert('두피 사진을 업로드해주세요.');
+                      setIsAnalyzing(true);
+                      setProducts(null);
+                      try {
+                        // 스프링부트 API 호출
+                        const formData = new FormData();
+                        formData.append('image', selectedImage);
+                        formData.append('top_k', '10');
+                        formData.append('use_preprocessing', 'true');
+                        
+                        // 로그인한 사용자의 user_id 추가
+                        if (userId) {
+                          formData.append('user_id', userId.toString());
+                          console.log('Daily 분석에 user_id 추가:', userId);
+                        } else {
+                          console.log('로그인하지 않은 사용자 - user_id 없음');
+                        }
+                        
+                        const response = await apiClient.post('/ai/hair-loss-daily/analyze', formData, {
+                          headers: { 'Content-Type': 'multipart/form-data' },
+                        });
+                        
+                        const result: HairAnalysisResponse = response.data;
+                        setAnalysis(result);
+                        updateDashboardFromAnalysis(result);
+                        
+                        // 사진 분석 완료 후 lastPhotoDate 업데이트
+                        setUserProgress(prev => ({
+                          ...prev,
+                          lastPhotoDate: new Date().toISOString()
+                        }));
+                        
+                        // 심각도에 따른 제품 추천
+                        const severityLevel = result.analysis ? parseInt(result.analysis.primary_severity.split('.')[0]) || 0 : 0;
+                        const stage = Math.min(3, Math.max(0, severityLevel));
+                        const prodRes = await hairProductApi.getProductsByStage(stage);
+                        setProducts(prodRes.products.slice(0, 6));
+                        
+                        // 케어 팁은 updateDashboardFromAnalysis에서 설정됨
+                      } catch (e) {
+                        console.error(e);
+                        alert('분석 또는 추천 호출 중 오류가 발생했습니다.');
+                      } finally {
+                        setIsAnalyzing(false);
                       }
-                      
-                      const response = await apiClient.post('/ai/hair-loss-daily/analyze', formData, {
-                        headers: { 'Content-Type': 'multipart/form-data' },
-                      });
-                      
-                      const result: HairAnalysisResponse = response.data;
-                      setAnalysis(result);
-                      updateDashboardFromAnalysis(result);
-                      
-                      // 사진 분석 완료 후 lastPhotoDate 업데이트
-                      setUserProgress(prev => ({
-                        ...prev,
-                        lastPhotoDate: new Date().toISOString()
-                      }));
-                      
-                      // 심각도에 따른 제품 추천
-                      const severityLevel = result.analysis ? parseInt(result.analysis.primary_severity.split('.')[0]) || 0 : 0;
-                      const stage = Math.min(3, Math.max(0, severityLevel));
-                      const prodRes = await hairProductApi.getProductsByStage(stage);
-                      setProducts(prodRes.products.slice(0, 6));
-                      
-                      // 케어 팁은 updateDashboardFromAnalysis에서 설정됨
-                    } catch (e) {
-                      console.error(e);
-                      alert('분석 또는 추천 호출 중 오류가 발생했습니다.');
-                    } finally {
-                      setIsAnalyzing(false);
-                    }
-                  }}
-                  disabled={isAnalyzing}
-                  className="w-full h-12 px-4 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] disabled:opacity-50 font-semibold active:scale-[0.98] transition-all"
-                >
-                  {isAnalyzing ? '분석 중...' : '사진으로 AI 분석'}
-                </button>
+                    }}
+                    disabled={isAnalyzing}
+                    className="flex-1 h-12 px-4 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] disabled:opacity-50 font-semibold active:scale-[0.98] transition-all"
+                  >
+                    {isAnalyzing ? '분석 중...' : '사진으로 AI 분석'}
+                  </button>
+                  <button
+                    onClick={() => navigate('/daily-care-detail')}
+                    className="flex-1 h-12 px-4 bg-white border-2 border-[#1F0101] text-[#1F0101] rounded-xl hover:bg-gray-50 font-semibold active:scale-[0.98] transition-all"
+                  >
+                    데일리케어
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -668,7 +664,7 @@ const DailyCare: React.FC = () => {
               
               {/* 지도 영역 */}
               {currentLocation ? (
-                <div className="relative bg-gray-100 rounded-lg overflow-hidden">
+                <div className="relative bg-gray-100 rounded-lg overflow-hidden" style={{ zIndex: 1 }}>
                   <MapPreview
                     latitude={currentLocation.latitude}
                     longitude={currentLocation.longitude}
