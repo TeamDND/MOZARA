@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import apiClient from '../../services/apiClient';
+import React, { useState } from 'react';
+import pythonClient from '../../services/pythonClient';
 
 interface QuizQuestion {
   question: string;
@@ -19,7 +19,9 @@ const HairQuiz: React.FC = () => {
 
   const generateQuizWithGemini = async (): Promise<QuizQuestion[]> => {
     try {
-      const response = await apiClient.post('/ai/hair-quiz/generate');
+      const response = await pythonClient.post('/hair-quiz/generate');
+      console.log('🔥 API 응답 전체:', response.data);
+      console.log('🔥 첫 번째 퀴즈:', response.data.items[0]);
       return response.data.items as QuizQuestion[];
     } catch (error: any) {
       console.error('퀴즈 생성 API 호출 실패:', error);
@@ -76,9 +78,9 @@ const HairQuiz: React.FC = () => {
   };
 
   const getResultMessage = () => {
-    if (score >= 18) {
+    if (score >= 10) {
       return "완벽해요! 탈모 박사로 인정합니다.";
-    } else if (score >= 12) {
+    } else if (score >= 7) {
       return "좋아요! 탈모에 대해 많이 알고 계시네요.";
     } else {
       return "아쉬워요. 매일 새로운 퀴즈를 통해 더 많은 정보를 알아가세요!";
@@ -125,8 +127,34 @@ const HairQuiz: React.FC = () => {
                   <p className="text-sm text-gray-600 mb-4">
                     총 {quizData.length}문제 중 {score}문제를 맞혔습니다!
                   </p>
-                  <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
                     <p className="text-sm text-gray-700 font-medium">{getResultMessage()}</p>
+                  </div>
+
+                  {/* 결과별 상세 설명 */}
+                  <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-left">
+                    <h3 className="text-sm font-bold text-blue-900 mb-2">📋 나의 결과 분석</h3>
+                    <div className="text-xs text-gray-700 space-y-1">
+                      {score >= 10 ? (
+                        <>
+                          <p>• 탈모에 대한 이해도가 매우 높습니다.</p>
+                          <p>• 올바른 정보로 탈모를 관리하고 계시네요.</p>
+                          <p>• 앞으로도 꾸준한 관심 부탁드립니다!</p>
+                        </>
+                      ) : score >= 7 ? (
+                        <>
+                          <p>• 탈모에 대한 기본 지식을 잘 갖추고 계십니다.</p>
+                          <p>• 조금만 더 공부하면 전문가 수준!</p>
+                          <p>• 틀린 문제를 복습해보세요.</p>
+                        </>
+                      ) : (
+                        <>
+                          <p>• 탈모에 대해 더 알아갈 기회입니다.</p>
+                          <p>• 잘못된 정보로 탈모가 악화될 수 있어요.</p>
+                          <p>• 매일 퀴즈로 올바른 지식을 쌓아가세요!</p>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -248,7 +276,21 @@ const HairQuiz: React.FC = () => {
                   <h3 className={`text-sm font-bold mb-2 ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
                     {isCorrect ? '정답입니다!' : '오답입니다!'}
                   </h3>
-                  <p className="text-sm text-gray-700 leading-relaxed">{currentQuestion.explanation}</p>
+                  <div className="mb-3">
+                    <p className="text-xs text-gray-600 mb-1">정답</p>
+                    <p className="text-base font-bold text-gray-900">{currentQuestion.answer}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600 mb-1">문제풀이</p>
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      {currentQuestion.explanation || '해설이 없습니다.'}
+                    </p>
+                    {!currentQuestion.explanation && (
+                      <p className="text-xs text-red-500 mt-2">
+                        DEBUG: explanation 필드가 비어있습니다.
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

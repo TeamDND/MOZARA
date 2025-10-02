@@ -945,6 +945,7 @@ class HairAnalysisResponse(BaseModel):
 class QuizQuestion(BaseModel):
     question: str
     answer: str
+    explanation: str
 
 class PaperDetail(BaseModel):
     id: str

@@ -59,43 +59,43 @@ export default function YouTubeVideos() {
       console.error('YouTube API Error:', err);
       console.log('더미 데이터로 대체합니다.');
       
-      // YouTube API 오류 시 더미 데이터 사용
+      // YouTube API 오류 시 더미 데이터 사용 (메인 컬러 #1F0101과 어울리는 색상)
       const dummyVideos: Video[] = [
         {
           videoId: 'dummy1',
           title: '탈모 예방을 위한 올바른 샴푸 사용법',
           channelName: '헤어케어 채널',
-          thumbnailUrl: 'https://placehold.co/300x168/4F46E5/FFFFFF?text=탈모+예방+샴푸'
+          thumbnailUrl: 'https://placehold.co/300x168/5B1010/FFFFFF?text=탈모+예방+샴푸'
         },
         {
           videoId: 'dummy2',
           title: '모발이식 수술 후 관리 방법',
           channelName: '의료 정보 채널',
-          thumbnailUrl: 'https://placehold.co/300x168/059669/FFFFFF?text=모발이식+관리'
+          thumbnailUrl: 'https://placehold.co/300x168/7F1D1D/FFFFFF?text=모발이식+관리'
         },
         {
           videoId: 'dummy3',
           title: '탈모 원인과 치료법 완벽 가이드',
           channelName: '건강 정보 채널',
-          thumbnailUrl: 'https://placehold.co/300x168/DC2626/FFFFFF?text=탈모+원인+치료'
+          thumbnailUrl: 'https://placehold.co/300x168/991B1B/FFFFFF?text=탈모+원인+치료'
         },
         {
           videoId: 'dummy4',
           title: '두피 마사지로 탈모 예방하기',
           channelName: '뷰티 케어 채널',
-          thumbnailUrl: 'https://placehold.co/300x168/7C3AED/FFFFFF?text=두피+마사지'
+          thumbnailUrl: 'https://placehold.co/300x168/450A0A/FFFFFF?text=두피+마사지'
         },
         {
           videoId: 'dummy5',
           title: '영양제로 탈모 개선하기',
           channelName: '건강 관리 채널',
-          thumbnailUrl: 'https://placehold.co/300x168/EA580C/FFFFFF?text=영양제+탈모개선'
+          thumbnailUrl: 'https://placehold.co/300x168/6B1515/FFFFFF?text=영양제+탈모개선'
         },
         {
           videoId: 'dummy6',
           title: '탈모 전문의가 알려주는 진실',
           channelName: '의료 전문 채널',
-          thumbnailUrl: 'https://placehold.co/300x168/0891B2/FFFFFF?text=탈모+전문의+진실'
+          thumbnailUrl: 'https://placehold.co/300x168/8B1F1F/FFFFFF?text=탈모+전문의+진실'
         }
       ];
       
