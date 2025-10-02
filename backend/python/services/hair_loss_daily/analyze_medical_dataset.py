@@ -55,7 +55,7 @@ def calculate_image_statistics(image_path: str) -> Dict:
         return stats
         
     except Exception as e:
-        print(f"⚠️ 이미지 분석 실패: {image_path} - {str(e)}")
+        print(f"[WARN] 이미지 분석 실패: {image_path} - {str(e)}")
         return None
 
 def analyze_medical_dataset(data_path: str, labeling_path: str = None) -> Dict:
@@ -97,7 +97,7 @@ def analyze_medical_dataset(data_path: str, labeling_path: str = None) -> Dict:
                 image_files.extend(found_files)
             
             if not image_files:
-                print(f"    ⚠️ 이미지 파일을 찾을 수 없습니다: {category_path}")
+                print(f"    [WARN] 이미지 파일을 찾을 수 없습니다: {category_path}")
                 continue
             
             severity_stats = []
@@ -160,14 +160,14 @@ def main():
     try:
         print(f"🔍 원천데이터 경로 확인: {args.data_path}")
         if not os.path.exists(args.data_path):
-            print(f"❌ 원천데이터 경로가 존재하지 않습니다: {args.data_path}")
+            print(f"[ERROR] 원천데이터 경로가 존재하지 않습니다: {args.data_path}")
             return 1
         
         # 라벨링 데이터 경로 확인
         if args.labeling_path:
             print(f"📋 라벨링데이터 경로 확인: {args.labeling_path}")
             if not os.path.exists(args.labeling_path):
-                print(f"⚠️ 라벨링데이터 경로가 존재하지 않습니다: {args.labeling_path}")
+                print(f"[WARN] 라벨링데이터 경로가 존재하지 않습니다: {args.labeling_path}")
                 args.labeling_path = None
         
         # 데이터셋 분석
@@ -182,13 +182,13 @@ def main():
         with open(args.output, 'w', encoding='utf-8') as f:
             json.dump(stats, f, indent=2, ensure_ascii=False)
         
-        print(f"✅ 분석 완료: {args.output}")
+        print(f"[OK] 분석 완료: {args.output}")
         print(f"📊 총 이미지 수: {stats['total_images']}")
         print(f"🎨 평균 RGB: {[round(x, 2) for x in stats['mean_rgb']]}")
         print(f"💡 평균 밝기: {stats['lighting_overall']['brightness_mean']:.2f}")
         
     except Exception as e:
-        print(f"❌ 분석 실패: {str(e)}")
+        print(f"[ERROR] 분석 실패: {str(e)}")
         import traceback
         traceback.print_exc()
         return 1

@@ -26,7 +26,7 @@ class CLIPEnsembleService:
         self.model_weights = {}
         self._initialize_models()
         self._initialize_prompts()
-        logger.info(f"✅ CLIP 앙상블 서비스 초기화 완료 (디바이스: {self.device})")
+        logger.info(f"[OK] CLIP 앙상블 서비스 초기화 완료 (디바이스: {self.device})")
     
     def _initialize_models(self):
         """CLIP 모델 초기화 (open_clip_torch 사용) - 메모리 최적화된 앙상블"""
@@ -59,9 +59,9 @@ class CLIPEnsembleService:
                     "weight": weight,
                     "description": description
                 }
-                logger.info(f"✅ {model_name} 로드 완료 ({description})")
+                logger.info(f"[OK] {model_name} 로드 완료 ({description})")
             except Exception as e:
-                logger.warning(f"⚠️ {model_name} 로드 실패: {str(e)}")
+                logger.warning(f"[WARN] {model_name} 로드 실패: {str(e)}")
                 # 메모리 부족 시 GPU 메모리 정리
                 if self.device == "cuda":
                     torch.cuda.empty_cache()
@@ -172,9 +172,9 @@ class CLIPEnsembleService:
                     features = future.result()
                     all_features.append(features)
                     weights.append(weight)
-                    logger.debug(f"✅ {model_name} 특징 추출 완료")
+                    logger.debug(f"[OK] {model_name} 특징 추출 완료")
                 except Exception as e:
-                    logger.error(f"❌ {model_name} 특징 추출 실패: {str(e)}")
+                    logger.error(f"[ERROR] {model_name} 특징 추출 실패: {str(e)}")
         
         if not all_features:
             raise RuntimeError("모든 모델에서 특징 추출에 실패했습니다")
@@ -253,7 +253,7 @@ class CLIPEnsembleService:
             if category_features:
                 combined_features = np.mean(category_features, axis=0)
                 prompt_features[category] = combined_features.flatten()
-                logger.debug(f"✅ {category} 프롬프트 특징 추출 완료")
+                logger.debug(f"[OK] {category} 프롬프트 특징 추출 완료")
         
         return prompt_features
     
@@ -324,9 +324,9 @@ class CLIPEnsembleService:
                     features = future.result()
                     all_features.append(features)
                     weights.append(weight)
-                    logger.debug(f"✅ {model_name} 특징 추출 완료 (가중치: {weight})")
+                    logger.debug(f"[OK] {model_name} 특징 추출 완료 (가중치: {weight})")
                 except Exception as e:
-                    logger.error(f"❌ {model_name} 특징 추출 실패: {str(e)}")
+                    logger.error(f"[ERROR] {model_name} 특징 추출 실패: {str(e)}")
         
         if not all_features:
             raise RuntimeError("모든 모델에서 특징 추출에 실패했습니다")

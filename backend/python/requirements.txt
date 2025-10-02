@@ -47,3 +47,5 @@ requests
 langdetect
 schedule
 beautifulsoup4
+sentence-transformers
+

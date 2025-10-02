@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-// API 기본 설정
+// Spring Boot 백엔드 기본 URL (Swin과 동일하게 변경)
 const SPRING_BOOT_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
-// Swin 분석 결과 인터페이스
-export interface SwinAnalysisResult {
+// RAG 분석 결과 인터페이스 (Swin과 동일한 구조로 통일)
+export interface RAGAnalysisResult {
   stage: number;
   title: string;
   description: string;
@@ -12,18 +12,13 @@ export interface SwinAnalysisResult {
 }
 
 // API 응답 인터페이스
-export interface SwinAnalysisResponse {
-  analysis: SwinAnalysisResult;
+export interface RAGAnalysisResponse {
+  analysis: RAGAnalysisResult;
   save_result: {
     message: string;
     saved: boolean;
     saved_id?: number;
   };
-}
-
-// 에러 응답 인터페이스
-export interface SwinAnalysisError {
-  error: string;
 }
 
 // 설문 데이터 인터페이스
@@ -36,34 +31,31 @@ export interface SurveyData {
 }
 
 /**
- * Swin Transformer를 통한 모발 분석 API 호출
+ * RAG v2를 통한 여성 모발 분석 API 호출 (Top View만 사용)
+ * Spring Boot를 거쳐 Python 호출하여 DB 저장까지 수행
  * @param topImageFile - Top View 이미지 파일
- * @param sideImageFile - Side View 이미지 파일
  * @param userId - 사용자 ID (선택적, 로그인한 경우)
  * @param imageUrl - 이미지 URL (선택적)
- * @param surveyData - 설문 데이터 (선택적, 동적 가중치 계산에 사용)
- * @returns Promise<SwinAnalysisResponse>
+ * @param surveyData - 설문 데이터 (선택적)
+ * @returns Promise<RAGAnalysisResponse>
  */
-export const analyzeHairWithSwin = async (
+export const analyzeHairWithRAG = async (
   topImageFile: File,
-  sideImageFile: File,
   userId?: number,
   imageUrl?: string,
   surveyData?: SurveyData
-): Promise<SwinAnalysisResponse> => {
+): Promise<RAGAnalysisResponse> => {
   try {
-    console.log('🔄 Swin Transformer 모발 분석 요청 시작');
+    console.log('🔄 RAG v2 여성 모발 분석 요청 시작 (Spring Boot 경유)');
     console.log('📁 Top View 파일:', topImageFile.name, topImageFile.size, 'bytes');
-    console.log('📁 Side View 파일:', sideImageFile.name, sideImageFile.size, 'bytes');
     console.log('👤 사용자 ID:', userId);
     console.log('📋 설문 데이터:', surveyData);
 
     // FormData 생성
     const formData = new FormData();
     formData.append('top_image', topImageFile);
-    formData.append('side_image', sideImageFile);
 
-    // 선택적 파라미터 추가 (로그인 여부 확인)
+    // 선택적 파라미터 추가
     if (userId !== undefined && userId !== null) {
       formData.append('user_id', userId.toString());
     }
@@ -71,7 +63,7 @@ export const analyzeHairWithSwin = async (
       formData.append('image_url', imageUrl);
     }
 
-    // 설문 데이터 추가
+    // 설문 데이터 추가 (Gemini LLM 맞춤형 분석용)
     if (surveyData) {
       formData.append('gender', surveyData.gender);
       formData.append('age', surveyData.age);
@@ -80,15 +72,15 @@ export const analyzeHairWithSwin = async (
       formData.append('stress', surveyData.stress);
     }
 
-    // API 호출
-    const response = await axios.post<SwinAnalysisResponse>(
-      `${SPRING_BOOT_BASE_URL}/api/ai/swin-check/analyze`,
+    // API 호출 (Spring Boot 경유)
+    const response = await axios.post<RAGAnalysisResponse>(
+      `${SPRING_BOOT_BASE_URL}/api/ai/rag-v2-check/analyze`,
       formData,
       {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 120000, // 120초 타임아웃 (Swin 모델 처리 시간 고려)
+        timeout: 120000, // 120초 타임아웃
         onUploadProgress: (progressEvent) => {
           if (progressEvent.total) {
             const percentCompleted = Math.round(
@@ -100,11 +92,11 @@ export const analyzeHairWithSwin = async (
       }
     );
 
-    console.log('✅ Swin 분석 응답 성공:', response.data);
+    console.log('✅ RAG v2 분석 응답 성공:', response.data);
     return response.data;
 
   } catch (error) {
-    console.error('❌ Swin 분석 오류:', error);
+    console.error('❌ RAG v2 분석 오류:', error);
 
     if (axios.isAxiosError(error)) {
       if (error.response?.data?.error) {
@@ -117,7 +109,7 @@ export const analyzeHairWithSwin = async (
         throw new Error('서버에서 분석 중 오류가 발생했습니다.');
       }
       if (error.response?.status === 404) {
-        throw new Error('분석 서비스를 찾을 수 없습니다.');
+        throw new Error('RAG 분석 서비스를 찾을 수 없습니다.');
       }
     }
 
@@ -150,44 +142,4 @@ export const validateImageFile = (file: File): { isValid: boolean; message?: str
   }
 
   return { isValid: true };
-};
-
-/**
- * 분석 단계에 따른 한글 설명 반환
- * @param stage - 분석 단계 (0-3)
- * @returns string
- */
-export const getStageDescription = (stage: number): string => {
-  switch (stage) {
-    case 0:
-      return '정상';
-    case 1:
-      return '초기 탈모';
-    case 2:
-      return '중등도 탈모';
-    case 3:
-      return '심각한 탈모';
-    default:
-      return '알 수 없음';
-  }
-};
-
-/**
- * 분석 단계에 따른 색상 반환 (Tailwind CSS 클래스)
- * @param stage - 분석 단계 (0-3)
- * @returns string
- */
-export const getStageColor = (stage: number): string => {
-  switch (stage) {
-    case 0:
-      return 'text-green-600 bg-green-50';
-    case 1:
-      return 'text-yellow-600 bg-yellow-50';
-    case 2:
-      return 'text-orange-600 bg-orange-50';
-    case 3:
-      return 'text-red-600 bg-red-50';
-    default:
-      return 'text-gray-600 bg-gray-50';
-  }
 };

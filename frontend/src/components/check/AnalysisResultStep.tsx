@@ -7,10 +7,12 @@ import { useState } from 'react';
 interface AnalysisResultStepProps {
   analysisResult: SwinAnalysisResult | null;
   onComplete: () => void;
+  gender?: string;
 }
 
-const AnalysisResultStep: React.FC<AnalysisResultStepProps> = ({ analysisResult, onComplete }) => {
+const AnalysisResultStep: React.FC<AnalysisResultStepProps> = ({ analysisResult, onComplete, gender }) => {
   const [showStageInfo, setShowStageInfo] = useState(false);
+  const isMale = gender === 'male' || gender === '남';
 
   return (
     <div className="space-y-8">
@@ -18,14 +20,14 @@ const AnalysisResultStep: React.FC<AnalysisResultStepProps> = ({ analysisResult,
         <CheckCircle className="w-12 h-12 text-green-500 mx-auto" />
         <h2 className="text-xl font-bold text-gray-800">통합 분석 결과</h2>
         <p className="text-sm text-gray-600">
-          AI가 분석한 종합적인 두피 상태입니다
+          AI가 분석한 종합적인 모발 상태입니다
         </p>
       </div>
 
       <div className="space-y-4">
         <div className="bg-white p-4 rounded-xl border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-800 mb-3">
-            🧠 Swin Transformer AI 분석 결과
+            🧠 AI 분석 결과
           </h3>
           {analysisResult ? (
             <div className="space-y-3">
