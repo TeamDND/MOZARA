@@ -35,7 +35,6 @@ class PineconeService:
             
             # 인덱스 연결
             self.index = self.pc.Index(self.index_name)
-
             print(f"[OK] Pinecone 클라이언트 초기화 완료 (인덱스: {self.index_name})")
 
         except Exception as e:
