@@ -20,8 +20,18 @@ import {
   Gift,
   Lightbulb,
   ArrowLeft,
-  BarChart3
+  BarChart3,
+  RefreshCw
 } from 'lucide-react';
+import { getWeatherData } from '../../services/weatherService';
+import type { WeatherData } from '../../services/weatherService';
+import { 
+  getPersonalizedRecommendations, 
+  getDefaultScalpCondition,
+  type RecommendedProduct,
+  type HealthTip,
+  type ScalpCondition 
+} from '../../services/recommendationService';
 
 const D_care: React.FC = () => {
   const navigate = useNavigate();
@@ -34,6 +44,140 @@ const D_care: React.FC = () => {
 
   const [streakDays, setStreakDays] = useState(7);
   const [challengeProgress, setChallengeProgress] = useState(43);
+  
+  // 날씨 데이터 상태
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [weatherError, setWeatherError] = useState<string | null>(null);
+  
+  // 추천 시스템 상태
+  const [recommendedProducts, setRecommendedProducts] = useState<RecommendedProduct[]>([]);
+  const [dailyTips, setDailyTips] = useState<HealthTip[]>([]);
+  const [scalpCondition, setScalpCondition] = useState<ScalpCondition>(getDefaultScalpCondition());
+
+  // 출석 체크(스트릭) 상태
+  const [attendance, setAttendance] = useState<Array<{ date: string; checked: boolean }>>([]);
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  // 최근 10일 출석 데이터 생성 및 로드
+  useEffect(() => {
+    const saved = typeof window !== 'undefined' ? window.localStorage.getItem('DCARE_ATTENDANCE') : null;
+    const savedMap: Record<string, boolean> = saved ? JSON.parse(saved) : {};
+
+    const days: Array<{ date: string; checked: boolean }> = [];
+    for (let i = 9; i >= 0; i -= 1) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      days.push({ date: dateStr, checked: !!savedMap[dateStr] });
+    }
+    setAttendance(days);
+
+    // 연속 출석 계산
+    const consecutive = getConsecutiveCount(days);
+    setStreakDays(consecutive);
+  }, []);
+
+  const getConsecutiveCount = (days: Array<{ date: string; checked: boolean }>) => {
+    let count = 0;
+    for (let i = days.length - 1; i >= 0; i -= 1) {
+      if (days[i].checked) count += 1;
+      else break;
+    }
+    return count;
+  };
+
+  // 날씨 기반 추천 정보 생성
+  const getWeatherRecommendations = (weather: WeatherData) => {
+    const recommendations = [];
+
+    // 자외선 지수에 따른 추천
+    if (weather.uvIndex >= 6) {
+      recommendations.push({
+        type: 'warning',
+        message: '자외선이 매우 강합니다. 모자나 선크림을 사용하세요.',
+        icon: '☀️'
+      });
+    } else if (weather.uvIndex >= 3) {
+      recommendations.push({
+        type: 'caution',
+        message: '자외선이 보통입니다. 실외 활동 시 주의하세요.',
+        icon: '🌤️'
+      });
+    }
+
+    // 습도에 따른 추천
+    if (weather.humidity < 30) {
+      recommendations.push({
+        type: 'info',
+        message: '습도가 낮습니다. 두피 보습에 신경 쓰세요.',
+        icon: '💧'
+      });
+    } else if (weather.humidity > 70) {
+      recommendations.push({
+        type: 'info',
+        message: '습도가 높습니다. 두피 통풍에 주의하세요.',
+        icon: '🌧️'
+      });
+    }
+
+    // 미세먼지에 따른 추천
+    if (weather.fineDust > 50) {
+      recommendations.push({
+        type: 'warning',
+        message: '미세먼지가 나쁩니다. 외출 후 머리 감기를 권장합니다.',
+        icon: '🌫️'
+      });
+    }
+
+    return recommendations;
+  };
+
+  const handleCheckInToday = () => {
+    setAttendance((prev) => {
+      const next = prev.map((d) => (d.date === todayStr ? { ...d, checked: true } : d));
+      // 저장
+      const map: Record<string, boolean> = {};
+      next.forEach((d) => {
+        map[d.date] = d.checked;
+      });
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('DCARE_ATTENDANCE', JSON.stringify(map));
+      }
+      setStreakDays(getConsecutiveCount(next));
+      return next;
+    });
+  };
+
+  // 날씨 데이터 가져오기
+  const fetchWeatherData = async () => {
+    setWeatherLoading(true);
+    setWeatherError(null);
+    
+    try {
+      // 실제 기상청 API 호출
+      const data = await getWeatherData();
+      setWeatherData(data);
+      console.log('D_care에서 날씨 데이터 가져옴:', data);
+      
+      // 날씨 데이터가 있으면 개인화된 추천 생성
+      if (data) {
+        const recommendations = getPersonalizedRecommendations(data, scalpCondition);
+        setRecommendedProducts(recommendations.products);
+        setDailyTips(recommendations.tips);
+      }
+    } catch (error) {
+      console.error('날씨 데이터 가져오기 실패:', error);
+      setWeatherError('날씨 정보를 가져올 수 없습니다.');
+    } finally {
+      setWeatherLoading(false);
+    }
+  };
+
+  // 컴포넌트 마운트시 날씨 데이터 가져오기
+  useEffect(() => {
+    fetchWeatherData();
+  }, []);
 
   const handleCheckboxChange = (id: number) => {
     setChecklist(prev => prev.map(item => 
@@ -196,7 +340,7 @@ const D_care: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Care Streak */}
+        {/* Care Streak - 출석 체크 스타일 */}
         <Card className="mx-4 mt-4">
           <CardHeader className="pb-3">
             <div className="flex justify-between items-center">
@@ -204,58 +348,176 @@ const D_care: React.FC = () => {
                 <Award className="h-5 w-5" style={{ color: '#1f0101' }} />
                 케어 스트릭
               </CardTitle>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <span className="text-2xl font-bold" style={{ color: '#1f0101' }}>{streakDays}일</span>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleCheckInToday}
+                  className="h-8 px-3"
+                >
+                  오늘 출석하기
+                </Button>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-1 mb-3">
-              {Array.from({ length: 7 }, (_, i) => (
-                <div 
-                  key={i}
-                  className={`flex-1 h-8 rounded-md flex items-center justify-center text-xs text-white ${
-                    i < streakDays ? '' : 'bg-gray-300'
-                  }`}
-                  style={i < streakDays ? { backgroundColor: '#1f0101' } : {}}
-                >
-                  {i + 1}
-                </div>
-              ))}
+            {/* 최근 10일 출석 도장 */}
+            <div className="grid grid-cols-5 gap-2 mb-3">
+              {attendance.map((d) => {
+                const date = new Date(d.date);
+                const day = date.getDate();
+                const isToday = d.date === todayStr;
+                const checked = d.checked;
+                return (
+                  <div 
+                    key={d.date}
+                    className={`h-9 rounded-lg flex items-center justify-center text-xs font-semibold border ${checked ? 'text-white' : 'text-gray-400'}`}
+                    style={checked ? { backgroundColor: '#1f0101', borderColor: '#1f0101' } : { borderColor: '#e5e7eb' }}
+                  >
+                    {isToday ? '오늘' : day}
+                  </div>
+                );
+              })}
             </div>
-            
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+
+            {/* 출석 안내 및 목표 진행도 */}
+            <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
               <Gift className="h-4 w-4" />
               <span>10일 연속 달성시 보너스 포인트 100P!</span>
             </div>
+            <Progress value={Math.min(100, (streakDays / 10) * 100)} className="h-2" />
           </CardContent>
         </Card>
 
         {/* Environment Info */}
-        <div className="grid grid-cols-3 gap-3 mx-4 mt-4">
-          <Card className="bg-gray-50 border-gray-200">
-            <CardContent className="p-3 text-center">
-              <Sun className="h-6 w-6 mx-auto mb-2" style={{ color: '#1f0101' }} />
-              <p className="text-xs font-medium" style={{ color: '#1f0101' }}>자외선 강함</p>
-              <p className="text-xs text-gray-600">모자 착용</p>
-            </CardContent>
-          </Card>
+        <div className="mx-4 mt-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold" style={{ color: '#1f0101' }}>실시간 환경 정보</h3>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={fetchWeatherData}
+              disabled={weatherLoading}
+              className="p-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${weatherLoading ? 'animate-spin' : ''}`} style={{ color: '#1f0101' }} />
+            </Button>
+          </div>
           
-          <Card className="bg-gray-50 border-gray-200">
-            <CardContent className="p-3 text-center">
-              <Droplets className="h-6 w-6 mx-auto mb-2" style={{ color: '#1f0101' }} />
-              <p className="text-xs font-medium" style={{ color: '#1f0101' }}>습도 30%</p>
-              <p className="text-xs text-gray-600">보습 필요</p>
-            </CardContent>
-          </Card>
+          {weatherError ? (
+            <Card className="bg-red-50 border-red-200">
+              <CardContent className="p-4 text-center">
+                <p className="text-sm text-red-600">{weatherError}</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={fetchWeatherData}
+                  className="mt-2"
+                >
+                  다시 시도
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-3 gap-3">
+              {/* UV 지수 카드 */}
+              <Card className="bg-gray-50 border-gray-200">
+                <CardContent className="p-3 text-center">
+                  <Sun className="h-6 w-6 mx-auto mb-2" style={{ color: '#1f0101' }} />
+                  {weatherLoading ? (
+                    <div className="animate-pulse">
+                      <div className="h-3 bg-gray-300 rounded mb-1"></div>
+                      <div className="h-3 bg-gray-300 rounded"></div>
+                    </div>
+                  ) : weatherData ? (
+                    <>
+                      <p className="text-xs font-medium" style={{ color: '#1f0101' }}>
+                        {weatherData.uvIndex >= 8 ? '자외선 매우 강함' :
+                         weatherData.uvIndex >= 6 ? '자외선 강함' :
+                         weatherData.uvIndex >= 3 ? '자외선 보통' : '자외선 약함'}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        {getWeatherRecommendations(weatherData).find(r => r.type === 'warning' || r.type === 'caution')?.message || '모자 착용'}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-xs font-medium" style={{ color: '#1f0101' }}>자외선 강함</p>
+                      <p className="text-xs text-gray-600">모자 착용</p>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+              
+              {/* 습도 카드 */}
+              <Card className="bg-gray-50 border-gray-200">
+                <CardContent className="p-3 text-center">
+                  <Droplets className="h-6 w-6 mx-auto mb-2" style={{ color: '#1f0101' }} />
+                  {weatherLoading ? (
+                    <div className="animate-pulse">
+                      <div className="h-3 bg-gray-300 rounded mb-1"></div>
+                      <div className="h-3 bg-gray-300 rounded"></div>
+                    </div>
+                  ) : weatherData ? (
+                    <>
+                      <p className="text-xs font-medium" style={{ color: '#1f0101' }}>
+                        습도 {weatherData.humidity}%
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        {getWeatherRecommendations(weatherData).find(r => r.type === 'info')?.message || '보습 필요'}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-xs font-medium" style={{ color: '#1f0101' }}>습도 30%</p>
+                      <p className="text-xs text-gray-600">보습 필요</p>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+              
+              {/* 미세먼지 카드 */}
+              <Card className="bg-gray-50 border-gray-200">
+                <CardContent className="p-3 text-center">
+                  <Wind className="h-6 w-6 mx-auto mb-2" style={{ color: '#1f0101' }} />
+                  {weatherLoading ? (
+                    <div className="animate-pulse">
+                      <div className="h-3 bg-gray-300 rounded mb-1"></div>
+                      <div className="h-3 bg-gray-300 rounded"></div>
+                    </div>
+                  ) : weatherData ? (
+                    <>
+                      <p className="text-xs font-medium" style={{ color: '#1f0101' }}>
+                        미세먼지 {weatherData.fineDust >= 76 ? '나쁨' :
+                                  weatherData.fineDust >= 36 ? '보통' : '좋음'}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        {getWeatherRecommendations(weatherData).find(r => r.type === 'warning')?.message || '외출 후 머리 감기'}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-xs font-medium" style={{ color: '#1f0101' }}>미세먼지</p>
+                      <p className="text-xs text-gray-600">나쁨</p>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
           
-          <Card className="bg-gray-50 border-gray-200">
-            <CardContent className="p-3 text-center">
-              <Wind className="h-6 w-6 mx-auto mb-2" style={{ color: '#1f0101' }} />
-              <p className="text-xs font-medium" style={{ color: '#1f0101' }}>미세먼지</p>
-              <p className="text-xs text-gray-600">나쁨</p>
-            </CardContent>
-          </Card>
+          {/* 위치 정보 */}
+          {weatherData && (
+            <div className="mt-3 text-center">
+              <p className="text-xs text-gray-500">
+                📍 {weatherData.location} • {new Date(weatherData.lastUpdated).toLocaleTimeString('ko-KR', { 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                })} 업데이트
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Photo Comparison */}
@@ -320,19 +582,41 @@ const D_care: React.FC = () => {
               오늘의 추천 제품
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#1f0101' }}>
-                <Droplets className="h-6 w-6 text-white" />
+          <CardContent className="space-y-3">
+            {weatherLoading ? (
+              <div className="animate-pulse">
+                <div className="h-16 bg-gray-200 rounded-xl"></div>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">수분 에센스</p>
-                <p className="text-xs text-gray-600">건조한 두피에 효과적</p>
-                <Badge variant="secondary" className="mt-1" style={{ backgroundColor: '#1f0101', color: 'white', opacity: 0.1 }}>
-                  15% 할인중
-                </Badge>
+            ) : recommendedProducts.length > 0 ? (
+              recommendedProducts.map((product, index) => (
+                <div key={product.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#1f0101' }}>
+                    <Droplets className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{product.name}</p>
+                    <p className="text-xs text-gray-600">{product.description}</p>
+                    <p className="text-xs text-blue-600 mt-1">💡 {product.reason}</p>
+                    <Badge variant="secondary" className="mt-1" style={{ backgroundColor: '#1f0101', color: 'white', opacity: 0.1 }}>
+                      우선순위 {product.priority}
+                    </Badge>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#1f0101' }}>
+                  <Droplets className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium">수분 에센스</p>
+                  <p className="text-xs text-gray-600">건조한 두피에 효과적</p>
+                  <Badge variant="secondary" className="mt-1" style={{ backgroundColor: '#1f0101', color: 'white', opacity: 0.1 }}>
+                    15% 할인중
+                  </Badge>
+                </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
@@ -384,20 +668,63 @@ const D_care: React.FC = () => {
         {/* Daily Tip */}
         <Card className="mx-4 mt-4 bg-gray-50 border-gray-200">
           <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <Lightbulb className="h-4 w-4" style={{ color: '#1f0101' }} />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-1">
-                  <h4 className="text-sm font-semibold" style={{ color: '#1f0101' }}>오늘의 건강 팁</h4>
+            {weatherLoading ? (
+              <div className="animate-pulse">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded"></div>
+                  </div>
                 </div>
-                <p className="text-xs text-gray-700">
-                  "샴푸 전 빗질을 하면 노폐물 제거와 혈액순환에 도움이 됩니다. 
-                  두피부터 모발 끝까지 부드럽게 빗어주세요."
-                </p>
               </div>
-            </div>
+            ) : dailyTips.length > 0 ? (
+              dailyTips.map((tip, index) => (
+                <div key={tip.id} className={`flex items-start gap-3 ${index > 0 ? 'mt-4' : ''}`}>
+                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Lightbulb className="h-4 w-4" style={{ color: '#1f0101' }} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="text-sm font-semibold" style={{ color: '#1f0101' }}>
+                        {tip.title}
+                      </h4>
+                      <Badge variant="secondary" className="text-xs" style={{ backgroundColor: '#1f0101', color: 'white', opacity: 0.1 }}>
+                        {tip.category}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-gray-700">
+                      {tip.content}
+                    </p>
+                    {tip.weatherCondition && (
+                      <p className="text-xs text-blue-600 mt-1">
+                        🌤️ {tip.weatherCondition} 기반 추천
+                      </p>
+                    )}
+                    {tip.scalpCondition && (
+                      <p className="text-xs text-green-600 mt-1">
+                        🧠 {tip.scalpCondition} 상태 기반 추천
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Lightbulb className="h-4 w-4" style={{ color: '#1f0101' }} />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <h4 className="text-sm font-semibold" style={{ color: '#1f0101' }}>오늘의 건강 팁</h4>
+                  </div>
+                  <p className="text-xs text-gray-700">
+                    "샴푸 전 빗질을 하면 노폐물 제거와 혈액순환에 도움이 됩니다. 
+                    두피부터 모발 끝까지 부드럽게 빗어주세요."
+                  </p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
