@@ -1,8 +1,11 @@
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
 import { Camera } from 'lucide-react';
 import { validateImageFile } from '../../services/geminiAnalysisService';
+import apiClient from '../../services/apiClient';
 
 interface ImageUploadStepProps {
   uploadedPhoto: string | null;
@@ -12,6 +15,8 @@ interface ImageUploadStepProps {
   setUploadedSidePhoto: React.Dispatch<React.SetStateAction<string | null>>;
   setUploadedSidePhotoFile: React.Dispatch<React.SetStateAction<File | null>>;
   gender?: string; // 성별 추가
+  setUploadedPhotoUrl?: React.Dispatch<React.SetStateAction<string | null>>; // S3 URL 저장
+  setUploadedSidePhotoUrl?: React.Dispatch<React.SetStateAction<string | null>>; // S3 URL 저장
 }
 
 const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
@@ -21,14 +26,20 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
   uploadedSidePhoto,
   setUploadedSidePhoto,
   setUploadedSidePhotoFile,
-  gender
+  gender,
+  setUploadedPhotoUrl,
+  setUploadedSidePhotoUrl
 }) => {
   // 남성인 경우에만 Side View 필요
   const isMale = gender === 'male';
+  const user = useSelector((state: any) => state.user);
+
+  const [isUploadingTop, setIsUploadingTop] = useState(false);
+  const [isUploadingSide, setIsUploadingSide] = useState(false);
 
   console.log('👤 ImageUploadStep - gender prop:', gender, 'isMale:', isMale);
 
-  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       // 파일 유효성 검사
@@ -44,10 +55,35 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
         setUploadedPhotoFile(file);
       };
       reader.readAsDataURL(file);
+
+      // S3 업로드
+      if (user?.username && setUploadedPhotoUrl) {
+        try {
+          setIsUploadingTop(true);
+          const formData = new FormData();
+          formData.append('image', file);
+          formData.append('username', user.username);
+          formData.append('viewType', 'top');
+
+          const response = await apiClient.post('/images/upload/hair-loss', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+
+          if (response.data.success) {
+            setUploadedPhotoUrl(response.data.imageUrl);
+            console.log('✅ Top View S3 업로드 성공:', response.data.imageUrl);
+          }
+        } catch (error) {
+          console.error('❌ Top View S3 업로드 실패:', error);
+          alert('이미지 업로드에 실패했습니다. 다시 시도해주세요.');
+        } finally {
+          setIsUploadingTop(false);
+        }
+      }
     }
   };
 
-  const handleSidePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSidePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       // 파일 유효성 검사
@@ -63,6 +99,31 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
         setUploadedSidePhotoFile(file);
       };
       reader.readAsDataURL(file);
+
+      // S3 업로드
+      if (user?.username && setUploadedSidePhotoUrl) {
+        try {
+          setIsUploadingSide(true);
+          const formData = new FormData();
+          formData.append('image', file);
+          formData.append('username', user.username);
+          formData.append('viewType', 'side');
+
+          const response = await apiClient.post('/images/upload/hair-loss', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+
+          if (response.data.success) {
+            setUploadedSidePhotoUrl(response.data.imageUrl);
+            console.log('✅ Side View S3 업로드 성공:', response.data.imageUrl);
+          }
+        } catch (error) {
+          console.error('❌ Side View S3 업로드 실패:', error);
+          alert('이미지 업로드에 실패했습니다. 다시 시도해주세요.');
+        } finally {
+          setIsUploadingSide(false);
+        }
+      }
     }
   };
 
@@ -123,7 +184,9 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
                 />
               </div>
               <div className="flex justify-center gap-3">
-                <Badge variant="secondary" className="px-3 py-1">✅ Top View 업로드 완료</Badge>
+                <Badge variant="secondary" className="px-3 py-1">
+                  {isUploadingTop ? '⏳ S3 업로드 중...' : '✅ Top View 업로드 완료'}
+                </Badge>
                 <div>
                   <Badge 
                     variant="outline" 
@@ -192,7 +255,9 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
                 />
               </div>
               <div className="flex justify-center gap-3">
-                <Badge variant="secondary" className="px-3 py-1">✅ Side View 업로드 완료</Badge>
+                <Badge variant="secondary" className="px-3 py-1">
+                  {isUploadingSide ? '⏳ S3 업로드 중...' : '✅ Side View 업로드 완료'}
+                </Badge>
                 <div>
                   <Badge 
                     variant="outline" 

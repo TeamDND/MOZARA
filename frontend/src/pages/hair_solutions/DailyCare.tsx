@@ -515,65 +515,88 @@ const DailyCare: React.FC = () => {
                   className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 hover:file:bg-gray-200"
                 />
                 <div className="flex gap-2">
-                  <button
-                    onClick={async () => {
-                      if (!selectedImage) return alert('두피 사진을 업로드해주세요.');
-                      setIsAnalyzing(true);
-                      setProducts(null);
-                      try {
-                        // 스프링부트 API 호출
-                        const formData = new FormData();
-                        formData.append('image', selectedImage);
-                        formData.append('top_k', '10');
-                        formData.append('use_preprocessing', 'true');
-                        
-                        // 로그인한 사용자의 user_id 추가
-                        if (userId) {
-                          formData.append('user_id', userId.toString());
-                          console.log('Daily 분석에 user_id 추가:', userId);
-                        } else {
-                          console.log('로그인하지 않은 사용자 - user_id 없음');
+                    <button
+                      onClick={async () => {
+                        if (!selectedImage) return alert('두피 사진을 업로드해주세요.');
+                        setIsAnalyzing(true);
+                        setProducts(null);
+                        try {
+                          // 1단계: S3 업로드
+                          let imageUrl: string | null = null;
+                          if (username) {
+                            try {
+                              console.log('🔄 S3 업로드 시작...');
+                              const uploadFormData = new FormData();
+                              uploadFormData.append('image', selectedImage);
+                              uploadFormData.append('username', username);
+
+                              const uploadResponse = await apiClient.post('/images/upload/hair-damage', uploadFormData, {
+                                headers: { 'Content-Type': 'multipart/form-data' },
+                              });
+
+                              if (uploadResponse.data.success) {
+                                imageUrl = uploadResponse.data.imageUrl;
+                                console.log('✅ S3 업로드 성공:', imageUrl);
+                              }
+                            } catch (uploadError) {
+                              console.error('❌ S3 업로드 실패:', uploadError);
+                              // S3 업로드 실패 시에도 분석은 진행 (imageUrl 없이)
+                            }
+                          }
+
+                          // 2단계: 스프링부트 AI 분석 API 호출
+                          const formData = new FormData();
+                          formData.append('image', selectedImage);
+                          formData.append('top_k', '10');
+                          formData.append('use_preprocessing', 'true');
+
+                          // 로그인한 사용자의 user_id 추가
+                          if (userId) {
+                            formData.append('user_id', userId.toString());
+                            console.log('Daily 분석에 user_id 추가:', userId);
+                          } else {
+                            console.log('로그인하지 않은 사용자 - user_id 없음');
+                          }
+
+                          // S3 URL이 있으면 추가
+                          if (imageUrl) {
+                            formData.append('image_url', imageUrl);
+                            console.log('📸 S3 이미지 URL 추가:', imageUrl);
+                          }
+
+                          const response = await apiClient.post('/ai/hair-loss-daily/analyze', formData, {
+                            headers: { 'Content-Type': 'multipart/form-data' },
+                          });
+
+                          const result: HairAnalysisResponse = response.data;
+                          setAnalysis(result);
+                          updateDashboardFromAnalysis(result);
+
+                          // 사진 분석 완료 후 lastPhotoDate 업데이트
+                          setUserProgress(prev => ({
+                            ...prev,
+                            lastPhotoDate: new Date().toISOString()
+                          }));
+
+                          // 심각도에 따른 제품 추천
+                          const severityLevel = result.analysis ? parseInt(result.analysis.primary_severity.split('.')[0]) || 0 : 0;
+                          const stage = Math.min(3, Math.max(0, severityLevel));
+                          const prodRes = await hairProductApi.getProductsByStage(stage);
+                          setProducts(prodRes.products.slice(0, 6));
+
+                          // 케어 팁은 updateDashboardFromAnalysis에서 설정됨
+                        } catch (e) {
+                          console.error(e);
+                          alert('분석 또는 추천 호출 중 오류가 발생했습니다.');
+                        } finally {
+                          setIsAnalyzing(false);
                         }
-                        
-                        const response = await apiClient.post('/ai/hair-loss-daily/analyze', formData, {
-                          headers: { 'Content-Type': 'multipart/form-data' },
-                        });
-                        
-                        const result: HairAnalysisResponse = response.data;
-                        setAnalysis(result);
-                        updateDashboardFromAnalysis(result);
-                        
-                        // 사진 분석 완료 후 lastPhotoDate 업데이트
-                        setUserProgress(prev => ({
-                          ...prev,
-                          lastPhotoDate: new Date().toISOString()
-                        }));
-                        
-                        // 심각도에 따른 제품 추천
-                        const severityLevel = result.analysis ? parseInt(result.analysis.primary_severity.split('.')[0]) || 0 : 0;
-                        const stage = Math.min(3, Math.max(0, severityLevel));
-                        const prodRes = await hairProductApi.getProductsByStage(stage);
-                        setProducts(prodRes.products.slice(0, 6));
-                        
-                        // 케어 팁은 updateDashboardFromAnalysis에서 설정됨
-                      } catch (e) {
-                        console.error(e);
-                        alert('분석 또는 추천 호출 중 오류가 발생했습니다.');
-                      } finally {
-                        setIsAnalyzing(false);
-                      }
-                    }}
-                    disabled={isAnalyzing}
-                    className="flex-1 h-12 px-4 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] disabled:opacity-50 font-semibold active:scale-[0.98] transition-all"
-                  >
-                    {isAnalyzing ? '분석 중...' : '사진으로 AI 분석'}
-                  </button>
-                  <button
-                    onClick={() => navigate('/daily-care-detail')}
-                    className="flex-1 h-12 px-4 bg-white border-2 border-[#1F0101] text-[#1F0101] rounded-xl hover:bg-gray-50 font-semibold active:scale-[0.98] transition-all"
-                  >
-                    데일리케어
-                  </button>
+                      }}
+                      disabled={isAnalyzing}
+                      className="w-full h-12 px-4 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] disabled:opacity-50 font-semibold active:scale-[0.98] transition-all"
+                    >
+                      {isAnalyzing ? '분석 중...' : '사진으로 AI 분석'}
+                    </button>
                 </div>
               </div>
             </div>

@@ -26,26 +26,34 @@ public class HairLossDailyController {
     public ResponseEntity<Map<String, Object>> analyzeHairImage(
             @RequestParam("image") MultipartFile image,
             @RequestParam(value = "top_k", defaultValue = "10") int topK,
-            @RequestParam(value = "user_id", required = false) Integer userId) {
-        
+            @RequestParam(value = "user_id", required = false) Integer userId,
+            @RequestParam(value = "image_url", required = false) String imageUrl) {
+
         try {
             // 이미지 파일 유효성 검사
             if (image.isEmpty()) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "이미지 파일이 필요합니다."));
             }
-            
+
             if (!image.getContentType().startsWith("image/")) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "이미지 파일만 업로드 가능합니다."));
             }
-            
+
             Map<String, Object> result = hairLossDailyService.analyzeHairImage(image, topK);
-            
+
             // user_id가 있으면 분석 결과를 자동으로 저장
             if (userId != null && userId > 0) {
                 try {
                     result.put("user_id", userId);
+
+                    // image_url이 있으면 추가
+                    if (imageUrl != null && !imageUrl.isEmpty()) {
+                        result.put("image_url", imageUrl);
+                        log.info("📸 S3 이미지 URL 전달: {}", imageUrl);
+                    }
+
                     Map<String, Object> saveResult = hairLossDailyService.saveAnalysisResult(result);
                     result.put("save_result", saveResult);
                 } catch (Exception e) {
@@ -53,9 +61,9 @@ public class HairLossDailyController {
                     result.put("save_error", "분석 결과 저장 중 오류가 발생했습니다: " + e.getMessage());
                 }
             }
-            
+
             return ResponseEntity.ok(result);
-            
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "머리사진 분석 중 오류가 발생했습니다: " + e.getMessage()));
