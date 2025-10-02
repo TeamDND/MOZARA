@@ -61,6 +61,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
+                                "/error", // 에러 페이지 허용
                                 "/uploads/**", // 이미지 경로 허용
                                 "/api/join",
                                 "/api/login",
@@ -70,6 +71,7 @@ public class SecurityConfig {
                                 "/api/google",
                                 "/api/oauth2/**", // OAuth2 관련 엔드포인트 허용
                                 "/login/oauth2/**", // OAuth2 로그인 리다이렉트 허용
+                                "/oauth2/**", // 모든 OAuth2 경로 허용
                                 "/oauth2/authorization/**", // OAuth2 인증 허용
                                 "/api/login/oauth2/code/*",
                                 "/oauth2/success",
