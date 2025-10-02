@@ -48,6 +48,12 @@ export default function Home() {
       badge: "NEW",
       image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=300&h=300&fit=crop&crop=center" // 퀴즈/학습 느낌
     },
+    { 
+      name: "D_care", 
+      description: "두피와 모발을 위한 맞춤 케어 프로그램으로 건강한 헤어 관리",
+      badge: "NEW",
+      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=300&fit=crop&crop=center" // 케어/관리 느낌
+    },
   ];
 
   // 도구 클릭 핸들러
@@ -73,6 +79,9 @@ export default function Home() {
         break;
       case "탈모 OX 퀴즈":
         navigate('/hair-quiz');
+        break;
+      case "D_care":
+        navigate('/d-care');
         break;
       default:
         break;
