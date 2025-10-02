@@ -106,9 +106,23 @@ def generate_default_image_url(category: str, name: str) -> str:
     
     if '문신' in category_lower or '문신' in name_lower or 'smp' in name_lower:
         selected_category = '두피문신'
-    elif '가발' in category_lower or '가발' in name_lower or '증모술' in name_lower:
+    elif ('가발' in category_lower or '가발' in name_lower or '증모술' in name_lower or 
+          '헤어피스' in name_lower or '헤어시스템' in name_lower or '헤어라인' in name_lower):
         selected_category = '가발전문점'
-    elif '미용' in category_lower or '미용' in name_lower or '헤어' in name_lower or '살롱' in name_lower:
+    elif (('미용' in category_lower or '미용' in name_lower or '살롱' in name_lower or
+           '헤어' in name_lower or '두피' in name_lower or '모발' in name_lower or
+           '헤어샵' in name_lower or '미용샵' in name_lower or '미용센터' in name_lower or
+           '미용스튜디오' in name_lower or '헤어케어' in name_lower or '두피케어' in name_lower or
+           '모발케어' in name_lower or '모발관리' in name_lower or '두피관리' in name_lower or
+           '탈모케어' in name_lower or '탈모관리' in name_lower or '헤어스타일링' in name_lower or
+           '헤어디자인' in name_lower or '두피스파' in name_lower or '헤드스파' in name_lower or
+           '두피마사지' in name_lower or '모발진단' in name_lower or '두피진단' in name_lower or
+           '모발분석' in name_lower or '두피분석' in name_lower or '모발치료' in name_lower or
+           '두피치료' in name_lower or '모발상담' in name_lower or '두피상담' in name_lower or
+           '맨즈헤어' in name_lower or '남성미용실' in name_lower or '여성미용실' in name_lower or
+           '탈모전용' in name_lower) and not (
+          '가발' in name_lower or '증모술' in name_lower or '헤어피스' in name_lower or 
+          '헤어시스템' in name_lower or '헤어라인' in name_lower)):
         selected_category = '탈모미용실'
     else:
         selected_category = '탈모병원'
@@ -150,9 +164,23 @@ def get_unsplash_collection_images(category: str, name: str) -> str:
     
     if '문신' in category_lower or '문신' in name_lower or 'smp' in name_lower:
         selected_category = '두피문신'
-    elif '가발' in category_lower or '가발' in name_lower or '증모술' in name_lower:
+    elif ('가발' in category_lower or '가발' in name_lower or '증모술' in name_lower or 
+          '헤어피스' in name_lower or '헤어시스템' in name_lower or '헤어라인' in name_lower):
         selected_category = '가발전문점'
-    elif '미용' in category_lower or '미용' in name_lower or '헤어' in name_lower or '살롱' in name_lower:
+    elif (('미용' in category_lower or '미용' in name_lower or '살롱' in name_lower or
+           '헤어' in name_lower or '두피' in name_lower or '모발' in name_lower or
+           '헤어샵' in name_lower or '미용샵' in name_lower or '미용센터' in name_lower or
+           '미용스튜디오' in name_lower or '헤어케어' in name_lower or '두피케어' in name_lower or
+           '모발케어' in name_lower or '모발관리' in name_lower or '두피관리' in name_lower or
+           '탈모케어' in name_lower or '탈모관리' in name_lower or '헤어스타일링' in name_lower or
+           '헤어디자인' in name_lower or '두피스파' in name_lower or '헤드스파' in name_lower or
+           '두피마사지' in name_lower or '모발진단' in name_lower or '두피진단' in name_lower or
+           '모발분석' in name_lower or '두피분석' in name_lower or '모발치료' in name_lower or
+           '두피치료' in name_lower or '모발상담' in name_lower or '두피상담' in name_lower or
+           '맨즈헤어' in name_lower or '남성미용실' in name_lower or '여성미용실' in name_lower or
+           '탈모전용' in name_lower) and not (
+          '가발' in name_lower or '증모술' in name_lower or '헤어피스' in name_lower or 
+          '헤어시스템' in name_lower or '헤어라인' in name_lower)):
         selected_category = '탈모미용실'
     else:
         selected_category = '탈모병원'
@@ -184,9 +212,23 @@ def get_unsplash_user_images(category: str, name: str) -> str:
     
     if '문신' in category_lower or '문신' in name_lower or 'smp' in name_lower:
         selected_category = '두피문신'
-    elif '가발' in category_lower or '가발' in name_lower or '증모술' in name_lower:
+    elif ('가발' in category_lower or '가발' in name_lower or '증모술' in name_lower or 
+          '헤어피스' in name_lower or '헤어시스템' in name_lower or '헤어라인' in name_lower):
         selected_category = '가발전문점'
-    elif '미용' in category_lower or '미용' in name_lower or '헤어' in name_lower or '살롱' in name_lower:
+    elif (('미용' in category_lower or '미용' in name_lower or '살롱' in name_lower or
+           '헤어' in name_lower or '두피' in name_lower or '모발' in name_lower or
+           '헤어샵' in name_lower or '미용샵' in name_lower or '미용센터' in name_lower or
+           '미용스튜디오' in name_lower or '헤어케어' in name_lower or '두피케어' in name_lower or
+           '모발케어' in name_lower or '모발관리' in name_lower or '두피관리' in name_lower or
+           '탈모케어' in name_lower or '탈모관리' in name_lower or '헤어스타일링' in name_lower or
+           '헤어디자인' in name_lower or '두피스파' in name_lower or '헤드스파' in name_lower or
+           '두피마사지' in name_lower or '모발진단' in name_lower or '두피진단' in name_lower or
+           '모발분석' in name_lower or '두피분석' in name_lower or '모발치료' in name_lower or
+           '두피치료' in name_lower or '모발상담' in name_lower or '두피상담' in name_lower or
+           '맨즈헤어' in name_lower or '남성미용실' in name_lower or '여성미용실' in name_lower or
+           '탈모전용' in name_lower) and not (
+          '가발' in name_lower or '증모술' in name_lower or '헤어피스' in name_lower or 
+          '헤어시스템' in name_lower or '헤어라인' in name_lower)):
         selected_category = '탈모미용실'
     else:
         selected_category = '탈모병원'
@@ -903,6 +945,7 @@ class HairAnalysisResponse(BaseModel):
 class QuizQuestion(BaseModel):
     question: str
     answer: str
+    explanation: str
 
 class PaperDetail(BaseModel):
     id: str

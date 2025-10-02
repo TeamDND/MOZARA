@@ -363,7 +363,6 @@ export default function MyPage() {
     joinDate: "가입일 정보 없음", // UserState에 createdAt 속성이 없음
     totalAnalysis: loading ? 0 : totalAnalysis, // API에서 가져온 실제 분석 결과 개수
     satisfaction: 0, // UserState에 satisfaction 속성이 없음
-    address: user.address || "주소 정보 없음",
     gender: formatGender(userAdditionalInfo.gender), // API에서 조회한 성별 변환
     age: userAdditionalInfo.age || 0, // API에서 조회한 나이 사용
     role: user.role || "일반 사용자",

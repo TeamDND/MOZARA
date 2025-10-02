@@ -677,7 +677,7 @@ def analyze_hair_with_swin(top_image_data: bytes, side_image_data: bytes = None,
             "description": llm_result['description'],
             "advice": advice_text,
             "confidence": final_confidence,
-            "analysis_type": "swin_dual_model_llm_enhanced"
+            "analysis_type": "hairloss"
         }
 
         log_message(f"✅ 분석 완료: Stage {final_stage}, 신뢰도 {final_confidence:.2%}")

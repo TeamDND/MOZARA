@@ -76,7 +76,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       onClick={() => onProductClick?.(product)}
     >
       {/* 제품 이미지 */}
-      <div className="relative h-36 bg-gray-100 overflow-hidden">
+      <div className="relative h-40 bg-gray-100 overflow-hidden">
         <img
           src={product.productImage || defaultImageUrl} // product.productImage가 없을 경우 대비
           alt={product.productName}
