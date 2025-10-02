@@ -21,12 +21,30 @@ const OAuth2Callback: React.FC = () => {
         const accessToken = searchParams.get('access_token');
         const refreshToken = searchParams.get('refresh_token');
         const error = searchParams.get('error');
+        const code = searchParams.get('code');
+        const state = searchParams.get('state');
         
         console.log('OAuth2 콜백 처리 시작');
         console.log('전체 URL:', window.location.href);
-        console.log('URL 파라미터:', { success, accessToken: accessToken ? '있음' : '없음', refreshToken: refreshToken ? '있음' : '없음', error });
+        console.log('URL 파라미터:', { 
+          success, 
+          accessToken: accessToken ? '있음' : '없음', 
+          refreshToken: refreshToken ? '있음' : '없음', 
+          error,
+          code: code ? '있음' : '없음',
+          state: state ? '있음' : '없음'
+        });
         console.log('실제 accessToken 값:', accessToken);
         console.log('실제 refreshToken 값:', refreshToken);
+        console.log('실제 code 값:', code);
+        
+        // code 파라미터가 있으면 구글이 직접 콜백한 것 (Nginx 설정 문제)
+        if (code && !accessToken) {
+          console.log('구글에서 직접 콜백됨 - Nginx 설정 문제입니다');
+          setStatus('error');
+          setErrorMessage('OAuth2 콜백이 백엔드로 전달되지 않았습니다. 관리자에게 문의하세요.');
+          return;
+        }
 
         if (success === 'false' || error) {
           setStatus('error');
