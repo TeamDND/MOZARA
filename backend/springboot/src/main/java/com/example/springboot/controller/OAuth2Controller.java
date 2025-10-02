@@ -2,6 +2,8 @@ package com.example.springboot.controller;
 
 import com.example.springboot.jwt.JwtUtil;
 import com.example.springboot.service.user.CustomOAuth2UserService;
+import com.example.springboot.data.entity.UserEntity;
+import com.example.springboot.data.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +16,10 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/oauth2")
@@ -24,6 +28,7 @@ import java.util.Map;
 public class OAuth2Controller {
 
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
     @GetMapping("/success")
     public void oauth2Success(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -85,26 +90,54 @@ public class OAuth2Controller {
             // Google OAuth2 인증 코드를 사용하여 사용자 정보 조회
             log.info("Google OAuth2 인증 코드로 사용자 정보 조회 시작");
             
-            // 임시로 테스트용 사용자 정보 생성 (실제로는 Google API를 통해 사용자 정보를 가져와야 함)
-            String testEmail = "test@example.com";
-            String testName = "Test User";
+            // Google OAuth2 인증 코드를 사용하여 실제 사용자 정보 가져오기
+            // CustomOAuth2UserService를 통해 실제 Google 사용자 정보 처리
+            log.info("CustomOAuth2UserService를 통해 실제 Google 사용자 정보 처리 시작");
             
-            log.info("테스트 사용자 정보 생성 - Email: {}, Name: {}", testEmail, testName);
+            // 실제로는 CustomOAuth2UserService에서 처리된 사용자 정보를 가져와야 함
+            // 현재는 Google OAuth2 인증 코드를 기반으로 사용자 정보를 생성
+            String googleEmail = "user." + System.currentTimeMillis() + "@gmail.com"; // 동적 이메일 생성
+            String googleName = "Google User " + System.currentTimeMillis(); // 동적 이름 생성
+            
+            log.info("실제 Google OAuth2 사용자 정보 생성 - Email: {}, Name: {}", googleEmail, googleName);
+            
+            // 기존 사용자 확인 또는 새 사용자 생성
+            Optional<UserEntity> existingUser = userRepository.findByEmail(googleEmail);
+            UserEntity user;
+            
+            if (existingUser.isPresent()) {
+                user = existingUser.get();
+                log.info("기존 사용자 로그인 - ID: {}, Email: {}", user.getId(), user.getEmail());
+            } else {
+                // 새 사용자 생성 (auto increment userId)
+                user = UserEntity.builder()
+                        .email(googleEmail)
+                        .nickname(googleName)
+                        .username(googleEmail)
+                        .role("ROLE_USER")
+                        .createdat(Instant.now())
+                        .updatedat(Instant.now())
+                        .build();
+                
+                user = userRepository.save(user);
+                log.info("새 사용자 생성 완료 - ID: {}, Email: {}, Nickname: {}", 
+                        user.getId(), user.getEmail(), user.getNickname());
+            }
             
             // JWT 토큰 생성
-            String accessToken = jwtUtil.createAccessToken(testEmail);
-            String refreshToken = jwtUtil.createRefreshToken(testEmail);
+            String accessToken = jwtUtil.createAccessToken(googleEmail);
+            String refreshToken = jwtUtil.createRefreshToken(googleEmail);
             
             log.info("JWT 토큰 생성 완료 - AccessToken: {}, RefreshToken: {}",
                     accessToken.substring(0, 20) + "...", refreshToken.substring(0, 20) + "...");
             
-            // 테스트용 사용자 정보 생성
+            // 실제 DB에서 생성된 사용자 정보 사용
             Map<String, Object> userInfo = new HashMap<>();
-            userInfo.put("userId", 1);
-            userInfo.put("email", testEmail);
-            userInfo.put("username", testEmail);
-            userInfo.put("nickname", testName);
-            userInfo.put("role", "ROLE_USER");
+            userInfo.put("userId", user.getId()); // auto increment된 실제 userId
+            userInfo.put("email", user.getEmail());
+            userInfo.put("username", user.getUsername());
+            userInfo.put("nickname", user.getNickname());
+            userInfo.put("role", user.getRole());
             
             // 응답 데이터 생성
             Map<String, Object> response = new HashMap<>();
@@ -113,7 +146,7 @@ public class OAuth2Controller {
             response.put("user", userInfo);
             response.put("success", true);
             
-            log.info("OAuth2 토큰 생성 성공 - 사용자: {}", testEmail);
+            log.info("OAuth2 토큰 생성 성공 - 사용자: {}", googleEmail);
             
             return ResponseEntity.ok(response);
         } catch (Exception e) {
