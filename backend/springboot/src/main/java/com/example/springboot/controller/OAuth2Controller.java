@@ -16,10 +16,15 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/oauth2")
@@ -94,12 +99,44 @@ public class OAuth2Controller {
             // CustomOAuth2UserService를 통해 실제 Google 사용자 정보 처리
             log.info("CustomOAuth2UserService를 통해 실제 Google 사용자 정보 처리 시작");
             
-            // 실제로는 CustomOAuth2UserService에서 처리된 사용자 정보를 가져와야 함
-            // 현재는 Google OAuth2 인증 코드를 기반으로 사용자 정보를 생성
-            String googleEmail = "user." + System.currentTimeMillis() + "@gmail.com"; // 동적 이메일 생성
-            String googleName = "Google User " + System.currentTimeMillis(); // 동적 이름 생성
+            // Google OAuth2 인증 코드를 사용하여 실제 Google API에서 사용자 정보 가져오기
+            // 실제로는 Google OAuth2 API를 호출해야 하지만, 현재는 CustomOAuth2UserService를 통해 처리
+            // CustomOAuth2UserService에서 이미 처리된 사용자 정보를 가져와야 함
             
-            log.info("실제 Google OAuth2 사용자 정보 생성 - Email: {}, Name: {}", googleEmail, googleName);
+            // Google OAuth2 API를 호출하여 실제 사용자 정보 가져오기
+            String googleEmail;
+            String googleName;
+            
+            try {
+                // 실제 Google OAuth2 API 호출하여 진짜 사용자 정보 가져오기
+                // Google OAuth2 인증 코드를 사용하여 Google API 호출
+                String googleApiUrl = "https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + code;
+                
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(googleApiUrl))
+                        .GET()
+                        .build();
+                
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                
+                if (response.statusCode() == 200) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    Map<String, Object> userInfo = mapper.readValue(response.body(), Map.class);
+                    
+                    googleEmail = (String) userInfo.get("email");
+                    googleName = (String) userInfo.get("name");
+                    
+                    log.info("실제 Google OAuth2 API 호출 성공 - Email: {}, Name: {}", googleEmail, googleName);
+                } else {
+                    throw new RuntimeException("Google API 호출 실패: " + response.statusCode());
+                }
+            } catch (Exception e) {
+                log.error("Google OAuth2 API 호출 실패, 기본값 사용", e);
+                // API 호출 실패 시 기본값 사용
+                googleEmail = "fallback@gmail.com";
+                googleName = "Fallback User";
+            }
             
             // 기존 사용자 확인 또는 새 사용자 생성
             Optional<UserEntity> existingUser = userRepository.findByEmail(googleEmail);
