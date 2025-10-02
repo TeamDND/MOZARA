@@ -13,6 +13,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HairQuizSubmissionDTO {
     private Integer userId;
+    private List<HairQuizQuestionDTO> quizQuestions; // 퀴즈 문제들
     private List<QuizAnswerDTO> answers;
     
     @Data

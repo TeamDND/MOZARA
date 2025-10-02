@@ -83,8 +83,10 @@ public class HairQuizService {
      */
     public HairQuizResultDTO submitQuiz(HairQuizSubmissionDTO submission, List<HairQuizQuestionDTO> quizQuestions) {
         try {
-            log.info("[HairQuiz] 퀴즈 답변 제출 - userId: {}, 답변 수: {}", 
-                    submission.getUserId(), submission.getAnswers().size());
+            log.info("[HairQuiz] 퀴즈 답변 제출 - userId: {}, 문제 수: {}, 답변 수: {}", 
+                    submission.getUserId(), 
+                    quizQuestions != null ? quizQuestions.size() : 0,
+                    submission.getAnswers().size());
 
             // 답변 검증 및 채점
             List<HairQuizResultDTO.QuestionResultDTO> questionResults = new ArrayList<>();
@@ -93,9 +95,12 @@ public class HairQuizService {
             for (HairQuizSubmissionDTO.QuizAnswerDTO userAnswer : submission.getAnswers()) {
                 int questionIndex = userAnswer.getQuestionIndex();
                 
-                if (questionIndex >= 0 && questionIndex < quizQuestions.size()) {
+                if (quizQuestions != null && questionIndex >= 0 && questionIndex < quizQuestions.size()) {
                     HairQuizQuestionDTO question = quizQuestions.get(questionIndex);
                     boolean isCorrect = question.getAnswer().equals(userAnswer.getUserAnswer());
+                    
+                    log.info("[HairQuiz] 문제 {} - 정답: {}, 사용자답: {}, 맞음: {}", 
+                            questionIndex, question.getAnswer(), userAnswer.getUserAnswer(), isCorrect);
                     
                     if (isCorrect) {
                         correctCount++;
@@ -111,6 +116,9 @@ public class HairQuizService {
                             .build();
                     
                     questionResults.add(result);
+                } else {
+                    log.warn("[HairQuiz] 잘못된 문제 인덱스: {} (총 문제 수: {})", 
+                            questionIndex, quizQuestions != null ? quizQuestions.size() : 0);
                 }
             }
 

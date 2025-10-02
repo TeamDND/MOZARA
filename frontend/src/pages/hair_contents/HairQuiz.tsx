@@ -1,10 +1,38 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import pythonClient from '../../services/pythonClient';
+import apiClient from '../../services/apiClient';
+import { RootState } from '../../utils/store';
 
 interface QuizQuestion {
   question: string;
   answer: 'O' | 'X';
   explanation: string;
+}
+
+interface QuizSubmission {
+  userId: number;
+  quizQuestions: QuizQuestion[]; // 퀴즈 문제들도 함께 제출
+  answers: {
+    questionIndex: number;
+    userAnswer: 'O' | 'X';
+  }[];
+}
+
+interface QuizResult {
+  userId: number;
+  totalQuestions: number;
+  correctAnswers: number;
+  earnedPoints: number;
+  isPassed: boolean;
+  questionResults: {
+    questionIndex: number;
+    question: string;
+    correctAnswer: 'O' | 'X';
+    userAnswer: 'O' | 'X';
+    isCorrect: boolean;
+    explanation: string;
+  }[];
 }
 
 const HairQuiz: React.FC = () => {
@@ -16,6 +44,12 @@ const HairQuiz: React.FC = () => {
   const [selectedAnswer, setSelectedAnswer] = useState<'O' | 'X' | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [userAnswers, setUserAnswers] = useState<('O' | 'X')[]>([]);
+  const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Redux에서 사용자 정보 가져오기
+  const { userId } = useSelector((state: RootState) => state.user);
 
   const generateQuizWithGemini = async (): Promise<QuizQuestion[]> => {
     try {
@@ -36,12 +70,16 @@ const HairQuiz: React.FC = () => {
     setShowExplanation(false);
     setSelectedAnswer(null);
     setShowResult(false);
+    setUserAnswers([]);
+    setQuizResult(null);
     setIsLoading(true);
 
     try {
       const data = await generateQuizWithGemini();
       if (data.length === 0) throw new Error("API로부터 퀴즈 데이터를 받지 못했습니다.");
       setQuizData(data);
+      // 사용자 답변 배열 초기화
+      setUserAnswers(new Array(data.length).fill(null));
     } catch (error) {
       console.error("퀴즈 생성 오류:", error);
       alert('퀴즈를 만드는 데 실패했습니다. 잠시 후 다시 시도해 주세요.');
@@ -54,6 +92,12 @@ const HairQuiz: React.FC = () => {
     if (showExplanation) return;
     
     setSelectedAnswer(answer);
+    
+    // 사용자 답변 저장
+    const newUserAnswers = [...userAnswers];
+    newUserAnswers[currentQuestionIndex] = answer;
+    setUserAnswers(newUserAnswers);
+    
     const currentQuestion = quizData[currentQuestionIndex];
     const correct = answer === currentQuestion.answer;
     setIsCorrect(correct);
@@ -73,7 +117,49 @@ const HairQuiz: React.FC = () => {
     } else {
       setTimeout(() => {
         setShowResult(true);
+        // 퀴즈 완료 후 서버에 답변 제출
+        submitQuizAnswers(newUserAnswers);
       }, 2000);
+    }
+  };
+
+  // 퀴즈 답변 제출 함수
+  const submitQuizAnswers = async (answers: ('O' | 'X')[]) => {
+    if (!userId) {
+      console.log('로그인하지 않은 사용자 - 퀴즈 결과 제출하지 않음');
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const submission: QuizSubmission = {
+        userId: userId,
+        quizQuestions: quizData, // 퀴즈 문제들도 함께 제출
+        answers: answers.map((answer, index) => ({
+          questionIndex: index,
+          userAnswer: answer
+        }))
+      };
+
+      console.log('퀴즈 답변 제출:', submission);
+      
+      const response = await apiClient.post('/ai/hair-quiz/submit', submission);
+      const result: QuizResult = response.data;
+      
+      console.log('퀴즈 결과:', result);
+      setQuizResult(result);
+      
+      // 포인트 지급 알림
+      if (result.isPassed && result.earnedPoints > 0) {
+        alert(`🎉 퀴즈 통과! ${result.earnedPoints}포인트를 획득했습니다!`);
+      }
+      
+    } catch (error: any) {
+      console.error('퀴즈 제출 실패:', error);
+      alert('퀴즈 결과 제출에 실패했습니다. 포인트가 지급되지 않을 수 있습니다.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -129,6 +215,35 @@ const HairQuiz: React.FC = () => {
                   </p>
                   <div className="bg-gray-50 rounded-lg p-4 mb-4">
                     <p className="text-sm text-gray-700 font-medium">{getResultMessage()}</p>
+                    
+                    {/* 서버 결과 표시 */}
+                    {quizResult && (
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-gray-600">서버 검증 결과:</span>
+                          <span className={`font-semibold ${quizResult.isPassed ? 'text-green-600' : 'text-red-600'}`}>
+                            {quizResult.correctAnswers}/{quizResult.totalQuestions} 정답
+                          </span>
+                        </div>
+                        {quizResult.isPassed && quizResult.earnedPoints > 0 && (
+                          <div className="mt-2 text-center">
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              🎉 +{quizResult.earnedPoints}포인트 획득!
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* 제출 중 표시 */}
+                    {isSubmitting && (
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <div className="flex items-center justify-center text-xs text-gray-500">
+                          <div className="animate-spin rounded-full h-3 w-3 border border-gray-300 border-t-gray-600 mr-2"></div>
+                          결과 제출 중...
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* 결과별 상세 설명 */}

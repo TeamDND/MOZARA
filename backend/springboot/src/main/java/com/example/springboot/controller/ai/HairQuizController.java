@@ -55,13 +55,13 @@ public class HairQuizController {
     @PostMapping("/submit")
     public ResponseEntity<?> submitQuiz(@RequestBody HairQuizSubmissionDTO submission) {
         try {
-            log.info("[HairQuiz] 퀴즈 답변 제출 요청 - userId: {}", submission.getUserId());
+            log.info("[HairQuiz] 퀴즈 답변 제출 요청 - userId: {}, 문제 수: {}, 답변 수: {}", 
+                    submission.getUserId(), 
+                    submission.getQuizQuestions() != null ? submission.getQuizQuestions().size() : 0,
+                    submission.getAnswers() != null ? submission.getAnswers().size() : 0);
             
-            // 먼저 퀴즈를 생성해서 정답과 비교
-            HairQuizResponseDTO quizResponse = hairQuizService.generateQuiz();
-            
-            // 답변 제출 및 결과 처리
-            HairQuizResultDTO result = hairQuizService.submitQuiz(submission, quizResponse.getItems());
+            // 프론트엔드에서 제출한 퀴즈 문제들을 사용
+            HairQuizResultDTO result = hairQuizService.submitQuiz(submission, submission.getQuizQuestions());
             
             return ResponseEntity.ok(result);
             
