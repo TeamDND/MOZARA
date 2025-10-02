@@ -37,6 +37,8 @@ import OAuth2TokenProxy from './pages/users/OAuth2TokenProxy';
 
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
+  console.log('App 컴포넌트 렌더링 - 현재 경로:', window.location.pathname);
+  
   return (
     <ErrorBoundary>
       <Routes>

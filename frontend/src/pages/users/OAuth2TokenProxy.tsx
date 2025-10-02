@@ -9,6 +9,8 @@ import { Button } from '../../components/ui/button';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
 const OAuth2TokenProxy: React.FC = () => {
+  console.log('=== OAuth2TokenProxy 컴포넌트 시작 ===');
+  
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
@@ -18,6 +20,10 @@ const OAuth2TokenProxy: React.FC = () => {
   // Redux 상태 확인
   const user = useSelector((state: RootState) => state.user);
   const token = useSelector((state: RootState) => state.token);
+  
+  console.log('OAuth2TokenProxy 컴포넌트 초기화 완료');
+  console.log('현재 경로:', window.location.pathname);
+  console.log('경로 매칭 확인: /login/oauth2/code/google');
 
   useEffect(() => {
     console.log('=== OAuth2TokenProxy 컴포넌트 렌더링됨 ===');
