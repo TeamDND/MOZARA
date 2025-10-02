@@ -668,7 +668,7 @@ const DailyCare: React.FC = () => {
               
               {/* 지도 영역 */}
               {currentLocation ? (
-                <div className="relative bg-gray-100 rounded-lg overflow-hidden">
+                <div className="relative bg-gray-100 rounded-lg overflow-hidden" style={{ zIndex: 1 }}>
                   <MapPreview
                     latitude={currentLocation.latitude}
                     longitude={currentLocation.longitude}

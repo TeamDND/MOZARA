@@ -1,5 +1,5 @@
 import type React from "react"
-import { Home, User, Bot, Search, Layers3 } from "lucide-react"
+import { Home, Sprout, Bot, Search, Layers3 } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { RootState } from "../utils/store"
@@ -80,7 +80,7 @@ const BottomNavigationBar: React.FC = () => {
               <Home className="h-6 w-6 text-white" />
             </button>
 
-            {/* 프로필 */}
+            {/* 탈모PT */}
             <button
               onClick={() => {
                 closeChatBotModal();
@@ -92,9 +92,9 @@ const BottomNavigationBar: React.FC = () => {
               }}
               className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
-              <User className="h-5 w-5 mb-1 text-[#222222]" />
+              <Sprout className="h-5 w-5 mb-1 text-[#222222]" />
               <span className="text-xs font-medium text-[#222222]">
-                MY
+                탈모PT
               </span>
             </button>
 

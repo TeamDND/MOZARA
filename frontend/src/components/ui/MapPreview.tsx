@@ -98,14 +98,14 @@ const MapPreview: React.FC<MapPreviewProps> = ({
   };
 
   return (
-    <div className={`overflow-hidden shadow-inner ${className || ''}`}> 
-      <div className="w-full h-full relative">
+    <div className={`overflow-hidden shadow-inner ${className || ''}`} style={{ zIndex: 1 }}> 
+      <div className="w-full h-full relative" style={{ zIndex: 1 }}>
         {/* @ts-ignore */}
         <MapContainer
           center={center}
           zoom={zoom}
           scrollWheelZoom={true}
-          style={{ height: '100%', width: '100%' }}
+          style={{ height: '100%', width: '100%', zIndex: 1 }}
         >
           {/* @ts-ignore */}
           <TileLayer
