@@ -68,27 +68,29 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
 
           // DB에 저장된 값이 있으면 자동으로 채우기
           if (userInfo.gender || userInfo.age || userInfo.familyHistory !== null || userInfo.isLoss !== null || userInfo.stress) {
-            // DB 한글 값을 영문으로 변환
-            const convertGender = (gender: string) => {
-              if (gender === '남' || gender === 'male') return 'male';
-              if (gender === '여' || gender === 'female') return 'female';
-              return '';
-            };
+            console.log('🔄 사용자 정보 로드:', {
+              gender: userInfo.gender,
+              age: userInfo.age,
+              familyHistory: userInfo.familyHistory,
+              isLoss: userInfo.isLoss,
+              stress: userInfo.stress
+            });
 
-            const convertStress = (stress: string) => {
-              if (stress === '높음' || stress === 'high') return 'high';
-              if (stress === '보통' || stress === 'medium') return 'medium';
-              if (stress === '낮음' || stress === 'low') return 'low';
-              return stress || '';
-            };
+            // 한글 성별을 영어로 변환
+            let genderValue = userInfo.gender || '';
+            if (genderValue === '남' || genderValue === '남성') {
+              genderValue = 'male';
+            } else if (genderValue === '여' || genderValue === '여성') {
+              genderValue = 'female';
+            }
 
             setBaspAnswers(prev => ({
               ...prev,
-              gender: convertGender(userInfo.gender || ''),
+              gender: genderValue,
               age: userInfo.age ? String(userInfo.age) : '',
               familyHistory: userInfo.familyHistory === true ? 'yes' : userInfo.familyHistory === false ? 'no' : '',
               recentHairLoss: userInfo.isLoss === true ? 'yes' : userInfo.isLoss === false ? 'no' : '',
-              stress: convertStress(userInfo.stress || '')
+              stress: userInfo.stress || ''
             }));
 
             // 필수 필드가 모두 채워져 있으면 모달 표시
@@ -137,14 +139,14 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
       const steps = isMale ? [
         '설문 분석 완료',
         '이미지 전처리 완료',
-        'Swin Transformer AI 모발 분석 중...',
+        'AI 모발 분석 중...',
         '탈모 진행도 측정 완료',
         '헤어라인 분석 완료',
         '개인 맞춤 계획 수립 완료'
       ] : [
         '설문 분석 완료',
         '이미지 전처리 완료',
-        'RAG 듀얼 앙상블 AI 모발 분석 중...',
+        'AI 모발 분석 중...',
         '탈모 진행도 측정 완료',
         '두피 밀도 분석 완료',
         '개인 맞춤 계획 수립 완료'
@@ -283,6 +285,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         );
 
       case 2:
+        console.log('📸 ImageUploadStep 렌더링 - gender:', baspAnswers.gender);
         return (
           <ImageUploadStep
             uploadedPhoto={uploadedPhoto}

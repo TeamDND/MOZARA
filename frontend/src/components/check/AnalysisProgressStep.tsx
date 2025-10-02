@@ -65,7 +65,7 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                 <span className="text-sm">
-                  {isMale ? 'Swin Transformer AI로 이미지 분석 중...' : 'RAG 듀얼 앙상블 AI로 이미지 분석 중...'}
+                  AI로 이미지 분석 중...
                 </span>
               </div>
             )}
@@ -74,9 +74,7 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
           <div className="bg-blue-50 p-4 rounded-xl">
             <p className="text-sm text-blue-800">
               🧠 <strong>실제 AI 분석 진행 중!</strong>{' '}
-              {isMale
-                ? 'Swin Transformer 모델이 귀하의 두피 상태를 분석하고 있습니다.'
-                : 'ConvNeXt + ViT 듀얼 앙상블 모델이 귀하의 두피 상태를 분석하고 있습니다.'}
+              AI 모델이 귀하의 모발 상태를 분석하고 있습니다.
               {' '}잠시만 기다려주세요.
             </p>
           </div>

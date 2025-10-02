@@ -26,6 +26,8 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
   // 남성인 경우에만 Side View 필요
   const isMale = gender === 'male';
 
+  console.log('👤 ImageUploadStep - gender prop:', gender, 'isMale:', isMale);
+
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
