@@ -45,6 +45,7 @@ interface AnalysisResult {
   advice: string
   grade: number
   imageUrl?: string
+  analysisType?: string // analysisType 추가
   type: string
   improvement: string
 }
@@ -150,24 +151,28 @@ export default function MyPage() {
         console.log('API 호출: 분석 결과 리스트 조회', `/analysis-results/${user.userId}`);
         const resultsResponse = await apiClient.get(`/analysis-results/${user.userId}`)
         console.log('분석 결과 리스트 API 응답:', resultsResponse.data);
-        
+
         // 날짜 포맷팅 및 데이터 변환
-        const formattedResults = resultsResponse.data.map((result: any, index: number) => ({
-          id: result.id,
-          inspectionDate: result.inspectionDate ? 
-            new Date(result.inspectionDate).toLocaleDateString('ko-KR', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit'
-            }).replace(/\./g, '.').replace(/\s/g, '') : 
-            `2024.01.${String(index + 1).padStart(2, '0')}`,
-          analysisSummary: result.analysisSummary || '분석 결과 요약',
-          advice: result.advice || '개선 방안 제시',
-          grade: result.grade || 85,
-          imageUrl: result.imageUrl,
-          type: result.type || '종합 진단',
-          improvement: result.improvement || '15% 개선됨'
-        }))
+        const formattedResults = resultsResponse.data.map((result: any, index: number) => {
+          // imageUrl은 그대로 전달 (MyReportPage에서 처리)
+          return {
+            id: result.id,
+            inspectionDate: result.inspectionDate ?
+              new Date(result.inspectionDate).toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+              }).replace(/\./g, '.').replace(/\s/g, '') :
+              `2024.01.${String(index + 1).padStart(2, '0')}`,
+            analysisSummary: result.analysisSummary || '분석 결과 요약',
+            advice: result.advice || '개선 방안 제시',
+            grade: result.grade || 85,
+            imageUrl: result.imageUrl, // 전체 URL 그대로 전달 (|||포함)
+            analysisType: result.analysisType,
+            type: result.type || '종합 진단',
+            improvement: result.improvement || '15% 개선됨'
+          };
+        })
         
         setAnalysisResults(formattedResults)
       } catch (error: any) {
@@ -459,40 +464,6 @@ export default function MyPage() {
                           }}
                         >
                           <div className="flex items-center justify-between">
-                            {/* 이미지 영역 */}
-                            <div className="flex-shrink-0 mr-4">
-                              {reportData?.imageUrl ? (
-                                <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
-                                  <img
-                                    src={reportData.imageUrl}
-                                    alt="분석 결과 이미지"
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                      // 이미지 로드 실패 시 더미 이미지로 대체
-                                      const target = e.target as HTMLImageElement
-                                      target.style.display = 'none'
-                                      const parent = target.parentElement
-                                      if (parent) {
-                                        parent.innerHTML = `
-                                          <div class="w-full h-full flex items-center justify-center bg-gray-200">
-                                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                          </div>
-                                        `
-                                      }
-                                    }}
-                                  />
-                                </div>
-                              ) : (
-                                <div className="w-16 h-16 rounded-lg bg-gray-200 flex items-center justify-center">
-                                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                  </svg>
-                                </div>
-                              )}
-                            </div>
-                            
                             {/* 콘텐츠 영역 */}
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-3">

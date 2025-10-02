@@ -532,12 +532,35 @@ const DailyCare: React.FC = () => {
                     setIsAnalyzing(true);
                     setProducts(null);
                     try {
-                      // 스프링부트 API 호출
+                      // 1단계: S3 업로드
+                      let imageUrl: string | null = null;
+                      if (username) {
+                        try {
+                          console.log('🔄 S3 업로드 시작...');
+                          const uploadFormData = new FormData();
+                          uploadFormData.append('image', selectedImage);
+                          uploadFormData.append('username', username);
+
+                          const uploadResponse = await apiClient.post('/images/upload/hair-damage', uploadFormData, {
+                            headers: { 'Content-Type': 'multipart/form-data' },
+                          });
+
+                          if (uploadResponse.data.success) {
+                            imageUrl = uploadResponse.data.imageUrl;
+                            console.log('✅ S3 업로드 성공:', imageUrl);
+                          }
+                        } catch (uploadError) {
+                          console.error('❌ S3 업로드 실패:', uploadError);
+                          // S3 업로드 실패 시에도 분석은 진행 (imageUrl 없이)
+                        }
+                      }
+
+                      // 2단계: 스프링부트 AI 분석 API 호출
                       const formData = new FormData();
                       formData.append('image', selectedImage);
                       formData.append('top_k', '10');
                       formData.append('use_preprocessing', 'true');
-                      
+
                       // 로그인한 사용자의 user_id 추가
                       if (userId) {
                         formData.append('user_id', userId.toString());
@@ -545,27 +568,33 @@ const DailyCare: React.FC = () => {
                       } else {
                         console.log('로그인하지 않은 사용자 - user_id 없음');
                       }
-                      
+
+                      // S3 URL이 있으면 추가
+                      if (imageUrl) {
+                        formData.append('image_url', imageUrl);
+                        console.log('📸 S3 이미지 URL 추가:', imageUrl);
+                      }
+
                       const response = await apiClient.post('/ai/hair-loss-daily/analyze', formData, {
                         headers: { 'Content-Type': 'multipart/form-data' },
                       });
-                      
+
                       const result: HairAnalysisResponse = response.data;
                       setAnalysis(result);
                       updateDashboardFromAnalysis(result);
-                      
+
                       // 사진 분석 완료 후 lastPhotoDate 업데이트
                       setUserProgress(prev => ({
                         ...prev,
                         lastPhotoDate: new Date().toISOString()
                       }));
-                      
+
                       // 심각도에 따른 제품 추천
                       const severityLevel = result.analysis ? parseInt(result.analysis.primary_severity.split('.')[0]) || 0 : 0;
                       const stage = Math.min(3, Math.max(0, severityLevel));
                       const prodRes = await hairProductApi.getProductsByStage(stage);
                       setProducts(prodRes.products.slice(0, 6));
-                      
+
                       // 케어 팁은 updateDashboardFromAnalysis에서 설정됨
                     } catch (e) {
                       console.error(e);

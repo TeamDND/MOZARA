@@ -31,6 +31,7 @@ interface AnalysisResult {
   imageUrl?: string;
   type: string;
   improvement: string;
+  analysisType?: string;
 }
 
 interface MyReportPageProps {
@@ -44,9 +45,17 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
   // URL state에서 분석 결과 데이터 가져오기
   const stateAnalysisResult = location.state?.analysisResult as AnalysisResult;
   const analysisResult = propAnalysisResult || stateAnalysisResult;
-  
+
   const [selectedRegion, setSelectedRegion] = useState('서울');
   const [selectedCategory, setSelectedCategory] = useState('전체');
+
+  // 이미지 URL 처리 (남성 탈모 검사는 top|||side 형식)
+  const imageUrl = analysisResult?.imageUrl || '';
+  // type 필드가 analysisType 역할을 함
+  const analysisType = analysisResult?.analysisType || analysisResult?.type || '';
+  const [topImageUrl, sideImageUrl] = imageUrl.includes('|||')
+    ? imageUrl.split('|||').map(url => url.trim())
+    : [imageUrl, null];
 
   // 분석 결과가 없으면 마이페이지로 돌아가기
   if (!analysisResult) {
@@ -256,13 +265,40 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
           {analysisResult.imageUrl && (
             <div className="bg-white p-4 rounded-xl shadow-md">
               <h3 className="text-base font-semibold text-gray-800 mb-3">분석 이미지</h3>
-              <div className="aspect-video rounded-lg overflow-hidden bg-gray-200">
-                <ImageWithFallback 
-                  src={analysisResult.imageUrl}
-                  alt="분석 결과 이미지"
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              {/* 남성 탈모 검사 (두 개 이미지) */}
+              {topImageUrl && sideImageUrl ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-gray-600 mb-2 text-center">정수리</p>
+                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                      <ImageWithFallback
+                        src={topImageUrl}
+                        alt="정수리 이미지"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600 mb-2 text-center">측면</p>
+                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                      <ImageWithFallback
+                        src={sideImageUrl}
+                        alt="측면 이미지"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* 여성 탈모 검사 또는 모발 손상 검사 (한 개 이미지) */
+                <div className="aspect-square rounded-lg overflow-hidden bg-gray-200">
+                  <ImageWithFallback
+                    src={topImageUrl || analysisResult.imageUrl}
+                    alt="분석 결과 이미지"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
             </div>
           )}
 

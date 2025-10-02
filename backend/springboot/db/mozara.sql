@@ -30,7 +30,7 @@ CREATE TABLE `analysis_results` (
   `analysis_summary` tinytext,
   `advice` tinytext,
   `grade` int DEFAULT NULL,
-  `image_url` varchar(255) DEFAULT NULL,
+  `image_url` varchar(1000) DEFAULT NULL,
   `user_id_foreign` int DEFAULT NULL,
   `analysis_type` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`result_id`),

@@ -47,6 +47,8 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
   const [uploadedPhotoFile, setUploadedPhotoFile] = useState<File | null>(null);
   const [uploadedSidePhoto, setUploadedSidePhoto] = useState<string | null>(null);
   const [uploadedSidePhotoFile, setUploadedSidePhotoFile] = useState<File | null>(null);
+  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState<string | null>(null); // S3 URL
+  const [uploadedSidePhotoUrl, setUploadedSidePhotoUrl] = useState<string | null>(null); // S3 URL
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [analysisSteps, setAnalysisSteps] = useState<string[]>([]);
@@ -163,12 +165,19 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
           if (isMale) {
             // 남성: Swin Transformer 분석 (Top + Side)
             console.log('🔄 남성 - Swin API 분석 시작');
+            console.log('📸 Top View URL:', uploadedPhotoUrl);
+            console.log('📸 Side View URL:', uploadedSidePhotoUrl);
+
+            // S3 URL 결합 (|||로 구분)
+            const combinedImageUrl = uploadedPhotoUrl && uploadedSidePhotoUrl
+              ? `${uploadedPhotoUrl}|||${uploadedSidePhotoUrl}`
+              : undefined;
 
             const result = await analyzeHairWithSwin(
               uploadedPhotoFile,
               uploadedSidePhotoFile!,
               user?.userId || undefined,
-              undefined,
+              combinedImageUrl,
               {
                 gender: baspAnswers.gender,
                 age: baspAnswers.age,
@@ -183,11 +192,12 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
           } else {
             // 여성: RAG v2 분석 (Top만)
             console.log('🔄 여성 - RAG v2 API 분석 시작');
+            console.log('📸 Top View URL:', uploadedPhotoUrl);
 
             const result = await analyzeHairWithRAG(
               uploadedPhotoFile,
               user?.userId || undefined,
-              undefined, // imageUrl (선택적)
+              uploadedPhotoUrl || undefined,
               {
                 gender: baspAnswers.gender,
                 age: baspAnswers.age,
@@ -295,6 +305,8 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
             setUploadedSidePhoto={setUploadedSidePhoto}
             setUploadedSidePhotoFile={setUploadedSidePhotoFile}
             gender={baspAnswers.gender}
+            setUploadedPhotoUrl={setUploadedPhotoUrl}
+            setUploadedSidePhotoUrl={setUploadedSidePhotoUrl}
           />
         );
 

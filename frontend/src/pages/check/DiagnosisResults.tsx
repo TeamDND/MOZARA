@@ -55,6 +55,13 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
   const [showStageInfo, setShowStageInfo] = useState(false);
   // URL state 또는 props에서 Swin 분석 결과 가져오기
   const swinResult = location.state?.swinResult || diagnosisData?.photo?.swinResult;
+
+  // 이미지 URL 처리 (남성 탈모 검사는 top|||side 형식)
+  const imageUrl = location.state?.imageUrl || diagnosisData?.imageUrl || '';
+  const analysisType = location.state?.analysisType || diagnosisData?.analysisType || '';
+  const [topImageUrl, sideImageUrl] = imageUrl.includes('|||')
+    ? imageUrl.split('|||')
+    : [imageUrl, null];
   const stageRecommendations: Record<number, StageRecommendation> = {
     0: {
       title: '정상 - 예방 및 두피 관리',
@@ -367,6 +374,35 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* 남성 탈모 검사 이미지 표시 (swin_dual_model_llm_enhanced) */}
+            {analysisType === 'swin_dual_model_llm_enhanced' && topImageUrl && sideImageUrl && (
+              <div className="mt-4 p-3 bg-white rounded-lg">
+                <h3 className="text-sm font-semibold text-gray-800 mb-3">분석 이미지</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-gray-600 mb-2 text-center">정수리</p>
+                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                      <ImageWithFallback
+                        src={topImageUrl}
+                        alt="정수리 이미지"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600 mb-2 text-center">측면</p>
+                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                      <ImageWithFallback
+                        src={sideImageUrl}
+                        alt="측면 이미지"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
