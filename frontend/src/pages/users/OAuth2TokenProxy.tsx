@@ -54,7 +54,9 @@ const OAuth2TokenProxy: React.FC = () => {
           console.log('응답 헤더:', response.headers);
           console.log('백엔드에서 받은 토큰 데이터:', response.data);
           
-          const { accessToken, refreshToken, user } = response.data;
+          // JWT 토큰 에러는 무시하고 정상 응답 처리
+          if (response.data && response.data.accessToken && response.data.user) {
+            const { accessToken, refreshToken, user } = response.data;
             
             if (accessToken && user) {
               console.log('OAuth2 로그인 성공!');
@@ -78,14 +80,26 @@ const OAuth2TokenProxy: React.FC = () => {
                 console.log('토큰 존재 여부:', token ? '있음' : '없음');
               }, 100);
               
-              setStatus('success');
-              
-              // 성공 시에도 즉시 이동하지 않고 사용자가 버튼을 클릭하도록 함
-              console.log('OAuth2 로그인 성공 - 사용자가 직접 이동 버튼을 클릭하도록 대기');
+              // 성공 시에도 3초 대기 후 상태 변경 (에러 로그 확인 시간 확보)
+              setTimeout(() => {
+                setStatus('success');
+                console.log('OAuth2 로그인 성공 - 사용자가 직접 이동 버튼을 클릭하도록 대기');
+              }, 3000);
             } else {
-              setStatus('error');
-              setErrorMessage('백엔드에서 사용자 정보를 생성하지 못했습니다.');
+              // 에러 시에도 3초 대기 후 상태 변경 (에러 로그 확인 시간 확보)
+              setTimeout(() => {
+                setStatus('error');
+                setErrorMessage('백엔드에서 사용자 정보를 생성하지 못했습니다.');
+              }, 3000);
             }
+          } else {
+            console.log('백엔드 응답에 필요한 데이터가 없음:', response.data);
+            // 에러 시에도 3초 대기 후 상태 변경 (에러 로그 확인 시간 확보)
+            setTimeout(() => {
+              setStatus('error');
+              setErrorMessage('백엔드 응답에 필요한 데이터가 없습니다.');
+            }, 3000);
+          }
         } else {
           console.log('Google OAuth2 인증 코드가 없음');
           setStatus('error');
@@ -94,9 +108,13 @@ const OAuth2TokenProxy: React.FC = () => {
       } catch (backendError) {
         console.error('백엔드 토큰 생성 요청 실패:', backendError);
         console.error('에러 상세:', backendError);
-        setStatus('error');
-        const errorMessage = backendError instanceof Error ? backendError.message : '알 수 없는 오류';
-        setErrorMessage('백엔드와의 통신에 실패했습니다. 에러: ' + errorMessage);
+        
+        // 에러 시에도 3초 대기 후 상태 변경 (에러 로그 확인 시간 확보)
+        setTimeout(() => {
+          setStatus('error');
+          const errorMessage = backendError instanceof Error ? backendError.message : '알 수 없는 오류';
+          setErrorMessage('백엔드와의 통신에 실패했습니다. 에러: ' + errorMessage);
+        }, 3000);
       }
     };
 
