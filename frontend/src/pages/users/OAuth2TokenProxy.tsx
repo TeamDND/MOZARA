@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setToken } from '../../utils/tokenSlice';
 import { setUser } from '../../utils/userSlice';
+import { RootState } from '../../utils/store';
 import apiClient from '../../services/apiClient';
 import { Button } from '../../components/ui/button';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
@@ -13,6 +14,10 @@ const OAuth2TokenProxy: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
+  
+  // Redux 상태 확인
+  const user = useSelector((state: RootState) => state.user);
+  const token = useSelector((state: RootState) => state.token);
 
   useEffect(() => {
     const handleOAuth2Token = async () => {
@@ -46,12 +51,24 @@ const OAuth2TokenProxy: React.FC = () => {
               dispatch(setUser(user));
               dispatch(setToken(accessToken));
               
+              // Redux 저장 후 상태 확인
+              console.log('Redux 저장 완료 - 사용자 정보:', user);
+              console.log('Redux 저장 완료 - 토큰:', accessToken);
+              
+              // Redux store에서 실제 저장된 값 확인
+              setTimeout(() => {
+                console.log('=== Redux Store 상태 확인 ===');
+                console.log('저장된 사용자 정보:', user);
+                console.log('저장된 토큰:', token);
+                console.log('사용자 ID:', user.userId);
+                console.log('토큰 존재 여부:', token ? '있음' : '없음');
+              }, 100);
+              
               setStatus('success');
               
-              // 2초 후 대시보드로 이동
-              setTimeout(() => {
-                navigate('/daily-care');
-              }, 2000);
+              // 즉시 대시보드로 이동 (2초 대기 제거)
+              console.log('대시보드로 이동 중...');
+              navigate('/daily-care');
             } else {
               setStatus('error');
               setErrorMessage('백엔드에서 사용자 정보를 생성하지 못했습니다.');
