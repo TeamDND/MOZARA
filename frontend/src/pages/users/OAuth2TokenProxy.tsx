@@ -25,27 +25,17 @@ const OAuth2TokenProxy: React.FC = () => {
         console.log('OAuth2 파라미터:', { code, state, scope });
         
         if (code) {
-          // 백엔드의 OAuth2 토큰 생성 엔드포인트에 직접 요청
-          const response = await fetch('http://hairfit.duckdns.org:8080/oauth2/token', {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              code: code,
-              state: state,
-              scope: scope
-            })
+          // 백엔드의 OAuth2 토큰 생성 엔드포인트에 직접 요청 (apiClient 사용)
+          const response = await apiClient.post('/oauth2/token', {
+            code: code,
+            state: state,
+            scope: scope
           });
           
           console.log('백엔드 OAuth2 토큰 생성 응답:', response);
+          console.log('백엔드에서 받은 토큰 데이터:', response.data);
           
-          if (response.ok) {
-            const tokenData = await response.json();
-            console.log('백엔드에서 받은 토큰 데이터:', tokenData);
-            
-            const { accessToken, refreshToken, user } = tokenData;
+          const { accessToken, refreshToken, user } = response.data;
             
             if (accessToken && user) {
               console.log('OAuth2 로그인 성공!');
@@ -66,10 +56,6 @@ const OAuth2TokenProxy: React.FC = () => {
               setStatus('error');
               setErrorMessage('백엔드에서 사용자 정보를 생성하지 못했습니다.');
             }
-          } else {
-            setStatus('error');
-            setErrorMessage('백엔드 OAuth2 토큰 생성에 실패했습니다.');
-          }
         } else {
           setStatus('error');
           setErrorMessage('Google OAuth2 인증 코드를 받지 못했습니다.');
