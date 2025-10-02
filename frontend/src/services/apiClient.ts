@@ -23,24 +23,29 @@ apiClient.interceptors.request.use(
         }
         
         // JWT 토큰 추가 (Bearer 접두사 포함)
-        // localStorage에서 토큰 가져오기 (순환 참조 방지)
-        try {
-            const persistData = localStorage.getItem('persist:root');
-            if (persistData) {
-                const parsedData = JSON.parse(persistData);
-                const tokenData = parsedData.token ? JSON.parse(parsedData.token) : {};
-                const jwtToken = tokenData.jwtToken;
-                
-                if (jwtToken && jwtToken !== 'null' && jwtToken !== 'undefined') {
-                    config.headers = config.headers || {};
-                    config.headers['authorization'] = `Bearer ${jwtToken}`;
-                    // console.log('JWT 토큰 추가됨:', jwtToken.substring(0, 20) + '...'); // 보안상 주석처리
-                } else {
-                    console.warn('JWT 토큰이 없거나 유효하지 않음');
+        // OAuth2 토큰 생성 요청에서는 JWT 토큰 검증 건너뛰기
+        if (!config.url?.includes('/oauth2/token')) {
+            // localStorage에서 토큰 가져오기 (순환 참조 방지)
+            try {
+                const persistData = localStorage.getItem('persist:root');
+                if (persistData) {
+                    const parsedData = JSON.parse(persistData);
+                    const tokenData = parsedData.token ? JSON.parse(parsedData.token) : {};
+                    const jwtToken = tokenData.jwtToken;
+                    
+                    if (jwtToken && jwtToken !== 'null' && jwtToken !== 'undefined') {
+                        config.headers = config.headers || {};
+                        config.headers['authorization'] = `Bearer ${jwtToken}`;
+                        // console.log('JWT 토큰 추가됨:', jwtToken.substring(0, 20) + '...'); // 보안상 주석처리
+                    } else {
+                        console.warn('JWT 토큰이 없거나 유효하지 않음');
+                    }
                 }
+            } catch (error) {
+                console.error('토큰 파싱 오류:', error);
             }
-        } catch (error) {
-            console.error('토큰 파싱 오류:', error);
+        } else {
+            console.log('OAuth2 토큰 생성 요청 - JWT 토큰 검증 건너뛰기');
         }
         return config;
     },
