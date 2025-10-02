@@ -74,12 +74,26 @@ public class OAuth2Controller {
             }
 
             if (userEmail != null) {
+                // DB에 사용자가 없으면 생성
+                Optional<UserEntity> existingUser = userRepository.findByUsername(userEmail);
+                if (existingUser.isEmpty()) {
+                    log.info("신규 OAuth2 사용자 생성 - Email: {}, Name: {}", userEmail, userName);
+                    UserEntity newUser = UserEntity.builder()
+                            .email(userEmail)
+                            .username(userEmail)
+                            .nickname(userName != null ? userName : userEmail.split("@")[0])
+                            .role("ROLE_USER")
+                            .build();
+                    userRepository.save(newUser);
+                    log.info("신규 사용자 DB 저장 완료");
+                }
+
                 // JWT 토큰 생성
                 log.info("JWT 토큰 생성 시작 - 실제 Gmail: {}", userEmail);
                 String accessToken = jwtUtil.createAccessToken(userEmail);
                 String refreshToken = jwtUtil.createRefreshToken(userEmail);
-                
-                log.info("JWT 토큰 생성 완료 - AccessToken: {}, RefreshToken: {}", 
+
+                log.info("JWT 토큰 생성 완료 - AccessToken: {}, RefreshToken: {}",
                         accessToken.substring(0, 20) + "...", refreshToken.substring(0, 20) + "...");
                 log.info("OAuth2 로그인 성공 - 사용자: {}, 토큰 생성 완료", userEmail);
                 
