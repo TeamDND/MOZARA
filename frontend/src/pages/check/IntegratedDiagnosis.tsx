@@ -67,9 +67,25 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
 
           // DB에 저장된 값이 있으면 자동으로 채우기
           if (userInfo.gender || userInfo.age || userInfo.familyHistory !== null || userInfo.isLoss !== null || userInfo.stress) {
+            console.log('🔄 사용자 정보 로드:', {
+              gender: userInfo.gender,
+              age: userInfo.age,
+              familyHistory: userInfo.familyHistory,
+              isLoss: userInfo.isLoss,
+              stress: userInfo.stress
+            });
+
+            // 한글 성별을 영어로 변환
+            let genderValue = userInfo.gender || '';
+            if (genderValue === '남' || genderValue === '남성') {
+              genderValue = 'male';
+            } else if (genderValue === '여' || genderValue === '여성') {
+              genderValue = 'female';
+            }
+
             setBaspAnswers(prev => ({
               ...prev,
-              gender: userInfo.gender || '',
+              gender: genderValue,
               age: userInfo.age ? String(userInfo.age) : '',
               familyHistory: userInfo.familyHistory === true ? 'yes' : userInfo.familyHistory === false ? 'no' : '',
               recentHairLoss: userInfo.isLoss === true ? 'yes' : userInfo.isLoss === false ? 'no' : '',
@@ -237,6 +253,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         );
 
       case 2:
+        console.log('📸 ImageUploadStep 렌더링 - gender:', baspAnswers.gender);
         return (
           <ImageUploadStep
             uploadedPhoto={uploadedPhoto}
