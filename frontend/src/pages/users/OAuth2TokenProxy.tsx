@@ -34,6 +34,8 @@ const OAuth2TokenProxy: React.FC = () => {
         console.log('OAuth2 파라미터:', { code, state, scope });
         
         if (code) {
+          console.log('백엔드 OAuth2 토큰 생성 요청 시작...');
+          
           // 백엔드의 OAuth2 토큰 생성 엔드포인트에 직접 요청 (apiClient 사용)
           const response = await apiClient.post('/oauth2/token', {
             code: code,
@@ -42,6 +44,8 @@ const OAuth2TokenProxy: React.FC = () => {
           });
           
           console.log('백엔드 OAuth2 토큰 생성 응답:', response);
+          console.log('응답 상태:', response.status);
+          console.log('응답 헤더:', response.headers);
           console.log('백엔드에서 받은 토큰 데이터:', response.data);
           
           const { accessToken, refreshToken, user } = response.data;
@@ -83,8 +87,10 @@ const OAuth2TokenProxy: React.FC = () => {
         }
       } catch (backendError) {
         console.error('백엔드 토큰 생성 요청 실패:', backendError);
+        console.error('에러 상세:', backendError);
         setStatus('error');
-        setErrorMessage('백엔드와의 통신에 실패했습니다.');
+        const errorMessage = backendError instanceof Error ? backendError.message : '알 수 없는 오류';
+        setErrorMessage('백엔드와의 통신에 실패했습니다. 에러: ' + errorMessage);
       }
     };
 
@@ -92,7 +98,9 @@ const OAuth2TokenProxy: React.FC = () => {
   }, [searchParams, dispatch, navigate]);
 
   const handleRetry = () => {
-    navigate('/login');
+    console.log('다시 시도 버튼 클릭 - 현재 URL:', window.location.href);
+    // 현재 페이지 새로고침하여 다시 시도
+    window.location.reload();
   };
 
   const handleGoHome = () => {
