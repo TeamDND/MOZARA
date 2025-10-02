@@ -80,9 +80,8 @@ const OAuth2TokenProxy: React.FC = () => {
               
               setStatus('success');
               
-              // 즉시 대시보드로 이동 (2초 대기 제거)
-              console.log('대시보드로 이동 중...');
-              navigate('/daily-care');
+              // 성공 시에도 즉시 이동하지 않고 사용자가 버튼을 클릭하도록 함
+              console.log('OAuth2 로그인 성공 - 사용자가 직접 이동 버튼을 클릭하도록 대기');
             } else {
               setStatus('error');
               setErrorMessage('백엔드에서 사용자 정보를 생성하지 못했습니다.');
@@ -106,7 +105,10 @@ const OAuth2TokenProxy: React.FC = () => {
 
   const handleRetry = () => {
     console.log('다시 시도 버튼 클릭 - 현재 URL:', window.location.href);
-    // 현재 페이지 새로고침하여 다시 시도
+    console.log('현재 상태를 loading으로 변경하여 다시 시도');
+    setStatus('loading');
+    setErrorMessage('');
+    // useEffect가 다시 실행되도록 searchParams 변경
     window.location.reload();
   };
 
@@ -133,13 +135,28 @@ const OAuth2TokenProxy: React.FC = () => {
           <>
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-800 mb-2">로그인 성공!</h2>
-            <p className="text-gray-600 mb-4">잠시 후 대시보드로 이동합니다.</p>
-            <Button
-              onClick={() => navigate('/daily-care')}
-              className="w-full bg-[#222222] hover:bg-[#333333] text-white"
-            >
-              바로 이동하기
-            </Button>
+            <p className="text-gray-600 mb-4">아래 버튼을 클릭하여 대시보드로 이동하세요.</p>
+            <div className="space-y-2">
+              <Button
+                onClick={() => {
+                  console.log('대시보드로 이동 버튼 클릭');
+                  navigate('/daily-care');
+                }}
+                className="w-full bg-[#222222] hover:bg-[#333333] text-white"
+              >
+                대시보드로 이동
+              </Button>
+              <Button
+                onClick={() => {
+                  console.log('로그인 페이지로 이동 버튼 클릭');
+                  navigate('/login');
+                }}
+                variant="outline"
+                className="w-full"
+              >
+                로그인 페이지로
+              </Button>
+            </div>
           </>
         )}
 
