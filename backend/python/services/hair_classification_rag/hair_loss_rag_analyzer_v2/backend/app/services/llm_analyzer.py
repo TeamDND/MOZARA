@@ -14,15 +14,13 @@ class LLMHairAnalyzer:
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.logger = logging.getLogger(__name__)
 
-        # 노우드 분류 기준 정의
-        self.norwood_descriptions = {
-            1: "정상 또는 극히 경미한 탈모 - 탈모 징후가 거의 없거나 전혀 없음. 헤어라인이 자연스럽고 밀도가 충분함.",
-            2: "경미한 탈모 - M자 탈모가 시작되거나 이마선이 약간 후퇴. 측두부에서 약간의 후퇴 시작.",
-            3: "초기 탈모 - M자 탈모가 뚜렷해지고 정수리 부분 모발 밀도 감소. 헤어라인 후퇴가 명확함.",
-            4: "중기 탈모 - M자 탈모 진행, 정수리 탈모 본격화. 앞머리와 정수리 두 부위 모두 영향.",
-            5: "진행된 탈모 - 앞머리와 정수리 탈모가 연결되기 시작. 상당한 모발 손실.",
-            6: "심한 탈모 - 앞머리와 정수리가 완전히 연결되어 하나의 큰 탈모 영역 형성.",
-            7: "매우 심한 탈모 - 측면과 뒷머리를 제외한 대부분의 모발 손실. 거의 대머리 상태."
+        # Sinclair Scale 분류 기준 정의 (여성형 탈모)
+        self.sinclair_descriptions = {
+            1: "Stage 1 (정상) - 정수리 모발 밀도 정상, 가르마 부위 두피 노출 없음",
+            2: "Stage 2 (경증) - 가르마 부위 두피가 약간 보이기 시작, 모발 밀도 경미한 감소",
+            3: "Stage 3 (중등도) - 가르마 부위 두피 노출 증가, 모발 밀도 중등도 감소",
+            4: "Stage 4 (중증) - 가르마 부위 및 정수리 두피 노출 뚜렷, 모발 밀도 현저한 감소",
+            5: "Stage 5 (최중증) - 정수리 전체 두피 노출, 모발 밀도 심각한 감소"
         }
 
     def encode_image_to_base64(self, image: Image.Image) -> str:
@@ -64,13 +62,13 @@ class LLMHairAnalyzer:
                 similar_info += f"- 유사도 {i+1}: Level {img['stage']} (거리: {img['distance']:.2f})\n"
 
         prompt = f"""
-당신은 남성 탈모 전문 AI 분석가입니다. 노우드 분류법(Norwood Scale)을 기준으로 정확한 탈모 단계를 분석해주세요.
+당신은 여성형 탈모 전문 AI 분석가입니다. Sinclair Scale(5단계)을 기준으로 정확한 탈모 단계를 분석해주세요.
 
-## 노우드 분류 기준:
-{chr(10).join([f"Level {k}: {v}" for k, v in self.norwood_descriptions.items()])}
+## Sinclair Scale 분류 기준:
+{chr(10).join([f"Stage {k}: {v}" for k, v in self.sinclair_descriptions.items()])}
 
-## ConvNeXt 모델 + FAISS 검색 결과:
-- 예측 단계: Level {predicted_stage}
+## ConvNeXt + ViT 앙상블 + RAG 검색 결과:
+- 예측 단계: Stage {predicted_stage}
 - 신뢰도: {confidence:.1f}%
 
 ### 단계별 유사도 분포:
@@ -80,10 +78,10 @@ class LLMHairAnalyzer:
 {similar_info}
 
 ## 분석 요청:
-1. 업로드된 이미지를 노우드 분류 기준으로 세밀하게 분석해주세요
-2. 헤어라인 패턴, M자 탈모 정도, 정수리 상태, 전체적인 모발 밀도를 종합적으로 평가해주세요
-3. FAISS 검색 결과를 참고하되, 시각적 분석을 우선으로 최종 판단해주세요
-4. ConvNeXt 모델이 Level 1(정상)과 Level 2(경미한 탈모) 구분에 어려움이 있다는 점을 고려해주세요
+1. 업로드된 이미지를 Sinclair Scale 기준으로 세밀하게 분석해주세요
+2. 가르마 부위 두피 노출 정도, 정수리 모발 밀도, 전체적인 모발 밀도를 종합적으로 평가해주세요
+3. RAG 검색 결과를 참고하되, 시각적 분석을 우선으로 최종 판단해주세요
+4. 여성형 탈모는 정수리와 가르마 부위에서 시작되며, 헤어라인은 유지되는 특징이 있습니다
 
 ## 응답 형식:
 반드시 아래 정확한 JSON 형식으로만 응답해주세요. 다른 텍스트는 절대 포함하지 마세요.
@@ -92,16 +90,16 @@ class LLMHairAnalyzer:
     "final_stage": 2,
     "confidence": 0.75,
     "analysis_details": {{
-        "hairline_pattern": "헤어라인 패턴 설명",
-        "crown_condition": "정수리 상태 설명",
+        "part_line_condition": "가르마 부위 상태 설명",
+        "crown_density": "정수리 모발 밀도 평가",
         "overall_density": "전체 모발 밀도 평가",
         "key_indicators": ["주요 탈모 징후 1", "주요 탈모 징후 2"]
     }},
-    "faiss_comparison": "FAISS 결과와의 비교 분석",
+    "rag_comparison": "RAG 검색 결과와의 비교 분석",
     "reasoning": "최종 판단 근거"
 }}
 
-중요: final_stage는 반드시 2~7 사이의 정수여야 합니다. JSON 형식만 응답하세요.
+중요: final_stage는 반드시 1~5 사이의 정수여야 합니다. JSON 형식만 응답하세요.
 """
         return prompt
 
@@ -210,14 +208,14 @@ class LLMHairAnalyzer:
                 # LLM 실패 시 FAISS 결과 사용
                 return {
                     'success': True,
-                    'method': 'faiss_only',
+                    'method': 'ensemble_only',
                     'predicted_stage': faiss_results.get('predicted_stage'),
                     'confidence': faiss_results.get('confidence', 0),
-                    'stage_description': self.norwood_descriptions.get(
+                    'stage_description': self.sinclair_descriptions.get(
                         faiss_results.get('predicted_stage'), "알 수 없는 단계"
                     ),
                     'analysis_details': {
-                        'source': 'FAISS 검색 결과 (LLM 분석 실패)',
+                        'source': 'RAG 앙상블 결과 (LLM 분석 실패)',
                         'llm_error': llm_results.get('error', 'Unknown error')
                     },
                     'similar_images': faiss_results.get('similar_images', []),
@@ -226,14 +224,14 @@ class LLMHairAnalyzer:
 
             llm_analysis = llm_results.get('llm_analysis', {})
 
-            # LLM 결과를 우선으로 하되, FAISS 결과도 포함
+            # LLM 결과를 우선으로 하되, RAG 앙상블 결과도 포함
             final_stage = llm_analysis.get('final_stage', faiss_results.get('predicted_stage'))
-            # 단계 값 안전 보정: 2~7로 클램프
+            # 단계 값 안전 보정: 1~5로 클램프 (Sinclair Scale)
             try:
                 final_stage = int(final_stage)
             except Exception:
-                final_stage = int(faiss_results.get('predicted_stage', 2) or 2)
-            final_stage = max(2, min(7, final_stage))
+                final_stage = int(faiss_results.get('predicted_stage', 1) or 1)
+            final_stage = max(1, min(5, final_stage))
             final_confidence = llm_analysis.get('confidence', faiss_results.get('confidence', 0))
 
             return {
@@ -241,14 +239,14 @@ class LLMHairAnalyzer:
                 'method': 'llm_enhanced',
                 'predicted_stage': final_stage,
                 'confidence': final_confidence,
-                'stage_description': self.norwood_descriptions.get(final_stage, "알 수 없는 단계"),
+                'stage_description': self.sinclair_descriptions.get(final_stage, "알 수 없는 단계"),
                 'analysis_details': {
                     'llm_analysis': llm_analysis.get('analysis_details', {}),
                     'llm_reasoning': llm_analysis.get('reasoning', ''),
-                    'faiss_comparison': llm_analysis.get('faiss_comparison', ''),
+                    'rag_comparison': llm_analysis.get('rag_comparison', ''),
                     'token_usage': llm_results.get('token_usage', {})
                 },
-                'faiss_results': {
+                'ensemble_results': {
                     'predicted_stage': faiss_results.get('predicted_stage'),
                     'confidence': faiss_results.get('confidence'),
                     'stage_scores': faiss_results.get('stage_scores', {}),

@@ -229,3 +229,41 @@ class ImageProcessor:
 
         self.logger.info(f"ConvNeXt: {len(conv_data['embeddings'])}개, ViT: {len(vit_data['embeddings'])}개 임베딩 생성")
         return conv_data, vit_data
+
+    def simulate_bisenet_segmentation(self, image: Image.Image) -> Image.Image:
+        """
+        BiSeNet 세그멘테이션 시뮬레이션 (두피 영역 추출)
+        실제 구현에서는 BiSeNet 모델을 사용하여 두피 영역을 정확히 추출
+        현재는 중앙 70% 영역을 ROI로 크롭하여 시뮬레이션
+        """
+        width, height = image.size
+        left = int(width * 0.15)
+        top = int(height * 0.15)
+        right = int(width * 0.85)
+        bottom = int(height * 0.85)
+
+        # ROI 추출
+        roi_img = image.crop((left, top, right, bottom))
+
+        # 원본 크기로 resize (모델 입력 크기 맞추기)
+        roi_img = roi_img.resize((width, height), Image.Resampling.LANCZOS)
+
+        return roi_img
+
+    def extract_roi_dual_embeddings(self, image: Image.Image) -> Tuple[Optional[np.ndarray], Optional[np.ndarray]]:
+        """
+        BiSeNet ROI 처리 후 ConvNeXt + ViT 듀얼 임베딩 추출
+        """
+        try:
+            # BiSeNet으로 두피 영역 추출
+            roi_image = self.simulate_bisenet_segmentation(image)
+
+            # ROI 이미지로 듀얼 임베딩 생성
+            conv_embedding = self.extract_embedding(roi_image, self.conv_model, self.transform_conv)
+            vit_embedding = self.extract_embedding(roi_image, self.vit_model, self.transform_vit)
+
+            return conv_embedding, vit_embedding
+
+        except Exception as e:
+            self.logger.error(f"ROI 듀얼 임베딩 추출 실패: {e}")
+            return None, None

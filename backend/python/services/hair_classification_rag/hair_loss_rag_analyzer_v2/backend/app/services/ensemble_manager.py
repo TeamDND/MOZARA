@@ -1,6 +1,9 @@
 """
 ConvNeXt + ViT-S/16 앙상블 매니저
-Per-class 가중 소프트보팅 + 선택적 오버라이드
+신뢰도 기반 동적 가중치 앙상블 (Confidence-Weighted Ensemble)
+
+Per-class 가중치는 추후 최적화 후 적용 예정
+(가중치 파일: result_log/tester/weight/weight(female_full+1)/ensemble_config.json)
 """
 
 import numpy as np
@@ -12,7 +15,7 @@ from ..per_class_config import get_ensemble_config
 
 class EnsembleManager:
     def __init__(self):
-        """앙상블 매니저 초기화"""
+        """앙상블 매니저 초기화 (신뢰도 기반 동적 가중치)"""
         self.config = get_ensemble_config()
         self.logger = logging.getLogger(__name__)
 
@@ -54,34 +57,78 @@ class EnsembleManager:
         s = probs.sum()
         return probs / s if s > 0 else probs
 
-    def apply_ensemble(self, p_conv: np.ndarray, p_vit: np.ndarray) -> Tuple[int, np.ndarray]:
-        """앙상블 예측 적용"""
-        # Per-class 가중치 적용 (self.config에서 직접 접근)
-        w_conv = np.array(self.config["weights"]["conv"], float)
-        w_vit = np.array(self.config["weights"]["vit"], float)
+    def apply_ensemble(self, p_conv: np.ndarray, p_vit: np.ndarray) -> Tuple[int, np.ndarray, Dict]:
+        """
+        신뢰도 기반 동적 가중치 앙상블
+
+        각 모델의 최대 확률(신뢰도)에 따라 가중치를 동적으로 계산
+
+        Returns:
+            - pred: 예측 stage (1-based)
+            - P_ens: 앙상블 확률 분포
+            - weights_info: 사용된 가중치 정보
+        """
+        # 각 모델의 최대 확률을 신뢰도로 사용
+        conf_conv = np.max(p_conv)
+        conf_vit = np.max(p_vit)
+
+        # 신뢰도 합으로 정규화하여 가중치 계산
+        total_conf = conf_conv + conf_vit + 1e-12
+        w_conv = conf_conv / total_conf
+        w_vit = conf_vit / total_conf
+
+        # 동적 가중치로 앙상블
         P_ens = w_conv * p_conv + w_vit * p_vit
 
-        # 오버라이드 적용 (USE_OVERRIDE가 True인 경우)
-        if self.config["override"]:
-            strong_c = np.array(self.config["strong"]["conv"], int)
-            strong_v = np.array(self.config["strong"]["vit"], int)
-            tau_c = np.array(self.config["tau"]["conv"], float)
-            tau_v = np.array(self.config["tau"]["vit"], float)
-
-            # Hard override per class if strong and threshold satisfied
-            for c in range(self.config["num_classes"]):
-                if strong_c[c] and p_conv[c] >= tau_c[c] and tau_c[c] > 0:
-                    P_ens[c] = p_conv[c]
-                if strong_v[c] and p_vit[c] >= tau_v[c] and tau_v[c] > 0:
-                    P_ens[c] = p_vit[c]
-
-        # 정규화 (선택적)
+        # 정규화
         s = P_ens.sum()
         if s > 0:
             P_ens = P_ens / s
 
         pred = int(np.argmax(P_ens)) + 1  # 1-based indexing
-        return pred, P_ens
+
+        weights_info = {
+            'conv_weight': float(w_conv),
+            'vit_weight': float(w_vit),
+            'conv_confidence': float(conf_conv),
+            'vit_confidence': float(conf_vit),
+        }
+
+        return pred, P_ens, weights_info
+
+    # ============================================================================
+    # Per-class 가중치 방식 (주석 처리 - 추후 최적화 후 사용)
+    # 가중치 파일: result_log/tester/weight/weight(female_full+1)/ensemble_config.json
+    # ============================================================================
+    # def apply_ensemble_perclass(self, p_conv: np.ndarray, p_vit: np.ndarray) -> Tuple[int, np.ndarray]:
+    #     """Per-class 가중치 적용 앙상블"""
+    #     # Per-class 가중치 적용 (self.config에서 직접 접근)
+    #     w_conv = np.array(self.config["weights"]["conv"], float)
+    #     w_vit = np.array(self.config["weights"]["vit"], float)
+    #     P_ens = w_conv * p_conv + w_vit * p_vit
+    #
+    #     # 오버라이드 적용 (USE_OVERRIDE가 True인 경우)
+    #     if self.config["override"]:
+    #         strong_c = np.array(self.config["strong"]["conv"], int)
+    #         strong_v = np.array(self.config["strong"]["vit"], int)
+    #         tau_c = np.array(self.config["tau"]["conv"], float)
+    #         tau_v = np.array(self.config["tau"]["vit"], float)
+    #
+    #         # Hard override per class if strong and threshold satisfied
+    #         for c in range(self.config["num_classes"]):
+    #             if strong_c[c] and p_conv[c] >= tau_c[c] and tau_c[c] > 0:
+    #                 P_ens[c] = p_conv[c]
+    #             if strong_v[c] and p_vit[c] >= tau_v[c] and tau_v[c] > 0:
+    #                 P_ens[c] = p_vit[c]
+    #
+    #     # 정규화
+    #     s = P_ens.sum()
+    #     if s > 0:
+    #         P_ens = P_ens / s
+    #
+    #     pred = int(np.argmax(P_ens)) + 1  # 1-based indexing
+    #     return pred, P_ens
+    # ============================================================================
 
     def predict_from_dual_results(self, conv_matches: List[Dict], vit_matches: List[Dict]) -> Dict:
         """ConvNeXt + ViT 검색 결과로부터 앙상블 예측"""
@@ -90,8 +137,8 @@ class EnsembleManager:
             p_conv = self.knn_to_probs(conv_matches, self.config["num_classes"], self.config["Tconv"])
             p_vit = self.knn_to_probs(vit_matches, self.config["num_classes"], self.config["Tvit"])
 
-            # 앙상블 예측
-            pred_stage, p_ensemble = self.apply_ensemble(p_conv, p_vit)
+            # 신뢰도 기반 동적 가중치 앙상블 예측
+            pred_stage, p_ensemble, weights_info = self.apply_ensemble(p_conv, p_vit)
 
             # 신뢰도 계산 (최대 확률값)
             confidence = float(np.max(p_ensemble))
@@ -128,14 +175,11 @@ class EnsembleManager:
                 "stage_scores": stage_scores,
                 "similar_images": similar_images,
                 "ensemble_details": {
+                    "method": "confidence_weighted",
                     "conv_probs": p_conv.tolist(),
                     "vit_probs": p_vit.tolist(),
                     "ensemble_probs": p_ensemble.tolist(),
-                    "weights_used": {
-                        "conv": self.config["weights"]["conv"],
-                        "vit": self.config["weights"]["vit"]
-                    },
-                    "override_applied": self.config["override"]
+                    "dynamic_weights": weights_info
                 }
             }
 

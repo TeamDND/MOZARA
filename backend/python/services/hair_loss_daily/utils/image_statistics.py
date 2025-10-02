@@ -23,13 +23,13 @@ class ImageStatisticsProcessor:
             if os.path.exists(self.stats_path):
                 with open(self.stats_path, 'r', encoding='utf-8') as f:
                     self.medical_stats = json.load(f)
-                print(f"✅ 의료 데이터셋 통계 로드 완료: {self.stats_path}")
+                print(f"[OK] 의료 데이터셋 통계 로드 완료: {self.stats_path}")
                 return True
             else:
-                print(f"⚠️ 의료 데이터셋 통계 파일을 찾을 수 없습니다: {self.stats_path}")
+                print(f"[WARN] 의료 데이터셋 통계 파일을 찾을 수 없습니다: {self.stats_path}")
                 return False
         except Exception as e:
-            print(f"❌ 의료 데이터셋 통계 로드 실패: {str(e)}")
+            print(f"[ERROR] 의료 데이터셋 통계 로드 실패: {str(e)}")
             return False
     
     def calculate_image_statistics(self, image: np.ndarray) -> Dict:
@@ -54,13 +54,13 @@ class ImageStatisticsProcessor:
             return stats
             
         except Exception as e:
-            print(f"❌ 이미지 통계 계산 실패: {str(e)}")
+            print(f"[ERROR] 이미지 통계 계산 실패: {str(e)}")
             return {}
     
     def apply_statistical_normalization(self, image: np.ndarray) -> np.ndarray:
         """통계적 정규화 적용"""
         if not self.medical_stats:
-            print("⚠️ 의료 데이터셋 통계가 없어 통계적 정규화를 건너뜁니다.")
+            print("[WARN] 의료 데이터셋 통계가 없어 통계적 정규화를 건너뜁니다.")
             return image
         
         try:
@@ -91,13 +91,13 @@ class ImageStatisticsProcessor:
             return normalized_image
             
         except Exception as e:
-            print(f"❌ 통계적 정규화 실패: {str(e)}")
+            print(f"[ERROR] 통계적 정규화 실패: {str(e)}")
             return image
     
     def apply_histogram_matching(self, image: np.ndarray) -> np.ndarray:
         """히스토그램 매칭 적용"""
         if not self.medical_stats or "histogram_avg" not in self.medical_stats:
-            print("⚠️ 의료 데이터셋 히스토그램이 없어 히스토그램 매칭을 건너뜁니다.")
+            print("[WARN] 의료 데이터셋 히스토그램이 없어 히스토그램 매칭을 건너뜁니다.")
             return image
         
         try:
@@ -133,7 +133,7 @@ class ImageStatisticsProcessor:
             return matched_image
             
         except Exception as e:
-            print(f"❌ 히스토그램 매칭 실패: {str(e)}")
+            print(f"[ERROR] 히스토그램 매칭 실패: {str(e)}")
             return image
     
     def get_medical_lighting_target(self) -> Optional[Dict]:

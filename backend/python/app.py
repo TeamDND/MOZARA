@@ -869,6 +869,16 @@ else:
     index = None
     print("Hair Loss Daily 라우터 마운트 건너뜀")
 
+# Hair Loss RAG Analyzer v2 모듈 마운트
+try:
+    from services.hair_classification_rag.hair_loss_rag_analyzer_v2.backend.main import app as hair_rag_v2_app
+    app.mount("/hair-rag-v2", hair_rag_v2_app)
+    HAIR_RAG_V2_AVAILABLE = True
+    print("Hair Loss RAG Analyzer v2 라우터 마운트 완료 (/hair-rag-v2)")
+except ImportError as e:
+    print(f"Hair Loss RAG Analyzer v2 라우터 마운트 실패: {e}")
+    HAIR_RAG_V2_AVAILABLE = False
+
 # OpenAI setup
 openai_api_key = os.getenv("OPENAI_API_KEY")
 if openai_api_key:
@@ -965,7 +975,8 @@ def read_root():
             "hair_change": "/generate_hairstyle" if HAIR_CHANGE_AVAILABLE else "unavailable",
             "basp_diagnosis": "/api/basp/evaluate" if BASP_AVAILABLE else "unavailable",
             "hair_gemini_check": "/hair_gemini_check" if GEMINI_HAIR_CHECK_AVAILABLE else "unavailable",
-            "hair_swin_check": "/hair_swin_check" if SWIN_HAIR_CHECK_AVAILABLE else "unavailable"
+            "hair_swin_check": "/hair_swin_check" if SWIN_HAIR_CHECK_AVAILABLE else "unavailable",
+            "hair_rag_v2": "/hair-rag-v2" if HAIR_RAG_V2_AVAILABLE else "unavailable"
         }
     }
 
@@ -1053,7 +1064,98 @@ async def api_hair_swin_check(
     except Exception as e:
         print(f"--- [DEBUG] Swin Error: {str(e)} ---")
         raise HTTPException(status_code=500, detail=str(e))
-        
+
+# --- RAG v2 탈모 사진 분석 전용 엔드포인트 (여성용) ---
+@app.post("/hair_rag_v2_check")
+async def api_hair_rag_v2_check(
+    top_image: Annotated[UploadFile, File(...)],
+    gender: Optional[str] = Form(None),
+    age: Optional[str] = Form(None),
+    familyHistory: Optional[str] = Form(None),
+    recentHairLoss: Optional[str] = Form(None),
+    stress: Optional[str] = Form(None)
+):
+    """
+    multipart/form-data로 전송된 Top 이미지를 RAG v2 (ConvNeXt + ViT 듀얼 앙상블 + Gemini)로 분석
+    여성용 탈모 분석 (Sinclair Scale 기반)
+    설문 데이터도 함께 받아서 LLM 개인 맞춤 분석에 사용
+    """
+    if not HAIR_RAG_V2_AVAILABLE:
+        raise HTTPException(status_code=503, detail="RAG v2 분석 모듈이 활성화되지 않았습니다.")
+
+    try:
+        from PIL import Image
+        import io
+
+        # RAG v2 analyzer 가져오기
+        from services.hair_classification_rag.hair_loss_rag_analyzer_v2.backend.app.routers.analysis import get_analyzer
+
+        # Top 이미지 읽기
+        top_image_bytes = await top_image.read()
+        print(f"--- [DEBUG] RAG v2 Files received. Top: {len(top_image_bytes)} bytes ---")
+
+        # PIL Image로 변환
+        image = Image.open(io.BytesIO(top_image_bytes)).convert('RGB')
+
+        # 설문 데이터 구성
+        survey_data = None
+        if age or gender or familyHistory or recentHairLoss or stress:
+            survey_data = {
+                'gender': gender if gender else 'female',
+                'age': age,
+                'familyHistory': familyHistory,
+                'recentHairLoss': recentHairLoss,
+                'stress': stress
+            }
+            print(f"--- [DEBUG] RAG v2 Survey data: {survey_data} ---")
+
+        # RAG v2 analyzer로 분석 (직접 호출 - RunPod 배포 대비)
+        analyzer = get_analyzer()
+        rag_result = await analyzer.analyze_image(
+            image,
+            top_image.filename,
+            use_llm=True,  # Gemini LLM 사용
+            use_roi=True,  # ROI 기반 분석
+            survey_data=survey_data
+        )
+
+        if not rag_result.get('success'):
+            raise HTTPException(status_code=500, detail=rag_result.get('error', 'RAG v2 분석 실패'))
+
+        print(f"--- [DEBUG] RAG v2 원본 응답 keys: {rag_result.keys()} ---")
+
+        # Stage 5단계(1-5)를 4단계(0-3)로 변환
+        original_stage = rag_result.get('predicted_stage', 1)
+        if original_stage <= 3:
+            converted_stage = original_stage - 1
+        else:  # 4 or 5
+            converted_stage = 3
+
+        # Swin과 동일한 형식으로 응답 구성
+        response = {
+            'success': True,
+            'stage': converted_stage,  # 0-3
+            'confidence': rag_result.get('confidence', 0.0),
+            'title': rag_result.get('title', ''),
+            'description': rag_result.get('description', ''),
+            'advice': rag_result.get('advice', ''),
+            'analysis_type': 'rag_v2_analysis',
+            'original_sinclair_stage': original_stage,  # 1-5 (디버깅용)
+        }
+
+        print(f"--- [DEBUG] RAG v2 분석 완료: Stage {original_stage} (Sinclair) -> {converted_stage} (Display) ---")
+        print(f"--- [DEBUG] RAG v2 Title: {response['title']} ---")
+
+        return response
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"--- [DEBUG] RAG v2 Error: {str(e)} ---")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"RAG v2 분석 중 오류: {str(e)}")
+
 # --- 네이버 지역 검색 API 프록시 ---
 @app.get("/api/naver/local/search")
 async def search_naver_local(query: str):

@@ -23,14 +23,16 @@ interface UserInfo {
   role: string;
   recentHairLoss: boolean; // true/false
   familyHistory: boolean; // true/false
+  stress?: string; // 스트레스 수준 (low, medium, high)
 }
 
 interface UserInfoEditProps {
   userInfo: UserInfo;
   initialTab?: 'basic' | 'analysis';
+  onInfoUpdated?: () => void; // 정보 업데이트 시 호출될 콜백
 }
 
-const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'basic' }) => {
+const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'basic', onInfoUpdated }) => {
   const [activeTab, setActiveTab] = useState<'basic' | 'analysis'>(initialTab);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -44,9 +46,10 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
 
   // 분석 정보 상태
   const [gender, setGender] = useState("");
-  const [age, setAge] = useState<number>(0);
+  const [age, setAge] = useState<string>(""); // string으로 변경하여 빈 값 허용
   const [recentHairLoss, setRecentHairLoss] = useState(false);
   const [familyHistory, setFamilyHistory] = useState(false);
+  const [stress, setStress] = useState<string>(""); // 스트레스 수준 추가
 
   // 비밀번호 변경 상태
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -58,10 +61,20 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
     if (userInfo) {
       setName(userInfo.name || "");
       setEmail(userInfo.email || "");
-      setGender(userInfo.gender || "");
-      setAge(userInfo.age || 0);
+
+      // 한글 성별을 영어로 변환 (하위 호환성)
+      let genderValue = userInfo.gender || "";
+      if (genderValue === "남" || genderValue === "남성") {
+        genderValue = "male";
+      } else if (genderValue === "여" || genderValue === "여성") {
+        genderValue = "female";
+      }
+      setGender(genderValue);
+
+      setAge(userInfo.age ? String(userInfo.age) : "");
       setRecentHairLoss(userInfo.recentHairLoss || false);
       setFamilyHistory(userInfo.familyHistory || false);
+      setStress(userInfo.stress || "");
     }
   }, [userInfo]);
 
@@ -100,8 +113,21 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
   const handleAnalysisInfoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (userInfo.gender === gender && userInfo.age === age &&
-        userInfo.recentHairLoss === recentHairLoss && userInfo.familyHistory === familyHistory) {
+    // 나이 유효성 검사
+    if (!age || age.trim() === "") {
+      alert("나이를 입력해주세요.");
+      return;
+    }
+
+    const ageNumber = parseInt(age);
+    if (isNaN(ageNumber) || ageNumber <= 0 || ageNumber > 150) {
+      alert("올바른 나이를 입력해주세요. (1-150)");
+      return;
+    }
+
+    if (userInfo.gender === gender && userInfo.age === ageNumber &&
+        userInfo.recentHairLoss === recentHairLoss && userInfo.familyHistory === familyHistory &&
+        userInfo.stress === stress) {
       alert("변경된 내용이 없습니다.");
       return;
     }
@@ -109,15 +135,18 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
     try {
       const res = await apiClient.put(`/userinfo/${username}`, {
         gender,
-        age,
+        age: ageNumber,
         isLoss: recentHairLoss,
         familyHistory,
-        stress: null // 필요시 추가
+        stress: stress || null
       });
 
       if (res?.data) {
         alert('정보가 수정되었습니다.');
-        // 필요시 페이지 새로고침 또는 상태 업데이트
+        // 부모 컴포넌트에 업데이트 알림
+        if (onInfoUpdated) {
+          onInfoUpdated();
+        }
       }
     } catch (error: any) {
       console.error(error);
@@ -271,9 +300,9 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
             <div className="flex gap-2">
               <Button
                 type="button"
-                onClick={() => setGender("남")}
+                onClick={() => setGender("male")}
                 className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
-                  gender === "남" || gender === "남성" || gender === "male"
+                  gender === "male" || gender === "남" || gender === "남성"
                     ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
                 }`}
@@ -282,9 +311,9 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
               </Button>
               <Button
                 type="button"
-                onClick={() => setGender("여")}
+                onClick={() => setGender("female")}
                 className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
-                  gender === "여" || gender === "여성" || gender === "female"
+                  gender === "female" || gender === "여" || gender === "여성"
                     ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
                 }`}
@@ -299,7 +328,10 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
             <input
               type="number"
               value={age}
-              onChange={(e) => setAge(Number(e.target.value))}
+              onChange={(e) => setAge(e.target.value)}
+              placeholder="나이를 입력하세요"
+              min="1"
+              max="150"
               className="w-full p-3 bg-gray-50 rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
             />
           </div>
@@ -356,6 +388,45 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
                 }`}
               >
                 아니오
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">스트레스 수준</label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                onClick={() => setStress("high")}
+                className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
+                  stress === "high"
+                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
+                }`}
+              >
+                높음
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setStress("medium")}
+                className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
+                  stress === "medium"
+                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
+                }`}
+              >
+                보통
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setStress("low")}
+                className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
+                  stress === "low"
+                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
+                }`}
+              >
+                낮음
               </Button>
             </div>
           </div>

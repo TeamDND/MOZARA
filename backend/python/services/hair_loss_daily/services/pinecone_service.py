@@ -35,7 +35,6 @@ class PineconeService:
             
             # 인덱스 연결
             self.index = self.pc.Index(self.index_name)
-            
             print(f"[OK] Pinecone 클라이언트 초기화 완료 (인덱스: {self.index_name})")
 
         except Exception as e:
@@ -76,7 +75,7 @@ class PineconeService:
             return results
             
         except Exception as e:
-            print(f"⚠️ 벡터 검색 오류: {str(e)}")
+            print(f"[WARN] 벡터 검색 오류: {str(e)}")
             return []
     
     def search_by_category(self, 
@@ -110,7 +109,7 @@ class PineconeService:
             }
             
         except Exception as e:
-            print(f"⚠️ 인덱스 통계 조회 오류: {str(e)}")
+            print(f"[WARN] 인덱스 통계 조회 오류: {str(e)}")
             return {"error": str(e)}
     
     def health_check(self) -> Dict:

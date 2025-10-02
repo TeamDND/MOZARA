@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Settings:
-    # Query filters (testing)
-    DEFAULT_GENDER_FILTER: str = os.getenv("GENDER_FILTER", "male")
+    # Query filters (여성형 탈모 - Sinclair 5단계)
+    DEFAULT_GENDER_FILTER: str = os.getenv("GENDER_FILTER", "female")
     DEFAULT_POINTVIEW_FILTER: str = os.getenv("POINTVIEW_FILTER", "top-down")
 
     # Pinecone 설정
@@ -34,15 +34,13 @@ class Settings:
     MODEL_NAME: str = "convnext_large.fb_in22k_ft_in1k_384"
     EMBEDDING_DIMENSION: int = 1536  # ConvNeXt-L feature dimension
 
-    # 단계 설명
+    # 단계 설명 (Sinclair Scale - 여성형 탈모)
     STAGE_DESCRIPTIONS: dict = {
-        1: "정상 또는 매우 경미한 탈모 - 탈모 징후가 거의 없거나 미세함",
-        2: "경미한 탈모 - M자 탈모가 시작되거나 이마 라인 약간 후퇴",
-        3: "초기 탈모 - M자 탈모가 뚜렷해지며 정수리 부위 모발 밀도 감소",
-        4: "중기 탈모 - M자 탈모 진행, 정수리 탈모 본격화",
-        5: "진행성 탈모 - 정수리와 M자 탈모가 연결되기 시작",
-        6: "심한 탈모 - 정수리와 정면부가 점점 연결되어 하나의 큰 탈모 영역 형성",
-        7: "매우 심한 탈모 - 측면과 뒷머리를 제외한 대부분의 모발 소실"
+        1: "Stage 1 (정상) - 정수리 모발 밀도 정상, 탈모 징후 없음",
+        2: "Stage 2 (경증) - 가르마 부위 두피가 약간 보이기 시작, 모발 밀도 경미한 감소",
+        3: "Stage 3 (중등도) - 가르마 부위 두피 노출 증가, 모발 밀도 중등도 감소",
+        4: "Stage 4 (중증) - 가르마 부위 및 정수리 두피 노출 뚜렷, 모발 밀도 현저한 감소",
+        5: "Stage 5 (최중증) - 정수리 전체 두피 노출, 모발 밀도 심각한 감소"
     }
 
 settings = Settings()

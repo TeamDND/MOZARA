@@ -86,13 +86,46 @@ export default function MyPage() {
   // 사용자 추가 정보 상태
   const [userAdditionalInfo, setUserAdditionalInfo] = useState<{
     gender: string
+    age: number
     familyHistory: boolean | null
     isLoss: boolean | null
+    stress: string | null
   }>({
     gender: '',
+    age: 0,
     familyHistory: null,
-    isLoss: null
+    isLoss: null,
+    stress: null
   })
+
+  // UserInfoEdit 컴포넌트 강제 리렌더링을 위한 key
+  const [userInfoKey, setUserInfoKey] = useState(0)
+
+  // 사용자 추가 정보를 다시 불러오는 함수
+  const refreshUserInfo = async () => {
+    if (!user.username || !token) {
+      return
+    }
+
+    try {
+      console.log('API 호출: 사용자 추가 정보 재조회', `/userinfo/${user.username}`);
+      const response = await apiClient.get(`/userinfo/${user.username}`)
+      console.log('사용자 추가 정보 재조회 API 응답:', response.data);
+
+      setUserAdditionalInfo({
+        gender: response.data.gender || '',
+        age: response.data.age || 0,
+        familyHistory: response.data.familyHistory,
+        isLoss: response.data.isLoss,
+        stress: response.data.stress || null
+      })
+
+      // 강제로 컴포넌트 리렌더링을 위해 key 변경
+      setUserInfoKey(prev => prev + 1)
+    } catch (error: any) {
+      console.error('사용자 추가 정보 재조회 실패:', error);
+    }
+  }
 
   // 분석 결과 개수 및 리스트 조회
   useEffect(() => {
@@ -183,8 +216,10 @@ export default function MyPage() {
         
         setUserAdditionalInfo({
           gender: response.data.gender || '',
+          age: response.data.age || 0,
           familyHistory: response.data.familyHistory,
-          isLoss: response.data.isLoss
+          isLoss: response.data.isLoss,
+          stress: response.data.stress || null
         })
       } catch (error: any) {
         console.error('사용자 추가 정보 조회 실패:', error);
@@ -325,10 +360,11 @@ export default function MyPage() {
     satisfaction: 0, // UserState에 satisfaction 속성이 없음
     address: user.address || "주소 정보 없음",
     gender: formatGender(userAdditionalInfo.gender), // API에서 조회한 성별 변환
-    age: user.age || 0,
+    age: userAdditionalInfo.age || 0, // API에서 조회한 나이 사용
     role: user.role || "일반 사용자",
     recentHairLoss: userAdditionalInfo.isLoss ?? false, // boolean 값 그대로 전달
-    familyHistory: userAdditionalInfo.familyHistory ?? false // boolean 값 그대로 전달
+    familyHistory: userAdditionalInfo.familyHistory ?? false, // boolean 값 그대로 전달
+    stress: userAdditionalInfo.stress || undefined // 스트레스 수준
   }
 
   return (
@@ -541,7 +577,12 @@ export default function MyPage() {
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">
-            <UserInfoEdit userInfo={userInfo} initialTab={location.state?.activeSubTab as 'basic' | 'analysis' | undefined} />
+            <UserInfoEdit
+              key={userInfoKey}
+              userInfo={userInfo}
+              initialTab={location.state?.activeSubTab as 'basic' | 'analysis' | undefined}
+              onInfoUpdated={refreshUserInfo}
+            />
           </TabsContent>
         </Tabs>
       </div>
