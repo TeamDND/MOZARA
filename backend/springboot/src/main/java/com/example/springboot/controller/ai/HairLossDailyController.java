@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 @RestController
@@ -153,6 +154,77 @@ public class HairLossDailyController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "분석 결과 저장 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 특정 날짜의 daily 분석 결과 조회
+     */
+    @GetMapping("/results/date")
+    public ResponseEntity<Map<String, Object>> getDailyAnalysisResultsByDate(
+            @RequestParam("user_id") Integer userId,
+            @RequestParam("date") String dateString) {
+        try {
+            LocalDate date = LocalDate.parse(dateString);
+            Map<String, Object> result = hairLossDailyService.getDailyAnalysisResults(userId, date);
+            
+            if (result.containsKey("error")) {
+                return ResponseEntity.badRequest().body(result);
+            }
+            
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Daily 분석 결과 조회 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Daily 분석 결과 조회 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 날짜 범위의 daily 분석 결과 조회
+     */
+    @GetMapping("/results/date-range")
+    public ResponseEntity<Map<String, Object>> getDailyAnalysisResultsByDateRange(
+            @RequestParam("user_id") Integer userId,
+            @RequestParam("start_date") String startDateString,
+            @RequestParam("end_date") String endDateString) {
+        try {
+            LocalDate startDate = LocalDate.parse(startDateString);
+            LocalDate endDate = LocalDate.parse(endDateString);
+            
+            Map<String, Object> result = hairLossDailyService.getDailyAnalysisResultsByDateRange(userId, startDate, endDate);
+            
+            if (result.containsKey("error")) {
+                return ResponseEntity.badRequest().body(result);
+            }
+            
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Daily 분석 결과 조회 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Daily 분석 결과 조회 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 최근 daily 분석 결과 조회
+     */
+    @GetMapping("/results/latest")
+    public ResponseEntity<Map<String, Object>> getLatestDailyAnalysisResults(
+            @RequestParam("user_id") Integer userId,
+            @RequestParam(value = "limit", defaultValue = "10") int limit) {
+        try {
+            Map<String, Object> result = hairLossDailyService.getLatestDailyAnalysisResults(userId, limit);
+            
+            if (result.containsKey("error")) {
+                return ResponseEntity.badRequest().body(result);
+            }
+            
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("최근 Daily 분석 결과 조회 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "최근 Daily 분석 결과 조회 중 오류가 발생했습니다: " + e.getMessage()));
         }
     }
 }
