@@ -2,7 +2,7 @@ package com.example.springboot.controller;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.boot.web.servlet.error.ErrorController as SpringErrorController;
+import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Controller
-public class ErrorController implements SpringErrorController {
+public class CustomErrorController implements ErrorController {
 
     @RequestMapping("/error")
     @ResponseBody

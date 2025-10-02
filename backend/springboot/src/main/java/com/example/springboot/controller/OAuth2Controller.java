@@ -49,30 +49,30 @@ public class OAuth2Controller {
         if (authentication != null) {
             String userEmail = null;
             String userName = null;
-            
-            // CustomOAuth2User 처리
-            if (authentication.getPrincipal() instanceof CustomOAuth2UserService.CustomOAuth2User) {
-                CustomOAuth2UserService.CustomOAuth2User oauth2User = 
-                    (CustomOAuth2UserService.CustomOAuth2User) authentication.getPrincipal();
-                userEmail = oauth2User.getEmail();
-                userName = oauth2User.getName();
-                
-                log.info("=== CustomOAuth2User로 처리됨 ===");
-                log.info("실제 Gmail: {}", userEmail);
-                log.info("실제 Google 이름: {}", userName);
-            }
-            // DefaultOidcUser 처리 (Google OIDC)
-            else if (authentication.getPrincipal() instanceof OidcUser) {
+
+            // DefaultOidcUser 처리 (Google OIDC) - 먼저 확인
+            if (authentication.getPrincipal() instanceof OidcUser) {
                 OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
                 userEmail = oidcUser.getEmail();
                 userName = oidcUser.getFullName();
-                
+
                 log.info("=== DefaultOidcUser로 처리됨 ===");
                 log.info("실제 Gmail: {}", userEmail);
                 log.info("실제 Google 이름: {}", userName);
                 log.info("OIDC Attributes: {}", oidcUser.getAttributes());
             }
-            
+            // CustomOAuth2User 처리
+            else if (authentication.getPrincipal() instanceof CustomOAuth2UserService.CustomOAuth2User) {
+                CustomOAuth2UserService.CustomOAuth2User oauth2User =
+                    (CustomOAuth2UserService.CustomOAuth2User) authentication.getPrincipal();
+                userEmail = oauth2User.getEmail();
+                userName = oauth2User.getName();
+
+                log.info("=== CustomOAuth2User로 처리됨 ===");
+                log.info("실제 Gmail: {}", userEmail);
+                log.info("실제 Google 이름: {}", userName);
+            }
+
             if (userEmail != null) {
                 // JWT 토큰 생성
                 log.info("JWT 토큰 생성 시작 - 실제 Gmail: {}", userEmail);
