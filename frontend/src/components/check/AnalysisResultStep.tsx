@@ -57,7 +57,7 @@ const AnalysisResultStep: React.FC<AnalysisResultStepProps> = ({ analysisResult,
               <div>
                 <p className="text-sm text-gray-600 mb-2">AI 추천 가이드</p>
                 <div className="space-y-1">
-                  {analysisResult.advice.map((advice, index) => (
+                  {analysisResult.advice.split('\n').map((advice, index) => (
                     <p key={index} className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
                       • {advice}
                     </p>

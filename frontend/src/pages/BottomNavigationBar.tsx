@@ -3,6 +3,7 @@ import { Home, User, Bot, Search, Layers3 } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { RootState } from "../utils/store"
+import { openChatBotModal, closeChatBotModal } from "../components/ChatBot/ChatBotModal"
 
 const BottomNavigationBar: React.FC = () => {
   const navigate = useNavigate()
@@ -22,7 +23,7 @@ const BottomNavigationBar: React.FC = () => {
 
   return (
     // 모바일 하단 네비게이션
-    <nav className="fixed bottom-0 left-0 right-0 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 z-[9999]">
       <div className="relative bg-white/90 backdrop-blur">
         {/* 상단 둥근 모서리 */}
         <div className="bg-white/90 backdrop-blur rounded-t-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
@@ -30,7 +31,14 @@ const BottomNavigationBar: React.FC = () => {
           <div className="flex items-center justify-around pt-2 pb-2 px-4">
             {/* 분석 */}
             <button
-              onClick={() => navigate('/integrated-diagnosis')}
+              onClick={() => {
+                closeChatBotModal();
+                if (isLoggedIn) {
+                  navigate('/integrated-diagnosis')
+                } else {
+                  navigate('/login')
+                }
+              }}
               className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
               <Search className="h-5 w-5 mb-1 text-[#222222]" />
@@ -41,7 +49,14 @@ const BottomNavigationBar: React.FC = () => {
 
             {/* 기능 */}
             <button
-              onClick={() => navigate('/main-contents')}
+              onClick={() => {
+                closeChatBotModal();
+                if (isLoggedIn) {
+                  navigate('/main-contents')
+                } else {
+                  navigate('/login')
+                }
+              }}
               className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
               <Layers3 className="h-5 w-5 mb-1 text-[#222222]" />
@@ -53,6 +68,7 @@ const BottomNavigationBar: React.FC = () => {
             {/* 홈 (가운데) */}
             <button
               onClick={() => {
+                closeChatBotModal();
                 if (isLoggedIn) {
                   navigate('/daily-care')
                 } else {
@@ -66,7 +82,14 @@ const BottomNavigationBar: React.FC = () => {
 
             {/* 프로필 */}
             <button
-              onClick={() => navigate('/mypage')}
+              onClick={() => {
+                closeChatBotModal();
+                if (isLoggedIn) {
+                  navigate('/mypage')
+                } else {
+                  navigate('/login')
+                }
+              }}
               className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
               <User className="h-5 w-5 mb-1 text-[#222222]" />
@@ -77,7 +100,7 @@ const BottomNavigationBar: React.FC = () => {
 
             {/* 챗봇 */}
             <button
-              onClick={() => navigate('/chat')}
+              onClick={() => openChatBotModal()}
               className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
               <Bot className="h-5 w-5 mb-1 text-[#222222]" />

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -99,6 +100,30 @@ public class MyPageController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("{\"error\": \"분석 결과 조회 중 오류가 발생했습니다.\"}");
+        }
+    }
+
+    /**
+     * 사용자 ID와 분석 타입으로 분석 결과 존재 여부 확인
+     */
+    @GetMapping("/has-analysis/{userId}/{analysisType}")
+    public ResponseEntity<?> hasAnalysisByType(@PathVariable Integer userId, @PathVariable String analysisType) {
+        try {
+            System.out.println("=== 분석 결과 존재 여부 확인 ===");
+            System.out.println("userId: " + userId);
+            System.out.println("analysisType: " + analysisType);
+            
+            boolean hasAnalysis = myPageService.hasAnalysisByType(userId, analysisType);
+            
+            System.out.println("hasAnalysis: " + hasAnalysis);
+            
+            Map<String, Object> response = Map.of("hasAnalysis", hasAnalysis);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.out.println("에러 발생: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "분석 결과 확인 중 오류가 발생했습니다."));
         }
     }
 }

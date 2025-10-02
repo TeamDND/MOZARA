@@ -2,6 +2,12 @@
 """
 MOZARA Python Backend 통합 애플리케이션
 """
+# Windows 환경에서 UTF-8 인코딩 강제 설정
+import sys
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -1607,7 +1613,148 @@ async def hair_quiz_health_check():
         "timestamp": datetime.now().isoformat()
     }
 
+# --- Chat API (챗봇) ---
+class ChatRequest(BaseModel):
+    message: str
+    conversation_id: str
 
+class ChatResponse(BaseModel):
+    response: str
+    sources: List[str]
+    conversation_id: str
+    timestamp: str
+
+@app.post("/chat", response_model=ChatResponse)
+async def chat_with_gemini(request: ChatRequest):
+    """Gemini API를 사용한 탈모 관련 챗봇"""
+    if not genai:
+        raise HTTPException(status_code=503, detail="Gemini API가 설정되지 않았습니다.")
+
+    try:
+        # Gemini 모델 설정
+        model = genai.GenerativeModel('gemini-2.5-flash-lite')
+
+        # 탈모 전문 프롬프트 설정
+        system_prompt = """
+당신은 탈모 전문 상담사입니다. 탈모와 관련된 질문에 전문적이고 도움이 되는 답변을 제공해주세요.
+
+다음 규칙을 따라주세요:
+1. 탈모 관련 질문에 대해서만 답변해주세요
+2. 의학적 조언은 전문의 상담을 권하고, 일반적인 정보만 제공해주세요
+3. 친근하고 이해하기 쉬운 한국어로 답변해주세요
+4. 답변은 200자 이내로 간결하게 해주세요
+5. 탈모와 관련없는 질문에는 "탈모와 관련된 질문만 답변드릴 수 있습니다"라고 답변해주세요
+
+사용자 질문: {message}
+"""
+
+        # Gemini API 호출
+        prompt = system_prompt.format(message=request.message)
+        response = model.generate_content(prompt)
+
+        # 응답 처리
+        bot_response = response.text if response.text else "죄송합니다. 답변을 생성할 수 없습니다."
+
+        return ChatResponse(
+            response=bot_response,
+            sources=["Gemini AI"],
+            conversation_id=request.conversation_id,
+            timestamp=datetime.now().isoformat()
+        )
+
+    except Exception as e:
+        print(f"챗봇 API 오류: {e}")
+        raise HTTPException(status_code=500, detail=f"챗봇 응답 생성 중 오류가 발생했습니다: {str(e)}")
+
+@app.get("/chat/health")
+async def chat_health_check():
+    """챗봇 서비스 헬스체크"""
+    return {
+        "status": "healthy" if genai else "unavailable",
+        "service": "gemini-chat",
+        "timestamp": datetime.now().isoformat()
+    }
+
+# --- RAG 기반 챗봇 API (사용자별 메모리 관리) ---
+try:
+    from services.rag_chatbot.rag_service_final import get_final_rag_chatbot
+    RAG_CHATBOT_AVAILABLE = True
+    print("✅ RAG 챗봇 모듈 로드 성공 (사용자별 메모리 관리 + LangChain)")
+except ImportError as e:
+    print(f"❌ RAG 챗봇 모듈 로드 실패: {e}")
+    RAG_CHATBOT_AVAILABLE = False
+
+@app.post("/rag-chat", response_model=ChatResponse)
+async def rag_chat_endpoint(request: ChatRequest):
+    """RAG 기반 탈모 전문 챗봇"""
+    if not RAG_CHATBOT_AVAILABLE:
+        raise HTTPException(status_code=503, detail="RAG 챗봇 서비스가 비활성화되어 있습니다.")
+
+    try:
+        # RAG 챗봇 인스턴스 가져오기 (사용자별 메모리 관리)
+        chatbot = get_final_rag_chatbot()
+
+        # 채팅 처리 (conversation_id로 사용자별 대화 기억)
+        result = chatbot.chat(request.message, request.conversation_id)
+
+        return ChatResponse(
+            response=result['response'],
+            sources=result['sources'],
+            conversation_id=result['conversation_id'],
+            timestamp=result['timestamp']
+        )
+
+    except Exception as e:
+        print(f"RAG 챗봇 오류: {e}")
+        raise HTTPException(status_code=500, detail=f"RAG 챗봇 처리 중 오류가 발생했습니다: {str(e)}")
+
+@app.get("/rag-chat/health")
+async def rag_chat_health_check():
+    """RAG 챗봇 헬스체크"""
+    if not RAG_CHATBOT_AVAILABLE:
+        return {
+            "status": "unavailable",
+            "service": "rag-chatbot",
+            "error": "RAG 챗봇 모듈이 로드되지 않았습니다.",
+            "timestamp": datetime.now().isoformat()
+        }
+
+    try:
+        chatbot = get_final_rag_chatbot()
+        health_status = chatbot.get_health_status()
+        health_status["timestamp"] = datetime.now().isoformat()
+        return health_status
+    except Exception as e:
+        return {
+            "status": "error",
+            "service": "rag-chatbot",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
+@app.post("/rag-chat/clear")
+async def clear_conversation(request: dict):
+    """대화 기록 삭제"""
+    if not RAG_CHATBOT_AVAILABLE:
+        raise HTTPException(status_code=503, detail="RAG 챗봇 서비스가 비활성화되어 있습니다.")
+
+    try:
+        conversation_id = request.get("conversation_id", "")
+        if not conversation_id:
+            raise HTTPException(status_code=400, detail="conversation_id가 필요합니다.")
+
+        chatbot = get_final_rag_chatbot()
+        chatbot.clear_conversation(conversation_id)
+
+        return {
+            "success": True,
+            "message": f"대화 기록 삭제 완료: {conversation_id}",
+            "timestamp": datetime.now().isoformat()
+        }
+
+    except Exception as e:
+        print(f"대화 기록 삭제 오류: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 # --- Location Services API ---
 @app.get("/location/naver/search")
 async def search_naver_local(query: str):

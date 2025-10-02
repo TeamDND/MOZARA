@@ -31,12 +31,16 @@ import { PlantGrowth } from './components/PlantGrowth';
 import MyPage from './pages/MyPage';
 import MyReportPage from './pages/MyReportPage';
 import Chat from './pages/Chat';
+import ChatBotModal from './components/ChatBot/ChatBotModal';
 import PointExchange from './pages/PointExchange';
 
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
   return (
     <ErrorBoundary>
+      {/* 전역 챗봇 모달 */}
+      <ChatBotModal />
+
       <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<LandingPage />} />
@@ -70,6 +74,7 @@ const App: React.FC = () => {
           <Route path="mypage" element={<MyPage />} />
           <Route path="my-report" element={<MyReportPage />} />
           <Route path="store-finder" element={<StoreFinder />} />
+          {/* Chat 라우트 제거 - 이제 모달로 사용 */}
           <Route path="chat" element={<Chat />} />
           <Route path="point-exchange" element={<PointExchange />} />
         </Route>
