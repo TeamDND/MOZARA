@@ -68,6 +68,7 @@ public class OAuth2Controller {
             String redirectUrl = "https://hairfit.duckdns.org/oauth2/callback?access_token=" + accessToken + 
                                "&refresh_token=" + refreshToken + "&success=true";
             
+            log.info("프론트엔드로 리다이렉트: {}", redirectUrl);
             response.sendRedirect(redirectUrl);
         } else {
             log.error("=== OAuth2 인증 실패 ===");
@@ -76,6 +77,7 @@ public class OAuth2Controller {
             if (authentication != null) {
                 log.error("Principal 타입: {}", authentication.getPrincipal().getClass().getName());
             }
+            log.error("OAuth2 인증 실패 - 프론트엔드로 리다이렉트");
             response.sendRedirect("https://hairfit.duckdns.org/oauth2/callback?success=false&error=auth_failed");
         }
     }
@@ -84,6 +86,7 @@ public class OAuth2Controller {
     public void oauth2Fail(HttpServletResponse response) throws IOException {
         log.error("OAuth2 로그인 실패");
         
+        log.error("OAuth2 로그인 실패 - 프론트엔드로 리다이렉트");
         response.sendRedirect("https://hairfit.duckdns.org/oauth2/callback?success=false&error=login_failed");
     }
 

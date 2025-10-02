@@ -59,7 +59,10 @@ const OAuth2Callback: React.FC = () => {
             
             // Redux에 저장
             dispatch(setUser(userResponse.data));
-            dispatch(setToken(accessToken));
+            dispatch(setToken({
+              accessToken: accessToken,
+              refreshToken: refreshToken
+            }));
             
             // Redux 상태 확인
             console.log('Redux 저장 완료 - 사용자 정보:', userResponse.data);
