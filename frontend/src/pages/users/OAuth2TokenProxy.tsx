@@ -20,6 +20,10 @@ const OAuth2TokenProxy: React.FC = () => {
   const token = useSelector((state: RootState) => state.token);
 
   useEffect(() => {
+    console.log('=== OAuth2TokenProxy 컴포넌트 렌더링됨 ===');
+    console.log('현재 URL:', window.location.href);
+    console.log('searchParams:', searchParams.toString());
+    
     const handleOAuth2Token = async () => {
       try {
         const code = searchParams.get('code');
