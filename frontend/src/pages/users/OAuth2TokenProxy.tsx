@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setToken } from '../../utils/tokenSlice';
 import { setUser } from '../../utils/userSlice';
-import { RootState } from '../../utils/store';
 import apiClient from '../../services/apiClient';
 import { Button } from '../../components/ui/button';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
@@ -16,14 +15,6 @@ const OAuth2TokenProxy: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
-  
-  // Redux 상태 확인
-  const user = useSelector((state: RootState) => state.user);
-  const token = useSelector((state: RootState) => state.token);
-  
-  console.log('OAuth2TokenProxy 컴포넌트 초기화 완료');
-  console.log('현재 경로:', window.location.pathname);
-  console.log('경로 매칭 확인: /login/oauth2/code/google');
 
   useEffect(() => {
     console.log('=== OAuth2TokenProxy 컴포넌트 렌더링됨 ===');
@@ -39,174 +30,139 @@ const OAuth2TokenProxy: React.FC = () => {
         console.log('OAuth2 토큰 프록시 처리 시작');
         console.log('OAuth2 파라미터:', { code, state, scope });
         
+        // code 파라미터가 있으면 구글 OAuth2 콜백이므로 처리하지 않음
+        // 올바른 OAuth2 플로우는 /oauth2/success에서 처리됨
         if (code) {
-          console.log('백엔드 OAuth2 토큰 생성 요청 시작...');
+          console.log('구글 OAuth2 콜백 파라미터 감지됨');
+          console.log('이 컴포넌트는 사용하지 않는 엔드포인트입니다.');
+          console.log('올바른 OAuth2 플로우를 사용해주세요.');
           
-          // 백엔드의 OAuth2 토큰 생성 엔드포인트에 직접 요청 (apiClient 사용)
-          const response = await apiClient.post('/oauth2/token', {
-            code: code,
-            state: state,
-            scope: scope
-          });
-          
-          console.log('백엔드 OAuth2 토큰 생성 응답:', response);
-          console.log('응답 상태:', response.status);
-          console.log('응답 헤더:', response.headers);
-          console.log('백엔드에서 받은 토큰 데이터:', response.data);
-          
-          // JWT 토큰 에러는 무시하고 정상 응답 처리
-          if (response.data && response.data.accessToken && response.data.user) {
-            const { accessToken, refreshToken, user } = response.data;
-            
-            if (accessToken && user) {
-              console.log('OAuth2 로그인 성공!');
-              console.log('사용자 정보:', user);
-              console.log('토큰:', accessToken);
-              
-              // Redux에 저장
-              dispatch(setUser(user));
-              dispatch(setToken(accessToken));
-              
-              // Redux 저장 후 상태 확인
-              console.log('Redux 저장 완료 - 사용자 정보:', user);
-              console.log('Redux 저장 완료 - 토큰:', accessToken);
-              
-              // Redux store에서 실제 저장된 값 확인
-              setTimeout(() => {
-                console.log('=== Redux Store 상태 확인 ===');
-                console.log('저장된 사용자 정보:', user);
-                console.log('저장된 토큰:', token);
-                console.log('사용자 ID:', user.userId);
-                console.log('토큰 존재 여부:', token ? '있음' : '없음');
-              }, 100);
-              
-              // 성공 시에도 3초 대기 후 상태 변경 (에러 로그 확인 시간 확보)
-              setTimeout(() => {
-                setStatus('success');
-                console.log('OAuth2 로그인 성공 - 사용자가 직접 이동 버튼을 클릭하도록 대기');
-              }, 3000);
-            } else {
-              // 에러 시에도 3초 대기 후 상태 변경 (에러 로그 확인 시간 확보)
-              setTimeout(() => {
-                setStatus('error');
-                setErrorMessage('백엔드에서 사용자 정보를 생성하지 못했습니다.');
-              }, 3000);
-            }
-          } else {
-            console.log('백엔드 응답에 필요한 데이터가 없음:', response.data);
-            // 에러 시에도 3초 대기 후 상태 변경 (에러 로그 확인 시간 확보)
-            setTimeout(() => {
-              setStatus('error');
-              setErrorMessage('백엔드 응답에 필요한 데이터가 없습니다.');
-            }, 3000);
-          }
-        } else {
-          console.log('Google OAuth2 인증 코드가 없음');
           setStatus('error');
-          setErrorMessage('Google OAuth2 인증 코드를 받지 못했습니다.');
+          setErrorMessage('잘못된 OAuth2 플로우입니다. 구글 로그인 버튼을 사용해주세요.');
+          return;
         }
-      } catch (backendError) {
-        console.error('백엔드 토큰 생성 요청 실패:', backendError);
-        console.error('에러 상세:', backendError);
         
-        // 에러 시에도 3초 대기 후 상태 변경 (에러 로그 확인 시간 확보)
-        setTimeout(() => {
+        // access_token과 refresh_token이 URL에 있는 경우 (올바른 플로우)
+        const accessToken = searchParams.get('access_token');
+        const refreshToken = searchParams.get('refresh_token');
+        const success = searchParams.get('success');
+        
+        console.log('URL 파라미터 확인:', { accessToken, refreshToken, success });
+        
+        if (accessToken && refreshToken && success === 'true') {
+          console.log('올바른 OAuth2 성공 플로우 감지됨');
+          
+          try {
+            // JWT 토큰 저장
+            console.log('JWT 토큰 저장 중...');
+            
+            dispatch(setToken({
+              accessToken: accessToken,
+              refreshToken: refreshToken
+            }));
+            
+            console.log('토큰 저장 완료, 사용자 정보 조회 시작...');
+            
+            // 사용자 정보 조회 API 호출
+            const userResponse = await apiClient.get('/user/info');
+            console.log('사용자 정보 조회 응답:', userResponse.data);
+            
+            if (userResponse.data) {
+              dispatch(setUser(userResponse.data));
+              console.log('사용자 정보 저장 완료:', userResponse.data);
+              
+              setStatus('success');
+              setTimeout(() => {
+                navigate('/dashboard');
+              }, 2000);
+            } else {
+              throw new Error('사용자 정보를 가져올 수 없습니다.');
+            }
+            
+          } catch (userError) {
+            console.error('사용자 정보 조회 실패:', userError);
+            setStatus('error');
+            setErrorMessage('사용자 정보를 가져오는데 실패했습니다.');
+            return;
+          }
+        } else if (success === 'false') {
+          console.log('OAuth2 로그인 실패');
           setStatus('error');
-          const errorMessage = backendError instanceof Error ? backendError.message : '알 수 없는 오류';
-          setErrorMessage('백엔드와의 통신에 실패했습니다. 에러: ' + errorMessage);
-        }, 3000);
+          setErrorMessage('구글 로그인에 실패했습니다.');
+        } else {
+          console.log('OAuth2 파라미터가 없음 - 대기 중...');
+          // 파라미터가 없으면 로딩 상태 유지
+        }
+      } catch (error) {
+        console.error('OAuth2 처리 중 오류 발생:', error);
+        setStatus('error');
+        setErrorMessage('OAuth2 처리 중 오류가 발생했습니다.');
       }
     };
 
     handleOAuth2Token();
   }, [searchParams, dispatch, navigate]);
 
-  const handleRetry = () => {
-    console.log('다시 시도 버튼 클릭 - 현재 URL:', window.location.href);
-    console.log('현재 상태를 loading으로 변경하여 다시 시도');
-    setStatus('loading');
-    setErrorMessage('');
-    // useEffect가 다시 실행되도록 searchParams 변경
-    window.location.reload();
-  };
-
-  const handleGoHome = () => {
-    navigate('/');
-  };
-
   const handleGoToLogin = () => {
     navigate('/login');
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8 text-center">
-        {status === 'loading' && (
-          <>
-            <Loader2 className="w-16 h-16 text-blue-500 animate-spin mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">토큰 생성 중...</h2>
-            <p className="text-gray-600">잠시만 기다려주세요.</p>
-          </>
-        )}
+  const handleGoToDashboard = () => {
+    navigate('/dashboard');
+  };
 
-        {status === 'success' && (
-          <>
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">로그인 성공!</h2>
-            <p className="text-gray-600 mb-4">아래 버튼을 클릭하여 대시보드로 이동하세요.</p>
-            <div className="space-y-2">
-              <Button
-                onClick={() => {
-                  console.log('대시보드로 이동 버튼 클릭');
-                  navigate('/daily-care');
-                }}
-                className="w-full bg-[#222222] hover:bg-[#333333] text-white"
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6">
+        <div className="text-center">
+          {status === 'loading' && (
+            <>
+              <Loader2 className="mx-auto h-12 w-12 text-blue-600 animate-spin" />
+              <h2 className="mt-4 text-xl font-semibold text-gray-900">
+                OAuth2 처리 중...
+              </h2>
+              <p className="mt-2 text-gray-600">
+                구글 로그인 정보를 처리하고 있습니다.
+              </p>
+            </>
+          )}
+          
+          {status === 'success' && (
+            <>
+              <CheckCircle className="mx-auto h-12 w-12 text-green-600" />
+              <h2 className="mt-4 text-xl font-semibold text-gray-900">
+                로그인 성공!
+              </h2>
+              <p className="mt-2 text-gray-600">
+                구글 로그인이 성공적으로 완료되었습니다.
+              </p>
+              <Button 
+                onClick={handleGoToDashboard}
+                className="mt-4 w-full"
               >
                 대시보드로 이동
               </Button>
-              <Button
-                onClick={() => {
-                  console.log('로그인 페이지로 이동 버튼 클릭');
-                  navigate('/login');
-                }}
-                variant="outline"
-                className="w-full"
-              >
-                로그인 페이지로
-              </Button>
-            </div>
-          </>
-        )}
-
-        {status === 'error' && (
-          <>
-            <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">로그인 실패</h2>
-            <p className="text-gray-600 mb-4">{errorMessage}</p>
-            <div className="space-y-2">
-              <Button
-                onClick={handleRetry}
-                className="w-full bg-[#222222] hover:bg-[#333333] text-white"
-              >
-                다시 시도하기
-              </Button>
-              <Button
+            </>
+          )}
+          
+          {status === 'error' && (
+            <>
+              <XCircle className="mx-auto h-12 w-12 text-red-600" />
+              <h2 className="mt-4 text-xl font-semibold text-gray-900">
+                로그인 실패
+              </h2>
+              <p className="mt-2 text-gray-600">
+                {errorMessage || '로그인 처리 중 오류가 발생했습니다.'}
+              </p>
+              <Button 
                 onClick={handleGoToLogin}
-                variant="outline"
-                className="w-full"
+                className="mt-4 w-full"
               >
-                로그인 페이지로
+                로그인 페이지로 이동
               </Button>
-              <Button
-                onClick={handleGoHome}
-                variant="outline"
-                className="w-full"
-              >
-                홈으로 이동
-              </Button>
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

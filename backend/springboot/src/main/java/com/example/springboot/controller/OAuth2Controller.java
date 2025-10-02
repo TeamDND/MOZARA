@@ -88,82 +88,18 @@ public class OAuth2Controller {
 
     @PostMapping("/token")
     public ResponseEntity<?> oauth2Token(@RequestBody Map<String, String> request) {
-        log.info("=== OAuth2 토큰 생성 요청 ===");
+        log.info("=== OAuth2 토큰 생성 요청 (사용하지 않는 엔드포인트) ===");
         log.info("요청 데이터: {}", request);
         
-        try {
-            String code = request.get("code");
-            String state = request.get("state");
-            String scope = request.get("scope");
-            
-            log.info("OAuth2 파라미터 - Code: {}, State: {}, Scope: {}", code, state, scope);
-            
-            // Google OAuth2 인증 코드를 사용하여 사용자 정보 조회
-            log.info("Google OAuth2 인증 코드로 사용자 정보 조회 시작");
-            
-            // Google OAuth2 인증 코드를 사용하여 실제 사용자 정보 가져오기
-            // CustomOAuth2UserService를 통해 실제 Google 사용자 정보 처리
-            log.info("CustomOAuth2UserService를 통해 실제 Google 사용자 정보 처리 시작");
-            
-            // Google OAuth2 인증 코드를 사용하여 실제 Google API에서 사용자 정보 가져오기
-            // 실제로는 Google OAuth2 API를 호출해야 하지만, 현재는 CustomOAuth2UserService를 통해 처리
-            // CustomOAuth2UserService에서 이미 처리된 사용자 정보를 가져와야 함
-            
-            // CustomOAuth2UserService에서 이미 처리된 실제 Google 사용자 정보 사용
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            log.info("현재 인증 상태: {}", authentication);
-            
-            UserEntity user;
-            if (authentication != null && authentication.getPrincipal() instanceof CustomOAuth2UserService.CustomOAuth2User) {
-                CustomOAuth2UserService.CustomOAuth2User oauth2User = 
-                    (CustomOAuth2UserService.CustomOAuth2User) authentication.getPrincipal();
-                
-                user = oauth2User.getUserEntity();
-                log.info("CustomOAuth2UserService에서 처리된 사용자 정보 사용 - ID: {}, Email: {}, Name: {}", 
-                        user.getId(), user.getEmail(), user.getNickname());
-            } else {
-                log.error("CustomOAuth2UserService에서 사용자 정보를 찾을 수 없음");
-                throw new RuntimeException("OAuth2 사용자 정보를 찾을 수 없습니다.");
-            }
-            
-            // JWT 토큰 생성
-            String accessToken = jwtUtil.createAccessToken(user.getEmail());
-            String refreshToken = jwtUtil.createRefreshToken(user.getEmail());
-            
-            log.info("JWT 토큰 생성 완료 - AccessToken: {}, RefreshToken: {}",
-                    accessToken.substring(0, 20) + "...", refreshToken.substring(0, 20) + "...");
-            
-            // CustomOAuth2UserService에서 처리된 실제 사용자 정보 사용
-            log.info("=== OAuth2Controller에서 사용자 정보 응답 생성 ===");
-            log.info("실제 DB 사용자 ID: {}", user.getId());
-            log.info("실제 Gmail 주소: {}", user.getEmail());
-            log.info("실제 사용자명 (Gmail): {}", user.getUsername());
-            log.info("실제 닉네임 (Google 이름): {}", user.getNickname());
-            log.info("실제 권한: {}", user.getRole());
-            
-            Map<String, Object> userInfo = new HashMap<>();
-            userInfo.put("userId", user.getId()); // auto increment된 실제 userId
-            userInfo.put("email", user.getEmail()); // 실제 Gmail
-            userInfo.put("username", user.getUsername()); // 실제 Gmail (username으로도 사용)
-            userInfo.put("nickname", user.getNickname()); // 실제 Google 이름
-            userInfo.put("role", user.getRole());
-            
-            // 응답 데이터 생성
-            Map<String, Object> response = new HashMap<>();
-            response.put("accessToken", accessToken);
-            response.put("refreshToken", refreshToken);
-            response.put("user", userInfo);
-            response.put("success", true);
-            
-            log.info("OAuth2 토큰 생성 성공 - 사용자: {}", user.getEmail());
-            
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            log.error("OAuth2 토큰 생성 실패", e);
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "토큰 생성에 실패했습니다.");
-            return ResponseEntity.status(500).body(errorResponse);
-        }
+        // 이 엔드포인트는 사용하지 않습니다. 
+        // 구글 OAuth2 로그인은 /oauth2/success 엔드포인트에서 처리됩니다.
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "이 엔드포인트는 사용하지 않습니다. 구글 로그인은 /oauth2/success에서 처리됩니다.");
+        errorResponse.put("message", "올바른 OAuth2 플로우를 사용해주세요.");
+        
+        log.warn("사용하지 않는 /oauth2/token 엔드포인트 호출됨");
+        
+        return ResponseEntity.status(400).body(errorResponse);
     }
 
     @GetMapping("/login/google")
