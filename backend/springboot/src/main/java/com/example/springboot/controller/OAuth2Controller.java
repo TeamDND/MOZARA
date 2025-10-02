@@ -49,8 +49,14 @@ public class OAuth2Controller {
             CustomOAuth2UserService.CustomOAuth2User oauth2User = 
                 (CustomOAuth2UserService.CustomOAuth2User) authentication.getPrincipal();
             
+            // 실제 구글 사용자 정보 로그 출력
+            log.info("=== OAuth2 Success에서 실제 사용자 정보 확인 ===");
+            log.info("실제 Gmail: {}", oauth2User.getEmail());
+            log.info("실제 Google 이름: {}", oauth2User.getName());
+            log.info("실제 사용자 엔티티: {}", oauth2User.getUserEntity());
+            
             // JWT 토큰 생성
-            log.info("JWT 토큰 생성 시작 - 사용자: {}", oauth2User.getEmail());
+            log.info("JWT 토큰 생성 시작 - 실제 Gmail: {}", oauth2User.getEmail());
             String accessToken = jwtUtil.createAccessToken(oauth2User.getEmail());
             String refreshToken = jwtUtil.createRefreshToken(oauth2User.getEmail());
             
@@ -103,77 +109,43 @@ public class OAuth2Controller {
             // 실제로는 Google OAuth2 API를 호출해야 하지만, 현재는 CustomOAuth2UserService를 통해 처리
             // CustomOAuth2UserService에서 이미 처리된 사용자 정보를 가져와야 함
             
-            // Google OAuth2 API를 호출하여 실제 사용자 정보 가져오기
-            String googleEmail;
-            String googleName;
+            // CustomOAuth2UserService에서 이미 처리된 실제 Google 사용자 정보 사용
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            log.info("현재 인증 상태: {}", authentication);
             
-            try {
-                // 실제 Google OAuth2 API 호출하여 진짜 사용자 정보 가져오기
-                // Google OAuth2 인증 코드를 사용하여 Google API 호출
-                String googleApiUrl = "https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + code;
-                
-                HttpClient client = HttpClient.newHttpClient();
-                HttpRequest googleRequest = HttpRequest.newBuilder()
-                        .uri(URI.create(googleApiUrl))
-                        .GET()
-                        .build();
-                
-                HttpResponse<String> response = client.send(googleRequest, HttpResponse.BodyHandlers.ofString());
-                
-                if (response.statusCode() == 200) {
-                    ObjectMapper mapper = new ObjectMapper();
-                    Map<String, Object> userInfo = mapper.readValue(response.body(), Map.class);
-                    
-                    googleEmail = (String) userInfo.get("email");
-                    googleName = (String) userInfo.get("name");
-                    
-                    log.info("실제 Google OAuth2 API 호출 성공 - Email: {}, Name: {}", googleEmail, googleName);
-                } else {
-                    throw new RuntimeException("Google API 호출 실패: " + response.statusCode());
-                }
-            } catch (Exception e) {
-                log.error("Google OAuth2 API 호출 실패, 기본값 사용", e);
-                // API 호출 실패 시 기본값 사용
-                googleEmail = "fallback@gmail.com";
-                googleName = "Fallback User";
-            }
-            
-            // 기존 사용자 확인 또는 새 사용자 생성
-            Optional<UserEntity> existingUser = userRepository.findByEmail(googleEmail);
             UserEntity user;
-            
-            if (existingUser.isPresent()) {
-                user = existingUser.get();
-                log.info("기존 사용자 로그인 - ID: {}, Email: {}", user.getId(), user.getEmail());
-            } else {
-                // 새 사용자 생성 (auto increment userId)
-                user = UserEntity.builder()
-                        .email(googleEmail)
-                        .nickname(googleName)
-                        .username(googleEmail)
-                        .role("ROLE_USER")
-                        .createdat(Instant.now())
-                        .updatedat(Instant.now())
-                        .build();
+            if (authentication != null && authentication.getPrincipal() instanceof CustomOAuth2UserService.CustomOAuth2User) {
+                CustomOAuth2UserService.CustomOAuth2User oauth2User = 
+                    (CustomOAuth2UserService.CustomOAuth2User) authentication.getPrincipal();
                 
-                user = userRepository.save(user);
-                log.info("새 사용자 생성 완료 - ID: {}, Email: {}, Nickname: {}", 
+                user = oauth2User.getUserEntity();
+                log.info("CustomOAuth2UserService에서 처리된 사용자 정보 사용 - ID: {}, Email: {}, Name: {}", 
                         user.getId(), user.getEmail(), user.getNickname());
+            } else {
+                log.error("CustomOAuth2UserService에서 사용자 정보를 찾을 수 없음");
+                throw new RuntimeException("OAuth2 사용자 정보를 찾을 수 없습니다.");
             }
             
             // JWT 토큰 생성
-            String accessToken = jwtUtil.createAccessToken(googleEmail);
-            String refreshToken = jwtUtil.createRefreshToken(googleEmail);
+            String accessToken = jwtUtil.createAccessToken(user.getEmail());
+            String refreshToken = jwtUtil.createRefreshToken(user.getEmail());
             
             log.info("JWT 토큰 생성 완료 - AccessToken: {}, RefreshToken: {}",
                     accessToken.substring(0, 20) + "...", refreshToken.substring(0, 20) + "...");
             
-            // 실제 DB에서 생성된 사용자 정보 사용
+            // CustomOAuth2UserService에서 처리된 실제 사용자 정보 사용
+            log.info("=== OAuth2Controller에서 사용자 정보 응답 생성 ===");
+            log.info("실제 DB 사용자 ID: {}", user.getId());
+            log.info("실제 Gmail 주소: {}", user.getEmail());
+            log.info("실제 사용자명 (Gmail): {}", user.getUsername());
+            log.info("실제 닉네임 (Google 이름): {}", user.getNickname());
+            log.info("실제 권한: {}", user.getRole());
+            
             Map<String, Object> userInfo = new HashMap<>();
             userInfo.put("userId", user.getId()); // auto increment된 실제 userId
-            userInfo.put("email", user.getEmail());
-            userInfo.put("username", user.getUsername());
-            userInfo.put("nickname", user.getNickname());
+            userInfo.put("email", user.getEmail()); // 실제 Gmail
+            userInfo.put("username", user.getUsername()); // 실제 Gmail (username으로도 사용)
+            userInfo.put("nickname", user.getNickname()); // 실제 Google 이름
             userInfo.put("role", user.getRole());
             
             // 응답 데이터 생성
@@ -183,7 +155,7 @@ public class OAuth2Controller {
             response.put("user", userInfo);
             response.put("success", true);
             
-            log.info("OAuth2 토큰 생성 성공 - 사용자: {}", googleEmail);
+            log.info("OAuth2 토큰 생성 성공 - 사용자: {}", user.getEmail());
             
             return ResponseEntity.ok(response);
         } catch (Exception e) {

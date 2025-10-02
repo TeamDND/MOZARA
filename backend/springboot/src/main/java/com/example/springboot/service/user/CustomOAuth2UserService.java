@@ -31,6 +31,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         
         OAuth2UserInfo oAuth2UserInfo = null;
         
+        // Google에서 받은 실제 attributes 로그 출력
+        log.info("=== Google OAuth2 Attributes 전체 정보 ===");
+        oAuth2User.getAttributes().forEach((key, value) -> {
+            log.info("Google Attribute - Key: {}, Value: {}", key, value);
+        });
+        
         if (registrationId.equals("google")) {
             oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
         } else {
@@ -40,8 +46,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         
         String email = oAuth2UserInfo.getEmail();
         String name = oAuth2UserInfo.getName();
+        String providerId = oAuth2UserInfo.getProviderId();
         
-        log.info("OAuth2 사용자 정보 - Email: {}, Name: {}", email, name);
+        log.info("=== Google에서 추출한 사용자 정보 ===");
+        log.info("실제 Gmail: {}", email);
+        log.info("실제 Google 이름: {}", name);
+        log.info("Google 사용자 ID (sub): {}", providerId);
         
         // 기존 사용자 확인
         log.info("DB에서 사용자 조회 시작 - Email: {}", email);
@@ -109,6 +119,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         
         public GoogleUserInfo(Map<String, Object> attributes) {
             this.attributes = attributes;
+            log.info("=== GoogleUserInfo 생성 - 실제 Google Attributes ===");
+            attributes.forEach((key, value) -> {
+                log.info("GoogleUserInfo - {}: {}", key, value);
+            });
         }
         
         @Override
@@ -118,17 +132,23 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         
         @Override
         public String getProviderId() {
-            return (String) attributes.get("sub");
+            String sub = (String) attributes.get("sub");
+            log.info("Google ProviderId (sub) 추출: {}", sub);
+            return sub;
         }
         
         @Override
         public String getEmail() {
-            return (String) attributes.get("email");
+            String email = (String) attributes.get("email");
+            log.info("Google Email 추출: {}", email);
+            return email;
         }
         
         @Override
         public String getName() {
-            return (String) attributes.get("name");
+            String name = (String) attributes.get("name");
+            log.info("Google Name 추출: {}", name);
+            return name;
         }
     }
     
