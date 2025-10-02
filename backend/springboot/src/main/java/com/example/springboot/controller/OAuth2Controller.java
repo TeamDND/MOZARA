@@ -69,6 +69,7 @@ public class OAuth2Controller {
                                "&refresh_token=" + refreshToken + "&success=true";
             
             log.info("프론트엔드로 리다이렉트: {}", redirectUrl);
+            log.info("OAuth2 설정 테스트 - GitHub Actions 트리거");
             response.sendRedirect(redirectUrl);
         } else {
             log.error("=== OAuth2 인증 실패 ===");
