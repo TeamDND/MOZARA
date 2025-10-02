@@ -12,6 +12,7 @@ interface AnalysisProgressStepProps {
   isAnalyzing: boolean;
   onRetry: () => void;
   onGoBack: () => void;
+  gender?: string;  // 성별 추가
 }
 
 const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
@@ -22,8 +23,10 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
   analysisError,
   isAnalyzing,
   onRetry,
-  onGoBack
+  onGoBack,
+  gender
 }) => {
+  const isMale = gender === 'male' || gender === '남';
   return (
     <div className="space-y-8">
       <div className="text-center space-y-3">
@@ -61,15 +64,20 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
             {isAnalyzing && (
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-sm">Swin Transformer AI로 이미지 분석 중...</span>
+                <span className="text-sm">
+                  {isMale ? 'Swin Transformer AI로 이미지 분석 중...' : 'RAG 듀얼 앙상블 AI로 이미지 분석 중...'}
+                </span>
               </div>
             )}
           </div>
 
           <div className="bg-blue-50 p-4 rounded-xl">
             <p className="text-sm text-blue-800">
-              🧠 <strong>실제 AI 분석 진행 중!</strong> Swin Transformer 모델이 귀하의 두피 상태를 분석하고 있습니다.
-              잠시만 기다려주세요.
+              🧠 <strong>실제 AI 분석 진행 중!</strong>{' '}
+              {isMale
+                ? 'Swin Transformer 모델이 귀하의 두피 상태를 분석하고 있습니다.'
+                : 'ConvNeXt + ViT 듀얼 앙상블 모델이 귀하의 두피 상태를 분석하고 있습니다.'}
+              {' '}잠시만 기다려주세요.
             </p>
           </div>
         </div>

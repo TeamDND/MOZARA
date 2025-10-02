@@ -4,17 +4,18 @@ Per-class 앙상블 설정 (ConvNeXt + ViT-S/16)
 """
 
 # Pinecone 인덱스 설정
-INDEX_CONV = "hair-loss-rag-analyzer"  # ConvNeXt용 인덱스
-INDEX_VIT = "hair-loss-vit-s16"        # ViT-S/16용 인덱스
+import os
+INDEX_CONV = os.getenv("PINECONE_INDEX_NAME_RAG_CONV", "hair-loss-rag-analyzer")  # ConvNeXt용 인덱스
+INDEX_VIT = os.getenv("PINECONE_INDEX_NAME_RAG_VIT", "hair-loss-vit-s16")        # ViT-S/16용 인덱스
 
 # 검색 파라미터
 TOP_K = 10
 T_CONV = 0.15  # ConvNeXt 온도 파라미터
 T_VIT = 0.20   # ViT 온도 파라미터
 
-# 앙상블 설정
-USE_OVERRIDE = True
-NUM_CLASSES = 7
+# 앙상블 설정 (여성형 탈모 - Sinclair 5단계)
+USE_OVERRIDE = False  # 신뢰도 기반 동적 가중치 사용 중
+NUM_CLASSES = 5  # Stage 1-5
 
 # 검증셋에서 산출된 per-class 가중치
 PER_CLASS_WEIGHTS = {

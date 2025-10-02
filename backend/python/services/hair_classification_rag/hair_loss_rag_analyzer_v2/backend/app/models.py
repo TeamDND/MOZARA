@@ -7,23 +7,31 @@ class AnalysisRequest(BaseModel):
     filename: str
 
 class SimilarImage(BaseModel):
-    id: str
-    score: float
+    id: Optional[str] = None
+    score: Optional[float] = None
     stage: int
     filename: str
-    path: str
+    path: Optional[str] = None
+    similarity: Optional[float] = None  # RAG v2에서 사용
+    source: Optional[str] = None  # RAG v2에서 사용 (convnext/vit)
 
 class AnalysisResult(BaseModel):
     success: bool
     predicted_stage: Optional[int] = None
     confidence: Optional[float] = None
     stage_description: Optional[str] = None
+    # Swin과 동일한 필드 (Gemini LLM 결과)
+    title: Optional[str] = None
+    description: Optional[str] = None
+    advice: Optional[str] = None
+    # 기존 필드들
     norwood_stage: Optional[int] = None
     norwood_description: Optional[str] = None
     stage_scores: Optional[Dict[str, float]] = None
     stage_probabilities: Optional[Dict[str, float]] = None
     similar_images: Optional[List[SimilarImage]] = None
     analysis_details: Optional[Dict[str, Any]] = None
+    ensemble_details: Optional[Dict[str, Any]] = None
     fusion_method: Optional[str] = None
     fusion_weight: Optional[float] = None
     primary_viewpoint: Optional[str] = None

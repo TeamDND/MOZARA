@@ -7,10 +7,12 @@ import { useState } from 'react';
 interface AnalysisResultStepProps {
   analysisResult: SwinAnalysisResult | null;
   onComplete: () => void;
+  gender?: string;
 }
 
-const AnalysisResultStep: React.FC<AnalysisResultStepProps> = ({ analysisResult, onComplete }) => {
+const AnalysisResultStep: React.FC<AnalysisResultStepProps> = ({ analysisResult, onComplete, gender }) => {
   const [showStageInfo, setShowStageInfo] = useState(false);
+  const isMale = gender === 'male' || gender === '남';
 
   return (
     <div className="space-y-8">
@@ -25,7 +27,7 @@ const AnalysisResultStep: React.FC<AnalysisResultStepProps> = ({ analysisResult,
       <div className="space-y-4">
         <div className="bg-white p-4 rounded-xl border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-800 mb-3">
-            🧠 Swin Transformer AI 분석 결과
+            🧠 {isMale ? 'Swin Transformer AI' : 'RAG 듀얼 앙상블 AI'} 분석 결과
           </h3>
           {analysisResult ? (
             <div className="space-y-3">

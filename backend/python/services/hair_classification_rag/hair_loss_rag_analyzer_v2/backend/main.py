@@ -1,7 +1,7 @@
 ﻿from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers.analysis import router as analysis_router
-from app.config import settings
+from services.hair_classification_rag.hair_loss_rag_analyzer_v2.backend.app.routers.analysis import router as analysis_router
+from services.hair_classification_rag.hair_loss_rag_analyzer_v2.backend.app.config import settings
 
 app = FastAPI(title="Hair Loss RAG Analyzer v1", version="1.0.0")
 

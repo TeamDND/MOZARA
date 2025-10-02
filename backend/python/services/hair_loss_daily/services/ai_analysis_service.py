@@ -25,17 +25,17 @@ class AIAnalysisService:
             
             api_key = gemini_api_key or google_api_key
             if not api_key:
-                print("⚠️ GEMINI_API_KEY 또는 GOOGLE_API_KEY가 설정되지 않았습니다.")
+                print("[WARN] GEMINI_API_KEY 또는 GOOGLE_API_KEY가 설정되지 않았습니다.")
                 return
             
             # Gemini 설정
             genai.configure(api_key=api_key)
             self.model = genai.GenerativeModel('gemini-2.5-flash')
             
-            print("✅ Gemini AI 모델 초기화 완료")
+            print("[OK] Gemini AI 모델 초기화 완료")
             
         except Exception as e:
-            print(f"❌ Gemini 모델 초기화 실패: {str(e)}")
+            print(f"[ERROR] Gemini 모델 초기화 실패: {str(e)}")
             self.model = None
     
     def generate_advanced_analysis(self, rag_result: Dict[str, Any]) -> Dict[str, Any]:
@@ -65,7 +65,7 @@ class AIAnalysisService:
             }
             
         except Exception as e:
-            print(f"⚠️ AI 분석 오류: {str(e)}")
+            print(f"[WARN] AI 분석 오류: {str(e)}")
             return {
                 "success": False,
                 "error": str(e),
@@ -180,7 +180,7 @@ class AIAnalysisService:
             return json.loads(json_text)
             
         except Exception as e:
-            print(f"⚠️ AI 응답 파싱 오류: {str(e)}")
+            print(f"[WARN] AI 응답 파싱 오류: {str(e)}")
             return {
                 "diagnosis": response_text,
                 "main_issues": [],
