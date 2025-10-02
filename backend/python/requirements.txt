@@ -8,7 +8,7 @@ langchain
 langchain-openai
 langchain-pinecone
 langchain-google-genai
-google-ai-generativelanguage>=0.7
+google-ai-generativelanguage==0.6.15
 
 # AI & ML
 openai
@@ -20,7 +20,7 @@ open_clip_torch
 sentence-transformers
 
 # Vector Database
-pinecone
+pinecone>=3.0.0
 protobuf
 
 # PDF Processing
