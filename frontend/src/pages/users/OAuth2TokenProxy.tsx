@@ -82,6 +82,7 @@ const OAuth2TokenProxy: React.FC = () => {
               setErrorMessage('백엔드에서 사용자 정보를 생성하지 못했습니다.');
             }
         } else {
+          console.log('Google OAuth2 인증 코드가 없음');
           setStatus('error');
           setErrorMessage('Google OAuth2 인증 코드를 받지 못했습니다.');
         }
@@ -105,6 +106,10 @@ const OAuth2TokenProxy: React.FC = () => {
 
   const handleGoHome = () => {
     navigate('/');
+  };
+
+  const handleGoToLogin = () => {
+    navigate('/login');
   };
 
   return (
@@ -143,6 +148,13 @@ const OAuth2TokenProxy: React.FC = () => {
                 className="w-full bg-[#222222] hover:bg-[#333333] text-white"
               >
                 다시 시도하기
+              </Button>
+              <Button
+                onClick={handleGoToLogin}
+                variant="outline"
+                className="w-full"
+              >
+                로그인 페이지로
               </Button>
               <Button
                 onClick={handleGoHome}
