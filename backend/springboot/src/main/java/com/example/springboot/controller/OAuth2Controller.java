@@ -27,7 +27,7 @@ import java.util.Optional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
-@RequestMapping("/api/oauth2")
+@RequestMapping("/oauth2")
 @RequiredArgsConstructor
 @Slf4j
 public class OAuth2Controller {

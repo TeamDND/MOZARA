@@ -50,8 +50,7 @@ const App: React.FC = () => {
           <Route path="login" element={<LogIn />} />
           <Route path="oauth2/authorization/google" element={<OAuth2Proxy />} />
           <Route path="oauth2/callback" element={<OAuth2Callback />} />
-          {/* 임시: 백엔드 재배포 전까지 프론트엔드에서 처리 */}
-          <Route path="login/oauth2/code/google" element={<OAuth2Callback />} />
+          {/* /login/oauth2/code/google은 백엔드에서 처리 */}
           <Route path="integrated-diagnosis" element={<IntegratedDiagnosis />} />
           <Route path="diagnosis-results" element={<DiagnosisResults />} />
           <Route path="dashboard" element={<Dashboard />} />
