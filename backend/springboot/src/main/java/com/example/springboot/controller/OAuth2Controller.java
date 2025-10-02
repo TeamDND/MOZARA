@@ -83,6 +83,7 @@ public class OAuth2Controller {
     @GetMapping("/fail")
     public void oauth2Fail(HttpServletResponse response) throws IOException {
         log.error("OAuth2 로그인 실패");
+        
         response.sendRedirect("https://hairfit.duckdns.org/oauth2/callback?success=false&error=login_failed");
     }
 
