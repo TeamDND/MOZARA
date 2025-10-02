@@ -74,6 +74,7 @@ public class SecurityConfig {
                                 "/api/login/oauth2/code/*",
                                 "/oauth2/success",
                                 "/oauth2/fail",
+                                "/login/oauth2/code/**", // OAuth2 콜백 허용
                                 "/api/naver/local/**", // 네이버 로컬 검색 API 허용
                                 "/api/kakao/local/**", // 카카오 로컬 검색 API 허용
                                 "/api/config", // 설정 API 허용
