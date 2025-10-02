@@ -10,6 +10,7 @@ interface UserState {
   gender: string | null;
   age: number | null;
   role: string | null;
+  createdAt: string | null;
 }
 
 // TypeScript: 사용자 데이터 인터페이스 정의
@@ -21,6 +22,7 @@ interface UserData {
   gender: string;
   age: number;
   role?: string;
+  createdAt?: string;
 }
 
 // TypeScript: 초기 상태 정의
@@ -32,6 +34,7 @@ const initialState: UserState = {
   gender: null,
   age: null,
   role: null,
+  createdAt: null,
 };
 
 // TypeScript: 사용자 슬라이스 생성
@@ -52,6 +55,7 @@ const userSlice = createSlice({
       state.gender = null;
       state.age = null;
       state.role = null;
+      state.createdAt = null;
     },
   },
 });

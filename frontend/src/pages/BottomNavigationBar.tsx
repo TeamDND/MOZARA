@@ -85,7 +85,7 @@ const BottomNavigationBar: React.FC = () => {
               onClick={() => {
                 closeChatBotModal();
                 if (isLoggedIn) {
-                  navigate('/mypage')
+                  navigate('/hair-pt')
                 } else {
                   navigate('/login')
                 }
