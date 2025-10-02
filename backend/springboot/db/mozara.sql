@@ -27,8 +27,8 @@ DROP TABLE IF EXISTS `analysis_results`;
 CREATE TABLE `analysis_results` (
   `result_id` int NOT NULL AUTO_INCREMENT,
   `inspection_date` date DEFAULT NULL,
-  `analysis_summary` tinytext,
-  `advice` tinytext,
+  `analysis_summary` varchar(5000) DEFAULT NULL,
+  `advice` varchar(5000) DEFAULT NULL,
   `grade` int DEFAULT NULL,
   `image_url` varchar(255) DEFAULT NULL,
   `user_id_foreign` int DEFAULT NULL,

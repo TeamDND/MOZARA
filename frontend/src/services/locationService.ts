@@ -91,9 +91,21 @@ class LocationService {
       return { canonicalCategory: '탈모병원', searchQuery: '피부과' };
     }
 
-    // 전용 미용/관리 계열
+    // 전용 미용/관리 계열 (더 포괄적으로)
     const salonSynonyms = [
-      '전용 미용', '두피 관리 센터', '탈모 전문 헤어살롱', '헤드 스파', '탈모미용실', '탈모 전용 미용실'
+      '탈모미용실', '탈모 전용 미용실', '탈모미용', '탈모 미용실', '탈모 미용',
+      '두피 미용실', '두피 관리 센터', '두피 케어', '두피 관리', '두피 스파',
+      '탈모 전문 헤어살롱', '탈모 헤어살롱', '탈모 살롱', '탈모 헤어',
+      '헤드 스파', '두피 스파', '두피 마사지', '두피 케어샵',
+      '맨즈헤어', '남성 헤어', '남성 미용실', '남성 전용 미용실',
+      '여성 헤어', '여성 미용실', '여성 전용 미용실',
+      '헤어살롱', '헤어샵', '헤어 스타일링', '헤어 디자인',
+      '미용실', '미용샵', '미용센터', '미용 스튜디오',
+      '헤어케어', '두피케어', '모발케어', '모발 관리',
+      '탈모 케어', '탈모 관리', '탈모 스타일링', '탈모 디자인',
+      '두피 진단', '두피 분석', '두피 치료', '두피 상담',
+      '모발 진단', '모발 분석', '모발 치료', '모발 상담',
+      '헤어라인', '헤어라인 관리', '헤어라인 케어', '헤어라인 스타일링'
     ];
     if (salonSynonyms.some(s => q.includes(s.toLowerCase()))) {
       return { canonicalCategory: '탈모미용실', searchQuery: '두피 미용실' };
@@ -108,9 +120,13 @@ class LocationService {
       return { canonicalCategory: '두피문신', searchQuery: '두피문신' };
     }
 
-    // 가발/증모술
+    // 가발/증모술/헤어시스템
     const wigSynonyms = [
-      '가발 전문점', '맞춤 가발', '탈모 보완 가발', '증모술', '가발전문점'
+      '가발', '가발전문점', '가발샵', '가발매장', '가발센터', '가발스튜디오',
+      '맞춤 가발', '천연가발', '인조가발', '헤어피스', '헤어시스템', '헤어라인',
+      '탈모 보완', '탈모 가발', '모발 복원', '모발 대체', '증모술', '증모',
+      '가발 제작', '가발 수리', '가발 관리', '가발 스타일링', '가발 컨설팅',
+      '헤어라인 가발', '자연스러운 가발', '프리미엄 가발', '고품질 가발'
     ];
     if (wigSynonyms.some(s => q.includes(s.toLowerCase()))) {
       return { canonicalCategory: '가발전문점', searchQuery: '가발' };
@@ -221,18 +237,34 @@ class LocationService {
                          name.includes('병원') || name.includes('의원') || name.includes('클리닉') ||
                          name.includes('센터') || name.includes('피부과');
 
-        // 미용/헤어살롱 관련
-        const isBeauty = cat.includes('미용') || cat.includes('헤어') || cat.includes('두피') ||
+        // 미용/헤어살롱 관련 (더 포괄적으로)
+        const isBeauty = (cat.includes('미용') || cat.includes('헤어') || cat.includes('두피') ||
                         cat.includes('남성전문미용실') || cat.includes('여성전용미용실') ||
+                        cat.includes('헤어살롱') || cat.includes('헤어샵') || cat.includes('미용샵') ||
+                        cat.includes('미용센터') || cat.includes('미용스튜디오') || cat.includes('헤어케어') ||
+                        cat.includes('두피케어') || cat.includes('모발케어') || cat.includes('모발관리') ||
                         name.includes('미용실') || name.includes('헤어살롱') || name.includes('탈모전용') ||
-                        name.includes('맨즈헤어') || name.includes('헤어');
+                        name.includes('맨즈헤어') || name.includes('헤어') || name.includes('미용') ||
+                        name.includes('두피') || name.includes('모발') || name.includes('헤어샵') ||
+                        name.includes('미용샵') || name.includes('미용센터') || name.includes('미용스튜디오') ||
+                        name.includes('헤어케어') || name.includes('두피케어') || name.includes('모발케어') ||
+                        name.includes('모발관리') || name.includes('두피관리') || name.includes('탈모케어') ||
+                        name.includes('탈모관리') || name.includes('헤어스타일링') || name.includes('헤어디자인') ||
+                        name.includes('두피스파') || name.includes('헤드스파') || name.includes('두피마사지') ||
+                        name.includes('모발진단') || name.includes('두피진단') || name.includes('모발분석') ||
+                        name.includes('두피분석') || name.includes('모발치료') || name.includes('두피치료') ||
+                        name.includes('모발상담') || name.includes('두피상담') || name.includes('헤어라인'));
 
         // 문신/SMP 관련
         const isTattoo = cat.includes('문신') || cat.includes('두피문신') || cat.includes('SMP') ||
                         name.includes('문신') || name.includes('SMP');
 
-        // 가발 관련
-        const isWig = cat.includes('가발') || name.includes('가발') || name.includes('증모술');
+        // 가발 관련 (더 포괄적으로)
+        const isWig = (cat.includes('가발') || name.includes('가발') || name.includes('증모술') ||
+                      name.includes('헤어피스') || name.includes('헤어시스템') || name.includes('헤어라인') ||
+                      name.includes('모발복원') || name.includes('모발대체') || name.includes('탈모보완') ||
+                      name.includes('가발샵') || name.includes('가발센터') || name.includes('가발스튜디오') ||
+                      name.includes('맞춤가발') || name.includes('천연가발') || name.includes('인조가발'));
 
         // 약국 관련
         const isPharmacyPlace = cat.includes('약국') || cat.includes('pharmacy') ||
@@ -242,13 +274,13 @@ class LocationService {
         if (isPharmacy) return isPharmacyPlace;
         if (isSmp) return isTattoo || isMedical;
         if (isHairSalon) {
-          // 탈모미용실 검색 시 모든 미용실/헤어살롱을 포함
-          return isBeauty || isMedical ||
+          // 탈모미용실 검색 시 가발 관련은 제외하고 미용실/헤어살롱만 포함
+          return (isBeauty || isMedical ||
                  cat.includes('생활') || cat.includes('편의') ||
                  cat.includes('남성') || cat.includes('여성') ||
                  name.toLowerCase().includes('hair') ||
                  name.toLowerCase().includes('salon') ||
-                 name.toLowerCase().includes('style');
+                 name.toLowerCase().includes('style')) && !isWig;
         }
         if (isWigShop) return isWig;
 
@@ -305,18 +337,34 @@ class LocationService {
                          name.includes('병원') || name.includes('의원') || name.includes('클리닉') ||
                          name.includes('센터') || name.includes('피부과');
 
-        // 미용/헤어살롱 관련
-        const isBeauty = cat.includes('미용') || cat.includes('헤어') || cat.includes('두피') ||
+        // 미용/헤어살롱 관련 (더 포괄적으로)
+        const isBeauty = (cat.includes('미용') || cat.includes('헤어') || cat.includes('두피') ||
                         cat.includes('남성전문미용실') || cat.includes('여성전용미용실') ||
+                        cat.includes('헤어살롱') || cat.includes('헤어샵') || cat.includes('미용샵') ||
+                        cat.includes('미용센터') || cat.includes('미용스튜디오') || cat.includes('헤어케어') ||
+                        cat.includes('두피케어') || cat.includes('모발케어') || cat.includes('모발관리') ||
                         name.includes('미용실') || name.includes('헤어살롱') || name.includes('탈모전용') ||
-                        name.includes('맨즈헤어') || name.includes('헤어');
+                        name.includes('맨즈헤어') || name.includes('헤어') || name.includes('미용') ||
+                        name.includes('두피') || name.includes('모발') || name.includes('헤어샵') ||
+                        name.includes('미용샵') || name.includes('미용센터') || name.includes('미용스튜디오') ||
+                        name.includes('헤어케어') || name.includes('두피케어') || name.includes('모발케어') ||
+                        name.includes('모발관리') || name.includes('두피관리') || name.includes('탈모케어') ||
+                        name.includes('탈모관리') || name.includes('헤어스타일링') || name.includes('헤어디자인') ||
+                        name.includes('두피스파') || name.includes('헤드스파') || name.includes('두피마사지') ||
+                        name.includes('모발진단') || name.includes('두피진단') || name.includes('모발분석') ||
+                        name.includes('두피분석') || name.includes('모발치료') || name.includes('두피치료') ||
+                        name.includes('모발상담') || name.includes('두피상담') || name.includes('헤어라인'));
 
         // 문신/SMP 관련
         const isTattoo = cat.includes('문신') || cat.includes('두피문신') || cat.includes('SMP') ||
                         name.includes('문신') || name.includes('SMP');
 
-        // 가발 관련
-        const isWig = cat.includes('가발') || name.includes('가발') || name.includes('증모술');
+        // 가발 관련 (더 포괄적으로)
+        const isWig = (cat.includes('가발') || name.includes('가발') || name.includes('증모술') ||
+                      name.includes('헤어피스') || name.includes('헤어시스템') || name.includes('헤어라인') ||
+                      name.includes('모발복원') || name.includes('모발대체') || name.includes('탈모보완') ||
+                      name.includes('가발샵') || name.includes('가발센터') || name.includes('가발스튜디오') ||
+                      name.includes('맞춤가발') || name.includes('천연가발') || name.includes('인조가발'));
 
         // 약국 관련
         const isPharmacyPlace = cat.includes('약국') || cat.includes('pharmacy') ||
@@ -326,13 +374,13 @@ class LocationService {
         if (isPharmacy) return isPharmacyPlace;
         if (isSmp) return isTattoo || isMedical;
         if (isHairSalon) {
-          // 탈모미용실 검색 시 모든 미용실/헤어살롱을 포함
-          return isBeauty || isMedical ||
+          // 탈모미용실 검색 시 가발 관련은 제외하고 미용실/헤어살롱만 포함
+          return (isBeauty || isMedical ||
                  cat.includes('가정,생활') || cat.includes('생활') ||
                  cat.includes('남성') || cat.includes('여성') ||
                  name.toLowerCase().includes('hair') ||
                  name.toLowerCase().includes('salon') ||
-                 name.toLowerCase().includes('style');
+                 name.toLowerCase().includes('style')) && !isWig;
         }
         if (isWigShop) return isWig;
 
@@ -450,10 +498,16 @@ class LocationService {
     if (category.includes('병원') || category.includes('의원') || category.includes('클리닉')) {
       return '탈모병원';
     }
-    if (category.includes('미용실') || category.includes('헤어') || category.includes('살롱')) {
+    if (category.includes('미용실') || category.includes('헤어') || category.includes('살롱') ||
+        category.includes('미용샵') || category.includes('미용센터') || category.includes('미용스튜디오') ||
+        category.includes('헤어샵') || category.includes('헤어살롱') || category.includes('헤어케어') ||
+        category.includes('두피케어') || category.includes('모발케어') || category.includes('모발관리') ||
+        category.includes('두피관리') || category.includes('탈모케어') || category.includes('탈모관리')) {
       return '탈모미용실';
     }
-    if (category.includes('가발') || category.includes('증모술')) {
+    if (category.includes('가발') || category.includes('증모술') || category.includes('헤어피스') ||
+        category.includes('헤어시스템') || category.includes('헤어라인') || category.includes('모발복원') ||
+        category.includes('모발대체') || category.includes('탈모보완')) {
       return '가발전문점';
     }
     if (category.includes('문신') || category.includes('SMP')) {
@@ -467,10 +521,23 @@ class LocationService {
     if (name.includes('병원') || name.includes('의원') || name.includes('클리닉')) {
       return '탈모병원';
     }
-    if (name.includes('미용실') || name.includes('헤어') || name.includes('살롱')) {
+    if (name.includes('미용실') || name.includes('헤어') || name.includes('살롱') ||
+        name.includes('미용샵') || name.includes('미용센터') || name.includes('미용스튜디오') ||
+        name.includes('헤어샵') || name.includes('헤어살롱') || name.includes('헤어케어') ||
+        name.includes('두피케어') || name.includes('모발케어') || name.includes('모발관리') ||
+        name.includes('두피관리') || name.includes('탈모케어') || name.includes('탈모관리') ||
+        name.includes('두피') || name.includes('모발') || name.includes('미용') ||
+        name.includes('헤어스타일링') || name.includes('헤어디자인') || name.includes('두피스파') ||
+        name.includes('헤드스파') || name.includes('두피마사지') || name.includes('모발진단') ||
+        name.includes('두피진단') || name.includes('모발분석') || name.includes('두피분석') ||
+        name.includes('모발치료') || name.includes('두피치료') || name.includes('모발상담') ||
+        name.includes('두피상담') || name.includes('헤어라인') || name.includes('맨즈헤어') ||
+        name.includes('남성미용실') || name.includes('여성미용실') || name.includes('탈모전용')) {
       return '탈모미용실';
     }
-    if (name.includes('가발') || name.includes('증모술')) {
+    if (name.includes('가발') || name.includes('증모술') || name.includes('헤어피스') || 
+        name.includes('헤어시스템') || name.includes('헤어라인') || name.includes('모발복원') ||
+        name.includes('모발대체') || name.includes('탈모보완')) {
       return '가발전문점';
     }
     if (name.includes('문신') || name.includes('SMP')) {
@@ -496,6 +563,36 @@ class LocationService {
         category.includes(secondaryCat) || secondaryCat.includes(category)
       );
 
+      // 0단계에서는 모든 미용실 관련 장소를 추천으로 포함
+      let isRecommended = isPrimary || isSecondary;
+      if (stage === 0) {
+        const isBeautyRelated = (
+          category.includes('미용실') || category.includes('헤어') || category.includes('살롱') ||
+          category.includes('미용샵') || category.includes('미용센터') || category.includes('미용스튜디오') ||
+          category.includes('헤어샵') || category.includes('헤어살롱') || category.includes('헤어케어') ||
+          category.includes('두피케어') || category.includes('모발케어') || category.includes('모발관리') ||
+          category.includes('두피관리') || category.includes('탈모케어') || category.includes('탈모관리') ||
+          category.includes('헤어스타일링') || category.includes('헤어디자인') || category.includes('두피스파') ||
+          category.includes('헤드스파') || category.includes('두피마사지') || category.includes('모발진단') ||
+          category.includes('두피진단') || category.includes('모발분석') || category.includes('두피분석') ||
+          category.includes('모발치료') || category.includes('두피치료') || category.includes('모발상담') ||
+          category.includes('두피상담') || category.includes('헤어라인') || category.includes('맨즈헤어') ||
+          category.includes('남성미용실') || category.includes('여성미용실') || category.includes('탈모전용') ||
+          hospital.name.includes('미용실') || hospital.name.includes('헤어') || hospital.name.includes('살롱') ||
+          hospital.name.includes('미용샵') || hospital.name.includes('미용센터') || hospital.name.includes('미용스튜디오') ||
+          hospital.name.includes('헤어샵') || hospital.name.includes('헤어살롱') || hospital.name.includes('헤어케어') ||
+          hospital.name.includes('두피케어') || hospital.name.includes('모발케어') || hospital.name.includes('모발관리') ||
+          hospital.name.includes('두피관리') || hospital.name.includes('탈모케어') || hospital.name.includes('탈모관리') ||
+          hospital.name.includes('헤어스타일링') || hospital.name.includes('헤어디자인') || hospital.name.includes('두피스파') ||
+          hospital.name.includes('헤드스파') || hospital.name.includes('두피마사지') || hospital.name.includes('모발진단') ||
+          hospital.name.includes('두피진단') || hospital.name.includes('모발분석') || hospital.name.includes('두피분석') ||
+          hospital.name.includes('모발치료') || hospital.name.includes('두피치료') || hospital.name.includes('모발상담') ||
+          hospital.name.includes('두피상담') || hospital.name.includes('헤어라인') || hospital.name.includes('맨즈헤어') ||
+          hospital.name.includes('남성미용실') || hospital.name.includes('여성미용실') || hospital.name.includes('탈모전용')
+        );
+        isRecommended = isRecommended || isBeautyRelated;
+      }
+
       // 우선순위 점수 계산
       let priorityScore = CATEGORY_PRIORITY_SCORES[category as keyof typeof CATEGORY_PRIORITY_SCORES] || 0;
       
@@ -505,8 +602,10 @@ class LocationService {
         priorityScore += 25; // 2순위 솔루션 보너스
       }
 
-      // 추천 여부 결정
-      const isRecommended = isPrimary || isSecondary;
+      // 0단계에서 미용실 관련 장소에 추가 보너스
+      if (stage === 0 && isRecommended && !isPrimary && !isSecondary) {
+        priorityScore += 30; // 미용실 관련 장소 보너스
+      }
 
       return {
         ...hospital,
