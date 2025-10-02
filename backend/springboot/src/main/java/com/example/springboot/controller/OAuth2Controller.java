@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/oauth2")
+@RequestMapping("/api/oauth2")
 @RequiredArgsConstructor
 @Slf4j
 public class OAuth2Controller {
@@ -97,16 +97,15 @@ public class OAuth2Controller {
                 log.info("JWT 토큰 생성 완료 - AccessToken: {}, RefreshToken: {}",
                         accessToken.substring(0, 20) + "...", refreshToken.substring(0, 20) + "...");
                 
-                // 사용자 정보 반환
-                Map<String, Object> response = new HashMap<>();
-                response.put("accessToken", accessToken);
-                response.put("refreshToken", refreshToken);
-                response.put("user", oauth2User.getUserEntity());
-                response.put("success", true);
+                // 프론트엔드로 리다이렉트 (토큰을 쿼리 파라미터로 전달)
+                String redirectUrl = "https://hairfit.duckdns.org/oauth2/callback?access_token=" + accessToken +
+                                     "&refresh_token=" + refreshToken + "&success=true";
                 
-                log.info("OAuth2 토큰 생성 성공 - 사용자: {}", oauth2User.getEmail());
+                log.info("OAuth2 토큰 생성 성공 - 사용자: {}, 리다이렉트: {}", oauth2User.getEmail(), redirectUrl);
                 
-                return ResponseEntity.ok(response);
+                return ResponseEntity.status(302)
+                    .header("Location", redirectUrl)
+                    .build();
             } else {
                 log.error("OAuth2 인증 정보를 찾을 수 없음");
                 Map<String, String> errorResponse = new HashMap<>();
