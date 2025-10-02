@@ -597,12 +597,6 @@ const DailyCare: React.FC = () => {
                     >
                       {isAnalyzing ? '분석 중...' : '사진으로 AI 분석'}
                     </button>
-                  <button
-                    onClick={() => navigate('/daily-care-detail')}
-                    className="flex-1 h-12 px-4 bg-white border-2 border-[#1F0101] text-[#1F0101] rounded-xl hover:bg-gray-50 font-semibold active:scale-[0.98] transition-all"
-                  >
-                    데일리케어
-                  </button>
                 </div>
               </div>
             </div>
