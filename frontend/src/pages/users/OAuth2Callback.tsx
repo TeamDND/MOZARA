@@ -38,22 +38,6 @@ const OAuth2Callback: React.FC = () => {
         console.log('실제 refreshToken 값:', refreshToken);
         console.log('실제 code 값:', code);
         
-        // code 파라미터가 있으면 구글이 직접 콜백한 것 (임시 처리)
-        if (code && !accessToken) {
-          console.log('구글에서 직접 콜백됨 - 임시로 프론트엔드에서 처리');
-          console.log('Google OAuth2 Code:', code);
-          
-          // 임시로 성공 메시지 표시
-          setStatus('success');
-          setErrorMessage('');
-          
-          // 2초 후 대시보드로 이동
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 2000);
-          
-          return;
-        }
 
         if (success === 'false' || error) {
           setStatus('error');
