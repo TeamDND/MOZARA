@@ -2,6 +2,7 @@ package com.example.springboot.controller;
 
 import com.example.springboot.jwt.JwtUtil;
 import com.example.springboot.service.user.CustomOAuth2UserService;
+import com.example.springboot.service.user.SeedlingService;
 import com.example.springboot.data.entity.UserEntity;
 import com.example.springboot.data.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,6 +36,7 @@ public class OAuth2Controller {
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final SeedlingService seedlingService;
 
     @GetMapping("/success")
     public void oauth2Success(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -78,14 +80,24 @@ public class OAuth2Controller {
                 Optional<UserEntity> existingUser = userRepository.findByUsername(userEmail);
                 if (existingUser.isEmpty()) {
                     log.info("신규 OAuth2 사용자 생성 - Email: {}, Name: {}", userEmail, userName);
+                    String nickname = userName != null ? userName : userEmail.split("@")[0];
                     UserEntity newUser = UserEntity.builder()
                             .email(userEmail)
                             .username(userEmail)
-                            .nickname(userName != null ? userName : userEmail.split("@")[0])
+                            .nickname(nickname)
                             .role("ROLE_USER")
                             .build();
-                    userRepository.save(newUser);
+                    UserEntity savedUser = userRepository.save(newUser);
                     log.info("신규 사용자 DB 저장 완료");
+
+                    // Seedling 자동 생성
+                    try {
+                        seedlingService.createSeedling(savedUser, nickname);
+                        log.info("OAuth2 사용자의 Seedling 생성 완료 - {}", nickname);
+                    } catch (Exception e) {
+                        log.error("Seedling 생성 중 오류 발생: ", e);
+                        // Seedling 생성 실패해도 로그인은 계속 진행
+                    }
                 }
 
                 // JWT 토큰 생성
