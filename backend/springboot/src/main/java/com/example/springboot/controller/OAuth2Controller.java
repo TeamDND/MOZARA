@@ -113,12 +113,12 @@ public class OAuth2Controller {
                 String googleApiUrl = "https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + code;
                 
                 HttpClient client = HttpClient.newHttpClient();
-                HttpRequest request = HttpRequest.newBuilder()
+                HttpRequest googleRequest = HttpRequest.newBuilder()
                         .uri(URI.create(googleApiUrl))
                         .GET()
                         .build();
                 
-                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                HttpResponse<String> response = client.send(googleRequest, HttpResponse.BodyHandlers.ofString());
                 
                 if (response.statusCode() == 200) {
                     ObjectMapper mapper = new ObjectMapper();
