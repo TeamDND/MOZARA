@@ -33,7 +33,7 @@ import MyReportPage from './pages/MyReportPage';
 import Chat from './pages/Chat';
 import OAuth2Callback from './pages/users/OAuth2Callback';
 import OAuth2Proxy from './pages/users/OAuth2Proxy';
-import OAuth2TokenProxy from './pages/users/OAuth2TokenProxy';
+// OAuth2TokenProxy는 더 이상 사용하지 않음
 
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
@@ -49,9 +49,8 @@ const App: React.FC = () => {
           <Route path="landing" element={<LandingPage />} />
           <Route path="login" element={<LogIn />} />
           <Route path="oauth2/authorization/google" element={<OAuth2Proxy />} />
-          <Route path="oauth2/token" element={<OAuth2TokenProxy />} />
-          <Route path="login/oauth2/code/google" element={<OAuth2TokenProxy />} />
           <Route path="oauth2/callback" element={<OAuth2Callback />} />
+          {/* /login/oauth2/code/google은 백엔드에서 처리하므로 프론트엔드 라우팅 제거 */}
           <Route path="integrated-diagnosis" element={<IntegratedDiagnosis />} />
           <Route path="diagnosis-results" element={<DiagnosisResults />} />
           <Route path="dashboard" element={<Dashboard />} />

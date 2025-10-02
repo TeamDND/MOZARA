@@ -30,15 +30,23 @@ const OAuth2TokenProxy: React.FC = () => {
         console.log('OAuth2 토큰 프록시 처리 시작');
         console.log('OAuth2 파라미터:', { code, state, scope });
         
-        // code 파라미터가 있으면 구글 OAuth2 콜백이므로 처리하지 않음
-        // 올바른 OAuth2 플로우는 /oauth2/success에서 처리됨
+        // code 파라미터가 있으면 구글 OAuth2 콜백 처리
         if (code) {
           console.log('구글 OAuth2 콜백 파라미터 감지됨');
-          console.log('이 컴포넌트는 사용하지 않는 엔드포인트입니다.');
-          console.log('올바른 OAuth2 플로우를 사용해주세요.');
+          console.log('Spring Security OAuth2가 자동으로 처리할 것입니다.');
+          console.log('잠시만 기다려주세요...');
           
-          setStatus('error');
-          setErrorMessage('잘못된 OAuth2 플로우입니다. 구글 로그인 버튼을 사용해주세요.');
+          // Spring Security가 자동으로 /oauth2/success로 리다이렉트할 때까지 대기
+          // 실제로는 이 컴포넌트가 직접 처리하지 않고 Spring Security가 처리함
+          setStatus('loading');
+          setErrorMessage('');
+          
+          // 5초 후에도 리다이렉트가 안 되면 에러 처리
+          setTimeout(() => {
+            setStatus('error');
+            setErrorMessage('OAuth2 처리 시간이 초과되었습니다. 다시 시도해주세요.');
+          }, 5000);
+          
           return;
         }
         
