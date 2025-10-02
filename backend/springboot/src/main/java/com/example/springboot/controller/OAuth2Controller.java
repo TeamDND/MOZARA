@@ -84,7 +84,7 @@ public class OAuth2Controller {
                 log.info("OAuth2 로그인 성공 - 사용자: {}, 토큰 생성 완료", userEmail);
                 
                 // 프론트엔드로 리다이렉트 (토큰을 쿼리 파라미터로 전달)
-                String redirectUrl = "https://hairfit.duckdns.org/oauth2/callback?access_token=" + accessToken + 
+                String redirectUrl = "https://hairfit.duckdns.org/oauth2/callback?access_token=" + accessToken +
                                    "&refresh_token=" + refreshToken + "&success=true";
                 
                 log.info("프론트엔드로 리다이렉트: {}", redirectUrl);
