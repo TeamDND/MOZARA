@@ -89,8 +89,8 @@ const OAuth2Callback: React.FC = () => {
             console.log('Google OAuth2 파라미터:', { state, code, scope });
             
             if (code) {
-              // 백엔드의 OAuth2 토큰 생성 엔드포인트에 직접 요청
-              const response = await fetch('http://hairfit.duckdns.org:8080/oauth2/token', {
+              // 백엔드의 OAuth2 토큰 생성 엔드포인트에 직접 요청 (프록시 사용)
+              const response = await fetch('/oauth2/token', {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
