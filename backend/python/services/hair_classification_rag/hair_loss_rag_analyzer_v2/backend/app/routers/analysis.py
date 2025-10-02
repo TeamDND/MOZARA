@@ -5,13 +5,13 @@ import logging
 import os
 from datetime import datetime
 
-from ..models import (
+from services.hair_classification_rag.hair_loss_rag_analyzer_v2.backend.app.models import (
     AnalysisRequest, AnalysisResult, DatabaseSetupRequest,
     DatabaseSetupResponse, DatabaseInfo, UploadResponse,
     AddFolderRequest, AddFolderResponse
 )
-from ..services.hair_loss_analyzer import HairLossAnalyzer
-from ..config import settings
+from services.hair_classification_rag.hair_loss_rag_analyzer_v2.backend.app.services.hair_loss_analyzer import HairLossAnalyzer
+from services.hair_classification_rag.hair_loss_rag_analyzer_v2.backend.app.config import settings
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 
@@ -56,6 +56,23 @@ async def analyze_image_base64(request: AnalysisRequest):
         )
 
         if result['success']:
+            # Stage 5단계(1-5)를 4단계(0-3)로 변환
+            # 1->0, 2->1, 3->2, 4->3, 5->3
+            original_stage = result['predicted_stage']
+            if original_stage <= 3:
+                result['predicted_stage'] = original_stage - 1
+            else:  # 4 or 5
+                result['predicted_stage'] = 3
+
+            # stage_description도 업데이트
+            stage_map = {
+                0: "Stage 0 (정상) - 정수리 모발 밀도 정상, 탈모 징후 없음",
+                1: "Stage 1 (경증) - 가르마 부위 두피가 약간 보이기 시작, 모발 밀도 경미한 감소",
+                2: "Stage 2 (중등도) - 가르마 부위 두피 노출 증가, 모발 밀도 중등도 감소",
+                3: "Stage 3 (중증-최중증) - 가르마 부위 및 정수리 두피 노출 뚜렷, 모발 밀도 현저한 감소"
+            }
+            result['stage_description'] = stage_map.get(result['predicted_stage'], result.get('stage_description', ''))
+
             return AnalysisResult(**result)
         else:
             raise HTTPException(status_code=400, detail=result['error'])
@@ -65,8 +82,17 @@ async def analyze_image_base64(request: AnalysisRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/analyze-upload", response_model=AnalysisResult)
-async def analyze_uploaded_image(file: UploadFile = File(...), use_llm: bool = True):
-    """업로드된 이미지 파일 분석"""
+async def analyze_uploaded_image(
+    file: UploadFile = File(...),
+    use_llm: bool = True,
+    use_roi: bool = True,
+    age: Optional[str] = Form(None),
+    gender: Optional[str] = Form(None),
+    familyHistory: Optional[str] = Form(None),
+    recentHairLoss: Optional[str] = Form(None),
+    stress: Optional[str] = Form(None)
+):
+    """업로드된 이미지 파일 분석 (ROI 기반, 설문 데이터 포함)"""
     try:
         # 파일 크기 확인
         if file.size > settings.MAX_FILE_SIZE:
@@ -90,11 +116,40 @@ async def analyze_uploaded_image(file: UploadFile = File(...), use_llm: bool = T
         contents = await file.read()
         image = Image.open(io.BytesIO(contents)).convert('RGB')
 
-        # 분석 실행
+        # 설문 데이터 구성
+        survey_data = None
+        if age or gender or familyHistory or recentHairLoss or stress:
+            survey_data = {
+                'age': age,
+                'gender': gender,
+                'familyHistory': familyHistory,
+                'recentHairLoss': recentHairLoss,
+                'stress': stress
+            }
+            logging.info(f"설문 데이터 수신: {survey_data}")
+
+        # 분석 실행 (ROI 기반, 설문 데이터 포함)
         analyzer = get_analyzer()
-        result = await analyzer.analyze_image(image, file.filename, use_llm=use_llm)
+        result = await analyzer.analyze_image(image, file.filename, use_llm=use_llm, use_roi=use_roi, survey_data=survey_data)
 
         if result['success']:
+            # Stage 5단계(1-5)를 4단계(0-3)로 변환
+            # 1->0, 2->1, 3->2, 4->3, 5->3
+            original_stage = result['predicted_stage']
+            if original_stage <= 3:
+                result['predicted_stage'] = original_stage - 1
+            else:  # 4 or 5
+                result['predicted_stage'] = 3
+
+            # stage_description도 업데이트
+            stage_map = {
+                0: "Stage 0 (정상) - 정수리 모발 밀도 정상, 탈모 징후 없음",
+                1: "Stage 1 (경증) - 가르마 부위 두피가 약간 보이기 시작, 모발 밀도 경미한 감소",
+                2: "Stage 2 (중등도) - 가르마 부위 두피 노출 증가, 모발 밀도 중등도 감소",
+                3: "Stage 3 (중증-최중증) - 가르마 부위 및 정수리 두피 노출 뚜렷, 모발 밀도 현저한 감소"
+            }
+            result['stage_description'] = stage_map.get(result['predicted_stage'], result.get('stage_description', ''))
+
             return AnalysisResult(**result)
         else:
             raise HTTPException(status_code=400, detail=result['error'])

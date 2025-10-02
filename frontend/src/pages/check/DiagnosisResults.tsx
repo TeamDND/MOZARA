@@ -412,11 +412,11 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </div>
             <Button 
               onClick={() => {
-                  navigate('/daily-care');
+                  navigate('/d-care');
               }}
               className="ml-3 h-10 px-4 bg-[#222222] hover:bg-[#333333] text-white rounded-xl active:scale-[0.98]"
             >
-              데일리 케어
+              D_care
             </Button>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/button';
 import { Progress } from '../../components/ui/progress';
 import { ArrowLeft, ArrowRight, Info } from 'lucide-react';
 import { analyzeHairWithSwin, getStageDescription, getStageColor, SwinAnalysisResult } from '../../services/swinAnalysisService';
+import { analyzeHairWithRAG } from '../../services/ragAnalysisService';
 import SelfCheckStep from '../../components/check/SelfCheckStep';
 import ImageUploadStep from '../../components/check/ImageUploadStep';
 import AnalysisProgressStep from '../../components/check/AnalysisProgressStep';
@@ -67,9 +68,25 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
 
           // DB에 저장된 값이 있으면 자동으로 채우기
           if (userInfo.gender || userInfo.age || userInfo.familyHistory !== null || userInfo.isLoss !== null || userInfo.stress) {
+            console.log('🔄 사용자 정보 로드:', {
+              gender: userInfo.gender,
+              age: userInfo.age,
+              familyHistory: userInfo.familyHistory,
+              isLoss: userInfo.isLoss,
+              stress: userInfo.stress
+            });
+
+            // 한글 성별을 영어로 변환
+            let genderValue = userInfo.gender || '';
+            if (genderValue === '남' || genderValue === '남성') {
+              genderValue = 'male';
+            } else if (genderValue === '여' || genderValue === '여성') {
+              genderValue = 'female';
+            }
+
             setBaspAnswers(prev => ({
               ...prev,
-              gender: userInfo.gender || '',
+              gender: genderValue,
               age: userInfo.age ? String(userInfo.age) : '',
               familyHistory: userInfo.familyHistory === true ? 'yes' : userInfo.familyHistory === false ? 'no' : '',
               recentHairLoss: userInfo.isLoss === true ? 'yes' : userInfo.isLoss === false ? 'no' : '',
@@ -116,13 +133,22 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
     setAnalysisSteps([]);
 
     try {
-      // 분석 단계 시뮬레이션
-      const steps = [
-        'BASP 설문 분석 완료',
+      const isMale = baspAnswers.gender === 'male';
+
+      // 분석 단계 시뮬레이션 (성별에 따라 다른 메시지)
+      const steps = isMale ? [
+        '설문 분석 완료',
         '이미지 전처리 완료',
-        'Swin Transformer AI 모발 분석 중...',
+        'AI 모발 분석 중...',
         '탈모 진행도 측정 완료',
         '헤어라인 분석 완료',
+        '개인 맞춤 계획 수립 완료'
+      ] : [
+        '설문 분석 완료',
+        '이미지 전처리 완료',
+        'AI 모발 분석 중...',
+        '탈모 진행도 측정 완료',
+        '두피 밀도 분석 완료',
         '개인 맞춤 계획 수립 완료'
       ];
 
@@ -133,24 +159,46 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
 
         if (i === 2) {
           // 실제 API 호출은 3번째 단계에서
-          console.log('🔄 실제 Swin API 분석 시작');
+          // 성별에 따라 다른 분석 방법 사용
+          if (isMale) {
+            // 남성: Swin Transformer 분석 (Top + Side)
+            console.log('🔄 남성 - Swin API 분석 시작');
 
-          const result = await analyzeHairWithSwin(
-            uploadedPhotoFile,
-            uploadedSidePhotoFile!, // 여성의 경우 null일 수 있음
-            user?.userId || undefined, // 로그인한 사용자의 ID (비로그인시 undefined)
-            undefined, // imageUrl 없이
-            {
-              gender: baspAnswers.gender,
-              age: baspAnswers.age,
-              familyHistory: baspAnswers.familyHistory,
-              recentHairLoss: baspAnswers.recentHairLoss,
-              stress: baspAnswers.stress
-            }
-          );
+            const result = await analyzeHairWithSwin(
+              uploadedPhotoFile,
+              uploadedSidePhotoFile!,
+              user?.userId || undefined,
+              undefined,
+              {
+                gender: baspAnswers.gender,
+                age: baspAnswers.age,
+                familyHistory: baspAnswers.familyHistory,
+                recentHairLoss: baspAnswers.recentHairLoss,
+                stress: baspAnswers.stress
+              }
+            );
 
-          console.log('✅ Swin 분석 결과:', result);
-          setAnalysisResult(result.analysis);
+            console.log('✅ Swin 분석 결과:', result);
+            setAnalysisResult(result.analysis);
+          } else {
+            // 여성: RAG v2 분석 (Top만)
+            console.log('🔄 여성 - RAG v2 API 분석 시작');
+
+            const result = await analyzeHairWithRAG(
+              uploadedPhotoFile,
+              user?.userId || undefined,
+              undefined, // imageUrl (선택적)
+              {
+                gender: baspAnswers.gender,
+                age: baspAnswers.age,
+                familyHistory: baspAnswers.familyHistory,
+                recentHairLoss: baspAnswers.recentHairLoss,
+                stress: baspAnswers.stress
+              }
+            );
+
+            setAnalysisResult(result.analysis);
+          }
         }
 
         // 각 단계 사이의 지연
@@ -237,6 +285,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         );
 
       case 2:
+        console.log('📸 ImageUploadStep 렌더링 - gender:', baspAnswers.gender);
         return (
           <ImageUploadStep
             uploadedPhoto={uploadedPhoto}
@@ -251,13 +300,14 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
 
       case 3:
         return (
-          <AnalysisProgressStep 
+          <AnalysisProgressStep
             analysisComplete={analysisComplete}
             analysisProgress={analysisProgress}
             analysisSteps={analysisSteps}
             analysisResult={analysisResult}
             analysisError={analysisError}
             isAnalyzing={isAnalyzing}
+            gender={baspAnswers.gender}
             onRetry={() => {
                     setAnalysisError(null);
                     setCurrentStep(2);
@@ -268,9 +318,10 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
 
       case 4:
         return (
-          <AnalysisResultStep 
+          <AnalysisResultStep
             analysisResult={analysisResult}
             onComplete={handleComplete}
+            gender={baspAnswers.gender}
           />
         );
 
@@ -377,8 +428,8 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
           {/* 네비게이션 버튼 (Mobile-First) */}
           {currentStep < 4 && (
             <div className="flex justify-between gap-3 mt-6">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
                 disabled={currentStep === 1}
                 className="flex-1 h-12 rounded-xl"

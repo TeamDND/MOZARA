@@ -20,7 +20,7 @@ open_clip_torch
 sentence-transformers
 
 # Vector Database
-pinecone
+pinecone>=3.0.0
 protobuf
 
 # PDF Processing
@@ -47,3 +47,5 @@ requests
 langdetect
 schedule
 beautifulsoup4
+sentence-transformers
+

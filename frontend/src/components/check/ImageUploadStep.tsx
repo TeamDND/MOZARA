@@ -26,6 +26,8 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
   // 남성인 경우에만 Side View 필요
   const isMale = gender === 'male';
 
+  console.log('👤 ImageUploadStep - gender prop:', gender, 'isMale:', isMale);
+
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -86,11 +88,11 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
           
           {!uploadedPhoto ? (
             <div className="text-center space-y-4">
-              {/* 샘플 이미지 */}
+              {/* 샘플 이미지 - 성별에 따라 다른 이미지 표시 */}
               <div className="w-48 h-48 mx-auto rounded-xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
-                <img 
-                  src="/assets/images/check/TopView.PNG" 
-                  alt="Top View 샘플 이미지" 
+                <img
+                  src={isMale ? "/assets/images/check/TopView.PNG" : "/assets/images/check/female-TopView.png"}
+                  alt="Top View 샘플 이미지"
                   className="max-w-full max-h-full object-contain"
                 />
               </div>
