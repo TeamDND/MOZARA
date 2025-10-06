@@ -13,8 +13,8 @@ import YouTubeVideos from './pages/hair_tube/YouTubeVideos';
 import HairEncyclopediaMain from './pages/hairEncyclopedia/HairEncyclopediaMain';
 import HairDiagnosis from './pages/check/HairDiagnosis';
 import HairQuiz from './pages/hair_ox/HairQuiz';
+import MainPage from './pages/MainPage';
 import DailyCare from './pages/hair_dailycare/DailyCare';
-import DCare from './pages/hair_dailycare/D_care';
 import StoreFinder from './pages/hair_map/StoreFinder';
 
 
@@ -49,7 +49,6 @@ const App: React.FC = () => {
         <Route path="/" element={<MainLayout />}>
           <Route index element={<LandingPage />} />
           {/* 메인 플로우 (Main Flow) - new_fn_flow.md */}
-          {/* <Route path="main-page" element={<MainPage />} /> */}
           <Route path="landing" element={<LandingPage />} />
           <Route path="login" element={<LogIn />} />
           <Route path="integrated-diagnosis" element={<IntegratedDiagnosis />} />
@@ -72,8 +71,9 @@ const App: React.FC = () => {
           <Route path="hair-diagnosis" element={<HairDiagnosis />} />
           <Route path="hair-quiz" element={<HairQuiz />} />
           <Route path="signup" element={<SignUp />} />
-          <Route path="daily-care" element={<DailyCare />} />
-          <Route path="d-care" element={<DCare />} />
+          <Route path="main-page" element={<MainPage />} />
+          <Route path="d-care" element={<DailyCare />} />
+          <Route path="hair-dailycare" element={<DailyCare />} />
           <Route path="mypage" element={<MyPage />} />
           <Route path="my-report" element={<MyReportPage />} />
           <Route path="store-finder" element={<StoreFinder />} />

@@ -18,9 +18,14 @@ public interface AnalysisResultRepository extends JpaRepository<AnalysisResultEn
     long countByUserEntityIdForeign_Id(Integer userId);
     
     /**
-     * 사용자 ID로 분석 결과 목록 조회
+     * 사용자 ID로 분석 결과 목록 조회 (최신순)
      */
     List<AnalysisResultEntity> findByUserEntityIdForeign_IdOrderByInspectionDateDesc(Integer userId);
+    
+    /**
+     * 사용자 ID로 분석 결과 목록 조회 (오래된순)
+     */
+    List<AnalysisResultEntity> findByUserEntityIdForeign_IdOrderByInspectionDateAsc(Integer userId);
     
     /**
      * 사용자 ID로 최근 분석 결과 조회
@@ -52,9 +57,16 @@ public interface AnalysisResultRepository extends JpaRepository<AnalysisResultEn
                                                                        @Param("endDate") LocalDate endDate);
 
     /**
-     * 사용자 ID와 분석 타입으로 최근 분석 결과 조회
+     * 사용자 ID와 분석 타입으로 최근 분석 결과 조회 (최신순)
      */
     @Query("SELECT a FROM AnalysisResultEntity a WHERE a.userEntityIdForeign.id = :userId AND a.analysisType = :analysisType ORDER BY a.inspectionDate DESC")
     List<AnalysisResultEntity> findByUserIdAndAnalysisTypeOrderByDateDesc(@Param("userId") Integer userId, 
                                                                           @Param("analysisType") String analysisType);
+
+    /**
+     * 사용자 ID와 분석 타입으로 최근 분석 결과 조회 (오래된순)
+     */
+    @Query("SELECT a FROM AnalysisResultEntity a WHERE a.userEntityIdForeign.id = :userId AND a.analysisType = :analysisType ORDER BY a.inspectionDate ASC")
+    List<AnalysisResultEntity> findByUserIdAndAnalysisTypeOrderByDateAsc(@Param("userId") Integer userId, 
+                                                                         @Param("analysisType") String analysisType);
 }

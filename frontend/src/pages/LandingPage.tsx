@@ -117,7 +117,7 @@ useEffect(() => {
               className="px-8 py-4 mt-8 text-lg font-medium"
               onClick={() => {
                 if (isLoggedIn) {
-                  navigate('/daily-care')
+                  navigate('/main-page')
                 } else {
                   navigate('/login')
                 }

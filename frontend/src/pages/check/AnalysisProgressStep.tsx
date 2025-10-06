@@ -32,7 +32,7 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
       <div className="text-center space-y-3">
         {!analysisError ? (
           <>
-            <div className="animate-spin w-12 h-12 border-4 border-[#222222] border-t-transparent rounded-full mx-auto"></div>
+            <div className="animate-spin w-12 h-12 border-4 border-[#1f0101] border-t-transparent rounded-full mx-auto"></div>
             <h2 className="text-xl font-bold text-gray-800">AI 탈모 분석 중...</h2>
             <p className="text-sm text-gray-600">
               설문 응답과 사진을 종합하여 탈모 상태를 분석하고 있어요
@@ -106,7 +106,7 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
           </div>
           <Button
             onClick={onRetry}
-            className="w-full h-12 bg-[#222222] hover:bg-[#333333] text-white rounded-xl"
+            className="w-full h-12 bg-[#1f0101] hover:bg-[#333333] text-white rounded-xl"
           >
             다시 시도하기
           </Button>

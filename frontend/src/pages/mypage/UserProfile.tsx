@@ -26,14 +26,14 @@ const UserProfile: React.FC<UserProfileProps> = ({ userInfo, loading, onLogout }
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <div className="h-16 w-16 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
-            <User className="h-8 w-8 text-[#222222]" />
+            <User className="h-8 w-8 text-[#1f0101]" />
           </div>
           <div className="flex-1">
             <h2 className="text-xl font-bold text-gray-900 mb-1">{userInfo.name}</h2>
             <p className="text-sm text-gray-500 mb-2">가입일: {userInfo.joinDate}</p>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1">
-                <Users className="h-4 w-4 text-[#222222]" />
+                <Users className="h-4 w-4 text-[#1f0101]" />
                 <span className="text-sm font-medium text-gray-700">
                   {loading ? "로딩 중..." : `${userInfo.totalAnalysis}회 분석`}
                 </span>
@@ -51,7 +51,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ userInfo, loading, onLogout }
           <div className="flex justify-end">
             <button
               onClick={onLogout}
-              className="flex items-center gap-1 px-3 py-2 text-xs font-medium rounded-lg bg-[#222222] text-white hover:bg-[#333333] transition-colors"
+              className="flex items-center gap-1 px-3 py-2 text-xs font-medium rounded-lg bg-[#1f0101] text-white hover:bg-[#333333] transition-colors"
             >
               <LogOut className="h-3 w-3" />
               로그아웃
