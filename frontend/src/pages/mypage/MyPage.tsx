@@ -167,7 +167,7 @@ export default function MyPage() {
             advice: result.advice || '개선 방안 제시',
             grade: result.grade !== undefined && result.grade !== null ? result.grade : 0,
             imageUrl: result.imageUrl, // 전체 URL 그대로 전달 (|||포함)
-            analysisType: result.analysisType || '종합 진단',
+            analysisType: result.analysisType, // 백엔드 DTO와 일치 (analysis_type)
             improvement: result.improvement || '15% 개선됨'
           };
         })
@@ -232,15 +232,35 @@ export default function MyPage() {
     fetchUserAdditionalInfo()
   }, [user.username, token])
 
+  // 분석 타입을 한글로 변환하는 함수
+  const formatAnalysisType = (type: string | undefined): string => {
+    if (!type) return '종합 진단';
+    if (type === 'daily') return '두피 분석';
+    // 탈모 단계 검사로 처리되는 모든 타입
+    if (type === 'swin_dual_model_llm_enhanced' ||
+        type === 'rag_v2_analysis' ||
+        type === 'swin_analysis' ||
+        type === 'gemini_analysis' ||
+        type.includes('swin') ||
+        type.includes('rag') ||
+        type.includes('hairloss') ||
+        type.includes('hair_loss')) {
+      return '탈모 단계 검사';
+    }
+    return '종합 진단'; // 알 수 없는 타입은 종합 진단으로
+  };
+
   // 분석 결과를 리포트 형태로 변환하는 함수
   const formatAnalysisResults = (results: AnalysisResult[]) => {
+    const totalCount = results.length;
     return results.map((result, index) => ({
       id: result.id,
-      title: `AI 탈모 분석 리포트 #${index + 1}`,
+      title: `AI 탈모 분석 리포트 #${totalCount - index}`, // 역순 번호 (최신이 큰 번호)
       date: result.inspectionDate,
       status: "완료",
       score: result.grade,
-      analysistype: result.analysisType,
+      analysistype: formatAnalysisType(result.analysisType), // 한글로 변환
+      analysisTypeRaw: result.analysisType, // 원본 타입도 전달
       improvement: result.improvement,
     }))
   }
@@ -476,7 +496,7 @@ export default function MyPage() {
                                 </span>
                                 <span className="flex items-center gap-1 text-xs text-gray-500">
                                   <Star className="h-3 w-3" />
-                                  {report.score}단계
+                                  {report.analysisTypeRaw === 'daily' ? `${report.score}점` : `${report.score}단계`}
                                 </span>
                               </div>
                             </div>

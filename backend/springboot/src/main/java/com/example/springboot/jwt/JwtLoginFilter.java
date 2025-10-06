@@ -90,10 +90,8 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
         Map<String, Object> responseData = new HashMap<>();
 
         String errorMessage;
-        if (failed.getClass().getSimpleName().equals("UsernameNotFoundException")) {
-            errorMessage = "해당 사용자를 찾을 수 없습니다";
-        } else if (failed.getClass().getSimpleName().equals("BadCredentialsException")) {
-            errorMessage = "비밀번호가 틀렸습니다";
+        if (failed.getClass().getSimpleName().equals("BadCredentialsException")) {
+            errorMessage = "아이디 또는 비밀번호가 일치하지 않습니다";
         } else {
             errorMessage = failed.getMessage() != null ? failed.getMessage() : "로그인 실패";
         }

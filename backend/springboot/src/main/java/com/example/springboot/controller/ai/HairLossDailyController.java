@@ -44,23 +44,15 @@ public class HairLossDailyController {
 
             Map<String, Object> result = hairLossDailyService.analyzeHairImage(image, topK);
 
-            // user_id가 있으면 분석 결과를 자동으로 저장
+            // user_id와 image_url은 응답에 포함만 하고, 저장은 프론트엔드에서 grade와 함께 /save-result로 요청
             if (userId != null && userId > 0) {
-                try {
-                    result.put("user_id", userId);
+                result.put("user_id", userId);
+                log.info("분석 완료 - user_id: {}", userId);
+            }
 
-                    // image_url이 있으면 추가
-                    if (imageUrl != null && !imageUrl.isEmpty()) {
-                        result.put("image_url", imageUrl);
-                        log.info("📸 S3 이미지 URL 전달: {}", imageUrl);
-                    }
-
-                    Map<String, Object> saveResult = hairLossDailyService.saveAnalysisResult(result);
-                    result.put("save_result", saveResult);
-                } catch (Exception e) {
-                    log.warn("분석 결과 저장 실패: {}", e.getMessage());
-                    result.put("save_error", "분석 결과 저장 중 오류가 발생했습니다: " + e.getMessage());
-                }
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                result.put("image_url", imageUrl);
+                log.info("📸 S3 이미지 URL 포함: {}", imageUrl);
             }
 
             return ResponseEntity.ok(result);

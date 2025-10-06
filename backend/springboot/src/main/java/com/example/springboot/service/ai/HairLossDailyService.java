@@ -200,6 +200,21 @@ public class HairLossDailyService {
             Integer grade = null;
             String imageUrl = "";
 
+            // grade 추출 (프론트엔드에서 전달)
+            if (analysisResult.containsKey("grade")) {
+                Object gradeObj = analysisResult.get("grade");
+                if (gradeObj instanceof Number) {
+                    grade = ((Number) gradeObj).intValue();
+                } else if (gradeObj instanceof String) {
+                    try {
+                        grade = Integer.parseInt((String) gradeObj);
+                    } catch (NumberFormatException e) {
+                        log.warn("grade 파싱 실패: {}", gradeObj);
+                    }
+                }
+                log.info("추출된 grade: {}", grade);
+            }
+
             // Python API 응답 구조에 맞게 데이터 추출
             // analysis.diagnosis_scores에서 간단한 요약 생성
             if (analysisResult.containsKey("analysis")) {
@@ -268,10 +283,8 @@ public class HairLossDailyService {
             if (advice.isEmpty()) {
                 advice = "Daily 분석 완료";
             }
-            
-            // grade는 null로 처리 (LLM이 직접 점수를 반환하지 않음)
-            grade = null;
-            
+
+            // image_url 추출
             if (analysisResult.containsKey("image_url")) {
                 imageUrl = (String) analysisResult.get("image_url");
             }

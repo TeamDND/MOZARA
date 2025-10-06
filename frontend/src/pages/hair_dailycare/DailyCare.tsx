@@ -174,9 +174,9 @@ const DailyCare: React.FC = () => {
   const [dandruffLabel, setDandruffLabel] = useState<string>('양호');
   const [dandruffSub, setDandruffSub] = useState<string>('정상');
 
-  const updateDashboardFromAnalysis = (res: HairAnalysisResponse) => {
+  const updateDashboardFromAnalysis = (res: HairAnalysisResponse): number | null => {
     // LLM 기반 종합 두피 점수 계산
-    if (!res.analysis) return;
+    if (!res.analysis) return null;
     
     const primaryCategory = res.analysis.primary_category;
     const primarySeverity = res.analysis.primary_severity;
@@ -203,15 +203,14 @@ const DailyCare: React.FC = () => {
       };
       
       // 필터링된 분석으로 대시보드 업데이트
-      updateDashboardWithFilteredData(filteredAnalysis);
-      return;
+      return updateDashboardWithFilteredData(filteredAnalysis);
     }
-    
+
     // 비듬/탈모가 아닌 경우 정상 처리
-    updateDashboardWithFilteredData(res.analysis);
+    return updateDashboardWithFilteredData(res.analysis);
   };
   
-  const updateDashboardWithFilteredData = (analysis: any) => {
+  const updateDashboardWithFilteredData = (analysis: any): number => {
     const primaryCategory = analysis.primary_category;
     const primarySeverity = analysis.primary_severity;
     const avgConfidence = analysis.average_confidence;
@@ -252,6 +251,9 @@ const DailyCare: React.FC = () => {
     
     const finalScore = Math.max(0, Math.min(100, Math.round(baseScore)));
     setScalpScore(finalScore);
+
+    // finalScore 반환 (백엔드 저장용)
+    console.log('계산된 두피 점수:', finalScore);
 
     // 카테고리와 심각도에 따른 상태 추정 (새로운 카테고리)
     
@@ -355,6 +357,8 @@ const DailyCare: React.FC = () => {
     };
 
     setTips(buildSolutions(finalScore, oilinessLabel, flakeLabel, rednessLabel));
+
+    return finalScore;
   };
   const todayStr = new Date().toLocaleDateString('ko-KR', {
     year: 'numeric',
@@ -570,7 +574,29 @@ const DailyCare: React.FC = () => {
 
                           const result: HairAnalysisResponse = response.data;
                           setAnalysis(result);
-                          updateDashboardFromAnalysis(result);
+
+                          // 두피 점수 계산 및 대시보드 업데이트
+                          const calculatedScore = updateDashboardFromAnalysis(result);
+
+                          // scalpScore를 포함하여 백엔드로 grade 저장 요청
+                          if (userId && calculatedScore !== null) {
+                            try {
+                              console.log('두피 점수 저장 시도:', calculatedScore);
+
+                              // save_result에 grade 추가하여 재저장 API 호출
+                              const savePayload = {
+                                ...result,
+                                user_id: userId,
+                                grade: calculatedScore,
+                                image_url: imageUrl || ''
+                              };
+
+                              await apiClient.post('/ai/hair-loss-daily/save-result', savePayload);
+                              console.log('두피 점수 저장 완료:', calculatedScore);
+                            } catch (saveError) {
+                              console.error('두피 점수 저장 실패:', saveError);
+                            }
+                          }
 
                           // 사진 분석 완료 후 lastPhotoDate 업데이트
                           setUserProgress(prev => ({

@@ -87,7 +87,7 @@ public class MyPageService {
                 .advice(entity.getAdvice())
                 .grade(entity.getGrade())
                 .imageUrl(entity.getImageUrl())
-                .type(entity.getAnalysisType() != null ? entity.getAnalysisType() : determineAnalysisType(entity.getAnalysisSummary()))
+                .analysisType(entity.getAnalysisType() != null ? entity.getAnalysisType() : determineAnalysisType(entity.getAnalysisSummary()))
                 .improvement(calculateImprovement(entity.getGrade()))
                 .build();
     }

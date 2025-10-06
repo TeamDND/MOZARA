@@ -52,6 +52,8 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
 
   // 비밀번호 변경 상태
   const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [isPasswordVerified, setIsPasswordVerified] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -157,8 +159,40 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
   // 비밀번호 변경 토글
   const togglePasswordChange = () => {
     setShowPasswordChange(!showPasswordChange);
+    setCurrentPassword("");
+    setIsPasswordVerified(false);
     setNewPassword("");
     setConfirmPassword("");
+  };
+
+  // 현재 비밀번호 확인 핸들러
+  const handleVerifyCurrentPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!currentPassword) {
+      alert("현재 비밀번호를 입력해주세요.");
+      return;
+    }
+
+    try {
+      const res = await apiClient.post(`/verify-password/${username}`, currentPassword, {
+        headers: {
+          'Content-Type': 'text/plain'
+        }
+      });
+
+      const isValid = res?.data?.valid;
+      if (isValid) {
+        setIsPasswordVerified(true);
+        alert("비밀번호가 확인되었습니다.");
+      } else {
+        alert("현재 비밀번호가 일치하지 않습니다.");
+      }
+    } catch (error: any) {
+      console.error(error);
+      const errorMessage = error.response?.data?.error || "비밀번호 확인 중 오류가 발생했습니다.";
+      alert(errorMessage);
+    }
   };
 
   // 비밀번호 변경 핸들러
@@ -186,6 +220,8 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
       if (res?.data) {
         alert('비밀번호가 변경되었습니다.');
         setShowPasswordChange(false);
+        setCurrentPassword("");
+        setIsPasswordVerified(false);
         setNewPassword("");
         setConfirmPassword("");
       }
@@ -495,35 +531,60 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
 
           {/* 비밀번호 변경 폼 */}
           {showPasswordChange && (
-            <form onSubmit={handlePasswordChange} className="space-y-4 p-4 bg-gray-50 rounded-lg mt-3">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">새 비밀번호</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full p-3 bg-white rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
-                  placeholder="8자 이상 입력"
-                />
-              </div>
+            <div className="space-y-4 p-4 bg-gray-50 rounded-lg mt-3">
+              {/* 1단계: 현재 비밀번호 확인 */}
+              {!isPasswordVerified ? (
+                <form onSubmit={handleVerifyCurrentPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">현재 비밀번호</label>
+                    <input
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      className="w-full p-3 bg-white rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
+                      placeholder="현재 비밀번호를 입력하세요"
+                    />
+                  </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">비밀번호 재확인</label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full p-3 bg-white rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
-                  placeholder="비밀번호 재입력"
-                />
-              </div>
+                  <div className="flex justify-center">
+                    <Button type="submit" className="bg-[#222222] hover:bg-[#333333] text-white px-8 py-2 rounded-lg font-medium">
+                      확인
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                /* 2단계: 새 비밀번호 입력 */
+                <form onSubmit={handlePasswordChange} className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">새 비밀번호</label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full p-3 bg-white rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
+                      placeholder="8자 이상 입력"
+                    />
+                  </div>
 
-              <div className="flex justify-center">
-                <Button type="submit" className="bg-[#222222] hover:bg-[#333333] text-white px-8 py-2 rounded-lg font-medium">
-                  수정
-                </Button>
-              </div>
-            </form>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">비밀번호 재확인</label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full p-3 bg-white rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
+                      placeholder="비밀번호 재입력"
+                    />
+                  </div>
+
+                  <div className="flex justify-center">
+                    <Button type="submit" className="bg-[#222222] hover:bg-[#333333] text-white px-8 py-2 rounded-lg font-medium">
+                      수정
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </div>
           )}
 
           <Button

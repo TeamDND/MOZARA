@@ -100,12 +100,12 @@ public class AnalysisResultDAO {
     }
 
     /**
-     * 사용자 ID로 분석 결과 목록 조회 (최신순)
+     * 사용자 ID로 분석 결과 목록 조회 (날짜 내림차순 → ID 내림차순)
      */
     public List<AnalysisResultEntity> findByUserIdOrderByDateDesc(Integer userId) {
         try {
-            List<AnalysisResultEntity> results = analysisResultRepository.findByUserEntityIdForeign_IdOrderByInspectionDateDesc(userId);
-            log.info("[AnalysisResultDAO] 사용자 분석 결과 목록 조회 - userId: {}, count: {}", userId, results.size());
+            List<AnalysisResultEntity> results = analysisResultRepository.findByUserEntityIdForeign_IdOrderByInspectionDateDescIdDesc(userId);
+            log.info("[AnalysisResultDAO] 사용자 분석 결과 목록 조회 (날짜↓, ID↓) - userId: {}, count: {}", userId, results.size());
             return results;
         } catch (Exception e) {
             log.error("[AnalysisResultDAO] 사용자 분석 결과 목록 조회 실패 - userId: {}, error: {}", userId, e.getMessage(), e);
