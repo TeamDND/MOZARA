@@ -1,8 +1,8 @@
 package com.example.springboot.service.ai;
 
+import com.example.springboot.data.dao.AnalysisResultDAO;
 import com.example.springboot.data.entity.AnalysisResultEntity;
 import com.example.springboot.data.entity.UserEntity;
-import com.example.springboot.data.repository.AnalysisResultRepository;
 import com.example.springboot.data.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -26,7 +27,7 @@ public class HairLossDailyService {
     private String pythonApiBaseUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final AnalysisResultRepository analysisResultRepository;
+    private final AnalysisResultDAO analysisResultDAO;
     private final UserRepository userRepository;
 
     /**
@@ -307,44 +308,8 @@ public class HairLossDailyService {
                     entity.getGrade(), entity.getImageUrl(), entity.getAnalysisType(), 
                     entity.getUserEntityIdForeign() != null ? entity.getUserEntityIdForeign().getId() : "null");
 
-            // 데이터베이스에 저장
-            AnalysisResultEntity savedEntity = null;
-            try {
-                log.info("저장 시도 시작...");
-                
-                // 저장 전 엔티티 상태 확인
-                log.info("저장 전 엔티티: {}", entity);
-                
-                savedEntity = analysisResultRepository.save(entity);
-                log.info("Daily 분석 결과 저장 성공: ID {}", savedEntity.getId());
-                
-                // 저장 후 검증
-                if (savedEntity.getId() != null) {
-                    log.info("저장된 엔티티 검증 성공: ID={}, analysisType={}", savedEntity.getId(), savedEntity.getAnalysisType());
-                    
-                    // 저장된 데이터를 다시 조회해서 확인
-                    try {
-                        AnalysisResultEntity retrievedEntity = analysisResultRepository.findById(savedEntity.getId()).orElse(null);
-                        if (retrievedEntity != null) {
-                            log.info("DB에서 조회된 엔티티: ID={}, analysisType={}, analysisSummary={}", 
-                                    retrievedEntity.getId(), retrievedEntity.getAnalysisType(), 
-                                    retrievedEntity.getAnalysisSummary() != null ? retrievedEntity.getAnalysisSummary().substring(0, Math.min(50, retrievedEntity.getAnalysisSummary().length())) + "..." : "null");
-                        } else {
-                            log.error("저장 후 DB에서 조회되지 않음!");
-                        }
-                    } catch (Exception retrieveException) {
-                        log.error("저장된 데이터 조회 중 오류", retrieveException);
-                    }
-                } else {
-                    log.error("저장된 엔티티의 ID가 null입니다!");
-                }
-                
-            } catch (Exception saveException) {
-                log.error("데이터베이스 저장 중 예외 발생", saveException);
-                log.error("예외 상세 정보: {}", saveException.getMessage());
-                saveException.printStackTrace();
-                throw saveException;
-            }
+            // DAO를 통해 데이터베이스에 저장
+            AnalysisResultEntity savedEntity = analysisResultDAO.save(entity);
             
             return Map.of(
                 "success", true,
@@ -359,4 +324,140 @@ public class HairLossDailyService {
             throw new RuntimeException("Daily 분석 결과 저장 중 오류가 발생했습니다.", e);
         }
     }
+
+    /**
+     * 사용자의 daily 분석 결과를 날짜 기준으로 조회
+     */
+    public Map<String, Object> getDailyAnalysisResults(Integer userId, LocalDate date) {
+        try {
+            log.info("Daily 분석 결과 조회 요청 - userId: {}, date: {}", userId, date);
+            
+            if (userId == null || userId <= 0) {
+                return Map.of("error", "유효하지 않은 사용자 ID입니다.");
+            }
+
+            // 사용자 존재 확인
+            UserEntity user = userRepository.findById(userId).orElse(null);
+            if (user == null) {
+                return Map.of("error", "사용자를 찾을 수 없습니다.");
+            }
+
+            // DAO를 통해 특정 날짜의 daily 분석 결과 조회
+            List<AnalysisResultEntity> results = analysisResultDAO.findByUserIdAndAnalysisTypeAndDate(
+                    userId, "daily", date);
+
+            // DAO를 통해 결과를 Map 형태로 변환
+            List<Map<String, Object>> resultList = analysisResultDAO.convertEntityListToMapList(results);
+
+            return Map.of(
+                    "success", true,
+                    "userId", userId,
+                    "date", date.toString(),
+                    "analysisType", "daily",
+                    "count", results.size(),
+                    "results", resultList
+            );
+
+        } catch (Exception e) {
+            log.error("Daily 분석 결과 조회 중 오류 발생", e);
+            return Map.of("error", "Daily 분석 결과 조회 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 사용자의 daily 분석 결과를 날짜 범위로 조회
+     */
+    public Map<String, Object> getDailyAnalysisResultsByDateRange(Integer userId, LocalDate startDate, LocalDate endDate) {
+        try {
+            log.info("Daily 분석 결과 조회 요청 - userId: {}, startDate: {}, endDate: {}", userId, startDate, endDate);
+            
+            if (userId == null || userId <= 0) {
+                return Map.of("error", "유효하지 않은 사용자 ID입니다.");
+            }
+
+            if (startDate == null || endDate == null) {
+                return Map.of("error", "시작 날짜와 종료 날짜가 필요합니다.");
+            }
+
+            if (startDate.isAfter(endDate)) {
+                return Map.of("error", "시작 날짜는 종료 날짜보다 이전이어야 합니다.");
+            }
+
+            // 사용자 존재 확인
+            UserEntity user = userRepository.findById(userId).orElse(null);
+            if (user == null) {
+                return Map.of("error", "사용자를 찾을 수 없습니다.");
+            }
+
+            // DAO를 통해 날짜 범위의 daily 분석 결과 조회
+            List<AnalysisResultEntity> results = analysisResultDAO.findByUserIdAndAnalysisTypeAndDateRange(
+                    userId, "daily", startDate, endDate);
+
+            // DAO를 통해 결과를 Map 형태로 변환
+            List<Map<String, Object>> resultList = analysisResultDAO.convertEntityListToMapList(results);
+
+            return Map.of(
+                    "success", true,
+                    "userId", userId,
+                    "startDate", startDate.toString(),
+                    "endDate", endDate.toString(),
+                    "analysisType", "daily",
+                    "count", results.size(),
+                    "results", resultList
+            );
+
+        } catch (Exception e) {
+            log.error("Daily 분석 결과 조회 중 오류 발생", e);
+            return Map.of("error", "Daily 분석 결과 조회 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 사용자의 최근 daily 분석 결과 조회
+     */
+    public Map<String, Object> getLatestDailyAnalysisResults(Integer userId, int limit) {
+        try {
+            log.info("최근 Daily 분석 결과 조회 요청 - userId: {}, limit: {}", userId, limit);
+            
+            if (userId == null || userId <= 0) {
+                return Map.of("error", "유효하지 않은 사용자 ID입니다.");
+            }
+
+            if (limit <= 0 || limit > 100) {
+                limit = 10; // 기본값 10개, 최대 100개
+            }
+
+            // 사용자 존재 확인
+            UserEntity user = userRepository.findById(userId).orElse(null);
+            if (user == null) {
+                return Map.of("error", "사용자를 찾을 수 없습니다.");
+            }
+
+            // DAO를 통해 최근 daily 분석 결과 조회
+            List<AnalysisResultEntity> results = analysisResultDAO.findByUserIdAndAnalysisTypeOrderByDateDesc(
+                    userId, "daily");
+
+            // limit만큼만 반환
+            if (results.size() > limit) {
+                results = results.subList(0, limit);
+            }
+
+            // DAO를 통해 결과를 Map 형태로 변환
+            List<Map<String, Object>> resultList = analysisResultDAO.convertEntityListToMapList(results);
+
+            return Map.of(
+                    "success", true,
+                    "userId", userId,
+                    "analysisType", "daily",
+                    "limit", limit,
+                    "count", results.size(),
+                    "results", resultList
+            );
+
+        } catch (Exception e) {
+            log.error("최근 Daily 분석 결과 조회 중 오류 발생", e);
+            return Map.of("error", "최근 Daily 분석 결과 조회 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
 }

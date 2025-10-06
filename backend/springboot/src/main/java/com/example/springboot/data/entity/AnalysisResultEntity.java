@@ -31,8 +31,8 @@ public class AnalysisResultEntity {
     @Column(name = "grade")
     private Integer grade;
 
-    @Size(max = 255)
-    @Column(name = "image_url")
+    @Size(max = 1000)
+    @Column(name = "image_url", length = 1000)
     private String imageUrl;
 
     @Size(max = 50)

@@ -1161,8 +1161,8 @@ async def api_hair_rag_v2_check(
 @app.get("/api/naver/local/search")
 async def search_naver_local(query: str):
     """네이버 지역 검색 API 프록시"""
-    naver_client_id = os.getenv("NAVER_CLIENT_ID") or os.getenv("REACT_APP_NAVER_CLIENT_ID")
-    naver_client_secret = os.getenv("NAVER_CLIENT_SECRET") or os.getenv("REACT_APP_NAVER_CLIENT_SECRET")
+    naver_client_id = os.getenv("NAVER_CLIENT_ID")
+    naver_client_secret = os.getenv("NAVER_CLIENT_SECRET")
 
     if not naver_client_id or not naver_client_secret:
         raise HTTPException(status_code=503, detail="네이버 API 키가 설정되지 않았습니다.")
@@ -1243,7 +1243,7 @@ async def search_naver_local(query: str):
 @app.get("/api/kakao/geo/coord2address")
 async def get_address_from_coordinates(x: float, y: float):
     """카카오 좌표-주소 변환 API 프록시"""
-    kakao_api_key = os.getenv("KAKAO_REST_API_KEY") or os.getenv("REACT_APP_KAKAO_REST_API_KEY")
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY")
 
     if not kakao_api_key:
         raise HTTPException(status_code=503, detail="카카오 API 키가 설정되지 않았습니다.")
@@ -1273,7 +1273,7 @@ async def get_address_from_coordinates(x: float, y: float):
 # 대안: 좌표-행정구역 코드 변환 프록시
 @app.get("/api/kakao/local/geo/coord2regioncode")
 async def get_region_from_coordinates(x: float, y: float):
-    kakao_api_key = os.getenv("KAKAO_REST_API_KEY") or os.getenv("REACT_APP_KAKAO_REST_API_KEY")
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY")
     if not kakao_api_key:
         raise HTTPException(status_code=503, detail="카카오 API 키가 설정되지 않았습니다.")
     try:
@@ -1297,7 +1297,7 @@ async def search_kakao_local(
     radius: Optional[int] = 5000
 ):
     """카카오 지역 검색 API 프록시"""
-    kakao_api_key = os.getenv("KAKAO_REST_API_KEY") or os.getenv("REACT_APP_KAKAO_REST_API_KEY")
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY")
 
     if not kakao_api_key:
         raise HTTPException(status_code=503, detail="카카오 API 키가 설정되지 않았습니다.")
@@ -1721,9 +1721,9 @@ async def get_paper_analysis(paper_id: str):
 @app.get("/api/location/status")
 async def get_location_status():
     """위치 서비스 상태 확인 API"""
-    naver_client_id = os.getenv("NAVER_CLIENT_ID") or os.getenv("REACT_APP_NAVER_CLIENT_ID")
-    naver_client_secret = os.getenv("NAVER_CLIENT_SECRET") or os.getenv("REACT_APP_NAVER_CLIENT_SECRET")
-    kakao_api_key = os.getenv("KAKAO_REST_API_KEY") or os.getenv("REACT_APP_KAKAO_REST_API_KEY")
+    naver_client_id = os.getenv("NAVER_CLIENT_ID")
+    naver_client_secret = os.getenv("NAVER_CLIENT_SECRET")
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY")
 
     return {
         "status": "ok",
