@@ -41,7 +41,6 @@ interface AnalysisResult {
   advice: string;
   grade: number;
   imageUrl?: string;
-  type: string;
   improvement: string;
   analysisType?: string;
 }
@@ -187,7 +186,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
   // 이미지 URL 처리 (남성 탈모 검사는 top|||side 형식)
   const imageUrl = analysisResult?.imageUrl || '';
   // type 필드가 analysisType 역할을 함
-  const analysisType = analysisResult?.analysisType || analysisResult?.type || '';
+  const analysisType = analysisResult?.analysisType || '';
   const [topImageUrl, sideImageUrl] = imageUrl.includes('|||')
     ? imageUrl.split('|||').map(url => url.trim())
     : [imageUrl, null];
@@ -246,7 +245,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
               <div className="text-center p-3 bg-white rounded-lg">
                 <p className="text-xs text-gray-600">분석일</p>
                 <p className="text-xl font-bold text-gray-800">{analysisResult.inspectionDate}</p>
-                <Badge variant="outline" className="text-xs px-2 py-1">{analysisResult.type}</Badge>
+                <Badge variant="outline" className="text-xs px-2 py-1">{analysisResult.analysisType || '종합 진단'}</Badge>
               </div>
               <div className="text-center p-3 bg-white rounded-lg">
                 <p className="text-xs text-gray-600">분석 ID</p>
