@@ -246,7 +246,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full p-3 bg-gray-50 rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
+              className="w-full p-3 bg-gray-50 rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#1f0101] focus:outline-none"
             />
           </div>
 
@@ -256,11 +256,11 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 bg-gray-50 rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
+              className="w-full p-3 bg-gray-50 rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#1f0101] focus:outline-none"
             />
           </div>
 
-          <Button type="submit" className="w-full mt-6 bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium">
+          <Button type="submit" className="w-full mt-6 bg-[#1f0101] hover:bg-[#333333] text-white py-3 rounded-xl font-medium">
             정보 수정하기
           </Button>
         </form>
@@ -286,7 +286,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
               </div>
               <Button
                 onClick={() => navigate('/integrated-diagnosis')}
-                className="bg-[#222222] hover:bg-[#333333] text-white px-6 py-2 rounded-lg font-medium"
+                className="bg-[#1f0101] hover:bg-[#333333] text-white px-6 py-2 rounded-lg font-medium"
               >
                 분석 바로가기
               </Button>
@@ -302,7 +302,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
                 onClick={() => setGender("male")}
                 className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
                   gender === "male" || gender === "남" || gender === "남성"
-                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    ? "bg-[#1f0101] text-white hover:bg-[#333333] scale-105 shadow-md"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
                 }`}
               >
@@ -313,7 +313,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
                 onClick={() => setGender("female")}
                 className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
                   gender === "female" || gender === "여" || gender === "여성"
-                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    ? "bg-[#1f0101] text-white hover:bg-[#333333] scale-105 shadow-md"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
                 }`}
               >
@@ -331,7 +331,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
               placeholder="나이를 입력하세요"
               min="1"
               max="150"
-              className="w-full p-3 bg-gray-50 rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
+              className="w-full p-3 bg-gray-50 rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#1f0101] focus:outline-none"
             />
           </div>
 
@@ -343,7 +343,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
                 onClick={() => setRecentHairLoss(true)}
                 className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
                   recentHairLoss
-                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    ? "bg-[#1f0101] text-white hover:bg-[#333333] scale-105 shadow-md"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
                 }`}
               >
@@ -354,7 +354,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
                 onClick={() => setRecentHairLoss(false)}
                 className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
                   !recentHairLoss
-                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    ? "bg-[#1f0101] text-white hover:bg-[#333333] scale-105 shadow-md"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
                 }`}
               >
@@ -371,7 +371,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
                 onClick={() => setFamilyHistory(true)}
                 className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
                   familyHistory
-                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    ? "bg-[#1f0101] text-white hover:bg-[#333333] scale-105 shadow-md"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
                 }`}
               >
@@ -382,7 +382,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
                 onClick={() => setFamilyHistory(false)}
                 className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
                   !familyHistory
-                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    ? "bg-[#1f0101] text-white hover:bg-[#333333] scale-105 shadow-md"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
                 }`}
               >
@@ -399,7 +399,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
                 onClick={() => setStress("high")}
                 className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
                   stress === "high"
-                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    ? "bg-[#1f0101] text-white hover:bg-[#333333] scale-105 shadow-md"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
                 }`}
               >
@@ -410,7 +410,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
                 onClick={() => setStress("medium")}
                 className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
                   stress === "medium"
-                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    ? "bg-[#1f0101] text-white hover:bg-[#333333] scale-105 shadow-md"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
                 }`}
               >
@@ -421,7 +421,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
                 onClick={() => setStress("low")}
                 className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
                   stress === "low"
-                    ? "bg-[#222222] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    ? "bg-[#1f0101] text-white hover:bg-[#333333] scale-105 shadow-md"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
                 }`}
               >
@@ -430,7 +430,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
             </div>
           </div>
 
-          <Button type="submit" className="w-full mt-6 bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium">
+          <Button type="submit" className="w-full mt-6 bg-[#1f0101] hover:bg-[#333333] text-white py-3 rounded-xl font-medium">
             분석 정보 수정하기
           </Button>
         </form>
@@ -450,7 +450,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
           onClick={() => setActiveTab('basic')}
           className={`flex-1 py-3 px-4 text-sm font-medium text-center border-b-2 transition-colors ${
             activeTab === 'basic'
-              ? 'border-[#222222] text-[#222222]'
+              ? 'border-[#1f0101] text-[#1f0101]'
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
@@ -463,7 +463,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
           onClick={() => setActiveTab('analysis')}
           className={`flex-1 py-3 px-4 text-sm font-medium text-center border-b-2 transition-colors ${
             activeTab === 'analysis'
-              ? 'border-[#222222] text-[#222222]'
+              ? 'border-[#1f0101] text-[#1f0101]'
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
@@ -502,7 +502,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full p-3 bg-white rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
+                  className="w-full p-3 bg-white rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#1f0101] focus:outline-none"
                   placeholder="8자 이상 입력"
                 />
               </div>
@@ -513,13 +513,13 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full p-3 bg-white rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#222222] focus:outline-none"
+                  className="w-full p-3 bg-white rounded-lg text-sm text-gray-900 border border-gray-200 focus:border-[#1f0101] focus:outline-none"
                   placeholder="비밀번호 재입력"
                 />
               </div>
 
               <div className="flex justify-center">
-                <Button type="submit" className="bg-[#222222] hover:bg-[#333333] text-white px-8 py-2 rounded-lg font-medium">
+                <Button type="submit" className="bg-[#1f0101] hover:bg-[#333333] text-white px-8 py-2 rounded-lg font-medium">
                   수정
                 </Button>
               </div>

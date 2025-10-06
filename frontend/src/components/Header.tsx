@@ -44,7 +44,7 @@ export default function Header() {
         <div className="flex-1 flex justify-center">
           <button 
             onClick={handleLogoClick}
-            className="text-xl font-bold text-[#222222] hover:text-[#333333] transition-colors active:scale-95 font-kaushan"
+            className="text-xl font-bold text-[#1f0101] hover:text-[#333333] transition-colors active:scale-95 font-kaushan"
           >
             HairFit
           </button>
@@ -56,7 +56,7 @@ export default function Header() {
             className="flex items-center justify-center active:scale-95"
             aria-label="마이페이지"
           >
-            <User className="h-5 w-5 mb-1 text-[#222222]" />
+            <User className="h-5 w-5 mb-1 text-[#1f0101]" />
           </button>
         ) : (
           <div className="w-6 h-6"></div>

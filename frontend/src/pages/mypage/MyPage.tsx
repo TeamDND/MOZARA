@@ -379,21 +379,21 @@ export default function MyPage() {
             <TabsList className="flex gap-2 w-full pb-2 bg-transparent">
               <TabsTrigger
                 value="reports"
-                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-[#222222] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
+                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-[#1f0101] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
               >
                 <FileText className="h-4 w-4 mr-1" />
                 내 리포트
               </TabsTrigger>
               <TabsTrigger
                 value="favorites"
-                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
                 <Heart className="h-4 w-4 mr-1" />
                 내 찜
               </TabsTrigger>
               <TabsTrigger
                 value="profile"
-                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
                 <User className="h-4 w-4 mr-1" />
                 회원정보
@@ -433,7 +433,7 @@ export default function MyPage() {
                 
                 <Button 
                   onClick={() => navigate('/integrated-diagnosis')}
-                  className="w-full bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium"
+                  className="w-full bg-[#1f0101] hover:bg-[#333333] text-white py-3 rounded-xl font-medium"
                 >
                   새로운 AI 분석 시작하기
                 </Button>
@@ -494,7 +494,7 @@ export default function MyPage() {
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
                   <Button 
                     onClick={() => navigate('/integrated-diagnosis')}
-                    className="w-full bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium"
+                    className="w-full bg-[#1f0101] hover:bg-[#333333] text-white py-3 rounded-xl font-medium"
                   >
                     새로운 AI 분석 시작하기
                   </Button>
@@ -509,19 +509,19 @@ export default function MyPage() {
               <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
                 <TabsTrigger 
                   value="hospitals" 
-                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-[#222222] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
+                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-[#1f0101] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
                 >
                   탈모 맵
                 </TabsTrigger>
                 <TabsTrigger 
                   value="products" 
-                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
                 >
                   제품 추천
                 </TabsTrigger>
                 <TabsTrigger 
                   value="videos" 
-                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
                 >
                   영상 컨텐츠
                 </TabsTrigger>

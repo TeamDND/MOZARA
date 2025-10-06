@@ -48,29 +48,10 @@ const D_care: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-md mx-auto bg-white min-h-screen pb-20">
-        {/* Header */}
-        <div className="bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-50">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate(-1)}
-            className="p-2"
-          >
-            <ArrowLeft className="h-5 w-5 text-[#1f0101]" />
-          </Button>
-          <h1 className="text-lg font-semibold text-[#1f0101]">D_care</h1>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className="p-2"
-          >
-            <Calendar className="h-5 w-5 text-[#1f0101]" />
-          </Button>
-        </div>
 
         {/* Main Title Section */}
         <div className="px-4 py-8 text-center">
-          <h1 className="text-2xl font-bold text-[#1f0101] mb-2">모발 건강 관리</h1>
+          <h1 className="text-2xl font-bold text-[#1f0101] mb-2">데일리케어</h1>
           <p className="text-gray-600 text-sm">개인 맞춤형 두피 케어와 건강 추적을 시작해보세요</p>
         </div>
 

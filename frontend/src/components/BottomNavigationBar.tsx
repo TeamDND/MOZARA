@@ -1,5 +1,5 @@
 import type React from "react"
-import { Home, Sprout, Bot, Search, Layers3 } from "lucide-react"
+import { Home, Sprout, Bot, Search, Layers3, Calendar } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { RootState } from "../utils/store"
@@ -41,8 +41,8 @@ const BottomNavigationBar: React.FC = () => {
               }}
               className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
-              <Search className="h-5 w-5 mb-1 text-[#222222]" />
-              <span className="text-xs font-medium text-[#222222]">
+              <Search className="h-5 w-5 mb-1 text-[#1f0101]" />
+              <span className="text-xs font-medium text-[#1f0101]">
                 분석
               </span>
             </button>
@@ -59,8 +59,8 @@ const BottomNavigationBar: React.FC = () => {
               }}
               className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
-              <Layers3 className="h-5 w-5 mb-1 text-[#222222]" />
-              <span className="text-xs font-medium text-[#222222]">
+              <Layers3 className="h-5 w-5 mb-1 text-[#1f0101]" />
+              <span className="text-xs font-medium text-[#1f0101]">
                 기능
               </span>
             </button>
@@ -75,12 +75,12 @@ const BottomNavigationBar: React.FC = () => {
                   navigate('/')
                 }
               }}
-              className="flex flex-col items-center py-2 px-3 bg-[#222222] rounded-full w-12 h-12 justify-center transition-all hover:bg-[#333333]"
+              className="flex flex-col items-center py-2 px-3 bg-[#1f0101] rounded-full w-12 h-12 justify-center transition-all hover:bg-[#333333]"
             >
               <Home className="h-6 w-6 text-white" />
             </button>
 
-            {/* 탈모PT */}
+            {/* 데일리케어 */}
             <button
               onClick={() => {
                 closeChatBotModal();
@@ -92,9 +92,9 @@ const BottomNavigationBar: React.FC = () => {
               }}
               className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
-              <Sprout className="h-5 w-5 mb-1 text-[#222222]" />
-              <span className="text-xs font-medium text-[#222222]">
-                탈모PT
+              <Calendar className="h-5 w-5 mb-1 text-[#1f0101]" />
+              <span className="text-xs font-medium text-[#1f0101]">
+                케어
               </span>
             </button>
 
@@ -103,8 +103,8 @@ const BottomNavigationBar: React.FC = () => {
               onClick={() => openChatBotModal()}
               className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
-              <Bot className="h-5 w-5 mb-1 text-[#222222]" />
-              <span className="text-xs font-medium text-[#222222]">
+              <Bot className="h-5 w-5 mb-1 text-[#1f0101]" />
+              <span className="text-xs font-medium text-[#1f0101]">
                 챗봇
               </span>
             </button>
