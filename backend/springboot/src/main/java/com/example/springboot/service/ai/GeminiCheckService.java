@@ -119,7 +119,7 @@ public class GeminiCheckService {
             entity.setAdvice(advice);
             entity.setGrade((Integer) geminiResult.get("stage"));
             entity.setImageUrl(imageUrl != null ? imageUrl : "");
-            entity.setAnalysisType("gemini_analysis");
+            entity.setAnalysisType("hairloss");
             entity.setUserEntityIdForeign(user);
 
             // AnalysisResultDAO를 통해 데이터베이스에 저장

@@ -141,7 +141,7 @@ export default function Home() {
         <main className="px-4 py-6">
           <div className="w-full space-y-4">
             <div className="text-center mb-4">
-              <h2 className="text-lg font-bold text-gray-900 mb-2">Hair Fit 기능모음</h2>
+              <h2 className="text-lg font-bold text-gray-900 mb-2">HairFit 기능모음</h2>
               <p className="text-sm text-gray-600">탈모 개선을 위한 다양한 솔루션과 컨텐츠</p>
             </div>
             <div className="space-y-3">

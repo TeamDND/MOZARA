@@ -70,18 +70,45 @@ public class AnalysisResultDAO {
     }
 
     /**
-     * 사용자 ID와 분석 타입으로 최근 분석 결과 조회
+     * 사용자 ID와 분석 타입으로 최근 분석 결과 조회 (최신순)
      */
     public List<AnalysisResultEntity> findByUserIdAndAnalysisTypeOrderByDateDesc(Integer userId, String analysisType) {
         try {
             List<AnalysisResultEntity> results = analysisResultRepository.findByUserIdAndAnalysisTypeOrderByDateDesc(userId, analysisType);
-            log.info("[AnalysisResultDAO] 최근 분석 결과 조회 - userId: {}, analysisType: {}, count: {}", 
+            log.info("[AnalysisResultDAO] 최근 분석 결과 조회 (최신순) - userId: {}, analysisType: {}, count: {}", 
                     userId, analysisType, results.size());
             return results;
         } catch (Exception e) {
             log.error("[AnalysisResultDAO] 최근 분석 결과 조회 실패 - userId: {}, analysisType: {}, error: {}", 
                     userId, analysisType, e.getMessage(), e);
             throw new RuntimeException("최근 분석 결과 조회 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    /**
+     * 사용자 ID와 분석 타입으로 최근 분석 결과 조회 (오래된순)
+     */
+    public List<AnalysisResultEntity> findByUserIdAndAnalysisTypeOrderByDateAsc(Integer userId, String analysisType) {
+        try {
+            List<AnalysisResultEntity> results = analysisResultRepository.findByUserIdAndAnalysisTypeOrderByDateAsc(userId, analysisType);
+            log.info("[AnalysisResultDAO] 최근 분석 결과 조회 (오래된순) - userId: {}, analysisType: {}, count: {}", 
+                    userId, analysisType, results.size());
+            return results;
+        } catch (Exception e) {
+            log.error("[AnalysisResultDAO] 최근 분석 결과 조회 실패 - userId: {}, analysisType: {}, error: {}", 
+                    userId, analysisType, e.getMessage(), e);
+            throw new RuntimeException("최근 분석 결과 조회 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    /**
+     * 사용자 ID와 분석 타입으로 분석 결과 조회 (정렬 옵션 포함)
+     */
+    public List<AnalysisResultEntity> findByUserIdAndAnalysisType(Integer userId, String analysisType, String sortOrder) {
+        if ("oldest".equals(sortOrder)) {
+            return findByUserIdAndAnalysisTypeOrderByDateAsc(userId, analysisType);
+        } else {
+            return findByUserIdAndAnalysisTypeOrderByDateDesc(userId, analysisType);
         }
     }
 
@@ -105,7 +132,7 @@ public class AnalysisResultDAO {
     public List<AnalysisResultEntity> findByUserIdOrderByDateDesc(Integer userId) {
         try {
             List<AnalysisResultEntity> results = analysisResultRepository.findByUserEntityIdForeign_IdOrderByInspectionDateDesc(userId);
-            log.info("[AnalysisResultDAO] 사용자 분석 결과 목록 조회 - userId: {}, count: {}", userId, results.size());
+            log.info("[AnalysisResultDAO] 사용자 분석 결과 목록 조회 (최신순) - userId: {}, count: {}", userId, results.size());
             return results;
         } catch (Exception e) {
             log.error("[AnalysisResultDAO] 사용자 분석 결과 목록 조회 실패 - userId: {}, error: {}", userId, e.getMessage(), e);
@@ -114,7 +141,32 @@ public class AnalysisResultDAO {
     }
 
     /**
-     * 사용자 ID로 분석 결과 목록 조회 (별칭 메서드)
+     * 사용자 ID로 분석 결과 목록 조회 (오래된순)
+     */
+    public List<AnalysisResultEntity> findByUserIdOrderByDateAsc(Integer userId) {
+        try {
+            List<AnalysisResultEntity> results = analysisResultRepository.findByUserEntityIdForeign_IdOrderByInspectionDateAsc(userId);
+            log.info("[AnalysisResultDAO] 사용자 분석 결과 목록 조회 (오래된순) - userId: {}, count: {}", userId, results.size());
+            return results;
+        } catch (Exception e) {
+            log.error("[AnalysisResultDAO] 사용자 분석 결과 목록 조회 실패 - userId: {}, error: {}", userId, e.getMessage(), e);
+            throw new RuntimeException("사용자 분석 결과 목록 조회 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    /**
+     * 사용자 ID로 분석 결과 목록 조회 (정렬 옵션 포함)
+     */
+    public List<AnalysisResultEntity> findByUserId(Integer userId, String sortOrder) {
+        if ("oldest".equals(sortOrder)) {
+            return findByUserIdOrderByDateAsc(userId);
+        } else {
+            return findByUserIdOrderByDateDesc(userId);
+        }
+    }
+
+    /**
+     * 사용자 ID로 분석 결과 목록 조회 (별칭 메서드 - 기본값: 최신순)
      */
     public List<AnalysisResultEntity> findByUserId(Integer userId) {
         return findByUserIdOrderByDateDesc(userId);
