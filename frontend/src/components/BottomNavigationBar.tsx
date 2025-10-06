@@ -1,5 +1,5 @@
 import type React from "react"
-import { Home, Sprout, Bot, Search, Layers3 } from "lucide-react"
+import { Home, Sprout, Bot, Search, Layers3, Calendar } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { RootState } from "../utils/store"
@@ -28,7 +28,7 @@ const BottomNavigationBar: React.FC = () => {
         {/* 상단 둥근 모서리 */}
         <div className="bg-white/90 backdrop-blur rounded-t-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
 
-          <div className="flex items-center justify-around pt-2 pb-2 px-4">
+          <div className="flex items-center pt-2 pb-2 px-4">
             {/* 분석 */}
             <button
               onClick={() => {
@@ -39,10 +39,22 @@ const BottomNavigationBar: React.FC = () => {
                   navigate('/login')
                 }
               }}
-              className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
+              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all flex-1 ${
+                location.pathname.startsWith('/integrated-diagnosis') || location.pathname.startsWith('/diagnosis')
+                  ? 'bg-[#1f0101]/10' 
+                  : ''
+              }`}
             >
-              <Search className="h-5 w-5 mb-1 text-[#222222]" />
-              <span className="text-xs font-medium text-[#222222]">
+              <Search className={`h-5 w-5 mb-1 ${
+                location.pathname.startsWith('/integrated-diagnosis') || location.pathname.startsWith('/diagnosis')
+                  ? 'text-[#1f0101]' 
+                  : 'text-gray-600'
+              }`} />
+              <span className={`text-xs font-medium ${
+                location.pathname.startsWith('/integrated-diagnosis') || location.pathname.startsWith('/diagnosis')
+                  ? 'text-[#1f0101]' 
+                  : 'text-gray-600'
+              }`}>
                 분석
               </span>
             </button>
@@ -57,10 +69,22 @@ const BottomNavigationBar: React.FC = () => {
                   navigate('/login')
                 }
               }}
-              className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
+              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all flex-1 ${
+                location.pathname.startsWith('/main-contents') || location.pathname.startsWith('/hair-change') || location.pathname.startsWith('/hair-product')
+                  ? 'bg-[#1f0101]/10' 
+                  : ''
+              }`}
             >
-              <Layers3 className="h-5 w-5 mb-1 text-[#222222]" />
-              <span className="text-xs font-medium text-[#222222]">
+              <Layers3 className={`h-5 w-5 mb-1 ${
+                location.pathname.startsWith('/main-contents') || location.pathname.startsWith('/hair-change') || location.pathname.startsWith('/hair-product')
+                  ? 'text-[#1f0101]' 
+                  : 'text-gray-600'
+              }`} />
+              <span className={`text-xs font-medium ${
+                location.pathname.startsWith('/main-contents') || location.pathname.startsWith('/hair-change') || location.pathname.startsWith('/hair-product')
+                  ? 'text-[#1f0101]' 
+                  : 'text-gray-600'
+              }`}>
                 기능
               </span>
             </button>
@@ -70,41 +94,53 @@ const BottomNavigationBar: React.FC = () => {
               onClick={() => {
                 closeChatBotModal();
                 if (isLoggedIn) {
-                  navigate('/daily-care')
+                  navigate('/main-page')
                 } else {
                   navigate('/')
                 }
               }}
-              className="flex flex-col items-center py-2 px-3 bg-[#222222] rounded-full w-12 h-12 justify-center transition-all hover:bg-[#333333]"
+              className="flex flex-col items-center py-2 px-3 bg-[#1f0101] rounded-full w-12 h-12 justify-center mx-2"
             >
               <Home className="h-6 w-6 text-white" />
             </button>
 
-            {/* 탈모PT */}
+            {/* 데일리케어 */}
             <button
               onClick={() => {
                 closeChatBotModal();
                 if (isLoggedIn) {
-                  navigate('/hair-pt')
+                  navigate('/d-care')
                 } else {
                   navigate('/login')
                 }
               }}
-              className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
+              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all flex-1 ${
+                location.pathname.startsWith('/d-care') || location.pathname.startsWith('/hair_dailycare')
+                  ? 'bg-[#1f0101]/10' 
+                  : ''
+              }`}
             >
-              <Sprout className="h-5 w-5 mb-1 text-[#222222]" />
-              <span className="text-xs font-medium text-[#222222]">
-                탈모PT
+              <Calendar className={`h-5 w-5 mb-1 ${
+                location.pathname.startsWith('/d-care') || location.pathname.startsWith('/hair_dailycare')
+                  ? 'text-[#1f0101]' 
+                  : 'text-gray-600'
+              }`} />
+              <span className={`text-xs font-medium ${
+                location.pathname.startsWith('/d-care') || location.pathname.startsWith('/hair_dailycare')
+                  ? 'text-[#1f0101]' 
+                  : 'text-gray-600'
+              }`}>
+                케어
               </span>
             </button>
 
             {/* 챗봇 */}
             <button
               onClick={() => openChatBotModal()}
-              className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
+              className="flex flex-col items-center py-2 px-3 rounded-lg transition-all flex-1"
             >
-              <Bot className="h-5 w-5 mb-1 text-[#222222]" />
-              <span className="text-xs font-medium text-[#222222]">
+              <Bot className="h-5 w-5 mb-1 text-gray-600" />
+              <span className="text-xs font-medium text-gray-600">
                 챗봇
               </span>
             </button>

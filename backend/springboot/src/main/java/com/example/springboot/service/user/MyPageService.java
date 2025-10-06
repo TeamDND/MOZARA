@@ -34,13 +34,20 @@ public class MyPageService {
     }
 
     /**
-     * 사용자 ID로 분석 결과 리스트 조회
+     * 사용자 ID로 분석 결과 리스트 조회 (정렬 옵션 포함)
      */
-    public List<AnalysisResultDTO> getAnalysisResultsByUserId(Integer userId) {
-        List<AnalysisResultEntity> entities = analysisResultDAO.findByUserId(userId);
+    public List<AnalysisResultDTO> getAnalysisResultsByUserId(Integer userId, String sortOrder) {
+        List<AnalysisResultEntity> entities = analysisResultDAO.findByUserId(userId, sortOrder);
         return entities.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 사용자 ID로 분석 결과 리스트 조회 (기본값: 최신순)
+     */
+    public List<AnalysisResultDTO> getAnalysisResultsByUserId(Integer userId) {
+        return getAnalysisResultsByUserId(userId, "newest");
     }
 
     /**
@@ -141,5 +148,30 @@ public class MyPageService {
         System.out.println("exists: " + exists);
         
         return exists;
+    }
+
+    /**
+     * 사용자 ID와 분석 타입으로 분석 결과 리스트 조회 (정렬 옵션 포함)
+     */
+    public List<AnalysisResultDTO> getAnalysisResultsByUserIdAndType(Integer userId, String analysisType, String sortOrder) {
+        List<AnalysisResultEntity> entities = analysisResultDAO.findByUserIdAndAnalysisType(userId, analysisType, sortOrder);
+        return entities.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 사용자 ID와 분석 타입으로 분석 결과 리스트 조회 (기본값: 최신순)
+     */
+    public List<AnalysisResultDTO> getAnalysisResultsByUserIdAndType(Integer userId, String analysisType) {
+        return getAnalysisResultsByUserIdAndType(userId, analysisType, "newest");
+    }
+
+    /**
+     * 사용자 ID와 분석 타입으로 분석 결과 개수 조회
+     */
+    public long getAnalysisCountByUserIdAndType(Integer userId, String analysisType) {
+        List<AnalysisResultEntity> entities = analysisResultDAO.findByUserIdAndAnalysisTypeOrderByDateDesc(userId, analysisType);
+        return entities.size();
     }
 }

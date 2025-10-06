@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { useNavigate, useLocation } from "react-router-dom"
 import { RootState } from "../../utils/store"
@@ -54,9 +54,13 @@ export default function MyPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const [activeTab, setActiveTab] = useState(location.state?.activeTab || "reports")
+  const [activeReportTab, setActiveReportTab] = useState<'all' | 'hairloss' | 'daily'>('all')
   const [totalAnalysis, setTotalAnalysis] = useState(0)
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([])
+  const [hairlossResults, setHairlossResults] = useState<AnalysisResult[]>([])
+  const [dailyResults, setDailyResults] = useState<AnalysisResult[]>([])
   const [loading, setLoading] = useState(true)
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
   
   // Redux에서 실제 유저 정보 가져오기
   const user = useSelector((state: RootState) => state.user)
@@ -128,83 +132,136 @@ export default function MyPage() {
     }
   }
 
-  // 분석 결과 개수 및 리스트 조회
-  useEffect(() => {
-    const fetchAnalysisData = async () => {
-      console.log('분석 결과 데이터 조회 시작:', { userId: user.userId, token: token ? '있음' : '없음' });
-      
-      if (!user.userId || !token) {
-        console.log('사용자 ID 또는 토큰이 없음:', { userId: user.userId, token: token });
-        setLoading(false)
-        return
-      }
+  // 분석 결과 데이터 조회 함수 (Incoming의 useCallback 구조 사용)
+  const fetchAnalysisData = useCallback(async () => {
+    console.log('분석 결과 데이터 조회 시작:', { userId: user.userId, token: token ? '있음' : '없음' });
 
-      try {
-        // 분석 결과 개수 조회
-        console.log('API 호출: 분석 결과 개수 조회', `/analysis-count/${user.userId}`);
-        const countResponse = await apiClient.get(`/analysis-count/${user.userId}`)
-        console.log('분석 결과 개수 API 응답:', countResponse.data);
-        const countData = countResponse.data
-        setTotalAnalysis(countData.count || 0)
-
-        // 분석 결과 리스트 조회
-        console.log('API 호출: 분석 결과 리스트 조회', `/analysis-results/${user.userId}`);
-        const resultsResponse = await apiClient.get(`/analysis-results/${user.userId}`)
-        console.log('분석 결과 리스트 API 응답:', resultsResponse.data);
-
-        // 날짜 포맷팅 및 데이터 변환
-        const formattedResults = resultsResponse.data.map((result: any, index: number) => {
-          // imageUrl은 그대로 전달 (MyReportPage에서 처리)
-          return {
-            id: result.id,
-            inspectionDate: result.inspectionDate ?
-              new Date(result.inspectionDate).toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-              }).replace(/\./g, '.').replace(/\s/g, '') :
-              `2024.01.${String(index + 1).padStart(2, '0')}`,
-            analysisSummary: result.analysisSummary || '분석 결과 요약',
-            advice: result.advice || '개선 방안 제시',
-            grade: result.grade !== undefined && result.grade !== null ? result.grade : 0,
-            imageUrl: result.imageUrl, // 전체 URL 그대로 전달 (|||포함)
-            analysisType: result.analysisType, // 백엔드 DTO와 일치 (analysis_type)
-            improvement: result.improvement || '15% 개선됨'
-          };
-        })
-        
-        setAnalysisResults(formattedResults)
-      } catch (error: any) {
-        console.error('분석 결과 데이터 조회 실패:', error);
-        console.error('에러 상세:', {
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
-          message: error.message
-        });
-        
-        // 토큰 만료(456) 또는 인증 실패(401) 시
-        if (error.response?.status === 456 || error.response?.status === 401) {
-          console.log('토큰 만료 또는 인증 실패 - 토큰 갱신 시도됨');
-          // 토큰 갱신은 apiClient에서 자동으로 처리됨
-        }
-        
-        // 심각한 인증 오류 시 Redux 상태 정리
-        if (error.response?.status === 401 && error.response?.data?.includes('invalid')) {
-          console.log('유효하지 않은 토큰 - 상태 정리');
-          dispatch(clearToken());
-          dispatch(clearUser());
-        }
-        
-        setTotalAnalysis(0)
-        setAnalysisResults([])
-      } finally {
-        setLoading(false)
-      }
+    if (!user.userId || !token) {
+      console.log('사용자 ID 또는 토큰이 없음:', { userId: user.userId, token: token });
+      setLoading(false)
+      return
     }
 
+    try {
+      // 전체 분석 결과 개수 조회
+      console.log('API 호출: 분석 결과 개수 조회', `/analysis-count/${user.userId}`);
+      const countResponse = await apiClient.get(`/analysis-count/${user.userId}`)
+      console.log('분석 결과 개수 API 응답:', countResponse.data);
+      const countData = countResponse.data
+      setTotalAnalysis(countData.count || 0)
+
+      // 전체 분석 결과 리스트 조회
+      console.log('API 호출: 분석 결과 리스트 조회', `/analysis-results/${user.userId}?sort=${sortOrder}`);
+      const resultsResponse = await apiClient.get(`/analysis-results/${user.userId}?sort=${sortOrder}`)
+      console.log('분석 결과 리스트 API 응답:', resultsResponse.data);
+
+      // 날짜 포맷팅 및 데이터 변환
+      const formattedResults = resultsResponse.data.map((result: any, index: number) => {
+        return {
+          id: result.id,
+          inspectionDate: result.inspectionDate ?
+            new Date(result.inspectionDate).toLocaleDateString('ko-KR', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit'
+            }).replace(/\./g, '.').replace(/\s/g, '') :
+            `2024.01.${String(index + 1).padStart(2, '0')}`,
+          analysisSummary: result.analysisSummary || '분석 결과 요약',
+          advice: result.advice || '개선 방안 제시',
+          grade: result.grade !== undefined && result.grade !== null ? result.grade : 0,
+          imageUrl: result.imageUrl,
+          analysisType: result.analysisType || '종합 진단',
+          improvement: result.improvement || '15% 개선됨'
+        };
+      })
+
+      setAnalysisResults(formattedResults)
+
+      // 탈모분석 결과 조회
+      try {
+        const hairlossResponse = await apiClient.get(`/analysis-results/${user.userId}/type/hairloss?sort=${sortOrder}`)
+        const hairlossFormatted = hairlossResponse.data.map((result: any, index: number) => ({
+          id: result.id,
+          inspectionDate: result.inspectionDate ?
+            new Date(result.inspectionDate).toLocaleDateString('ko-KR', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit'
+            }).replace(/\./g, '.').replace(/\s/g, '') :
+            `2024.01.${String(index + 1).padStart(2, '0')}`,
+          analysisSummary: result.analysisSummary || '분석 결과 요약',
+          advice: result.advice || '개선 방안 제시',
+          grade: result.grade !== undefined && result.grade !== null ? result.grade : 0,
+          imageUrl: result.imageUrl,
+          analysisType: result.analysisType || '탈모 분석',
+          improvement: result.improvement || '15% 개선됨'
+        }))
+        setHairlossResults(hairlossFormatted)
+      } catch (error) {
+        console.log('탈모분석 결과 조회 실패:', error)
+        setHairlossResults([])
+      }
+
+      // 두피분석 결과 조회
+      try {
+        const dailyResponse = await apiClient.get(`/analysis-results/${user.userId}/type/daily?sort=${sortOrder}`)
+        const dailyFormatted = dailyResponse.data.map((result: any, index: number) => ({
+          id: result.id,
+          inspectionDate: result.inspectionDate ?
+            new Date(result.inspectionDate).toLocaleDateString('ko-KR', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit'
+            }).replace(/\./g, '.').replace(/\s/g, '') :
+            `2024.01.${String(index + 1).padStart(2, '0')}`,
+          analysisSummary: result.analysisSummary || '분석 결과 요약',
+          advice: result.advice || '개선 방안 제시',
+          grade: result.grade !== undefined && result.grade !== null ? result.grade : 0,
+          imageUrl: result.imageUrl,
+          analysisType: result.analysisType || '두피 분석',
+          improvement: result.improvement || '15% 개선됨'
+        }))
+        setDailyResults(dailyFormatted)
+      } catch (error) {
+        console.log('두피분석 결과 조회 실패:', error)
+        setDailyResults([])
+      }
+
+    } catch (error: any) {
+      console.error('분석 결과 데이터 조회 실패:', error);
+      console.error('에러 상세:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
+
+      // 토큰 만료(456) 또는 인증 실패(401) 시
+      if (error.response?.status === 456 || error.response?.status === 401) {
+        console.log('토큰 만료 또는 인증 실패 - 토큰 갱신 시도됨');
+        // 토큰 갱신은 apiClient에서 자동으로 처리됨
+      }
+
+      // 심각한 인증 오류 시 Redux 상태 정리
+      if (error.response?.status === 401 && error.response?.data?.includes('invalid')) {
+        console.log('유효하지 않은 토큰 - 상태 정리');
+        dispatch(clearToken());
+        dispatch(clearUser());
+      }
+
+      setTotalAnalysis(0)
+      setAnalysisResults([])
+      setHairlossResults([])
+      setDailyResults([])
+    } finally {
+      setLoading(false)
+    }
+  }, [user.userId, token, dispatch, sortOrder])
+
+  // 데이터 로드 (사용자 ID, 토큰, 정렬 옵션 변경 시)
+  useEffect(() => {
     fetchAnalysisData()
-  }, [user.userId, token, dispatch])
+  }, [fetchAnalysisData])
 
   // 사용자 추가 정보 조회 (성별, 가족력, 최근 머리빠짐)
   useEffect(() => {
@@ -233,7 +290,7 @@ export default function MyPage() {
     fetchUserAdditionalInfo()
   }, [user.username, token])
 
-  // 분석 타입을 한글로 변환하는 함수
+  // 분석 타입을 한글로 변환하는 함수 (HEAD의 로직 사용)
   const formatAnalysisType = (type: string | undefined): string => {
     if (!type) return '종합 진단';
     if (type === 'daily') return '두피 분석';
@@ -251,12 +308,51 @@ export default function MyPage() {
     return '종합 진단'; // 알 수 없는 타입은 종합 진단으로
   };
 
-  // 분석 결과를 리포트 형태로 변환하는 함수
+  // 분석 결과를 정렬하는 함수 (Incoming 추가)
+  const sortAnalysisResults = (results: AnalysisResult[]) => {
+    return [...results].sort((a, b) => {
+      const dateA = new Date(a.inspectionDate.replace(/\./g, '-'))
+      const dateB = new Date(b.inspectionDate.replace(/\./g, '-'))
+
+      if (sortOrder === 'newest') {
+        return dateB.getTime() - dateA.getTime() // 최신순
+      } else {
+        return dateA.getTime() - dateB.getTime() // 오래된순
+      }
+    })
+  }
+
+  // 현재 선택된 탭에 따라 표시할 데이터를 반환하는 함수 (Incoming 추가)
+  const getCurrentResults = () => {
+    switch (activeReportTab) {
+      case 'hairloss':
+        return hairlossResults
+      case 'daily':
+        return dailyResults
+      default:
+        return analysisResults
+    }
+  }
+
+  // 현재 선택된 탭의 개수를 반환하는 함수 (Incoming 추가)
+  const getCurrentCount = () => {
+    switch (activeReportTab) {
+      case 'hairloss':
+        return hairlossResults.length
+      case 'daily':
+        return dailyResults.length
+      default:
+        return totalAnalysis
+    }
+  }
+
+  // 분석 결과를 리포트 형태로 변환하는 함수 (Incoming 구조 + HEAD의 역순 번호)
   const formatAnalysisResults = (results: AnalysisResult[]) => {
-    const totalCount = results.length;
-    return results.map((result, index) => ({
+    const sortedResults = sortAnalysisResults(results)
+    const totalCount = sortedResults.length; // HEAD의 역순 번호를 위한 전체 개수
+    return sortedResults.map((result, index) => ({
       id: result.id,
-      title: `AI 탈모 분석 리포트 #${totalCount - index}`, // 역순 번호 (최신이 큰 번호)
+      title: `AI ${formatAnalysisType(result.analysisType)} 리포트 #${totalCount - index}`, // HEAD의 역순 번호 + formatAnalysisType
       date: result.inspectionDate,
       status: "완료",
       score: result.grade,
@@ -400,21 +496,21 @@ export default function MyPage() {
             <TabsList className="flex gap-2 w-full pb-2 bg-transparent">
               <TabsTrigger
                 value="reports"
-                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-[#222222] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
+                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-[#1f0101] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
               >
                 <FileText className="h-4 w-4 mr-1" />
                 내 리포트
               </TabsTrigger>
               <TabsTrigger
                 value="favorites"
-                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
                 <Heart className="h-4 w-4 mr-1" />
                 내 찜
               </TabsTrigger>
               <TabsTrigger
                 value="profile"
-                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
                 <User className="h-4 w-4 mr-1" />
                 회원정보
@@ -425,103 +521,330 @@ export default function MyPage() {
           </div>
 
           <TabsContent value="reports" className="space-y-4">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="text-lg font-bold text-gray-900">내 AI 분석 리포트</h3>
-              <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100">
-                {loading ? "로딩 중..." : `${totalAnalysis}개`}
-              </Badge>
-            </div>
+            {/* 내 리포트 이중탭 */}
+            <Tabs value={activeReportTab} onValueChange={(value) => setActiveReportTab(value as 'all' | 'hairloss' | 'daily')} className="space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-bold text-gray-900">내 AI 분석 리포트</h3>
+                  <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100">
+                    {loading ? "로딩 중..." : `${getCurrentCount()}개`}
+                  </Badge>
+                </div>
+                {getCurrentCount() > 0 && (
+                  <select 
+                    value={sortOrder} 
+                    onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
+                    className="w-24 h-8 text-xs border border-gray-300 rounded-md px-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#1f0101] focus:border-transparent"
+                  >
+                    <option value="newest">최신순</option>
+                    <option value="oldest">오래된순</option>
+                  </select>
+                )}
+              </div>
 
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <div className="text-gray-500">로딩 중...</div>
-              </div>
-            ) : totalAnalysis === 0 ? (
-              <div className="space-y-4">
-                <Card className="border-0 shadow-sm bg-white">
-                  <CardContent className="p-6 text-center">
-                    <div className="mb-4">
-                      <FileText className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                      <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                        아직 분석 레포트가 없으시군요?
-                      </h4>
-                      <p className="text-sm text-gray-500">
-                        AI 분석을 통해 두피 상태를 확인하고 개선 방안을 알아보세요.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Button 
-                  onClick={() => navigate('/integrated-diagnosis')}
-                  className="w-full bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium"
+              <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
+                <TabsTrigger 
+                  value="all" 
+                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-[#1f0101] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
                 >
-                  새로운 AI 분석 시작하기
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {/* 레포트 리스트 영역 */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                  <div className="p-4 border-b border-gray-100">
-                    <h4 className="text-sm font-semibold text-gray-700">분석 리포트 목록</h4>
+                  전체
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="hairloss" 
+                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                >
+                  탈모분석
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="daily" 
+                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                >
+                  두피분석
+                </TabsTrigger>
+              </TabsList>
+
+              {/* 전체 탭 */}
+              <TabsContent value="all" className="space-y-4">
+                {loading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="text-gray-500">로딩 중...</div>
                   </div>
-                  <div className="divide-y divide-gray-100">
-                    {formatAnalysisResults(analysisResults).map((report) => {
-                      const reportData = analysisResults.find(r => r.id === report.id)
-                      return (
-                        <div
-                          key={report.id}
-                          className="p-4 hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
-                          onClick={() => {
-                            if (reportData) {
-                              navigate('/my-report', { 
-                                state: { analysisResult: reportData } 
-                              })
-                            }
-                          }}
-                        >
-                          <div className="flex items-center justify-between">
-                            {/* 콘텐츠 영역 */}
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-3">
-                                <h4 className="font-semibold text-gray-900 text-sm">{report.title}</h4>
-                                <Badge variant="outline" className="text-xs border-gray-200 text-gray-700">
-                                  {report.analysistype}
-                                </Badge>
-                              </div>
-                              <div className="flex items-center gap-4 mb-2">
-                                <span className="flex items-center gap-1 text-xs text-gray-500">
-                                  <Calendar className="h-3 w-3" />
-                                  {report.date}
-                                </span>
-                                <span className="flex items-center gap-1 text-xs text-gray-500">
-                                  <Star className="h-3 w-3" />
-                                  {report.analysisTypeRaw === 'daily' ? `${report.score}점` : `${report.score}단계`}
-                                </span>
+                ) : totalAnalysis === 0 ? (
+                  <div className="space-y-4">
+                    <Card className="border-0 shadow-sm bg-white">
+                      <CardContent className="p-6 text-center">
+                        <div className="mb-4">
+                          <FileText className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                          <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                            아직 분석 레포트가 없으시군요?
+                          </h4>
+                          <p className="text-sm text-gray-500">
+                            AI 분석을 통해 두피 상태를 확인하고 개선 방안을 알아보세요.
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Button
+                      onClick={() => navigate('/integrated-diagnosis')}
+                      className="w-full bg-[#1f0101] hover:bg-[#333333] text-white py-3 rounded-xl font-medium"
+                    >
+                      새로운 AI 분석 시작하기
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* 레포트 리스트 영역 */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                      <div className="p-4 border-b border-gray-100">
+                        <h4 className="text-sm font-semibold text-gray-700">전체 분석 리포트 목록</h4>
+                      </div>
+                      <div className="divide-y divide-gray-100">
+                        {formatAnalysisResults(getCurrentResults()).map((report) => {
+                          const reportData = getCurrentResults().find(r => r.id === report.id)
+                          return (
+                            <div
+                              key={report.id}
+                              className="p-4 hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                              onClick={() => {
+                                if (reportData) {
+                                  navigate('/my-report', {
+                                    state: { analysisResult: reportData }
+                                  })
+                                }
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                {/* 콘텐츠 영역 */}
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <h4 className="font-semibold text-gray-900 text-sm">{report.title}</h4>
+                                    <Badge variant="outline" className="text-xs border-gray-200 text-gray-700">
+                                      {report.analysistype}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center gap-4 mb-2">
+                                    <span className="flex items-center gap-1 text-xs text-gray-500">
+                                      <Calendar className="h-3 w-3" />
+                                      {report.date}
+                                    </span>
+                                    <span className="flex items-center gap-1 text-xs text-gray-500">
+                                      <Star className="h-3 w-3" />
+                                      {report.analysisTypeRaw === 'daily' ? `${report.score}점` : `${report.score}단계`}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* 화살표 */}
+                                <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0" />
                               </div>
                             </div>
-                            
-                            {/* 화살표 */}
-                            <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0" />
-                          </div>
-                        </div>
-                      )
-                    })}
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    {/* 새로운 분석 시작 버튼 영역 */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                      <Button 
+                        onClick={() => navigate('/integrated-diagnosis')}
+                        className="w-full bg-[#1f0101] hover:bg-[#333333] text-white py-3 rounded-xl font-medium"
+                      >
+                        새로운 AI 분석 시작하기
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                
-                {/* 새로운 분석 시작 버튼 영역 */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-                  <Button 
-                    onClick={() => navigate('/integrated-diagnosis')}
-                    className="w-full bg-[#222222] hover:bg-[#333333] text-white py-3 rounded-xl font-medium"
-                  >
-                    새로운 AI 분석 시작하기
-                  </Button>
-                </div>
-              </div>
-            )}
+                )}
+              </TabsContent>
+
+              {/* 탈모분석 탭 */}
+              <TabsContent value="hairloss" className="space-y-4">
+                {loading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="text-gray-500">로딩 중...</div>
+                  </div>
+                ) : hairlossResults.length === 0 ? (
+                  <div className="space-y-4">
+                    <Card className="border-0 shadow-sm bg-white">
+                      <CardContent className="p-6 text-center">
+                        <div className="mb-4">
+                          <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                          <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                            탈모분석 리포트가 없습니다
+                          </h4>
+                          <p className="text-sm text-gray-500">
+                            탈모분석을 통해 모발 상태를 확인해보세요.
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Button 
+                      onClick={() => navigate('/integrated-diagnosis')}
+                      className="w-full bg-[#1f0101] hover:bg-[#333333] text-white py-3 rounded-xl font-medium"
+                    >
+                      탈모분석 시작하기
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* 레포트 리스트 영역 */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                      <div className="p-4 border-b border-gray-100">
+                        <h4 className="text-sm font-semibold text-gray-700">탈모분석 리포트 목록</h4>
+                      </div>
+                      <div className="divide-y divide-gray-100">
+                        {formatAnalysisResults(getCurrentResults()).map((report) => {
+                          const reportData = getCurrentResults().find(r => r.id === report.id)
+                          return (
+                            <div
+                              key={report.id}
+                              className="p-4 hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                              onClick={() => {
+                                if (reportData) {
+                                  navigate('/my-report', { 
+                                    state: { analysisResult: reportData } 
+                                  })
+                                }
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                {/* 콘텐츠 영역 */}
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <h4 className="font-semibold text-gray-900 text-sm">{report.title}</h4>
+                                    <Badge variant="outline" className="text-xs border-gray-200 text-gray-700">
+                                      {report.analysistype}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center gap-4 mb-2">
+                                    <span className="flex items-center gap-1 text-xs text-gray-500">
+                                      <Calendar className="h-3 w-3" />
+                                      {report.date}
+                                    </span>
+                                    <span className="flex items-center gap-1 text-xs text-gray-500">
+                                      <Star className="h-3 w-3" />
+                                      {report.score}단계
+                                    </span>
+                                  </div>
+                                </div>
+                                
+                                {/* 화살표 */}
+                                <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                    
+                    {/* 새로운 분석 시작 버튼 영역 */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                      <Button 
+                        onClick={() => navigate('/integrated-diagnosis')}
+                        className="w-full bg-[#1f0101] hover:bg-[#333333] text-white py-3 rounded-xl font-medium"
+                      >
+                        새로운 탈모분석 시작하기
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+
+              {/* 두피분석 탭 */}
+              <TabsContent value="daily" className="space-y-4">
+                {loading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="text-gray-500">로딩 중...</div>
+                  </div>
+                ) : dailyResults.length === 0 ? (
+                  <div className="space-y-4">
+                    <Card className="border-0 shadow-sm bg-white">
+                      <CardContent className="p-6 text-center">
+                        <div className="mb-4">
+                          <Users className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                          <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                            두피분석 리포트가 없습니다
+                          </h4>
+                          <p className="text-sm text-gray-500">
+                            두피분석을 통해 두피 상태를 확인해보세요.
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Button 
+                      onClick={() => navigate('/integrated-diagnosis')}
+                      className="w-full bg-[#1f0101] hover:bg-[#333333] text-white py-3 rounded-xl font-medium"
+                    >
+                      두피분석 시작하기
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* 레포트 리스트 영역 */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                      <div className="p-4 border-b border-gray-100">
+                        <h4 className="text-sm font-semibold text-gray-700">두피분석 리포트 목록</h4>
+                      </div>
+                      <div className="divide-y divide-gray-100">
+                        {formatAnalysisResults(getCurrentResults()).map((report) => {
+                          const reportData = getCurrentResults().find(r => r.id === report.id)
+                          return (
+                            <div
+                              key={report.id}
+                              className="p-4 hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                              onClick={() => {
+                                if (reportData) {
+                                  navigate('/my-report', { 
+                                    state: { analysisResult: reportData } 
+                                  })
+                                }
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                {/* 콘텐츠 영역 */}
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <h4 className="font-semibold text-gray-900 text-sm">{report.title}</h4>
+                                    <Badge variant="outline" className="text-xs border-gray-200 text-gray-700">
+                                      {report.analysistype}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center gap-4 mb-2">
+                                    <span className="flex items-center gap-1 text-xs text-gray-500">
+                                      <Calendar className="h-3 w-3" />
+                                      {report.date}
+                                    </span>
+                                    <span className="flex items-center gap-1 text-xs text-gray-500">
+                                      <Star className="h-3 w-3" />
+                                      {report.score}단계
+                                    </span>
+                                  </div>
+                                </div>
+                                
+                                {/* 화살표 */}
+                                <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                    
+                    {/* 새로운 분석 시작 버튼 영역 */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                      <Button 
+                        onClick={() => navigate('/integrated-diagnosis')}
+                        className="w-full bg-[#1f0101] hover:bg-[#333333] text-white py-3 rounded-xl font-medium"
+                      >
+                        새로운 두피분석 시작하기
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           <TabsContent value="favorites" className="space-y-4">

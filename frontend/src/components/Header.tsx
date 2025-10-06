@@ -11,7 +11,7 @@ export default function Header() {
 
   const handleLogoClick = () => {
     if (isLoggedIn) {
-      navigate('/daily-care');
+      navigate('/main-page');
     } else {
       navigate('/');
     }
@@ -50,7 +50,7 @@ export default function Header() {
         <div className="flex-1 flex justify-center">
           <button
             onClick={handleLogoClick}
-            className="text-xl font-bold text-[#222222] hover:text-[#333333] transition-colors active:scale-95 font-kaushan"
+            className="text-xl font-bold text-[#1f0101] hover:text-[#333333] transition-colors active:scale-95 font-kaushan"
           >
             HairFit
           </button>
@@ -65,7 +65,7 @@ export default function Header() {
                 aria-label="관리자 페이지"
                 title="관리자 페이지"
               >
-                <Settings className="h-5 w-5 text-[#222222]" />
+                <Settings className="h-5 w-5 text-[#1f0101]" />
               </button>
             )}
             <button
@@ -73,7 +73,7 @@ export default function Header() {
               className="flex items-center justify-center active:scale-95 pl-1"
               aria-label="마이페이지"
             >
-              <User className="h-5 w-5 mb-1 text-[#222222]" />
+              <User className="h-5 w-5 mb-1 text-[#1f0101]" />
             </button>
           </div>
         ) : (

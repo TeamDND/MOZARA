@@ -369,6 +369,14 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
                   </p>
                 </div>
               </div>
+              <Button
+                onClick={() => {
+                    navigate('/main-page');
+                }}
+                className="ml-3 h-10 px-4 bg-[#1f0101] hover:bg-[#333333] text-white rounded-xl active:scale-[0.98]"
+              >
+                데일리 케어
+              </Button>
             </div>
           )}
 
@@ -378,25 +386,25 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
             <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
               <TabsTrigger 
                 value="hospitals" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-[#222222] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-[#1f0101] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
               >
                 탈모 맵
               </TabsTrigger>
               <TabsTrigger 
                 value="products" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
                 제품 추천
               </TabsTrigger>
               <TabsTrigger 
                 value="videos" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
                 영상 컨텐츠
               </TabsTrigger>
               <TabsTrigger 
                 value="lifestyle" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
                 생활습관
               </TabsTrigger>
@@ -414,7 +422,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
                         analysis_result: { grade: currentStage }
                       } 
                     })}
-                    className="h-8 px-3 bg-[#222222] hover:bg-[#333333] text-white text-xs rounded-lg"
+                    className="h-8 px-3 bg-[#1f0101] hover:bg-[#333333] text-white text-xs rounded-lg"
                   >
                     더보기
                     <ArrowRight className="w-3 h-3 ml-1" />
@@ -439,7 +447,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
                         analysis_result: { grade: currentStage }
                       } 
                     })}
-                    className="h-8 px-3 bg-[#222222] hover:bg-[#333333] text-white text-xs rounded-lg"
+                    className="h-8 px-3 bg-[#1f0101] hover:bg-[#333333] text-white text-xs rounded-lg"
                   >
                     더보기
                     <ArrowRight className="w-3 h-3 ml-1" />
@@ -454,7 +462,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
               <div className="bg-white p-4 rounded-xl shadow-md">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <Brain className="w-5 h-5 text-[#222222]" />
+                    <Brain className="w-5 h-5 text-[#1f0101]" />
                     <h3 className="text-lg font-semibold text-gray-800">
                       AI 맞춤 영상 추천
                       <span className="text-sm font-normal text-gray-600">
@@ -464,7 +472,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
                   </div>
                   <Button 
                     onClick={() => navigate('/youtube-videos')}
-                    className="h-8 px-3 bg-[#222222] hover:bg-[#333333] text-white text-xs rounded-lg"
+                    className="h-8 px-3 bg-[#1f0101] hover:bg-[#333333] text-white text-xs rounded-lg"
                   >
                     더보기
                     <ArrowRight className="w-3 h-3 ml-1" />
@@ -478,7 +486,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
             <TabsContent value="lifestyle" className="space-y-4">
               <DailyCareTab
                 currentStage={currentStage}
-                onNavigateToDailyCare={() => navigate('/daily-care')}
+                onNavigateToDailyCare={() => navigate('/hair-dailycare')}
               />
             </TabsContent>
           </Tabs>
@@ -607,7 +615,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
             <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 rounded-b-2xl">
               <Button
                 onClick={() => setShowStageInfo(false)}
-                className="w-full h-10 bg-[#222222] hover:bg-[#333333] text-white rounded-lg"
+                className="w-full h-10 bg-[#1f0101] hover:bg-[#333333] text-white rounded-lg"
               >
                 확인
               </Button>

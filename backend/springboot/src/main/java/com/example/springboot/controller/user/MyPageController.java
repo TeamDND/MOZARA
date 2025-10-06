@@ -36,12 +36,12 @@ public class MyPageController {
     }
 
     /**
-     * 사용자 분석 결과 리스트 조회
+     * 사용자 분석 결과 리스트 조회 (정렬 옵션 포함)
      */
     @GetMapping("/analysis-results/{userId}")
-    public ResponseEntity<?> getAnalysisResults(@PathVariable Integer userId) {
+    public ResponseEntity<?> getAnalysisResults(@PathVariable Integer userId, @RequestParam(value = "sort", defaultValue = "newest") String sortOrder) {
         try {
-            List<AnalysisResultDTO> results = myPageService.getAnalysisResultsByUserId(userId);
+            List<AnalysisResultDTO> results = myPageService.getAnalysisResultsByUserId(userId, sortOrder);
             return ResponseEntity.ok(results);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
@@ -124,6 +124,40 @@ public class MyPageController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "분석 결과 확인 중 오류가 발생했습니다."));
+        }
+    }
+
+    /**
+     * 사용자 ID와 분석 타입으로 분석 결과 리스트 조회 (정렬 옵션 포함)
+     */
+    @GetMapping("/analysis-results/{userId}/type/{analysisType}")
+    public ResponseEntity<?> getAnalysisResultsByUserIdAndType(@PathVariable Integer userId, @PathVariable String analysisType, @RequestParam(value = "sort", defaultValue = "newest") String sortOrder) {
+        try {
+            List<AnalysisResultDTO> results = myPageService.getAnalysisResultsByUserIdAndType(userId, analysisType, sortOrder);
+            return ResponseEntity.ok(results);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body("{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"분석 결과 리스트 조회 중 오류가 발생했습니다.\"}");
+        }
+    }
+
+    /**
+     * 사용자 ID와 분석 타입으로 분석 결과 개수 조회
+     */
+    @GetMapping("/analysis-count/{userId}/type/{analysisType}")
+    public ResponseEntity<?> getAnalysisCountByUserIdAndType(@PathVariable Integer userId, @PathVariable String analysisType) {
+        try {
+            long count = myPageService.getAnalysisCountByUserIdAndType(userId, analysisType);
+            return ResponseEntity.ok(Map.of("count", count));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body("{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"분석 결과 개수 조회 중 오류가 발생했습니다.\"}");
         }
     }
 }

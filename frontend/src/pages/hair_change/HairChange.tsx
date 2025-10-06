@@ -139,7 +139,7 @@ export default function HairChange() {
             <div className="space-y-2">
               <div 
                 className={`bg-white rounded-xl border hover:shadow-md transition-all cursor-pointer active:scale-[0.98] touch-manipulation overflow-hidden ${
-                  mode === 'wig' ? 'border-[#222222] ring-2 ring-[#222222] ring-opacity-20' : 'border-gray-100'
+                  mode === 'wig' ? 'border-[#1f0101] ring-2 ring-[#1f0101] ring-opacity-20' : 'border-gray-100'
                 }`}
                 onClick={() => {
                   setMode('wig');
@@ -156,7 +156,7 @@ export default function HairChange() {
                   </div>
                   <div className="flex-shrink-0 ml-2">
                     {mode === 'wig' ? (
-                      <div className="w-6 h-6 rounded-full bg-[#222222] flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-full bg-[#1f0101] flex items-center justify-center">
                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
@@ -170,7 +170,7 @@ export default function HairChange() {
               
               <div 
                 className={`bg-white rounded-xl border hover:shadow-md transition-all cursor-pointer active:scale-[0.98] touch-manipulation overflow-hidden ${
-                  mode === 'fill_bald' ? 'border-[#222222] ring-2 ring-[#222222] ring-opacity-20' : 'border-gray-100'
+                  mode === 'fill_bald' ? 'border-[#1f0101] ring-2 ring-[#1f0101] ring-opacity-20' : 'border-gray-100'
                 }`}
                 onClick={() => {
                   setMode('fill_bald');
@@ -187,7 +187,7 @@ export default function HairChange() {
                   </div>
                   <div className="flex-shrink-0 ml-2">
                     {mode === 'fill_bald' ? (
-                      <div className="w-6 h-6 rounded-full bg-[#222222] flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-full bg-[#1f0101] flex items-center justify-center">
                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
@@ -240,7 +240,7 @@ export default function HairChange() {
               <select
                 value={selectedHairstyle}
                 onChange={(e) => setSelectedHairstyle(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-[#222222] focus:border-transparent bg-white text-gray-700 text-sm"
+                className="w-full px-4 py-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-[#1f0101] focus:border-transparent bg-white text-gray-700 text-sm"
               >
                 <option value="">가발 스타일을 선택하세요</option>
                 {Object.entries(hairstyles)
@@ -274,7 +274,7 @@ export default function HairChange() {
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}
               placeholder="특별한 요청사항이 있다면 입력하세요..."
-              className="w-full px-4 py-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-[#222222] focus:border-transparent resize-none text-gray-700 text-sm"
+              className="w-full px-4 py-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-[#1f0101] focus:border-transparent resize-none text-gray-700 text-sm"
               rows={3}
             />
           </div>
@@ -284,7 +284,7 @@ export default function HairChange() {
             <button
               onClick={handleGenerate}
               disabled={isLoading}
-              className="w-full bg-[#222222] text-white py-3.5 px-6 rounded-xl font-semibold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
+              className="w-full bg-[#1f0101] text-white py-3.5 px-6 rounded-xl font-semibold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
             >
               {isLoading 
                 ? (mode === 'fill_bald' ? '🔄 빈머리 매꾸는 중...' : '🔄 변경 중...') 
@@ -312,7 +312,7 @@ export default function HairChange() {
           {/* 로딩 상태 */}
           {isLoading && (
             <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-8 text-center">
-              <div className="animate-spin rounded-full h-14 w-14 border-4 border-[#222222] border-t-transparent mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-14 w-14 border-4 border-[#1f0101] border-t-transparent mx-auto mb-4"></div>
               <p className="text-gray-900 font-semibold mb-2 text-sm">
                 {mode === 'fill_bald' 
                   ? 'AI가 빈머리를 자연스럽게 매꾸고 있습니다...' 
@@ -357,7 +357,7 @@ export default function HairChange() {
                       <div className="p-3 pt-0">
                         <button
                           onClick={() => handleDownloadImage(image.data, index)}
-                          className="w-full inline-flex items-center justify-center gap-2 bg-[#222222] text-white px-4 py-3 rounded-xl font-medium hover:bg-gray-800 transition-all active:scale-[0.98]"
+                          className="w-full inline-flex items-center justify-center gap-2 bg-[#1f0101] text-white px-4 py-3 rounded-xl font-medium hover:bg-gray-800 transition-all active:scale-[0.98]"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m4-6v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h4" />
