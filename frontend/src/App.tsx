@@ -33,6 +33,11 @@ import Chat from './pages/ChatBot/Chat';
 import ChatBotModal from './pages/ChatBot/ChatBotModal';
 import PointExchange from './pages/hair_pt/PointExchange';
 
+// 관리자 페이지
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUserDetail from './pages/admin/AdminUserDetail';
+import AdminReportView from './pages/admin/AdminReportView';
+
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
   return (
@@ -75,6 +80,11 @@ const App: React.FC = () => {
           {/* Chat 라우트 제거 - 이제 모달로 사용 */}
           <Route path="chat" element={<Chat />} />
           <Route path="point-exchange" element={<PointExchange />} />
+
+          {/* 관리자 페이지 라우트 */}
+          <Route path="admin" element={<AdminDashboard />} />
+          <Route path="admin/user/:username" element={<AdminUserDetail />} />
+          <Route path="admin/report/:reportId" element={<AdminReportView />} />
         </Route>
       </Routes>
     </ErrorBoundary>
