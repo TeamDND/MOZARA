@@ -142,7 +142,7 @@ const LogIn: React.FC = () => {
 
             <Button
               type="submit"
-              className="w-full h-12 bg-[#222222] hover:bg-[#333333] text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
+              className="w-full h-12 bg-[#1f0101] hover:bg-[#333333] text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
               disabled={isLoading}
             >
               {isLoading ? '로그인 중...' : '로그인하고 진단 시작'}

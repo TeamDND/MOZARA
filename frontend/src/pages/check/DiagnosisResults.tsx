@@ -340,7 +340,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </div>
             
             <div className="grid grid-cols-3 gap-3">
-              <div className="text-center p-3 bg-white rounded-lg">
+              <div className="text-center p-3 bg-white rounded-xl">
                 <div className="flex items-center justify-center gap-1 mb-1">
                   <p className="text-xs text-gray-600">🧠 Swin AI 분석</p>
                   <button
@@ -362,12 +362,12 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                   {getStageDescription(currentStage)}
                 </Badge>
               </div>
-              <div className="text-center p-3 bg-white rounded-lg">
+              <div className="text-center p-3 bg-white rounded-xl">
                 <p className="text-xs text-gray-600">모발 밀도</p>
                 <p className="text-xl font-bold text-gray-800">{diagnosisData?.photo?.hairDensity || 72}%</p>
                 <Badge variant="outline" className="text-xs px-2 py-1">양호</Badge>
               </div>
-              <div className="text-center p-3 bg-white rounded-lg">
+              <div className="text-center p-3 bg-white rounded-xl">
                 <p className="text-xs text-gray-600">두피 건강</p>
                 <p className="text-xl font-bold text-gray-800">{diagnosisData?.photo?.scalpHealth || 85}%</p>
                 <Badge variant="default" className="text-xs px-2 py-1">우수</Badge>
@@ -376,7 +376,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
 
             {/* AI 분석 결과 요약 */}
             {(swinResult || analysisGrade !== undefined) && (
-              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <div className="mt-4 p-3 bg-blue-50 rounded-xl">
                 <div className="flex items-center gap-2 mb-2">
                   <Brain className="w-4 h-4 text-blue-600" />
                   <h3 className="text-sm font-semibold text-blue-800">
@@ -414,7 +414,8 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
               onClick={() => {
                   navigate('/d-care');
               }}
-              className="ml-3 h-10 px-4 bg-[#222222] hover:bg-[#333333] text-white rounded-xl active:scale-[0.98]"
+              className="ml-3 h-10 px-4 text-white rounded-xl active:scale-[0.98]"
+              style={{ backgroundColor: "#1f0101" }}
             >
               D_care
             </Button>
@@ -426,25 +427,29 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
               <TabsTrigger 
                 value="hospitals" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-[#222222] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 transition-colors"
+                style={{ backgroundColor: "#1f0101" }}
               >
                 탈모 맵
               </TabsTrigger>
               <TabsTrigger 
                 value="products" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                data-state-active-style={{ backgroundColor: "#1f0101", color: "white" }}
               >
                 제품 추천
               </TabsTrigger>
               <TabsTrigger 
                 value="videos" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                data-state-active-style={{ backgroundColor: "#1f0101", color: "white" }}
               >
                 영상 컨텐츠
               </TabsTrigger>
               <TabsTrigger 
                 value="lifestyle" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                data-state-active-style={{ backgroundColor: "#1f0101", color: "white" }}
               >
                 생활습관
               </TabsTrigger>
@@ -462,7 +467,8 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                         analysis_result: { grade: currentStage }
                       } 
                     })}
-                    className="h-8 px-3 bg-[#222222] hover:bg-[#333333] text-white text-xs rounded-lg"
+                    className="h-8 px-3 text-white text-xs rounded-xl"
+                    style={{ backgroundColor: "#1f0101" }}
                   >
                     더보기
                     <ArrowRight className="w-3 h-3 ml-1" />
@@ -487,7 +493,8 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                         analysis_result: { grade: currentStage }
                       } 
                     })}
-                    className="h-8 px-3 bg-[#222222] hover:bg-[#333333] text-white text-xs rounded-lg"
+                    className="h-8 px-3 text-white text-xs rounded-xl"
+                    style={{ backgroundColor: "#1f0101" }}
                   >
                     더보기
                     <ArrowRight className="w-3 h-3 ml-1" />
@@ -512,7 +519,8 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                   </div>
                   <Button 
                     onClick={() => navigate('/youtube-videos')}
-                    className="h-8 px-3 bg-[#222222] hover:bg-[#333333] text-white text-xs rounded-lg"
+                    className="h-8 px-3 text-white text-xs rounded-xl"
+                    style={{ backgroundColor: "#1f0101" }}
                   >
                     더보기
                     <ArrowRight className="w-3 h-3 ml-1" />
@@ -548,7 +556,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </div>
 
             <div className="p-4 space-y-4">
-              <div className="bg-blue-50 p-3 rounded-lg">
+              <div className="bg-blue-50 p-3 rounded-xl">
                 <p className="text-xs text-blue-800 mb-2">
                   🤖 AI 분석은 다음 요소들을 종합적으로 고려합니다:
                 </p>
@@ -644,7 +652,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                 </div>
               </div>
 
-              <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="bg-gray-50 p-3 rounded-xl">
                 <p className="text-xs text-gray-600">
                   ⚠️ 이 결과는 AI 분석에 기반한 참고용이며, 정확한 진단을 위해서는 반드시 전문의 상담이 필요합니다.
                 </p>
@@ -652,9 +660,10 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </div>
 
             <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 rounded-b-2xl">
-              <Button
+                <Button
                 onClick={() => setShowStageInfo(false)}
-                className="w-full h-10 bg-[#222222] hover:bg-[#333333] text-white rounded-lg"
+                className="w-full h-10 text-white rounded-xl"
+                style={{ backgroundColor: "#1f0101" }}
               >
                 확인
               </Button>

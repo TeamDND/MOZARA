@@ -363,7 +363,8 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
             </AlertDialogAction>
             <AlertDialogAction 
               onClick={handleAutoFillConfirm}
-              className="w-full sm:w-auto bg-[#222222] hover:bg-[#333333] text-white px-8"
+              className="w-full sm:w-auto text-white px-8"
+              style={{ backgroundColor: "#1f0101" }}
             >
               확인
             </AlertDialogAction>
@@ -396,7 +397,8 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
             </AlertDialogAction>
             <AlertDialogAction 
               onClick={() => navigate('/login')}
-              className="w-full sm:w-auto bg-[#222222] hover:bg-[#333333] text-white px-8"
+              className="w-full sm:w-auto text-white px-8"
+              style={{ backgroundColor: "#1f0101" }}
             >
               로그인
             </AlertDialogAction>
@@ -443,7 +445,8 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
                     setCurrentStep(3);
                     performRealAnalysis();
                   }}
-                  className="flex-1 h-12 rounded-xl bg-[#222222] hover:bg-[#333333] active:scale-[0.98]"
+                  className="flex-1 h-12 rounded-xl text-white active:scale-[0.98]"
+                  style={{ backgroundColor: "#1f0101" }}
                   disabled={isAnalyzing}
                 >
                   {isAnalyzing ? (
@@ -464,7 +467,8 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
                 <Button 
                   onClick={() => setCurrentStep(2)}
                   disabled={!baspAnswers.gender || !baspAnswers.age || !baspAnswers.familyHistory || !baspAnswers.recentHairLoss || !baspAnswers.stress}
-                  className="flex-1 h-12 rounded-xl bg-[#222222] hover:bg-[#333333] active:scale-[0.98] disabled:opacity-50"
+                  className="flex-1 h-12 rounded-xl text-white active:scale-[0.98] disabled:opacity-50"
+                  style={{ backgroundColor: "#1f0101" }}
                 >
                   다음
                   <ArrowRight className="w-4 h-4 ml-2" />
