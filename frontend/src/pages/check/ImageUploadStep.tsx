@@ -161,7 +161,7 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
                 <Button 
                   type="button" 
                   onClick={() => document.getElementById('top-photo-upload')?.click()}
-                  className="h-12 px-6 bg-[#222222] hover:bg-[#333333] text-white rounded-xl active:scale-[0.98]"
+                  className="h-12 px-6 bg-[#1f0101] hover:bg-[#333333] text-white rounded-xl active:scale-[0.98]"
                 >
                   Top View 사진 선택
                 </Button>
@@ -232,7 +232,7 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
                 <Button 
                   type="button" 
                   onClick={() => document.getElementById('side-photo-upload')?.click()}
-                  className="h-12 px-6 bg-[#222222] hover:bg-[#333333] text-white rounded-xl active:scale-[0.98]"
+                  className="h-12 px-6 bg-[#1f0101] hover:bg-[#333333] text-white rounded-xl active:scale-[0.98]"
                 >
                   Side View 사진 선택
                 </Button>

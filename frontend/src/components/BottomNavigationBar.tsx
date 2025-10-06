@@ -99,7 +99,7 @@ const BottomNavigationBar: React.FC = () => {
                   navigate('/')
                 }
               }}
-              className="flex flex-col items-center py-2 px-3 bg-[#1f0101] rounded-full w-12 h-12 justify-center transition-all hover:bg-[#333333]"
+              className="flex flex-col items-center py-2 px-3 bg-[#1f0101] rounded-full w-12 h-12 justify-center"
             >
               <Home className="h-6 w-6 text-white" />
             </button>

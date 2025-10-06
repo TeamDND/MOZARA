@@ -570,7 +570,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             <TabsContent value="lifestyle" className="space-y-4">
               <DailyCareTab 
                 currentStage={currentStage}
-                onNavigateToDailyCare={() => navigate('/main-page')}
+                onNavigateToDailyCare={() => navigate('/hair-dailycare')}
               />
             </TabsContent>
           </Tabs>

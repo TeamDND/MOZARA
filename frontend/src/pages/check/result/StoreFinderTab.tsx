@@ -124,7 +124,7 @@ const StoreFinderTab: React.FC<StoreFinderTabProps> = ({ currentStage, currentLo
             onClick={() => setSelectedCategory(category.searchTerm)}
             className={`flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
               selectedCategory === category.searchTerm
-                ? 'bg-[#222222] text-white'
+                ? 'bg-[#1f0101] text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
@@ -158,7 +158,7 @@ const StoreFinderTab: React.FC<StoreFinderTabProps> = ({ currentStage, currentLo
       {/* 로딩 상태 */}
       {isLoading && (
         <div className="flex justify-center items-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#222222]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1f0101]"></div>
           <span className="ml-3 text-gray-600 text-sm">검색 중...</span>
         </div>
       )}
