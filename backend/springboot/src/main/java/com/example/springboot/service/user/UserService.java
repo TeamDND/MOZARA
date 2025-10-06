@@ -97,6 +97,7 @@ public class UserService {
                 .username(userEntity.getUsername())
                 .email(userEntity.getEmail())
                 .nickname(userEntity.getNickname())
+                .role(userEntity.getRole())
                 .gender(usersInfoEntity != null ? usersInfoEntity.getGender() : null)
                 .age(usersInfoEntity != null ? usersInfoEntity.getAge() : null)
                 .familyHistory(usersInfoEntity != null ? usersInfoEntity.getFamilyHistory() : null)

@@ -94,6 +94,31 @@ public class ImageUploadController {
     }
 
     /**
+     * S3 이미지 삭제
+     *
+     * @param imageUrl 삭제할 이미지 URL
+     * @return 삭제 결과
+     */
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteImage(@RequestParam("imageUrl") String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "이미지 URL이 필요합니다."));
+        }
+
+        try {
+            fileStore.deleteFile(imageUrl, bucket);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "이미지가 삭제되었습니다."
+            ));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("success", false, "message", "이미지 삭제에 실패했습니다."));
+        }
+    }
+
+    /**
      * 헬스 체크 엔드포인트
      */
     @GetMapping("/health")

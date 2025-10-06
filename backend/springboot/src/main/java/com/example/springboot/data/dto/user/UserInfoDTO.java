@@ -17,6 +17,7 @@ public class UserInfoDTO {
     private String nickname;
     private String gender;
     private Integer age;
+    private String role;
     private Boolean familyHistory;
     private Boolean isLoss;
     private String stress;
