@@ -45,8 +45,7 @@ interface AnalysisResult {
   advice: string
   grade: number
   imageUrl?: string
-  analysisType?: string // analysisType 추가
-  type: string
+  analysisType?: string 
   improvement: string
 }
 
@@ -166,10 +165,9 @@ export default function MyPage() {
               `2024.01.${String(index + 1).padStart(2, '0')}`,
             analysisSummary: result.analysisSummary || '분석 결과 요약',
             advice: result.advice || '개선 방안 제시',
-            grade: result.grade || 85,
+            grade: result.grade !== undefined && result.grade !== null ? result.grade : 0,
             imageUrl: result.imageUrl, // 전체 URL 그대로 전달 (|||포함)
-            analysisType: result.analysisType,
-            type: result.type || '종합 진단',
+            analysisType: result.analysisType || '종합 진단',
             improvement: result.improvement || '15% 개선됨'
           };
         })
@@ -242,7 +240,7 @@ export default function MyPage() {
       date: result.inspectionDate,
       status: "완료",
       score: result.grade,
-      type: result.type,
+      analysistype: result.analysisType,
       improvement: result.improvement,
     }))
   }
@@ -468,7 +466,7 @@ export default function MyPage() {
                               <div className="flex items-center gap-2 mb-3">
                                 <h4 className="font-semibold text-gray-900 text-sm">{report.title}</h4>
                                 <Badge variant="outline" className="text-xs border-gray-200 text-gray-700">
-                                  {report.type}
+                                  {report.analysistype}
                                 </Badge>
                               </div>
                               <div className="flex items-center gap-4 mb-2">
