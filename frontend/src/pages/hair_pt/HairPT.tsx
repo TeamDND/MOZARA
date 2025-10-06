@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { RootState, AppDispatch } from '../../utils/store';
 import { fetchSeedlingInfo, updateSeedlingNickname, setSeedling } from '../../utils/seedlingSlice';
 import apiClient from '../../services/apiClient';
+import ScalpPhotoCapture from '../hair_mobile_photo/ScalpPhotoCapture';
 
 interface Counters {
   water: number;
@@ -123,6 +124,7 @@ const HairPT: React.FC = () => {
   const [seedlingLevel, setSeedlingLevel] = useState(1);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [scalpPhotoCompleted, setScalpPhotoCompleted] = useState(false); // 두피 사진 촬영 완료 상태
 
   const plantStages = {
     1: { emoji: '🌱', name: '새싹' },
@@ -202,6 +204,13 @@ const HairPT: React.FC = () => {
         setCounters(prev => ({ ...prev, effector: 4 }));
       } else if (isToday) {
         setCounters(prev => ({ ...prev, effector: 0 }));
+      }
+
+      // 오늘 날짜인 경우 daily 레포트 확인
+      if (isToday) {
+        await checkTodayDailyReport();
+      } else {
+        setScalpPhotoCompleted(false); // 과거 날짜는 완료 상태 초기화
       }
     } catch (error) {
       console.error('습관 데이터 로드 실패:', error);
@@ -510,28 +519,46 @@ const HairPT: React.FC = () => {
   };
 
 
-  // 두피 사진 촬영 함수
-  const takeScalpPhoto = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.capture = 'environment'; // 후면 카메라 사용
-    
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const photoUrl = event.target?.result as string;
-          const today = new Date().toLocaleDateString();
-          const photoWithDate = `${photoUrl}|${today}`;
-          setScalpPhotos(prev => [...prev, photoWithDate]);
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-    
-    input.click();
+  // 오늘 daily 레포트가 있는지 확인
+  const checkTodayDailyReport = async () => {
+    if (!userId) return;
+
+    try {
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      const response = await apiClient.get(`/analysis-results/${userId}`);
+      const reports = response.data;
+
+      // 오늘 날짜이면서 analysisType이 'daily'인 레포트가 있는지 확인
+      const hasTodayDaily = reports.some((report: any) => {
+        const reportDate = report.inspectionDate?.split('T')[0] || report.inspectionDate;
+        return reportDate === today && report.analysisType === 'daily';
+      });
+
+      setScalpPhotoCompleted(hasTodayDaily);
+      console.log('📅 오늘 daily 레포트 존재 여부:', hasTodayDaily);
+    } catch (error) {
+      console.error('❌ daily 레포트 확인 실패:', error);
+    }
+  };
+
+  // AI 분석 완료 핸들러
+  const handleAnalysisComplete = (imageUrl: string, analysisResult: any) => {
+    // S3 URL과 날짜를 함께 저장
+    const today = new Date().toLocaleDateString();
+    const photoWithDate = `${imageUrl}|${today}`;
+    setScalpPhotos(prev => [...prev, photoWithDate]);
+
+    // 두피 사진 촬영 완료 상태로 변경
+    setScalpPhotoCompleted(true);
+
+    // 성공 토스트 메시지 표시
+    setToast({
+      visible: true,
+      message: `AI 분석 완료! 두피 점수: ${analysisResult.scalpScore}점`
+    });
+    setTimeout(() => setToast({ visible: false, message: '' }), 3000);
+
+    console.log('✅ AI 분석 결과:', analysisResult);
   };
 
 
@@ -950,26 +977,34 @@ const HairPT: React.FC = () => {
                   {getMissionsByCategory('routine').map(mission => renderMissionCard(mission))}
 
                   {/* 두피 사진 촬영 (특별 기능) */}
-                  <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
-                    <div className="flex items-center space-x-4 mb-4">
-                      <div className="w-14 h-14 flex items-center justify-center bg-purple-100 rounded-lg">
-                        <i className="fas fa-camera text-purple-500 text-lg"></i>
+                  <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-all">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-14 h-14 flex items-center justify-center bg-purple-100 rounded-lg">
+                          <i className="fas fa-camera text-purple-500 text-lg"></i>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-sm font-semibold">두피 사진 촬영</h3>
+                          <p className="text-sm text-gray-500">두피 상태 기록하기</p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="text-sm font-semibold">두피 사진 촬영</h3>
-                        <p className="text-sm text-gray-500">두피 상태 기록하기</p>
-                      </div>
+                      {scalpPhotoCompleted && selectedDate.toDateString() === new Date().toDateString() && (
+                        <span className="px-3 py-1.5 rounded-lg font-bold bg-green-500 text-white whitespace-nowrap text-sm">완료됨</span>
+                      )}
                     </div>
                     <div className="flex justify-end">
                       {selectedDate.toDateString() === new Date().toDateString() ? (
-                        <button 
-                          className="px-4 py-2 rounded-xl font-bold transition-colors bg-gray-200 hover:bg-gray-300 text-[#1F0101] active:scale-[0.98]"
-                          onClick={takeScalpPhoto}
-                        >
-                          사진 촬영하기
-                        </button>
+                        !scalpPhotoCompleted && (
+                          <ScalpPhotoCapture
+                            buttonText="사진 촬영하기"
+                            confirmButtonText="AI 분석하기"
+                            enableAnalysis={true}
+                            onAnalysisComplete={handleAnalysisComplete}
+                            className="px-4 py-2 rounded-xl font-bold transition-colors bg-gray-200 hover:bg-gray-300 text-[#1F0101] active:scale-[0.98]"
+                          />
+                        )
                       ) : (
-                        <button 
+                        <button
                           className="px-4 py-2 rounded-xl font-bold bg-gray-100 text-gray-400 cursor-not-allowed"
                           disabled
                         >

@@ -17,6 +17,7 @@ import HospitalMap from "./HospitalMap"
 import ProductRecommendation from "./ProductRecommendation"
 import VideoContent from "./VideoContent"
 import UserInfoEdit from "./UserInfoEdit"
+import MyFavorites from "./MyFavorites"
 import {
   FileText,
   Heart,
@@ -524,44 +525,8 @@ export default function MyPage() {
           </TabsContent>
 
           <TabsContent value="favorites" className="space-y-4">
-            {/* 맞춤 추천 탭 (Mobile-First) */}
-            <Tabs defaultValue="hospitals" className="space-y-4">
-              <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
-                <TabsTrigger 
-                  value="hospitals" 
-                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-[#222222] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
-                >
-                  탈모 맵
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="products" 
-                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
-                >
-                  제품 추천
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="videos" 
-                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
-                >
-                  영상 컨텐츠
-                </TabsTrigger>
-              </TabsList>
-
-              {/* 병원 추천 (Mobile-First) */}
-              <TabsContent value="hospitals" className="space-y-4">
-                <HospitalMap hospitals={recommendations.hospitals} />
-              </TabsContent>
-
-              {/* 제품 추천 (Mobile-First) */}
-              <TabsContent value="products" className="space-y-4">
-                <ProductRecommendation products={recommendations.products} />
-              </TabsContent>
-
-              {/* 영상 가이드 (Mobile-First) */}
-              <TabsContent value="videos" className="space-y-4">
-                <VideoContent videos={recommendations.youtubeVideos} />
-              </TabsContent>
-            </Tabs>
+            {/* 사용자의 찜 목록 */}
+            <MyFavorites />
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">

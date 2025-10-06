@@ -1,7 +1,6 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import { HairProduct } from '../../services/hairProductApi';
-import { toggleFavoriteProduct, selectIsFavorite } from '../../utils/hairProductSlice';
+import LikeButton from '../../components/LikeButton';
 
 interface ProductCardProps {
   product: HairProduct;
@@ -12,8 +11,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onProductClick
 }) => {
-  const dispatch = useDispatch();
-  const isFavorite = useSelector(selectIsFavorite(product.productId));
   
   // 가격 포맷팅 (수정 없음)
   const formatPrice = (price: number): string => {
@@ -61,11 +58,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
     }
   };
 
-  // 즐겨찾기 토글 핸들러 (수정 없음)
-  const handleFavoriteToggle = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 제품 클릭 이벤트 방지
-    dispatch(toggleFavoriteProduct(product.productId));
-  };
   
   // 이미지 오류 발생 시 대체 이미지
   const defaultImageUrl = 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop&crop=center';
@@ -96,14 +88,21 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </div>
         
         {/* 즐겨찾기 버튼 */}
-        <button
-          onClick={handleFavoriteToggle}
-          className="absolute bottom-2 right-2 w-7 h-7 bg-white/95 backdrop-blur rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm"
+        <div
+          className="absolute bottom-2 right-2"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
         >
-          <span className={`text-base ${isFavorite ? 'text-red-500' : 'text-gray-400'}`}>
-            {isFavorite ? '❤️' : '🤍'}
-          </span>
-        </button>
+          <LikeButton
+            type="product"
+            itemId={product.productId}
+            itemName={product.productName}
+            size="sm"
+            className="bg-white/95 backdrop-blur shadow-sm hover:bg-white"
+          />
+        </div>
         
       </div>
 
