@@ -345,8 +345,7 @@ const DailyCare: React.FC = () => {
     };
 
     setTips(buildSolutions(finalScore, oilinessLabel, flakeLabel, rednessLabel));
-
-    return finalScore;
+  return finalScore;
   };
 
   // 연속 케어 일수 계산
@@ -496,11 +495,6 @@ const DailyCare: React.FC = () => {
                             }
                           }
 
-                          // 사진 분석 완료 후 lastPhotoDate 업데이트
-                          setUserProgress(prev => ({
-                            ...prev,
-                            lastPhotoDate: new Date().toISOString()
-                          }));
 
                   // 심각도에 따른 제품 추천
                   const severityLevel = result.analysis ? parseInt(result.analysis.primary_severity.split('.')[0]) || 0 : 0;
