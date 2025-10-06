@@ -1,8 +1,8 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import Header from './Header';
-import Footer from './Footer';
-import BottomNavigationBar from './BottomNavigationBar';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import BottomNavigationBar from '../components/BottomNavigationBar';
 
 // TypeScript: MainLayout 컴포넌트 타입 정의
 const MainLayout: React.FC = () => {

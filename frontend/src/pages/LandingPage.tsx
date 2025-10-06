@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { ImageWithFallback } from "../hooks/ImageWithFallback"
 import { useSelector } from "react-redux"
 import { RootState } from "../utils/store"
+import { Button } from "../components/ui/button"
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -112,8 +113,8 @@ useEffect(() => {
               셀카로 쉽게 알아보는 내 탈모 진행 상태 <br />
               나만의 탈모 로드맵을 받아보세요
             </p>
-            <button
-              className="bg-[#222222] text-white px-8 py-4 mt-8 rounded-lg text-lg font-medium hover:bg-[#333333] transition-colors"
+            <Button
+              className="px-8 py-4 mt-8 text-lg font-medium"
               onClick={() => {
                 if (isLoggedIn) {
                   navigate('/daily-care')
@@ -123,7 +124,7 @@ useEffect(() => {
               }}
             >
               시작해보기
-            </button>
+            </Button>
           </div>
         </div>
 
