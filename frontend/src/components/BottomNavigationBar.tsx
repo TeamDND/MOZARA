@@ -28,7 +28,7 @@ const BottomNavigationBar: React.FC = () => {
         {/* 상단 둥근 모서리 */}
         <div className="bg-white/90 backdrop-blur rounded-t-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
 
-          <div className="flex items-center justify-around pt-2 pb-2 px-4">
+          <div className="flex items-center pt-2 pb-2 px-4">
             {/* 분석 */}
             <button
               onClick={() => {
@@ -39,7 +39,7 @@ const BottomNavigationBar: React.FC = () => {
                   navigate('/login')
                 }
               }}
-              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
+              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all flex-1 ${
                 location.pathname.startsWith('/integrated-diagnosis') || location.pathname.startsWith('/diagnosis')
                   ? 'bg-[#1f0101]/10' 
                   : ''
@@ -69,7 +69,7 @@ const BottomNavigationBar: React.FC = () => {
                   navigate('/login')
                 }
               }}
-              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
+              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all flex-1 ${
                 location.pathname.startsWith('/main-contents') || location.pathname.startsWith('/hair-change') || location.pathname.startsWith('/hair-product')
                   ? 'bg-[#1f0101]/10' 
                   : ''
@@ -99,7 +99,7 @@ const BottomNavigationBar: React.FC = () => {
                   navigate('/')
                 }
               }}
-              className="flex flex-col items-center py-2 px-3 bg-[#1f0101] rounded-full w-12 h-12 justify-center"
+              className="flex flex-col items-center py-2 px-3 bg-[#1f0101] rounded-full w-12 h-12 justify-center mx-2"
             >
               <Home className="h-6 w-6 text-white" />
             </button>
@@ -114,7 +114,7 @@ const BottomNavigationBar: React.FC = () => {
                   navigate('/login')
                 }
               }}
-              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
+              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all flex-1 ${
                 location.pathname.startsWith('/d-care') || location.pathname.startsWith('/hair_dailycare')
                   ? 'bg-[#1f0101]/10' 
                   : ''
@@ -137,7 +137,7 @@ const BottomNavigationBar: React.FC = () => {
             {/* 챗봇 */}
             <button
               onClick={() => openChatBotModal()}
-              className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
+              className="flex flex-col items-center py-2 px-3 rounded-lg transition-all flex-1"
             >
               <Bot className="h-5 w-5 mb-1 text-gray-600" />
               <span className="text-xs font-medium text-gray-600">

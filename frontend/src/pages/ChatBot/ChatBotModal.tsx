@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, X } from 'lucide-react';
 import ChatBotMessenger from './ChatBotMessenger';
 
@@ -13,6 +13,7 @@ export const closeChatBotModal = () => {
 
 const ChatBotModal: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   // 전역 이벤트 리스너
   useEffect(() => {
@@ -28,6 +29,23 @@ const ChatBotModal: React.FC = () => {
     };
   }, []);
 
+  // 외부 클릭 감지
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isOpen && modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
   return (
     <>
       {/* 플로팅 버튼 제거 - 네비게이션 바에서만 접근 */}
@@ -40,7 +58,10 @@ const ChatBotModal: React.FC = () => {
 
           {/* 모달 컨테이너 */}
           <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pt-20 pb-20 pointer-events-none">
-            <div className="relative w-full max-w-md h-[80vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fadeIn pointer-events-auto">
+            <div 
+              ref={modalRef}
+              className="relative w-full max-w-md h-[80vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fadeIn pointer-events-auto"
+            >
               {/* 챗봇 메신저 컴포넌트 */}
               <ChatBotMessenger onClose={() => setIsOpen(false)} />
             </div>
