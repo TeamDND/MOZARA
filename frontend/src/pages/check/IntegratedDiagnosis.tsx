@@ -6,10 +6,10 @@ import { Progress } from '../../components/ui/progress';
 import { ArrowLeft, ArrowRight, Info } from 'lucide-react';
 import { analyzeHairWithSwin, getStageDescription, getStageColor, SwinAnalysisResult } from '../../services/swinAnalysisService';
 import { analyzeHairWithRAG } from '../../services/ragAnalysisService';
-import SelfCheckStep from '../../components/check/SelfCheckStep';
-import ImageUploadStep from '../../components/check/ImageUploadStep';
-import AnalysisProgressStep from '../../components/check/AnalysisProgressStep';
-import AnalysisResultStep from '../../components/check/AnalysisResultStep';
+import SelfCheckStep from './SelfCheckStep';
+import ImageUploadStep from './ImageUploadStep';
+import AnalysisProgressStep from './AnalysisProgressStep';
+import AnalysisResultStep from './AnalysisResultStep';
 import apiClient from '../../services/apiClient';
 import {
   AlertDialog,
