@@ -22,7 +22,6 @@ import StoreFinder from './pages/StoreFinder';
 
 
 // new_fn_flow.md에 따른 새로운 컴포넌트들
-import { MainPage } from './pages/MainPage';
 import Dashboard from './pages/Dashboard';
 import IntegratedDiagnosis from './pages/check/IntegratedDiagnosis';
 import DiagnosisResults from './pages/check/DiagnosisResults';
