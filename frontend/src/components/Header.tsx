@@ -11,7 +11,7 @@ export default function Header() {
 
   const handleLogoClick = () => {
     if (isLoggedIn) {
-      navigate('/daily-care');
+      navigate('/main-page');
     } else {
       navigate('/');
     }

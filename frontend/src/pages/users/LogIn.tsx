@@ -66,7 +66,7 @@ const LogIn: React.FC = () => {
       console.log('사용자 정보:', userResponse.data);
 
       dispatch(setUser(userResponse.data));
-      navigate('/daily-care'); // 대시보드로 이동
+      navigate('/main-page'); // 대시보드로 이동
     } catch (error: any) {
       console.error('로그인 오류:', error);
       const errorMessage = error.response?.data?.error || '로그인 중 오류가 발생했습니다.';
@@ -81,7 +81,7 @@ const LogIn: React.FC = () => {
     // TODO: 소셜 로그인 API 구현
     console.log(`${provider} 로그인 시도`);
     // 데일리케어로 이동
-    navigate('/daily-care');
+    navigate('/main-page');
   };
 
   // 게스트 로그인 핸들러

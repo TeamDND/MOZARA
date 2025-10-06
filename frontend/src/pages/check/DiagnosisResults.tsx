@@ -453,7 +453,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
               className="ml-3 h-10 px-4 text-white rounded-xl active:scale-[0.98]"
               style={{ backgroundColor: "#1f0101" }}
             >
-              D_care
+              DailyCare
             </Button>
           </div>
         </div>
@@ -570,7 +570,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             <TabsContent value="lifestyle" className="space-y-4">
               <DailyCareTab 
                 currentStage={currentStage}
-                onNavigateToDailyCare={() => navigate('/daily-care')}
+                onNavigateToDailyCare={() => navigate('/main-page')}
               />
             </TabsContent>
           </Tabs>

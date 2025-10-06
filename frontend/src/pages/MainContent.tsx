@@ -15,43 +15,37 @@ export default function Home() {
     { 
       name: "헤어맵", 
       description: "내 주변 탈모 전문 병원과 클리닉을 쉽게 찾아보세요",
-      badge: "NEW",
       image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=300&h=300&fit=crop&crop=center" // 지도 썸네일
     },
     { 
       name: "헤어핏템", 
       description: "AI 분석 결과에 따른 개인 맞춤 헤어케어 제품 추천",
-      badge: "NEW",
       image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300&h=300&fit=crop&crop=center" // 화장품/제품
     },
     { 
       name: "헤어체인지", 
       description: "AI를 통한 가상 헤어스타일 체험과 시뮬레이션",
-      badge: "NEW",
+      badge: "BEST",
       image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300&h=300&fit=crop&crop=center" // 헤어/살롱
     },
     { 
       name: "탈모튜브", 
       description: "전문가가 추천하는 탈모 관리 및 헤어케어 영상 모음",
-      badge: "NEW",
       image: "https://images.unsplash.com/photo-1497551060073-4c5ab6435f12?w=300&h=300&fit=crop&crop=center" // 동영상/미디어
     },
     { 
       name: "탈모백과", 
       description: "탈모에 대한 과학적 정보와 전문 지식을 한눈에",
-      badge: "NEW",
       useIcon: true
     },
     { 
       name: "탈모 OX", 
       description: "AI가 만드는 매일 새로운 탈모 상식 퀴즈로 지식을 쌓아보세요",
-      badge: "NEW",
       image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=300&h=300&fit=crop&crop=center" // 퀴즈/학습 느낌
     },
     { 
-      name: "D_care", 
+      name: "DailyCare", 
       description: "두피와 모발을 위한 맞춤 케어 프로그램으로 건강한 헤어 관리",
-      badge: "NEW",
       image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=300&fit=crop&crop=center" // 케어/관리 느낌
     },
   ];
@@ -80,7 +74,7 @@ export default function Home() {
       case "탈모 OX":
         navigate('/hair-quiz');
         break;
-      case "D_care":
+      case "DailyCare":
         navigate('/d-care');
         break;
       default:
@@ -102,7 +96,7 @@ export default function Home() {
         </div>
       )}
       <div 
-        className="bg-white rounded-xl border border-gray-100 hover:shadow-md transition-all cursor-pointer active:scale-[0.98] touch-manipulation overflow-hidden"
+        className="bg-white rounded-xl border border-gray-100 shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-[0.98] touch-manipulation overflow-hidden"
         onClick={() => handleToolClick(tool.name)}
       >
         <div className="flex items-center p-4">

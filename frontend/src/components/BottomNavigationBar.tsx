@@ -39,10 +39,22 @@ const BottomNavigationBar: React.FC = () => {
                   navigate('/login')
                 }
               }}
-              className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
+              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
+                location.pathname.startsWith('/integrated-diagnosis') || location.pathname.startsWith('/diagnosis')
+                  ? 'bg-[#1f0101]/10' 
+                  : ''
+              }`}
             >
-              <Search className="h-5 w-5 mb-1 text-[#1f0101]" />
-              <span className="text-xs font-medium text-[#1f0101]">
+              <Search className={`h-5 w-5 mb-1 ${
+                location.pathname.startsWith('/integrated-diagnosis') || location.pathname.startsWith('/diagnosis')
+                  ? 'text-[#1f0101]' 
+                  : 'text-gray-600'
+              }`} />
+              <span className={`text-xs font-medium ${
+                location.pathname.startsWith('/integrated-diagnosis') || location.pathname.startsWith('/diagnosis')
+                  ? 'text-[#1f0101]' 
+                  : 'text-gray-600'
+              }`}>
                 분석
               </span>
             </button>
@@ -57,10 +69,22 @@ const BottomNavigationBar: React.FC = () => {
                   navigate('/login')
                 }
               }}
-              className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
+              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
+                location.pathname.startsWith('/main-contents') || location.pathname.startsWith('/hair-change') || location.pathname.startsWith('/hair-product')
+                  ? 'bg-[#1f0101]/10' 
+                  : ''
+              }`}
             >
-              <Layers3 className="h-5 w-5 mb-1 text-[#1f0101]" />
-              <span className="text-xs font-medium text-[#1f0101]">
+              <Layers3 className={`h-5 w-5 mb-1 ${
+                location.pathname.startsWith('/main-contents') || location.pathname.startsWith('/hair-change') || location.pathname.startsWith('/hair-product')
+                  ? 'text-[#1f0101]' 
+                  : 'text-gray-600'
+              }`} />
+              <span className={`text-xs font-medium ${
+                location.pathname.startsWith('/main-contents') || location.pathname.startsWith('/hair-change') || location.pathname.startsWith('/hair-product')
+                  ? 'text-[#1f0101]' 
+                  : 'text-gray-600'
+              }`}>
                 기능
               </span>
             </button>
@@ -70,7 +94,7 @@ const BottomNavigationBar: React.FC = () => {
               onClick={() => {
                 closeChatBotModal();
                 if (isLoggedIn) {
-                  navigate('/daily-care')
+                  navigate('/main-page')
                 } else {
                   navigate('/')
                 }
@@ -85,15 +109,27 @@ const BottomNavigationBar: React.FC = () => {
               onClick={() => {
                 closeChatBotModal();
                 if (isLoggedIn) {
-                  navigate('/hair-pt')
+                  navigate('/d-care')
                 } else {
                   navigate('/login')
                 }
               }}
-              className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
+              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all ${
+                location.pathname.startsWith('/d-care') || location.pathname.startsWith('/hair_dailycare')
+                  ? 'bg-[#1f0101]/10' 
+                  : ''
+              }`}
             >
-              <Calendar className="h-5 w-5 mb-1 text-[#1f0101]" />
-              <span className="text-xs font-medium text-[#1f0101]">
+              <Calendar className={`h-5 w-5 mb-1 ${
+                location.pathname.startsWith('/d-care') || location.pathname.startsWith('/hair_dailycare')
+                  ? 'text-[#1f0101]' 
+                  : 'text-gray-600'
+              }`} />
+              <span className={`text-xs font-medium ${
+                location.pathname.startsWith('/d-care') || location.pathname.startsWith('/hair_dailycare')
+                  ? 'text-[#1f0101]' 
+                  : 'text-gray-600'
+              }`}>
                 케어
               </span>
             </button>
@@ -103,8 +139,8 @@ const BottomNavigationBar: React.FC = () => {
               onClick={() => openChatBotModal()}
               className="flex flex-col items-center py-2 px-3 rounded-lg transition-all"
             >
-              <Bot className="h-5 w-5 mb-1 text-[#1f0101]" />
-              <span className="text-xs font-medium text-[#1f0101]">
+              <Bot className="h-5 w-5 mb-1 text-gray-600" />
+              <span className="text-xs font-medium text-gray-600">
                 챗봇
               </span>
             </button>

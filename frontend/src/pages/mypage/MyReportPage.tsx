@@ -331,7 +331,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
               </div>
               <Button 
                 onClick={() => {
-                    navigate('/daily-care');
+                    navigate('/main-page');
                 }}
                 className="ml-3 h-10 px-4 bg-[#1f0101] hover:bg-[#333333] text-white rounded-xl active:scale-[0.98]"
               >
@@ -445,7 +445,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
             <TabsContent value="lifestyle" className="space-y-4">
               <DailyCareTab 
                 currentStage={currentStage}
-                onNavigateToDailyCare={() => navigate('/daily-care')}
+                onNavigateToDailyCare={() => navigate('/main-page')}
               />
             </TabsContent>
           </Tabs>
