@@ -141,6 +141,20 @@ public class AnalysisResultDAO {
     }
 
     /**
+     * 사용자 ID로 분석 결과 목록 조회 (날짜 오름차순 → ID 오름차순)
+     */
+    public List<AnalysisResultEntity> findByUserIdOrderByDateAsc(Integer userId) {
+        try {
+            List<AnalysisResultEntity> results = analysisResultRepository.findByUserEntityIdForeign_IdOrderByInspectionDateAscIdAsc(userId);
+            log.info("[AnalysisResultDAO] 사용자 분석 결과 목록 조회 (날짜↑, ID↑) - userId: {}, count: {}", userId, results.size());
+            return results;
+        } catch (Exception e) {
+            log.error("[AnalysisResultDAO] 사용자 분석 결과 목록 조회 실패 - userId: {}, error: {}", userId, e.getMessage(), e);
+            throw new RuntimeException("사용자 분석 결과 목록 조회 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    /**
      * 사용자 ID로 분석 결과 목록 조회 (정렬 옵션 포함)
      */
     public List<AnalysisResultEntity> findByUserId(Integer userId, String sortOrder) {
