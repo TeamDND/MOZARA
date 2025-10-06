@@ -1,7 +1,5 @@
 import React from 'react';
 import apiClient from '../services/apiClient';
-import Header from '../pages/Header';
-import Footer from '../pages/Footer';
 
 export interface HairChangeRequest {
   image: File;
@@ -24,21 +22,6 @@ export interface Hairstyle {
 
 class HairChangeService {
   private baseUrl = 'ai/hair-change';
-  
-  /**
-   * Header와 Footer를 포함한 레이아웃 컴포넌트
-   */
-  renderWithLayout(children: React.ReactNode): React.ReactElement {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <main className="container mx-auto px-4 py-8">
-          {children}
-        </main>
-        <Footer />
-      </div>
-    );
-  }
 
   async generateHairstyle(request: HairChangeRequest): Promise<HairChangeResponse> {
     const formData = new FormData();

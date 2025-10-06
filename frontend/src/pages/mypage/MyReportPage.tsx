@@ -10,10 +10,10 @@ import apiClient from '../../services/apiClient';
 import { locationService, Hospital } from '../../services/locationService';
 import { hairProductApi, HairProduct } from '../../services/hairProductApi';
 import { elevenStApi } from '../../services/elevenStApi';
-import StoreFinderTab from './result/StoreFinderTab';
-import HairLossProductsTab from './result/HairLossProductsTab';
-import YouTubeVideosTab from './result/YouTubeVideosTab';
-import DailyCareTab from './result/DailyCareTab';
+import StoreFinderTab from '../check/result/StoreFinderTab';
+import HairLossProductsTab from '../check/result/HairLossProductsTab';
+import YouTubeVideosTab from '../check/result/YouTubeVideosTab';
+import DailyCareTab from '../check/result/DailyCareTab';
 import {
   CheckCircle,
   MapPin,
@@ -34,9 +34,19 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-interface DiagnosisResultsProps {
-  setCurrentView?: (view: string) => void;
-  diagnosisData?: any;
+interface AnalysisResult {
+  id: number;
+  inspectionDate: string;
+  analysisSummary: string;
+  advice: string;
+  grade: number;
+  imageUrl?: string;
+  improvement: string;
+  analysisType?: string;
+}
+
+interface MyReportPageProps {
+  analysisResult?: AnalysisResult;
 }
 
 interface Video {
@@ -52,9 +62,14 @@ interface StageRecommendation {
   description: string;
 }
 
-function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsProps = {}) {
+function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // URL state에서 분석 결과 데이터 가져오기
+  const stateAnalysisResult = location.state?.analysisResult as AnalysisResult;
+  const analysisResult = propAnalysisResult || stateAnalysisResult;
+
   const [selectedRegion, setSelectedRegion] = useState('서울');
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [youtubeVideos, setYoutubeVideos] = useState<Video[]>([]);
@@ -65,18 +80,9 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
   // 위치 정보 상태
   const [currentLocation, setCurrentLocation] = useState<{latitude: number, longitude: number} | null>(null);
   
-  // URL state 또는 props에서 Swin 분석 결과 가져오기
-  const swinResult = location.state?.swinResult || diagnosisData?.photo?.swinResult;
-
-  // 이미지 URL 처리 (남성 탈모 검사는 top|||side 형식)
-  const imageUrl = location.state?.imageUrl || diagnosisData?.imageUrl || '';
-  const analysisType = location.state?.analysisType || diagnosisData?.analysisType || '';
-  const [topImageUrl, sideImageUrl] = imageUrl.includes('|||')
-    ? imageUrl.split('|||')
-    : [imageUrl, null];
-  // analysis_result의 grade를 기반으로 단계 결정
-  const analysisGrade = location.state?.analysis_result?.grade || diagnosisData?.analysis_result?.grade;
-  const currentStage = analysisGrade !== undefined ? analysisGrade : (swinResult?.stage !== undefined ? swinResult.stage : 0);
+  // 현재 단계 결정
+  const currentStage = analysisResult?.grade || 0;
+  
   const stageRecommendations: Record<number, StageRecommendation> = {
     0: {
       title: '정상 - 예방 및 두피 관리',
@@ -177,169 +183,36 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStage]); // currentStage가 변경될 때만 실행
 
-  // 진단 결과에 따른 추천 데이터 생성 (Swin 결과 반영)
-  const getRecommendations = () => {
-    // Swin 결과가 있으면 우선 사용, 없으면 기본값
-    const swinStage = swinResult?.stage;
-    const baspScore = swinStage !== undefined ? swinStage : (diagnosisData?.basp?.score || 3.2);
-    const scalpHealth = diagnosisData?.photo?.scalpHealth || 85;
-    const swinTitle = swinResult?.title || '';
-    
-    // 병원 추천 (BASP 점수와 지역에 따라)
-    const hospitals = [
-      {
-        name: "서울모발이식센터",
-        specialty: "모발이식 전문",
-        category: "모발이식",
-        rating: 4.8,
-        reviews: 342,
-        distance: "2.3km",
-        phone: "02-123-4567",
-        image: "https://images.unsplash.com/photo-1690306815613-f839b74af330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkZXJtYXRvbG9neSUyMGNsaW5pYyUyMGhvc3BpdGFsfGVufDF8fHx8MTc1ODA3NjkxNXww&ixlib=rb-4.1.0&q=80&w=1080",
-        matchReason: baspScore > 4 ? "중등도 탈모에 특화된 치료" : "초기 탈모 예방 프로그램"
-      },
-      {
-        name: "더마헤어클리닉",
-        specialty: "피부과 전문의",
-        category: "탈모병원",
-        rating: 4.6,
-        reviews: 198,
-        distance: "1.8km", 
-        phone: "02-234-5678",
-        image: "https://images.unsplash.com/photo-1690306815613-f839b74af330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkZXJtYXRvbG9neSUyMGNsaW5pYyUyMGhvc3BpdGFsfGVufDF8fHx8MTc1ODA3NjkxNXww&ixlib=rb-4.1.0&q=80&w=1080",
-        matchReason: "두피 염증 치료 및 케어"
-      },
-      {
-        name: "프리미엄모발클리닉",
-        specialty: "종합 탈모 관리",
-        category: "탈모클리닉",
-        rating: 4.9,
-        reviews: 521,
-        distance: "3.1km",
-        phone: "02-345-6789",
-        image: "https://images.unsplash.com/photo-1690306815613-f839b74af330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkZXJtYXRvbG9neSUyMGNsaW5pYyUyMGhvc3BpdGFsfGVufDF8fHx8MTc1ODA3NjkxNXww&ixlib=rb-4.1.0&q=80&w=1080",
-        matchReason: "개인 맞춤형 토털 케어"
-      },
-      {
-        name: "헤어라인클리닉",
-        specialty: "탈모 전문 클리닉",
-        category: "탈모클리닉",
-        rating: 4.7,
-        reviews: 289,
-        distance: "1.5km",
-        phone: "02-456-7890",
-        image: "https://images.unsplash.com/photo-1690306815613-f839b74af330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkZXJtYXRvbG9neSUyMGNsaW5pYyUyMGhvc3BpdGFsfGVufDF8fHx8MTc1ODA3NjkxNXww&ixlib=rb-4.1.0&q=80&w=1080",
-        matchReason: "비침습적 탈모 치료"
-      },
-      {
-        name: "가발전문샵 헤어스타일",
-        specialty: "가발 및 헤어피스",
-        category: "가발",
-        rating: 4.4,
-        reviews: 156,
-        distance: "2.7km",
-        phone: "02-567-8901",
-        image: "https://images.unsplash.com/photo-1690306815613-f839b74af330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkZXJtYXRvbG9neSUyMGNsaW5pYyUyMGhvc3BpdGFsfGVufDF8fHx8MTc1ODA3NjkxNXww&ixlib=rb-4.1.0&q=80&w=1080",
-        matchReason: "자연스러운 가발 제작 및 관리"
-      }
-    ];
+  // 이미지 URL 처리 (남성 탈모 검사는 top|||side 형식)
+  const imageUrl = analysisResult?.imageUrl || '';
+  // type 필드가 analysisType 역할을 함
+  const analysisType = analysisResult?.analysisType || '';
+  const [topImageUrl, sideImageUrl] = imageUrl.includes('|||')
+    ? imageUrl.split('|||').map(url => url.trim())
+    : [imageUrl, null];
 
-    // 제품 추천 (두피 건강도에 따라)
-    const products = [
-      {
-        name: "아미노산 약산성 샴푸",
-        brand: "로레알 프로페셔널",
-        price: "28,000원",
-        rating: 4.5,
-        reviews: 1234,
-        image: "https://images.unsplash.com/photo-1730115656817-92eb256f2c01?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoYWlyJTIwY2FyZSUyMHByb2R1Y3RzJTIwc2hhbXBvb3xlbnwxfHx8fDE3NTgwMTQ2NTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-        matchReason: scalpHealth < 80 ? "두피 진정 및 pH 밸런스 조절" : "건강한 두피 유지",
-        category: "샴푸"
-      },
-      {
-        name: "비오틴 헤어 토닉",
-        brand: "닥터포헤어",
-        price: "45,000원",
-        rating: 4.3,
-        reviews: 892,
-        image: "https://images.unsplash.com/photo-1730115656817-92eb256f2c01?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoYWlyJTIwY2FyZSUyMHByb2R1Y3RzJTIwc2hhbXBvb3xlbnwxfHx8fDE3NTgwMTQ2NTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-        matchReason: "모발 성장 촉진 및 영양 공급",
-        category: "토닉"
-      },
-      {
-        name: "케라틴 단백질 앰플",
-        brand: "미장센",
-        price: "18,000원",
-        rating: 4.7,
-        reviews: 567,
-        image: "https://images.unsplash.com/photo-1730115656817-92eb256f2c01?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoYWlyJTIwY2FyZSUyMHByb2R1Y3RzJTIwc2hhbXBvb3xlbnwxfHx8fDE3NTgwMTQ2NTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-        matchReason: "모발 강화 및 끊어짐 방지",
-        category: "트리트먼트"
-      }
-    ];
+  // 분석 결과가 없으면 마이페이지로 돌아가기
+  if (!analysisResult) {
+    navigate('/mypage');
+    return null;
+  }
 
-    const getLifestyleGuides = () => {
-      const baseGuides = [
-        {
-          title: "스트레스 관리법",
-          description: "명상, 요가, 규칙적인 운동으로 스트레스 해소",
-          icon: <Heart className="w-5 h-5 text-red-500" />,
-          tips: ["주 3회 이상 운동", "하루 10분 명상", "충분한 수면"]
-        },
-        {
-          title: "영양 관리",
-          description: "모발 건강에 필요한 영양소 섭취",
-          icon: <Target className="w-5 h-5 text-green-500" />,
-          tips: ["단백질 충분히 섭취", "비타민 B군 보충", "아연, 철분 섭취"]
-        },
-        {
-          title: "두피 케어",
-          description: "올바른 세정과 마사지 루틴",
-          icon: <BookOpen className="w-5 h-5 text-blue-500" />,
-          tips: ["미지근한 물로 세정", "부드러운 마사지", "자극적인 제품 피하기"]
-        }
-      ];
-
-      // Swin 조언이 있으면 추가
-      if (swinResult && swinResult.advice && swinResult.advice.length > 0) {
-        baseGuides.push({
-          title: "🧠 AI 맞춤 가이드",
-          description: swinResult.description || "AI 분석 결과를 바탕으로 한 맞춤형 가이드",
-          icon: <Brain className="w-5 h-5 text-purple-500" />,
-          tips: swinResult.advice.split('\n')
-        });
-      }
-
-      return baseGuides;
-    };
-
-    return { hospitals, products, lifestyleGuides: getLifestyleGuides() };
-  };
-
-  const recommendations = getRecommendations();
   const regions = ['서울', '경기', '부산', '대구', '인천', '광주', '대전', '울산'];
   const categories = ['전체', '탈모병원', '탈모클리닉', '모발이식', '가발'];
-
-  // 카테고리별 병원 필터링
-  const filteredHospitals = selectedCategory === '전체' 
-    ? recommendations.hospitals 
-    : recommendations.hospitals.filter(hospital => hospital.category === selectedCategory);
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile-First 컨테이너 */}
       <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col">
         
-        
-
         {/* 메인 컨텐츠 (Mobile-First) */}
         <div className="flex-1 p-4 overflow-y-auto space-y-4">
           {/* 진단 결과 요약 (Mobile-First) */}
-              <div className="bg-gradient-to-r from-gray-50 to-green-50 p-4 rounded-xl">
+          <div className="bg-gradient-to-r from-gray-50 to-green-50 p-4 rounded-xl">
             <div className="flex items-center gap-3 mb-4">
               <CheckCircle className="w-8 h-8 text-green-500" />
               <div>
-                <h2 className="text-lg font-semibold text-gray-800">진단이 완료되었습니다!</h2>
+                <h2 className="text-lg font-semibold text-gray-800">분석이 완료되었습니다!</h2>
                 <p className="text-sm text-gray-600">
                   종합 분석 결과와 맞춤형 추천을 확인해보세요
                 </p>
@@ -347,9 +220,9 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </div>
             
             <div className="grid grid-cols-3 gap-3">
-              <div className="text-center p-3 bg-white rounded-xl">
+              <div className="text-center p-3 bg-white rounded-lg">
                 <div className="flex items-center justify-center gap-1 mb-1">
-                  <p className="text-xs text-gray-600">🧠 Swin AI 분석</p>
+                  <p className="text-xs text-gray-600">🧠 AI 분석</p>
                   <button
                     onClick={() => setShowStageInfo(true)}
                     className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -369,48 +242,49 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                   {getStageDescription(currentStage)}
                 </Badge>
               </div>
-              <div className="text-center p-3 bg-white rounded-xl">
-                <p className="text-xs text-gray-600">모발 밀도</p>
-                <p className="text-xl font-bold text-gray-800">{diagnosisData?.photo?.hairDensity || 72}%</p>
-                <Badge variant="outline" className="text-xs px-2 py-1">양호</Badge>
+              <div className="text-center p-3 bg-white rounded-lg">
+                <p className="text-xs text-gray-600">분석일</p>
+                <p className="text-xl font-bold text-gray-800">{analysisResult.inspectionDate}</p>
+                <Badge variant="outline" className="text-xs px-2 py-1">{analysisResult.analysisType || '종합 진단'}</Badge>
               </div>
-              <div className="text-center p-3 bg-white rounded-xl">
-                <p className="text-xs text-gray-600">두피 건강</p>
-                <p className="text-xl font-bold text-gray-800">{diagnosisData?.photo?.scalpHealth || 85}%</p>
-                <Badge variant="default" className="text-xs px-2 py-1">우수</Badge>
+              <div className="text-center p-3 bg-white rounded-lg">
+                <p className="text-xs text-gray-600">분석 ID</p>
+                <p className="text-xl font-bold text-gray-800">#{analysisResult.id}</p>
+                <Badge variant="default" className="text-xs px-2 py-1">완료</Badge>
               </div>
             </div>
 
             {/* AI 분석 결과 요약 */}
-            {(swinResult || analysisGrade !== undefined) && (
-              <div className="mt-4 p-3 bg-blue-50 rounded-xl">
-                <div className="flex items-center gap-2 mb-2">
-                  <Brain className="w-4 h-4 text-blue-600" />
-                  <h3 className="text-sm font-semibold text-blue-800">
-                    {swinResult?.title || `${currentStage}단계 분석 결과`}
-                  </h3>
-                </div>
-                <p className="text-xs text-blue-700 mb-3">
-                  {swinResult?.description || stageRecommendations[currentStage]?.description}
-                </p>
-                {swinResult?.advice && (
-                  <div className="space-y-1 pt-2 border-t border-blue-200">
-                    <p className="text-xs font-semibold text-blue-800 mb-1">AI 추천 조언:</p>
-                    {swinResult.advice.split('\n').map((advice: string, index: number) => (
-                      <p key={index} className="text-xs text-blue-700 flex items-start gap-1">
-                        <span className="text-blue-500">•</span>
-                        <span>{advice}</span>
-                      </p>
-                    ))}
-                  </div>
-                )}
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Brain className="w-4 h-4 text-blue-600" />
+                <h3 className="text-sm font-semibold text-blue-800">
+                  {stageRecommendations[currentStage]?.title || `${currentStage}단계 분석 결과`}
+                </h3>
               </div>
-            )}
+              <p className="text-xs text-blue-700 mb-3">
+                {stageRecommendations[currentStage]?.description}
+              </p>
+              {analysisResult.advice && (
+                <div className="space-y-1 pt-2 border-t border-blue-200">
+                  <p className="text-xs font-semibold text-blue-800 mb-1">AI 추천 조언:</p>
+                  {analysisResult.advice.split('\n').map((advice: string, index: number) => (
+                    <p key={index} className="text-xs text-blue-700 flex items-start gap-1">
+                      <span className="text-blue-500">•</span>
+                      <span>{advice}</span>
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
 
-            {/* 남성 탈모 검사 이미지 표시 (swin_dual_model_llm_enhanced) */}
-            {analysisType === 'swin_dual_model_llm_enhanced' && topImageUrl && sideImageUrl && (
-              <div className="mt-4 p-3 bg-white rounded-lg">
-                <h3 className="text-sm font-semibold text-gray-800 mb-3">분석 이미지</h3>
+          {/* 분석 이미지 */}
+          {analysisResult.imageUrl && (
+            <div className="bg-white p-4 rounded-xl shadow-md">
+              <h3 className="text-base font-semibold text-gray-800 mb-3">분석 이미지</h3>
+              {/* 남성 탈모 검사 (두 개 이미지) */}
+              {topImageUrl && sideImageUrl ? (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <p className="text-xs text-gray-600 mb-2 text-center">정수리</p>
@@ -433,59 +307,63 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
+              ) : (
+                /* 여성 탈모 검사 또는 모발 손상 검사 (한 개 이미지) */
+                <div className="aspect-square rounded-lg overflow-hidden bg-gray-200">
+                  <ImageWithFallback
+                    src={topImageUrl || analysisResult.imageUrl}
+                    alt="분석 결과 이미지"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Mobile-First 데일리 케어 */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 text-center">
-              <h1 className="text-lg font-bold text-gray-800">진단 결과 및 맞춤 추천</h1>
-              <p className="text-xs text-gray-600 mt-1">
-                AI 분석을 바탕으로 한 개인 맞춤형 솔루션
-              </p>
+          <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex-1 text-center">
+                <h1 className="text-lg font-bold text-gray-800">분석 결과 및 맞춤 추천</h1>
+                <p className="text-xs text-gray-600 mt-1">
+                  AI 분석을 바탕으로 한 개인 맞춤형 솔루션
+                </p>
+              </div>
+              <Button 
+                onClick={() => {
+                    navigate('/daily-care');
+                }}
+                className="ml-3 h-10 px-4 bg-[#222222] hover:bg-[#333333] text-white rounded-xl active:scale-[0.98]"
+              >
+                데일리 케어
+              </Button>
             </div>
-            <Button 
-              onClick={() => {
-                  navigate('/d-care');
-              }}
-              className="ml-3 h-10 px-4 text-white rounded-xl active:scale-[0.98]"
-              style={{ backgroundColor: "#1f0101" }}
-            >
-              D_care
-            </Button>
           </div>
-        </div>
 
           {/* 맞춤 추천 탭 (Mobile-First) */}
           <Tabs defaultValue="hospitals" className="space-y-4 flex items-center">
             <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
               <TabsTrigger 
                 value="hospitals" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 transition-colors"
-                style={{ backgroundColor: "#1f0101" }}
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-[#222222] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
               >
                 탈모 맵
               </TabsTrigger>
               <TabsTrigger 
                 value="products" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                data-state-active-style={{ backgroundColor: "#1f0101", color: "white" }}
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
                 제품 추천
               </TabsTrigger>
               <TabsTrigger 
                 value="videos" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                data-state-active-style={{ backgroundColor: "#1f0101", color: "white" }}
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
                 영상 컨텐츠
               </TabsTrigger>
               <TabsTrigger 
                 value="lifestyle" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                data-state-active-style={{ backgroundColor: "#1f0101", color: "white" }}
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
               >
                 생활습관
               </TabsTrigger>
@@ -503,8 +381,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                         analysis_result: { grade: currentStage }
                       } 
                     })}
-                    className="h-8 px-3 text-white text-xs rounded-xl"
-                    style={{ backgroundColor: "#1f0101" }}
+                    className="h-8 px-3 bg-[#222222] hover:bg-[#333333] text-white text-xs rounded-lg"
                   >
                     더보기
                     <ArrowRight className="w-3 h-3 ml-1" />
@@ -529,8 +406,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                         analysis_result: { grade: currentStage }
                       } 
                     })}
-                    className="h-8 px-3 text-white text-xs rounded-xl"
-                    style={{ backgroundColor: "#1f0101" }}
+                    className="h-8 px-3 bg-[#222222] hover:bg-[#333333] text-white text-xs rounded-lg"
                   >
                     더보기
                     <ArrowRight className="w-3 h-3 ml-1" />
@@ -555,8 +431,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                   </div>
                   <Button 
                     onClick={() => navigate('/youtube-videos')}
-                    className="h-8 px-3 text-white text-xs rounded-xl"
-                    style={{ backgroundColor: "#1f0101" }}
+                    className="h-8 px-3 bg-[#222222] hover:bg-[#333333] text-white text-xs rounded-lg"
                   >
                     더보기
                     <ArrowRight className="w-3 h-3 ml-1" />
@@ -592,7 +467,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </div>
 
             <div className="p-4 space-y-4">
-              <div className="bg-blue-50 p-3 rounded-xl">
+              <div className="bg-blue-50 p-3 rounded-lg">
                 <p className="text-xs text-blue-800 mb-2">
                   🤖 AI 분석은 다음 요소들을 종합적으로 고려합니다:
                 </p>
@@ -688,7 +563,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                 </div>
               </div>
 
-              <div className="bg-gray-50 p-3 rounded-xl">
+              <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-xs text-gray-600">
                   ⚠️ 이 결과는 AI 분석에 기반한 참고용이며, 정확한 진단을 위해서는 반드시 전문의 상담이 필요합니다.
                 </p>
@@ -696,10 +571,9 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </div>
 
             <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 rounded-b-2xl">
-                <Button
+              <Button
                 onClick={() => setShowStageInfo(false)}
-                className="w-full h-10 text-white rounded-xl"
-                style={{ backgroundColor: "#1f0101" }}
+                className="w-full h-10 bg-[#222222] hover:bg-[#333333] text-white rounded-lg"
               >
                 확인
               </Button>
@@ -711,5 +585,5 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
   );
 }
 
-export default DiagnosisResults;
-export { DiagnosisResults };
+export default MyReportPage;
+export { MyReportPage };

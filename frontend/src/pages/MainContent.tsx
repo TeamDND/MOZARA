@@ -37,7 +37,7 @@ export default function Home() {
       image: "https://images.unsplash.com/photo-1497551060073-4c5ab6435f12?w=300&h=300&fit=crop&crop=center" // 동영상/미디어
     },
     { 
-      name: "탈모 백과", 
+      name: "탈모백과", 
       description: "탈모에 대한 과학적 정보와 전문 지식을 한눈에",
       badge: "NEW",
       useIcon: true
