@@ -6,6 +6,9 @@
 import numpy as np
 from scipy.spatial.distance import cosine
 from typing import List, Dict
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class TimeSeriesComparator:
@@ -35,13 +38,25 @@ class TimeSeriesComparator:
             }
 
         current_density = current['hair_density_percentage']
+        past_density = past_list[-1]['hair_density_percentage']
 
         # 주간 변화 (가장 최근과 비교)
-        weekly_change = current_density - past_list[-1]['hair_density_percentage']
+        weekly_change = current_density - past_density
+
+        # 🔍 상세 로그 추가 (근본 원인 파악용)
+        logger.info(f"📊 밀도 변화 분석:")
+        logger.info(f"  과거 밀도: {past_density:.2f}%")
+        logger.info(f"  현재 밀도: {current_density:.2f}%")
+        logger.info(f"  절대 변화: {weekly_change:+.2f}% (percentage point)")
+        if past_density > 0:
+            relative_change = (weekly_change / past_density) * 100
+            logger.info(f"  상대 변화: {relative_change:+.2f}% (relative ratio)")
 
         # 월간 변화 (4주 전과 비교, 데이터가 충분하면)
         if len(past_list) >= 4:
-            monthly_change = current_density - past_list[-4]['hair_density_percentage']
+            past_monthly_density = past_list[-4]['hair_density_percentage']
+            monthly_change = current_density - past_monthly_density
+            logger.info(f"  월간 절대 변화: {monthly_change:+.2f}% (4주 전 대비)")
         else:
             monthly_change = weekly_change
 
