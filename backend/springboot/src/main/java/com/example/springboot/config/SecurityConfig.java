@@ -66,6 +66,7 @@ public class SecurityConfig {
                                 "/api/reissue",
                                 "/api/check-username/**",
                                 "/api/check-nickname/**",
+                                "/api/email-auth/**", // 이메일 인증 API 허용
                                 "/api/userinfo/**", // 로그인 후 사용자 정보 조회용
                                 "/api/naver",
                                 "/api/kakao",

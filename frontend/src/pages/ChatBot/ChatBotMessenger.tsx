@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, ChevronLeft, Sparkles, MessageCircle } from 'lucide-react';
+import apiClient from '../../services/apiClient';
 
 // 타입 정의
 interface Message {
@@ -19,9 +20,11 @@ interface ChatResponse {
 
 interface ChatBotMessengerProps {
   onClose: () => void;
+  isModalClosing?: boolean;
 }
 
-const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose }) => {
+const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose, isModalClosing: propIsModalClosing }) => {
+  const [isModalClosing, setIsModalClosing] = useState(false);
   // 로그인된 사용자 정보
   const getUserInfo = () => {
     try {
@@ -67,6 +70,7 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose }) => {
 
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [relatedQuestions, setRelatedQuestions] = useState<{[key: string]: string[]}>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 추천 질문
@@ -90,12 +94,48 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose }) => {
     '탈모 예방법',
   ];
 
+  // AI가 연관 질문을 생성하는 함수
+  const getRelatedQuestions = async (botResponse: string): Promise<string[]> => {
+    try {
+      const response = await apiClient.post('/ai/rag-v2-check/generate-related-questions', {
+        response: botResponse,
+      });
+
+      return response.data || [];
+    } catch (error) {
+      console.error('연관 질문 생성 실패:', error);
+      // 실패 시 기본 질문들 반환
+      return [
+        '이 치료법의 부작용은?',
+        '다른 치료법도 있나요?',
+        '효과가 언제 나타나나요?',
+        '주의사항이 있나요?',
+      ];
+    }
+  };
+
   // 메시지 변경 시 localStorage 저장
   useEffect(() => {
     if (messages.length > 1) {
       localStorage.setItem(`chatMessages_${userConversationId}`, JSON.stringify(messages));
     }
   }, [messages, userConversationId]);
+
+  // 모달이 닫혀있을 때 새로운 봇 메시지가 오면 모달을 다시 열기
+  useEffect(() => {
+    if (propIsModalClosing && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.sender === 'bot' && lastMessage.timestamp) {
+        // 최근 5초 이내의 봇 메시지라면 모달을 다시 열기
+        const messageTime = new Date(lastMessage.timestamp).getTime();
+        const now = new Date().getTime();
+        if (now - messageTime < 5000) {
+          // 모달을 다시 열기 위해 부모 컴포넌트에 알림
+          window.dispatchEvent(new CustomEvent('openChatBot'));
+        }
+      }
+    }
+  }, [messages, propIsModalClosing]);
 
   // 스크롤 자동 이동
   const scrollToBottom = () => {
@@ -121,6 +161,9 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose }) => {
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);
+    
+    // 메시지 추가 후 즉시 스크롤
+    setTimeout(() => scrollToBottom(), 100);
 
     try {
       const response = await fetch('http://127.0.0.1:8000/rag-chat', {
@@ -144,7 +187,24 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose }) => {
         sources: data.sources,
       };
 
+      // 모달이 닫혀도 메시지와 연관 질문을 저장
       setMessages(prev => [...prev, botMessage]);
+      
+      // 봇 응답 후 연관 질문 생성 (모달이 닫혀도 실행)
+      try {
+        const questions = await getRelatedQuestions(data.response);
+        setRelatedQuestions(prev => ({
+          ...prev,
+          [botMessage.id]: questions
+        }));
+      } catch (error) {
+        console.error('연관 질문 생성 실패:', error);
+      }
+      
+      // 봇 응답 후 스크롤 (모달이 열려있을 때만)
+      if (!isModalClosing && !propIsModalClosing) {
+        setTimeout(() => scrollToBottom(), 100);
+      }
     } catch (error) {
       console.error('메시지 전송 실패:', error);
       const errorMessage: Message = {
@@ -154,6 +214,11 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose }) => {
         timestamp: new Date().toISOString(),
       };
       setMessages(prev => [...prev, errorMessage]);
+      
+      // 에러 메시지 후에도 스크롤 (모달이 열려있을 때만)
+      if (!isModalClosing && !propIsModalClosing) {
+        setTimeout(() => scrollToBottom(), 100);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -236,57 +301,94 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose }) => {
 
       {/* 메시지 영역 */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div className={`flex gap-2 max-w-[80%] ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-              {/* 아바타 */}
-              {message.sender === 'bot' && (
-                <div className="flex-shrink-0 w-8 h-8 bg-[#1F0101] rounded-full flex items-center justify-center">
-                  <MessageCircle className="w-5 h-5 text-white" />
-                </div>
-              )}
+        {messages.map((message, index) => (
+          <div key={message.id}>
+            <div
+              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div className={`flex gap-2 max-w-[80%] ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                {/* 아바타 */}
+                {message.sender === 'bot' && (
+                  <div className="flex-shrink-0 w-8 h-8 bg-[#1F0101] rounded-full flex items-center justify-center">
+                    <MessageCircle className="w-5 h-5 text-white" />
+                  </div>
+                )}
 
-              {/* 메시지 말풍선 */}
-              <div className="flex flex-col gap-1">
-                <div
-                  className={`px-4 py-3 rounded-2xl shadow-sm ${
-                    message.sender === 'user'
-                      ? 'bg-[#1F0101] text-white rounded-tr-sm'
-                      : 'bg-white text-gray-800 rounded-tl-sm'
-                  }`}
-                >
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                    {message.text}
-                  </p>
+                {/* 메시지 말풍선 */}
+                <div className="flex flex-col gap-1">
+                  <div
+                    className={`px-4 py-3 rounded-2xl shadow-sm ${
+                      message.sender === 'user'
+                        ? 'bg-[#1F0101] text-white rounded-tr-sm'
+                        : 'bg-white text-gray-800 rounded-tl-sm'
+                    }`}
+                  >
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                      {message.text}
+                    </p>
 
-                  {/* 출처 표시 */}
-                  {message.sources && message.sources.length > 0 && (
-                    <div className="mt-2 pt-2 border-t border-gray-200">
-                      <p className="text-xs text-gray-500 mb-1">참고 자료:</p>
-                      <div className="space-y-1">
-                        {message.sources.map((source, idx) => (
-                          <p key={idx} className="text-xs text-[#1F0101]">
-                            • {source}
-                          </p>
-                        ))}
+                    {/* 출처 표시 */}
+                    {message.sources && message.sources.length > 0 && (
+                      <div className="mt-2 pt-2 border-t border-gray-200">
+                        <p className="text-xs text-gray-500 mb-1">참고 자료:</p>
+                        <div className="space-y-1">
+                          {message.sources.map((source, idx) => (
+                            <p key={idx} className="text-xs text-[#1F0101]">
+                              • {source}
+                            </p>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
 
-                {/* 시간 */}
-                <p
-                  className={`text-xs text-gray-400 px-2 ${
-                    message.sender === 'user' ? 'text-right' : 'text-left'
-                  }`}
-                >
-                  {formatTime(message.timestamp)}
-                </p>
+                  {/* 시간 */}
+                  <p
+                    className={`text-xs text-gray-400 px-2 ${
+                      message.sender === 'user' ? 'text-right' : 'text-left'
+                    }`}
+                  >
+                    {formatTime(message.timestamp)}
+                  </p>
+                </div>
               </div>
             </div>
+
+            {/* 빠른 질문 (첫 번째 봇 메시지 바로 아래) */}
+            {message.sender === 'bot' && index === 0 && messages.length === 1 && (
+              <div className="mt-4 ml-10">
+                <div className="flex flex-wrap gap-2">
+                  {hairQuestions.map((question, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => sendMessage(question)}
+                      className="max-w-72 min-w-fit px-3 py-2 bg-white text-gray-700 text-xs rounded-full border border-gray-200 hover:bg-gray-50 hover:border-[#1F0101] transition-colors shadow-sm text-left"
+                      title={question}
+                    >
+                      {question}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 연관 질문 (AI 응답 후) */}
+            {message.sender === 'bot' && index > 0 && relatedQuestions[message.id] && (
+              <div className="mt-4 ml-10">
+                <div className="flex flex-wrap gap-2">
+                  {relatedQuestions[message.id].map((question, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => sendMessage(question)}
+                      className="max-w-72 min-w-fit px-3 py-2 bg-blue-50 text-blue-700 text-xs rounded-full border border-blue-200 hover:bg-blue-100 hover:border-blue-300 transition-colors shadow-sm text-left"
+                      title={question}
+                    >
+                      {question}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ))}
 
@@ -311,22 +413,6 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 추천 질문 칩 */}
-      {messages.length <= 2 && (
-        <div className="px-4 pb-3">
-          <div className="flex flex-wrap gap-2">
-            {hairQuestions.map((question, idx) => (
-              <button
-                key={idx}
-                onClick={() => sendMessage(question)}
-                className="px-3 py-2 bg-white text-gray-700 text-xs rounded-full border border-gray-200 hover:bg-gray-50 hover:border-[#1F0101] transition-colors shadow-sm"
-              >
-                {question}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* 입력 영역 */}
       <div className="bg-white border-t px-4 py-3 shadow-lg">

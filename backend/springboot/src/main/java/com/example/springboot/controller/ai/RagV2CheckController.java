@@ -1,6 +1,7 @@
 package com.example.springboot.controller.ai;
 
 import com.example.springboot.service.ai.RagV2CheckService;
+import com.example.springboot.service.ai.RagChatService;
 import com.example.springboot.data.dao.UsersInfoDAO;
 import com.example.springboot.data.entity.UsersInfoEntity;
 import com.example.springboot.data.entity.UserEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +22,7 @@ import java.util.Map;
 public class RagV2CheckController {
 
     private final RagV2CheckService ragV2CheckService;
+    private final RagChatService ragChatService;
     private final UsersInfoDAO usersInfoDAO;
     private final UserRepository userRepository;
 
@@ -130,6 +133,28 @@ public class RagV2CheckController {
         } catch (Exception e) {
             System.out.println("사용자 정보 저장 오류: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * AI 응답을 기반으로 연관 질문들을 생성
+     */
+    @PostMapping("/generate-related-questions")
+    public ResponseEntity<List<String>> generateRelatedQuestions(@RequestBody Map<String, String> request) {
+        try {
+            String responseText = request.get("response");
+            
+            if (responseText == null || responseText.trim().isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+            
+            List<String> questions = ragChatService.generateRelatedQuestions(responseText);
+            return ResponseEntity.ok(questions);
+            
+        } catch (Exception e) {
+            System.out.println("연관 질문 생성 오류: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

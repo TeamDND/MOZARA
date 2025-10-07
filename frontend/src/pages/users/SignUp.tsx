@@ -193,9 +193,10 @@ const SignUp: React.FC = () => {
           setResendCooldown(response.remainingTime);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('인증코드 발송 오류:', error);
-      alert('인증코드 발송 중 오류가 발생했습니다.');
+      const errorMessage = error.response?.data?.message || error.message || '인증코드 발송 중 오류가 발생했습니다.';
+      alert(`인증코드 발송 실패: ${errorMessage}`);
     } finally {
       setEmailAuthLoading(false);
     }
