@@ -63,8 +63,8 @@ const ChatBotModal: React.FC = () => {
       >
         <div
           ref={modalRef}
-          className={`relative w-full max-w-md h-[80vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden pointer-events-auto transition-all duration-200 ${
-            isOpen ? 'animate-fadeIn' : 'opacity-0 scale-95'
+          className={`relative w-full max-w-md h-[80vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ${
+            isOpen ? 'animate-fadeIn pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'
           }`}
         >
           {/* 챗봇 메신저 컴포넌트 - 항상 렌더링 */}
