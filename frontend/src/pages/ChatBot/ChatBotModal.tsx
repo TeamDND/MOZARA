@@ -50,35 +50,32 @@ const ChatBotModal: React.FC = () => {
     <>
       {/* 플로팅 버튼 제거 - 네비게이션 바에서만 접근 */}
 
-      {/* 모달 */}
-      <>
-        {/* 블러 배경 */}
-        {isOpen && (
-          <div className="fixed inset-0 z-[100] bg-black/30 backdrop-blur-md pointer-events-auto" />
-        )}
+      {/* 블러 배경 - 모달이 열려있을 때만 */}
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] bg-black/30 backdrop-blur-md pointer-events-auto" />
+      )}
 
-        {/* 모달 컨테이너 */}
-        <div 
-          className={`fixed inset-0 z-[101] flex items-center justify-center p-4 pt-20 pb-20 pointer-events-none transition-opacity duration-200 ${
-            isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      {/* 모달 컨테이너 - 항상 렌더링하되 보이지 않게 */}
+      <div
+        className={`fixed inset-0 z-[101] flex items-center justify-center p-4 pt-20 pb-20 transition-opacity duration-200 ${
+          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        <div
+          ref={modalRef}
+          className={`relative w-full max-w-md h-[80vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden pointer-events-auto transition-all duration-200 ${
+            isOpen ? 'animate-fadeIn' : 'opacity-0 scale-95'
           }`}
         >
-          <div 
-            ref={modalRef}
-            className={`relative w-full max-w-md h-[80vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden pointer-events-auto transition-all duration-200 ${
-              isOpen ? 'animate-fadeIn' : 'opacity-0 scale-95'
-            }`}
-          >
-            {/* 챗봇 메신저 컴포넌트 */}
-            <ChatBotMessenger 
-              onClose={() => {
-                setIsOpen(false);
-              }}
-              isModalClosing={!isOpen}
-            />
-          </div>
+          {/* 챗봇 메신저 컴포넌트 - 항상 렌더링 */}
+          <ChatBotMessenger
+            onClose={() => {
+              setIsOpen(false);
+            }}
+            isModalClosing={!isOpen}
+          />
         </div>
-      </>
+      </div>
 
       {/* 애니메이션 스타일 */}
       <style>{`
