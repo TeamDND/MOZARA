@@ -883,7 +883,7 @@ const DailyCare: React.FC = () => {
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2 text-[#1f0101]">
                 <Camera className="h-5 w-5" style={{ color: '#1f0101' }} />
-                변화 추적
+                두피 관리 변화 추적
               </CardTitle>
             </div>
           </CardHeader>

@@ -4,6 +4,7 @@ import { Button } from '../../../components/ui/button';
 import { Badge } from '../../../components/ui/badge';
 import { Play, ExternalLink } from 'lucide-react';
 import { ImageWithFallback } from '../../../hooks/ImageWithFallback';
+import LikeButton from '../../../components/LikeButton';
 
 interface Video {
   videoId: string;
@@ -161,13 +162,21 @@ const YouTubeVideosTab: React.FC<YouTubeVideosTabProps> = ({ currentStage }) => 
 
                   {/* 영상 정보 영역 */}
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-semibold text-gray-800 mb-1 line-clamp-2">{video.title}</h4>
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h4 className="text-sm font-semibold text-gray-800 line-clamp-2 flex-1">{video.title}</h4>
+                      <LikeButton
+                        type="youtube"
+                        itemId={video.videoId}
+                        itemName={video.title}
+                        size="sm"
+                      />
+                    </div>
                     <p className="text-xs text-gray-600 mb-2">{video.channelName}</p>
-                    
+
                     <div className="bg-blue-50 p-2 rounded-lg text-xs mb-3">
                       🎯 {stageRecommendations[currentStage]?.title || '맞춤 추천'}
                     </div>
-                    
+
                     <button
                       onClick={() => {
                         const url = video.videoId.startsWith('dummy')

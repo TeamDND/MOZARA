@@ -9,6 +9,7 @@ import { Button } from '../components/ui/button';
 import { Target, Camera, Award, Sprout, MapPin, Video, HelpCircle } from 'lucide-react';
 import { locationService, Location } from '../services/locationService';
 import MapPreview from '../components/ui/MapPreview';
+import LikeButton from '../components/LikeButton';
 
 // YouTube 영상 타입 정의
 interface YouTubeVideo {
@@ -395,9 +396,17 @@ const MainPage: React.FC = () => {
                 
                 {/* 영상 정보 */}
                 <div className="mb-3">
-                  <h4 className="font-semibold text-gray-900 text-sm line-clamp-2 mb-1">
-                    {todayVideo.title}
-                  </h4>
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <h4 className="font-semibold text-gray-900 text-sm line-clamp-2 flex-1">
+                      {todayVideo.title}
+                    </h4>
+                    <LikeButton
+                      type="youtube"
+                      itemId={todayVideo.videoId}
+                      itemName={todayVideo.title}
+                      size="sm"
+                    />
+                  </div>
                   <p className="text-xs text-gray-600">{todayVideo.channelName}</p>
                 </div>
               </>

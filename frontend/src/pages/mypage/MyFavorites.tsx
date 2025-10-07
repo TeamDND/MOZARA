@@ -89,11 +89,13 @@ export default function MyFavorites() {
       let actualItemId = itemId;
       let productName = '';
 
-      // 제품일 경우 productId:productName 형식에서 분리
-      if (type === 'product' && itemId.includes(':')) {
+      // 제품과 YouTube일 경우 "id:name" 형식에서 분리
+      if ((type === 'product' || type === 'youtube') && itemId.includes(':')) {
         const [id, ...nameParts] = itemId.split(':');
         actualItemId = id;
-        productName = nameParts.join(':');
+        if (type === 'product') {
+          productName = nameParts.join(':');
+        }
       }
 
       const paramName =
@@ -106,9 +108,12 @@ export default function MyFavorites() {
         [paramName]: actualItemId
       };
 
-      // 제품일 경우 productName도 함께 전달
+      // 제품일 경우 productName, YouTube일 경우 videoTitle도 함께 전달
       if (type === 'product' && productName) {
         params.productName = productName;
+      } else if (type === 'youtube' && itemId.includes(':')) {
+        const [, ...titleParts] = itemId.split(':');
+        params.videoTitle = titleParts.join(':');
       }
 
       await apiClient.post(`/userlog/${type}/like`, null, { params });
@@ -183,38 +188,44 @@ export default function MyFavorites() {
         {/* YouTube 찜 목록 */}
         <TabsContent value="youtube" className="space-y-3">
           {likedItems.youtube.length > 0 ? (
-            likedItems.youtube.map(videoId => (
-              <Card key={videoId} className="overflow-hidden">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-sm text-gray-900 mb-1">
-                        YouTube 영상
-                      </h4>
-                      <p className="text-xs text-gray-500">
-                        Video ID: {videoId}
-                      </p>
-                      <a
-                        href={`https://www.youtube.com/watch?v=${videoId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 mt-2 text-xs text-blue-600 hover:text-blue-700"
+            likedItems.youtube.map(videoEntry => {
+              // videoId:videoTitle 형식 파싱
+              const [videoId, ...titleParts] = videoEntry.split(':');
+              const videoTitle = titleParts.join(':') || 'YouTube 영상';
+
+              return (
+                <Card key={videoEntry} className="overflow-hidden">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-sm text-gray-900 mb-1 line-clamp-2">
+                          {videoTitle}
+                        </h4>
+                        <p className="text-xs text-gray-500 mb-2">
+                          Video ID: {videoId}
+                        </p>
+                        <a
+                          href={`https://www.youtube.com/watch?v=${videoId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          YouTube에서 보기
+                        </a>
+                      </div>
+                      <button
+                        onClick={() => handleUnlike('youtube', videoEntry)}
+                        className="p-2 rounded-lg bg-red-50 hover:bg-red-100 transition-colors"
+                        title="찜 취소"
                       >
-                        <ExternalLink className="w-3 h-3" />
-                        YouTube에서 보기
-                      </a>
+                        <Heart className="w-4 h-4 text-red-500 fill-red-500" />
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleUnlike('youtube', videoId)}
-                      className="p-2 rounded-lg bg-red-50 hover:bg-red-100 transition-colors"
-                      title="찜 취소"
-                    >
-                      <Heart className="w-4 h-4 text-red-500 fill-red-500" />
-                    </button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                  </CardContent>
+                </Card>
+              );
+            })
           ) : (
             <div className="text-center py-8 text-gray-500">
               <Youtube className="w-12 h-12 mx-auto mb-3 text-gray-300" />

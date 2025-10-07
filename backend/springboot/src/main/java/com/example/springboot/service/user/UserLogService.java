@@ -20,36 +20,62 @@ public class UserLogService {
     private final UserRepository userRepository;
 
     // 유튜브 좋아요 추가/제거
-    public UserLogDTO toggleYoutubeLike(String username, String videoId) {
+    public UserLogDTO toggleYoutubeLike(String username, String videoId, String videoTitle) {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         Optional<UserLogEntity> existingLog = userLogRepository.findByUserEntityIdForeign_Username(username);
-        
+
+        // videoId:videoTitle 형식으로 저장
+        String videoEntry = videoId + ":" + videoTitle;
+
         UserLogEntity userLog;
         if (existingLog.isPresent()) {
             userLog = existingLog.get();
             String currentYoutubeLike = userLog.getYoutubeLike();
-            
+
             if (currentYoutubeLike == null || currentYoutubeLike.isEmpty()) {
-                userLog.setYoutubeLike(videoId);
+                userLog.setYoutubeLike(videoEntry);
             } else {
-                // 이미 좋아요한 영상인지 확인
-                if (currentYoutubeLike.contains(videoId)) {
-                    // 좋아요 제거
-                    userLog.setYoutubeLike(currentYoutubeLike.replace(videoId + ",", "").replace("," + videoId, "").replace(videoId, ""));
-                } else {
-                    // 좋아요 추가
-                    userLog.setYoutubeLike(currentYoutubeLike + "," + videoId);
+                // videoId가 포함되어 있는지 확인 (제목이 바뀌었을 수도 있으므로 ID로만 체크)
+                boolean alreadyLiked = false;
+                StringBuilder newYoutubeLike = new StringBuilder();
+                String[] videos = currentYoutubeLike.split(",");
+
+                for (String video : videos) {
+                    // 빈 문자열 무시
+                    if (video == null || video.trim().isEmpty()) {
+                        continue;
+                    }
+
+                    if (video.startsWith(videoId + ":")) {
+                        // 이미 좋아요한 영상이면 제거
+                        alreadyLiked = true;
+                    } else {
+                        if (newYoutubeLike.length() > 0) {
+                            newYoutubeLike.append(",");
+                        }
+                        newYoutubeLike.append(video);
+                    }
                 }
+
+                if (!alreadyLiked) {
+                    // 좋아요 추가
+                    if (newYoutubeLike.length() > 0) {
+                        newYoutubeLike.append(",");
+                    }
+                    newYoutubeLike.append(videoEntry);
+                }
+
+                userLog.setYoutubeLike(newYoutubeLike.toString());
             }
         } else {
             userLog = UserLogEntity.builder()
                     .userEntityIdForeign(user)
-                    .youtubeLike(videoId)
+                    .youtubeLike(videoEntry)
                     .build();
         }
-        
+
         UserLogEntity savedLog = userLogRepository.save(userLog);
         return convertToDTO(savedLog);
     }

@@ -5,6 +5,7 @@ import { Badge } from '../../../components/ui/badge';
 import { MapPin, Star, Phone, ArrowRight } from 'lucide-react';
 import MapPreview from '../../../components/ui/MapPreview';
 import DirectionModal from '../../../components/ui/DirectionModal';
+import LikeButton from '../../../components/LikeButton';
 
 interface StoreFinderTabProps {
   currentStage: number;
@@ -189,20 +190,19 @@ const StoreFinderTab: React.FC<StoreFinderTabProps> = ({ currentStage, currentLo
               </div>
               <div className="space-y-3">
                 {section.items.slice(0, 3).map((hospital) => (
-                  <div 
+                  <div
                     key={hospital.id}
-                    className={`bg-white rounded-xl border ${hospital.isRecommended ? 'border-[#1F0101] ring-2 ring-[#1F0101]/10' : 'border-gray-100'} hover:shadow-md transition-all overflow-hidden relative`}
+                    className="bg-white rounded-xl border border-gray-100 hover:shadow-md transition-all overflow-hidden"
                   >
-                    {hospital.isRecommended && (
-                      <div className="absolute top-2 right-2 z-10">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold text-white bg-[#1F0101] rounded-full">
-                          ⭐ 추천
-                        </span>
-                      </div>
-                    )}
-                    
                     <div className="p-4">
-                      <h3 className="font-semibold text-gray-900 mb-2 pr-14">{hospital.name}</h3>
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <h3 className="font-semibold text-gray-900 flex-1">{hospital.name}</h3>
+                        <LikeButton
+                          type={section.group === '탈모병원' ? 'hospital' : 'map'}
+                          itemId={`${section.group}-${hospital.name}`}
+                          size="sm"
+                        />
+                      </div>
                       <div className="space-y-1 text-xs text-gray-600 mb-3">
                         <div className="flex items-center gap-1">
                           <span>📍</span>
