@@ -46,8 +46,8 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         const response = await apiClient.get(`/userlog/${type}/likes/${username}`);
         const likedItems = response.data ? response.data.split(',').filter((id: string) => id.trim() !== '') : [];
 
-        // 제품의 경우 "productId:productName" 형식이므로 productId만 추출해서 비교
-        if (type === 'product') {
+        // 제품과 YouTube의 경우 "id:name" 형식이므로 id만 추출해서 비교
+        if (type === 'product' || type === 'youtube') {
           const isLiked = likedItems.some((item: string) => item.startsWith(itemId + ':'));
           setIsLiked(isLiked);
         } else {
@@ -77,9 +77,11 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         [`${type === 'youtube' ? 'videoId' : type === 'hospital' ? 'hospitalId' : type === 'product' ? 'productId' : 'mapId'}`]: itemId
       };
 
-      // 제품일 경우 제품 이름도 함께 전달
+      // 제품일 경우 제품 이름, YouTube일 경우 영상 제목도 함께 전달
       if (type === 'product' && itemName) {
         params.productName = itemName;
+      } else if (type === 'youtube' && itemName) {
+        params.videoTitle = itemName;
       }
 
       const response = await apiClient.post(`/userlog/${type}/like`, null, {

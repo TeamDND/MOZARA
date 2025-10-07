@@ -18,9 +18,10 @@ public class UserLogController {
     @PostMapping("/youtube/like")
     public ResponseEntity<UserLogDTO> toggleYoutubeLike(
             @RequestParam String username,
-            @RequestParam String videoId) {
+            @RequestParam String videoId,
+            @RequestParam(required = false, defaultValue = "") String videoTitle) {
         try {
-            UserLogDTO result = userLogService.toggleYoutubeLike(username, videoId);
+            UserLogDTO result = userLogService.toggleYoutubeLike(username, videoId, videoTitle);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

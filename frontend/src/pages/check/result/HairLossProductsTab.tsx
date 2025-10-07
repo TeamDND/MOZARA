@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { hairProductApi, HairProduct } from '../../../services/hairProductApi';
 import { Star, ShoppingCart } from 'lucide-react';
+import LikeButton from '../../../components/LikeButton';
 
 interface HairLossProductsTabProps {
   currentStage: number;
@@ -93,12 +94,16 @@ const HairLossProductsTab: React.FC<HairLossProductsTabProps> = ({ currentStage 
                   }}
                   loading="lazy"
                 />
-                
-                {/* 브랜드 배지 */}
-                <div className="absolute top-2 left-2">
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold text-white bg-[#1F0101]/90 rounded-full">
-                    ⭐ {product.brand || product.mallName}
-                  </span>
+
+                {/* 좋아요 버튼 */}
+                <div className="absolute top-2 right-2">
+                  <LikeButton
+                    type="product"
+                    itemId={product.productId}
+                    itemName={product.productName}
+                    size="sm"
+                    className="bg-white/95 backdrop-blur-sm shadow-md hover:bg-white"
+                  />
                 </div>
               </div>
 
@@ -126,13 +131,6 @@ const HairLossProductsTab: React.FC<HairLossProductsTabProps> = ({ currentStage 
                 {/* 가격 */}
                 <div className="text-base font-bold text-gray-900 mb-2">
                   {product.productPrice ? new Intl.NumberFormat('ko-KR').format(product.productPrice) + '원' : '가격 문의'}
-                </div>
-
-                {/* 적합 단계 배지 */}
-                <div className="flex flex-wrap gap-1 mb-2">
-                  <span className="text-[10px] bg-[#1F0101]/10 text-[#1F0101] px-2 py-0.5 rounded-full font-medium">
-                    {currentStage}단계
-                  </span>
                 </div>
 
                 {/* 구매 버튼 */}
