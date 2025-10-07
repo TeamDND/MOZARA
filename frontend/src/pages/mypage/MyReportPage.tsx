@@ -273,7 +273,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
                     getStageColor(currentStage)
                   }`}
                 >
-                  {getStageDescription(currentStage)}
+                  {isDailyAnalysis ? "두피 관리 점수" : getStageDescription(currentStage)}
                 </Badge>
               </div>
               <div className="text-center p-3 bg-white rounded-lg">
