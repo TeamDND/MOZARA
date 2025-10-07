@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import apiClient from '../../services/apiClient';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../utils/store';
+import LikeButton from '../../components/LikeButton';
 
 interface Video {
   videoId: string;
@@ -308,21 +309,20 @@ export default function YouTubeVideos() {
                           }}
                         />
                         {/* 찜 버튼 */}
-                        <button
+                        <div
+                          className="absolute top-2 right-2"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            toggleLike(video.videoId);
                           }}
-                          className="absolute top-2 right-2 w-8 h-8 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-all shadow-md"
-                          title={likedVideos.has(video.videoId) ? "찜 취소" : "찜하기"}
                         >
-                          <span className={`text-lg ${
-                            likedVideos.has(video.videoId) ? 'text-red-500' : 'text-gray-400'
-                          }`}>
-                            {likedVideos.has(video.videoId) ? '❤️' : '🤍'}
-                          </span>
-                        </button>
+                          <LikeButton
+                            type="youtube"
+                            itemId={video.videoId}
+                            size="sm"
+                            className="bg-white/95 backdrop-blur-sm shadow-md hover:bg-white"
+                          />
+                        </div>
                         {/* 찜한 영상 배지 */}
                         {likedVideos.has(video.videoId) && (
                           <div className="absolute top-2 left-2">

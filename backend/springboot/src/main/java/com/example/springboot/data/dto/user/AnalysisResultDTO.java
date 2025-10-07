@@ -16,6 +16,6 @@ public class AnalysisResultDTO {
     private String advice;
     private Integer grade;
     private String imageUrl;
-    private String type; // 분석 유형 (종합 진단, 모발 밀도, 두피 상태 등)
+    private String analysisType; // 분석 유형 (daily, swin_dual_model_llm_enhanced, rag_v2_analysis 등)
     private String improvement; // 개선 정도
 }

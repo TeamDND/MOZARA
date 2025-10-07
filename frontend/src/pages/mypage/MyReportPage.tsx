@@ -157,6 +157,11 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
     }
   }, []);
   
+  // 페이지 로드 시 스크롤을 맨 위로
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // 위치 정보 가져오기
   useEffect(() => {
     if (navigator.geolocation) {
@@ -191,6 +196,33 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
     ? imageUrl.split('|||').map(url => url.trim())
     : [imageUrl, null];
 
+  // 디버깅용 로그
+  console.log('🔍 MyReportPage - analysisResult:', analysisResult);
+  console.log('🔍 MyReportPage - analysisType:', analysisType);
+  console.log('🔍 MyReportPage - grade:', analysisResult?.grade);
+
+  // 분석 타입을 한글로 변환하는 함수
+  const formatAnalysisType = (type: string | undefined): string => {
+    if (!type) return '종합 진단';
+    if (type === 'daily') return '두피 분석';
+    // 탈모 단계 검사로 처리되는 모든 타입
+    if (type === 'swin_dual_model_llm_enhanced' ||
+        type === 'rag_v2_analysis' /* ||
+        type === 'swin_analysis' ||
+        type === 'gemini_analysis' ||
+        type.includes('swin') ||
+        type.includes('rag') ||
+        type.includes('hairloss') ||
+        type.includes('hair_loss') */) {
+      return '탈모 단계 검사';
+    }
+    return '종합 진단'; // 알 수 없는 타입은 종합 진단으로
+  };
+
+  // daily 타입인지 확인
+  const isDailyAnalysis = analysisType === 'daily';
+  console.log('🔍 MyReportPage - isDailyAnalysis:', isDailyAnalysis);
+
   // 분석 결과가 없으면 마이페이지로 돌아가기
   if (!analysisResult) {
     navigate('/mypage');
@@ -214,7 +246,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
               <div>
                 <h2 className="text-lg font-semibold text-gray-800">분석이 완료되었습니다!</h2>
                 <p className="text-sm text-gray-600">
-                  종합 분석 결과와 맞춤형 추천을 확인해보세요
+                  AI 분석 결과와 맞춤형 추천을 확인해보세요
                 </p>
               </div>
             </div>
@@ -223,34 +255,35 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
               <div className="text-center p-3 bg-white rounded-lg">
                 <div className="flex items-center justify-center gap-1 mb-1">
                   <p className="text-xs text-gray-600">🧠 AI 분석</p>
-                  <button
-                    onClick={() => setShowStageInfo(true)}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                    aria-label="단계 기준 보기"
-                  >
-                    <HelpCircle className="w-3 h-3" />
-                  </button>
+                  {!isDailyAnalysis && (
+                    <button
+                      onClick={() => setShowStageInfo(true)}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                      aria-label="단계 기준 보기"
+                    >
+                      <HelpCircle className="w-3 h-3" />
+                    </button>
+                  )}
                 </div>
                 <p className="text-xl font-bold text-gray-800">
-                  {currentStage}단계
+                  {isDailyAnalysis ? `${currentStage}점` : `${currentStage}단계`}
                 </p>
                 <Badge
                   className={`text-xs px-2 py-1 ${
                     getStageColor(currentStage)
                   }`}
                 >
-                  {getStageDescription(currentStage)}
+                  {isDailyAnalysis ? "두피 관리 점수" : getStageDescription(currentStage)}
                 </Badge>
               </div>
               <div className="text-center p-3 bg-white rounded-lg">
                 <p className="text-xs text-gray-600">분석일</p>
                 <p className="text-xl font-bold text-gray-800">{analysisResult.inspectionDate}</p>
-                <Badge variant="outline" className="text-xs px-2 py-1">{analysisResult.analysisType || '종합 진단'}</Badge>
+                <Badge variant="outline" className="text-xs px-2 py-1">{formatAnalysisType(analysisResult.analysisType)}</Badge>
               </div>
               <div className="text-center p-3 bg-white rounded-lg">
                 <p className="text-xs text-gray-600">분석 ID</p>
                 <p className="text-xl font-bold text-gray-800">#{analysisResult.id}</p>
-                <Badge variant="default" className="text-xs px-2 py-1">완료</Badge>
               </div>
             </div>
 
@@ -259,12 +292,17 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
               <div className="flex items-center gap-2 mb-2">
                 <Brain className="w-4 h-4 text-blue-600" />
                 <h3 className="text-sm font-semibold text-blue-800">
-                  {stageRecommendations[currentStage]?.title || `${currentStage}단계 분석 결과`}
+                  {isDailyAnalysis
+                    ? `두피 건강 ${currentStage}점 분석 결과`
+                    : (stageRecommendations[currentStage]?.title || `${currentStage}단계 분석 결과`)
+                  }
                 </h3>
               </div>
-              <p className="text-xs text-blue-700 mb-3">
-                {stageRecommendations[currentStage]?.description}
-              </p>
+              {!isDailyAnalysis && (
+                <p className="text-xs text-blue-700 mb-3">
+                  {stageRecommendations[currentStage]?.description}
+                </p>
+              )}
               {analysisResult.advice && (
                 <div className="space-y-1 pt-2 border-t border-blue-200">
                   <p className="text-xs font-semibold text-blue-800 mb-1">AI 추천 조언:</p>
@@ -320,16 +358,18 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
             </div>
           )}
 
-          {/* Mobile-First 데일리 케어 */}
-          <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
-            <div className="flex items-center justify-between">
-              <div className="flex-1 text-center">
-                <h1 className="text-lg font-bold text-gray-800">분석 결과 및 맞춤 추천</h1>
-                <p className="text-xs text-gray-600 mt-1">
-                  AI 분석을 바탕으로 한 개인 맞춤형 솔루션
-                </p>
+          {/* 헤더 영역 - daily 분석이 아닐 때만 표시 */}
+          {!isDailyAnalysis && (
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 text-center">
+                  <h1 className="text-lg font-bold text-gray-800">분석 결과 및 맞춤 추천</h1>
+                  <p className="text-xs text-gray-600 mt-1">
+                    AI 분석을 바탕으로 한 개인 맞춤형 솔루션
+                  </p>
+                </div>
               </div>
-              <Button 
+              <Button
                 onClick={() => {
                     navigate('/main-page');
                 }}
@@ -338,9 +378,10 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
                 데일리 케어
               </Button>
             </div>
-          </div>
+          )}
 
-          {/* 맞춤 추천 탭 (Mobile-First) */}
+          {/* 맞춤 추천 탭 (Mobile-First) - daily 분석이 아닐 때만 표시 */}
+          {!isDailyAnalysis && (
           <Tabs defaultValue="hospitals" className="space-y-4 flex items-center">
             <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
               <TabsTrigger 
@@ -443,12 +484,13 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
 
             {/* 생활습관 가이드 (Mobile-First) */}
             <TabsContent value="lifestyle" className="space-y-4">
-              <DailyCareTab 
+              <DailyCareTab
                 currentStage={currentStage}
                 onNavigateToDailyCare={() => navigate('/hair-dailycare')}
               />
             </TabsContent>
           </Tabs>
+          )}
         </div>
       </div>
 
@@ -469,7 +511,7 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
             <div className="p-4 space-y-4">
               <div className="bg-blue-50 p-3 rounded-lg">
                 <p className="text-xs text-blue-800 mb-2">
-                  🤖 AI 분석은 다음 요소들을 종합적으로 고려합니다:
+                  🤖 AI 분석은 다음 요소들을 고려합니다:
                 </p>
                 <ul className="text-xs text-blue-700 space-y-1">
                   <li>• 이미지 분석 (정수리, 측면)</li>

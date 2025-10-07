@@ -71,6 +71,7 @@ const LogIn: React.FC = () => {
       console.error('로그인 오류:', error);
       const errorMessage = error.response?.data?.error || '로그인 중 오류가 발생했습니다.';
       setError(errorMessage);
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -203,37 +203,52 @@ const AdminUserDetail: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                {reports.map((report, index) => (
-                  <div
-                    key={report.id}
-                    className="p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
-                    onClick={() => handleReportClick(report.id)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-semibold text-gray-900">
-                            AI 탈모 분석 리포트 #{index + 1}
-                          </h4>
-                          <Badge variant="outline" className="text-xs">
-                            {report.analysisType || '종합 진단'}
-                          </Badge>
+                {reports.map((report, index) => {
+                  const totalCount = reports.length;
+                  const formatAnalysisType = (type: string | undefined): string => {
+                    if (!type) return '종합 진단';
+                    if (type === 'daily') return '두피 분석';
+                    // 탈모 단계 검사로 처리되는 모든 타입
+                    if (type === 'swin_dual_model_llm_enhanced' ||
+                        type === 'rag_v2_analysis') {
+                      return '탈모 단계 검사';
+                    }
+                    return '종합 진단'; // 알 수 없는 타입은 종합 진단으로
+                  };
+                  const isDailyAnalysis = report.analysisType === 'daily';
+
+                  return (
+                    <div
+                      key={report.id}
+                      className="p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+                      onClick={() => handleReportClick(report.id)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="font-semibold text-gray-900">
+                              AI 탈모 분석 리포트 #{totalCount - index}
+                            </h4>
+                            <Badge variant="outline" className="text-xs">
+                              {formatAnalysisType(report.analysisType)}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {report.inspectionDate}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Star className="w-3 h-3" />
+                              {isDailyAnalysis ? `${report.grade}점` : `${report.grade}단계`}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {report.inspectionDate}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Star className="w-3 h-3" />
-                            {report.grade}단계
-                          </span>
-                        </div>
+                        <ChevronRight className="w-5 h-5 text-gray-400" />
                       </div>
-                      <ChevronRight className="w-5 h-5 text-gray-400" />
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>

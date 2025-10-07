@@ -17,6 +17,7 @@ import HospitalMap from "./HospitalMap"
 import ProductRecommendation from "./ProductRecommendation"
 import VideoContent from "./VideoContent"
 import UserInfoEdit from "./UserInfoEdit"
+import MyFavorites from "./MyFavorites"
 import {
   FileText,
   Heart,
@@ -131,10 +132,10 @@ export default function MyPage() {
     }
   }
 
-  // 분석 결과 데이터 조회 함수
+  // 분석 결과 데이터 조회 함수 (Incoming의 useCallback 구조 사용)
   const fetchAnalysisData = useCallback(async () => {
     console.log('분석 결과 데이터 조회 시작:', { userId: user.userId, token: token ? '있음' : '없음' });
-    
+
     if (!user.userId || !token) {
       console.log('사용자 ID 또는 토큰이 없음:', { userId: user.userId, token: token });
       setLoading(false)
@@ -173,7 +174,7 @@ export default function MyPage() {
           improvement: result.improvement || '15% 개선됨'
         };
       })
-      
+
       setAnalysisResults(formattedResults)
 
       // 탈모분석 결과 조회
@@ -234,20 +235,20 @@ export default function MyPage() {
         data: error.response?.data,
         message: error.message
       });
-      
+
       // 토큰 만료(456) 또는 인증 실패(401) 시
       if (error.response?.status === 456 || error.response?.status === 401) {
         console.log('토큰 만료 또는 인증 실패 - 토큰 갱신 시도됨');
         // 토큰 갱신은 apiClient에서 자동으로 처리됨
       }
-      
+
       // 심각한 인증 오류 시 Redux 상태 정리
       if (error.response?.status === 401 && error.response?.data?.includes('invalid')) {
         console.log('유효하지 않은 토큰 - 상태 정리');
         dispatch(clearToken());
         dispatch(clearUser());
       }
-      
+
       setTotalAnalysis(0)
       setAnalysisResults([])
       setHairlossResults([])
@@ -289,12 +290,30 @@ export default function MyPage() {
     fetchUserAdditionalInfo()
   }, [user.username, token])
 
-  // 분석 결과를 정렬하는 함수
+  // 분석 타입을 한글로 변환하는 함수 (HEAD의 로직 사용)
+  const formatAnalysisType = (type: string | undefined): string => {
+    if (!type) return '종합 진단';
+    if (type === 'daily') return '두피 분석';
+    // 탈모 단계 검사로 처리되는 모든 타입
+    if (type === 'swin_dual_model_llm_enhanced' ||
+        type === 'rag_v2_analysis' ||
+        type === 'swin_analysis' ||
+        type === 'gemini_analysis' ||
+        type.includes('swin') ||
+        type.includes('rag') ||
+        type.includes('hairloss') ||
+        type.includes('hair_loss')) {
+      return '탈모 단계 검사';
+    }
+    return '종합 진단'; // 알 수 없는 타입은 종합 진단으로
+  };
+
+  // 분석 결과를 정렬하는 함수 (Incoming 추가)
   const sortAnalysisResults = (results: AnalysisResult[]) => {
     return [...results].sort((a, b) => {
       const dateA = new Date(a.inspectionDate.replace(/\./g, '-'))
       const dateB = new Date(b.inspectionDate.replace(/\./g, '-'))
-      
+
       if (sortOrder === 'newest') {
         return dateB.getTime() - dateA.getTime() // 최신순
       } else {
@@ -303,7 +322,7 @@ export default function MyPage() {
     })
   }
 
-  // 현재 선택된 탭에 따라 표시할 데이터를 반환하는 함수
+  // 현재 선택된 탭에 따라 표시할 데이터를 반환하는 함수 (Incoming 추가)
   const getCurrentResults = () => {
     switch (activeReportTab) {
       case 'hairloss':
@@ -315,7 +334,7 @@ export default function MyPage() {
     }
   }
 
-  // 현재 선택된 탭의 개수를 반환하는 함수
+  // 현재 선택된 탭의 개수를 반환하는 함수 (Incoming 추가)
   const getCurrentCount = () => {
     switch (activeReportTab) {
       case 'hairloss':
@@ -327,16 +346,18 @@ export default function MyPage() {
     }
   }
 
-  // 분석 결과를 리포트 형태로 변환하는 함수
+  // 분석 결과를 리포트 형태로 변환하는 함수 (Incoming 구조 + HEAD의 역순 번호)
   const formatAnalysisResults = (results: AnalysisResult[]) => {
     const sortedResults = sortAnalysisResults(results)
+    const totalCount = sortedResults.length; // HEAD의 역순 번호를 위한 전체 개수
     return sortedResults.map((result, index) => ({
       id: result.id,
-      title: `AI ${result.analysisType} 리포트 #${index + 1}`,
+      title: `AI ${formatAnalysisType(result.analysisType)} 리포트 #${totalCount - index}`, // HEAD의 역순 번호 + formatAnalysisType
       date: result.inspectionDate,
       status: "완료",
       score: result.grade,
-      analysistype: result.analysisType,
+      analysistype: formatAnalysisType(result.analysisType), // 한글로 변환
+      analysisTypeRaw: result.analysisType, // 원본 타입도 전달
       improvement: result.improvement,
     }))
   }
@@ -563,8 +584,8 @@ export default function MyPage() {
                         </div>
                       </CardContent>
                     </Card>
-                    
-                    <Button 
+
+                    <Button
                       onClick={() => navigate('/integrated-diagnosis')}
                       className="w-full bg-[#1f0101] hover:bg-[#333333] text-white py-3 rounded-xl font-medium"
                     >
@@ -587,8 +608,8 @@ export default function MyPage() {
                               className="p-4 hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
                               onClick={() => {
                                 if (reportData) {
-                                  navigate('/my-report', { 
-                                    state: { analysisResult: reportData } 
+                                  navigate('/my-report', {
+                                    state: { analysisResult: reportData }
                                   })
                                 }
                               }}
@@ -609,11 +630,11 @@ export default function MyPage() {
                                     </span>
                                     <span className="flex items-center gap-1 text-xs text-gray-500">
                                       <Star className="h-3 w-3" />
-                                      {report.score}단계
+                                      {report.analysisTypeRaw === 'daily' ? `${report.score}점` : `${report.score}단계`}
                                     </span>
                                   </div>
                                 </div>
-                                
+
                                 {/* 화살표 */}
                                 <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0" />
                               </div>
@@ -622,7 +643,7 @@ export default function MyPage() {
                         })}
                       </div>
                     </div>
-                    
+
                     {/* 새로운 분석 시작 버튼 영역 */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
                       <Button 
@@ -827,44 +848,8 @@ export default function MyPage() {
           </TabsContent>
 
           <TabsContent value="favorites" className="space-y-4">
-            {/* 맞춤 추천 탭 (Mobile-First) */}
-            <Tabs defaultValue="hospitals" className="space-y-4">
-              <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
-                <TabsTrigger 
-                  value="hospitals" 
-                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-[#1f0101] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
-                >
-                  탈모 맵
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="products" 
-                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
-                >
-                  제품 추천
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="videos" 
-                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
-                >
-                  영상 컨텐츠
-                </TabsTrigger>
-              </TabsList>
-
-              {/* 병원 추천 (Mobile-First) */}
-              <TabsContent value="hospitals" className="space-y-4">
-                <HospitalMap hospitals={recommendations.hospitals} />
-              </TabsContent>
-
-              {/* 제품 추천 (Mobile-First) */}
-              <TabsContent value="products" className="space-y-4">
-                <ProductRecommendation products={recommendations.products} />
-              </TabsContent>
-
-              {/* 영상 가이드 (Mobile-First) */}
-              <TabsContent value="videos" className="space-y-4">
-                <VideoContent videos={recommendations.youtubeVideos} />
-              </TabsContent>
-            </Tabs>
+            {/* 사용자의 찜 목록 */}
+            <MyFavorites />
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">

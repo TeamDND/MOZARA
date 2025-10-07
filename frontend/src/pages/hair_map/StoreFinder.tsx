@@ -5,6 +5,7 @@ import HairLossStageSelector from '../../components/ui/HairLossStageSelector';
 import MapPreview from '../../components/ui/MapPreview';
 import DirectionModal from '../../components/ui/DirectionModal';
 import { HAIR_LOSS_STAGES, STAGE_RECOMMENDATIONS } from '../../utils/hairLossStages';
+import LikeButton from '../../components/LikeButton';
 
 const StoreFinder: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -485,7 +486,15 @@ const StoreFinder: React.FC = () => {
                         </div>
                       )}
                       <div className="p-4">
-                        <h3 className="font-semibold text-gray-900 mb-2 pr-14">{hospital.name}</h3>
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-semibold text-gray-900 flex-1">{hospital.name}</h3>
+                          <LikeButton
+                            type={hospital.category === '탈모병원' ? 'hospital' : 'map'}
+                            itemId={`${hospital.category}-${hospital.name}`}
+                            size="sm"
+                            className="ml-2"
+                          />
+                        </div>
                         <div className="space-y-1 text-xs text-gray-600 mb-3">
                           <div className="flex items-center gap-1">
                             <span>📍</span>
