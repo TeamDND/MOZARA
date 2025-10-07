@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Progress } from '../../components/ui/progress';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
+import { Separator } from '../../components/ui/separator';
 import { 
   CheckCircle, 
   Circle, 
@@ -97,6 +99,18 @@ const DailyCare: React.FC = () => {
   });
   const [streak, setStreak] = useState<number>(1);
 
+  // 시계열 비교 모달 상태
+  const [isComparisonModalOpen, setIsComparisonModalOpen] = useState(false);
+  const [comparisonData, setComparisonData] = useState<any>(null);
+  const [isComparingImages, setIsComparingImages] = useState(false);
+  const [comparisonError, setComparisonError] = useState<string | null>(null);
+
+  // 최근 2개 Daily 이미지 상태
+  const [latestDailyImages, setLatestDailyImages] = useState<{
+    current: string | null;
+    previous: string | null;
+  }>({ current: null, previous: null });
+
   // 새싹 단계 정의
   const plantStages = {
     1: { emoji: '🌱', name: '새싹' },
@@ -150,6 +164,64 @@ const DailyCare: React.FC = () => {
       if (savedTitle) setPlantTitle(savedTitle);
     }
   }, [dispatch, userId]);
+
+  // 최근 2개 Daily 이미지 불러오기
+  const loadLatestDailyImages = useCallback(async () => {
+    if (!userId) return;
+
+    try {
+      console.log('🔄 최근 Daily 이미지 불러오는 중...');
+      const response = await apiClient.get(`/timeseries/data/${userId}`);
+
+      if (response.data.success && response.data.data) {
+        const dailyData = response.data.data; // 서버에서 이미 daily 최신 2개만 반환
+
+        if (dailyData.length >= 1) {
+          setLatestDailyImages({
+            current: dailyData[0]?.imageUrl || null,
+            previous: dailyData[1]?.imageUrl || null
+          });
+          console.log('✅ Daily 이미지 로드 완료:', dailyData.length, '개');
+          console.log('📸 현재:', dailyData[0]?.imageUrl);
+          console.log('📸 이전:', dailyData[1]?.imageUrl);
+        }
+      }
+    } catch (err) {
+      console.error('❌ Daily 이미지 로드 실패:', err);
+    }
+  }, [userId]);
+
+  // Daily 시계열 비교 분석
+  const handleCompareImages = async () => {
+    if (!userId) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    setIsComparingImages(true);
+    setComparisonError(null);
+    setComparisonData(null);
+
+    try {
+      console.log('🔄 Daily 시계열 비교 시작...');
+      const response = await apiClient.get(`/timeseries/daily-comparison/${userId}`);
+
+      console.log('📥 비교 결과:', response.data);
+
+      if (!response.data.success) {
+        setComparisonError(response.data.message || '비교 데이터가 부족합니다.');
+        return;
+      }
+
+      setComparisonData(response.data);
+      setIsComparisonModalOpen(true);
+    } catch (err: any) {
+      console.error('❌ 시계열 비교 실패:', err);
+      setComparisonError(err.response?.data?.message || '비교 중 오류가 발생했습니다.');
+    } finally {
+      setIsComparingImages(false);
+    }
+  };
 
   // 대시보드 카드 상태 (분석 결과 연동)
   const [scalpScore, setScalpScore] = useState<number>(78);
@@ -372,7 +444,10 @@ const DailyCare: React.FC = () => {
 
     // 새싹 정보 로드
     loadSeedlingInfo();
-  }, [createdAt, loadSeedlingInfo]);
+
+    // 최근 Daily 이미지 로드
+    loadLatestDailyImages();
+  }, [createdAt, loadSeedlingInfo, loadLatestDailyImages]);
 
   const handleCheckboxChange = (id: number) => {
     setChecklist(prev => prev.map(item => 
@@ -407,7 +482,7 @@ const DailyCare: React.FC = () => {
         <Card className="mx-4 mt-4">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg text-[#1f0101]">오늘의 두피 분석</CardTitle>
-            <p className="text-sm text-gray-600 mt-1">오늘의 두피 상태를 확인해보세요</p>
+            <p className="text-sm text-gray-600 mt-1">오늘의 두피 상태를 확인해보세요. (정수리 영역 사진) </p>
           </CardHeader>
           <CardContent className="space-y-3">
             <input
@@ -490,6 +565,9 @@ const DailyCare: React.FC = () => {
 
                               await apiClient.post('/ai/hair-loss-daily/save-result', savePayload);
                               console.log('두피 점수 저장 완료:', calculatedScore);
+
+                              // Daily 이미지 새로고침
+                              loadLatestDailyImages();
                             } catch (saveError) {
                               console.error('두피 점수 저장 실패:', saveError);
                             }
@@ -549,6 +627,19 @@ const DailyCare: React.FC = () => {
                 <p className="mt-1 text-xs opacity-90">{rednessSub}</p>
               </CardContent>
             </Card>
+          </div>
+        )}
+
+        {/* 시계열 변화 분석 버튼 */}
+        {analysis && (
+          <div className="mx-4 mt-4">
+            <Button
+              onClick={() => navigate('/timeseries-analysis')}
+              className="w-full bg-gradient-to-r from-[#1f0101] to-[#2A0202] text-white hover:opacity-90 flex items-center justify-center gap-2"
+            >
+              <BarChart3 className="h-5 w-5" />
+              변화 추이 보기
+            </Button>
           </div>
         )}
 
@@ -799,22 +890,47 @@ const DailyCare: React.FC = () => {
           <CardContent>
             <div className="grid grid-cols-2 gap-3 mb-3">
               <div className="text-center">
-                <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl mb-2 flex items-center justify-center">
-                  <Camera className="h-8 w-8 text-gray-500" />
-                </div>
-                <p className="text-xs text-gray-600">30일 전</p>
+                {latestDailyImages.previous ? (
+                  <img
+                    src={latestDailyImages.previous}
+                    alt="이전 레포트"
+                    className="aspect-square object-cover rounded-xl mb-2 w-full border-2 border-gray-300"
+                  />
+                ) : (
+                  <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl mb-2 flex items-center justify-center">
+                    <Camera className="h-8 w-8 text-gray-500" />
+                  </div>
+                )}
+                <p className="text-xs text-gray-600">이전 레포트</p>
               </div>
               <div className="text-center">
-                <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl mb-2 flex items-center justify-center border-2" style={{ borderColor: '#1f0101' }}>
-                  <Camera className="h-8 w-8" style={{ color: '#1f0101' }} />
-                </div>
+                {latestDailyImages.current ? (
+                  <img
+                    src={latestDailyImages.current}
+                    alt="오늘 레포트"
+                    className="aspect-square object-cover rounded-xl mb-2 w-full border-2 border-gray-300"
+                    /* style={{ borderColor: '#1f0101' }} */
+                  />
+                ) : (
+                  <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl mb-2 flex items-center justify-center border-2" style={{ borderColor: '#1f0101' }}>
+                    <Camera className="h-8 w-8" style={{ color: '#1f0101' }} />
+                  </div>
+                )}
                 <p className="text-xs" style={{ color: '#1f0101' }}>오늘</p>
               </div>
             </div>
             
-            <Button variant="outline" className="w-full">
-              새 사진 추가
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleCompareImages}
+              disabled={isComparingImages}
+            >
+              {isComparingImages ? '분석 중...' : '변화 분석하기'}
             </Button>
+            {comparisonError && (
+              <p className="text-xs text-red-600 mt-2 text-center">{comparisonError}</p>
+            )}
           </CardContent>
         </Card>
 
@@ -967,6 +1083,206 @@ const DailyCare: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {/* 시계열 비교 모달 */}
+      {isComparisonModalOpen && comparisonData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            {/* 헤더 */}
+            <div className="sticky top-0 bg-white border-b p-4 flex items-center justify-between rounded-t-2xl">
+              <h2 className="text-lg font-bold text-[#1f0101]">변화 분석 결과</h2>
+              <button
+                onClick={() => setIsComparisonModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* 날짜 정보 */}
+            <div className="p-4 border-b bg-gray-50">
+              <div className="grid grid-cols-2 gap-3 text-center">
+                <div>
+                  <p className="text-xs text-gray-600 mb-1">이전 레포트</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {comparisonData.previous_date}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600 mb-1">오늘 레포트</p>
+                  <p className="text-sm font-semibold text-[#1f0101]">
+                    {comparisonData.current_date}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 이미지 비교 */}
+            <div className="p-4 border-b">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <img
+                    src={comparisonData.previous_image_url}
+                    alt="이전 사진"
+                    className="w-full aspect-square object-cover rounded-lg border-2 border-gray-300"
+                  />
+                </div>
+                <div>
+                  <img
+                    src={comparisonData.current_image_url}
+                    alt="현재 사진"
+                    className="w-full aspect-square object-cover rounded-lg border-2 border-[#1f0101]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 탭으로 구분된 상세 분석 */}
+            <div className="p-4">
+              <Tabs defaultValue="density" className="w-full">
+                {/* <TabsList className="w-full grid grid-cols-3">
+                  <TabsTrigger value="density">밀도</TabsTrigger>
+                  <TabsTrigger value="distribution">분포</TabsTrigger>
+                  <TabsTrigger value="ai">AI</TabsTrigger>
+                </TabsList> */}
+
+                {/* 밀도 탭 - 변화량만 표시 */}
+                {comparisonData.current?.density && comparisonData.comparison?.density && (
+                  <TabsContent value="density" className="space-y-3 mt-4">
+                    {/* 전체 밀도는 거리/각도에 따라 부정확하므로 삭제 */}
+                    {/* <div className="bg-blue-50 rounded-lg p-4 text-center">
+                      <p className="text-xs text-blue-700 mb-1">현재 모발 밀도</p>
+                      <p className="text-3xl font-bold text-blue-900">
+                        {comparisonData.current.density.hair_density_percentage.toFixed(1)}%
+                      </p>
+                    </div>
+                    <Separator /> */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="text-center p-4 bg-gray-50 rounded-lg">
+                        <p className="text-xs text-gray-600 mb-2">밀도 변화율</p>
+                        <p className={`text-2xl font-bold ${
+                          comparisonData.comparison.density.change_percentage > 0
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                        }`}>
+                          {comparisonData.comparison.density.change_percentage > 0 ? '+' : ''}
+                          {comparisonData.comparison.density.change_percentage.toFixed(1)}%
+                        </p>
+                      </div>
+                      <div className="text-center p-4 bg-gray-50 rounded-lg">
+                        <p className="text-xs text-gray-600 mb-2">추세</p>
+                        <p className="text-2xl font-bold text-[#1f0101]">
+                          {comparisonData.comparison.density.trend === 'improving' ? '✅ 개선' :
+                           comparisonData.comparison.density.trend === 'declining' ? '⚠️ 악화' : '➡️ 유지'}
+                        </p>
+                      </div>
+                    </div>
+                  </TabsContent>
+                )}
+
+                {/* 분포 탭 */}
+                {comparisonData.comparison?.distribution && (
+                  <TabsContent value="distribution" className="space-y-3 mt-4">
+                    <div className="bg-purple-50 rounded-lg p-4 text-center">
+                      <p className="text-sm text-purple-700 mb-2">이전과의 분포 유사도</p>
+                      <p className="text-3xl font-bold text-purple-900">
+                        {(comparisonData.comparison.distribution.similarity * 100).toFixed(1)}%
+                      </p>
+                      <Progress
+                        value={comparisonData.comparison.distribution.similarity * 100}
+                        className="mt-3"
+                      />
+                    </div>
+                    <p className="text-xs text-center text-gray-600">
+                      {comparisonData.comparison.distribution.similarity > 0.9
+                        ? '✅ 분포가 안정적으로 유지되고 있습니다'
+                        : '⚠️ 분포에 변화가 감지되었습니다'}
+                    </p>
+                  </TabsContent>
+                )}
+
+                {/* AI 탭 */}
+                {comparisonData.comparison?.features && (
+                  <TabsContent value="ai" className="space-y-3 mt-4">
+                    <div className="bg-orange-50 rounded-lg p-4 text-center">
+                      <p className="text-sm text-orange-700 mb-2">AI Feature 유사도</p>
+                      <p className="text-3xl font-bold text-orange-900">
+                        {(comparisonData.comparison.features.similarity * 100).toFixed(1)}%
+                      </p>
+                      <Progress
+                        value={comparisonData.comparison.features.similarity * 100}
+                        className="mt-3"
+                      />
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">변화 점수</span>
+                        <span className="font-bold text-[#1f0101]">
+                          {comparisonData.comparison.features.change_score.toFixed(1)} / 100
+                        </span>
+                      </div>
+                    </div>
+                  </TabsContent>
+                )}
+              </Tabs>
+            </div>
+
+            <Separator />
+
+            {/* 종합 평가 */}
+            {/* {comparisonData.summary && (
+              <div className="p-4 space-y-3">
+                <h3 className="text-base font-semibold text-[#1f0101]">종합 평가</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <Card className="border-0 bg-gray-50">
+                    <CardContent className="p-3 text-center">
+                      <p className="text-xs text-gray-600 mb-1">전체 트렌드</p>
+                      <p className="text-lg font-bold">
+                        {comparisonData.summary.overall_trend === 'improving' ? '✅ 개선' :
+                         comparisonData.summary.overall_trend === 'declining' ? '⚠️ 악화' : '➖ 유지'}
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-0 bg-gray-50">
+                    <CardContent className="p-3 text-center">
+                      <p className="text-xs text-gray-600 mb-1">위험도</p>
+                      <Badge className={`${
+                        comparisonData.summary.risk_level === 'high' ? 'bg-red-600' :
+                        comparisonData.summary.risk_level === 'medium' ? 'bg-yellow-600' : 'bg-green-600'
+                      }`}>
+                        {comparisonData.summary.risk_level === 'high' ? '높음' :
+                         comparisonData.summary.risk_level === 'medium' ? '보통' : '낮음'}
+                      </Badge>
+                    </CardContent>
+                  </Card>
+                </div>
+                {comparisonData.summary.recommendations && comparisonData.summary.recommendations.length > 0 && (
+                  <Card className="border-0 bg-blue-50">
+                    <CardContent className="p-3">
+                      <p className="text-xs font-semibold text-blue-800 mb-2">💡 권장 사항</p>
+                      <div className="space-y-1">
+                        {comparisonData.summary.recommendations.map((rec: string, idx: number) => (
+                          <p key={idx} className="text-xs text-blue-700">• {rec}</p>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )} */}
+
+            {/* 닫기 버튼 */}
+            <div className="p-4 border-t">
+              <Button
+                onClick={() => setIsComparisonModalOpen(false)}
+                className="w-full bg-[#1f0101] hover:bg-[#2A0202]"
+              >
+                닫기
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

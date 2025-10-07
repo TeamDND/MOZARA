@@ -32,6 +32,7 @@ import MyReportPage from './pages/mypage/MyReportPage';
 import Chat from './pages/ChatBot/Chat';
 import ChatBotModal from './pages/ChatBot/ChatBotModal';
 import PointExchange from './pages/hair_pt/PointExchange';
+import TimeSeriesAnalysis from './pages/timeseries/TimeSeriesAnalysis';
 
 // 관리자 페이지
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -80,6 +81,9 @@ const App: React.FC = () => {
           {/* Chat 라우트 제거 - 이제 모달로 사용 */}
           <Route path="chat" element={<Chat />} />
           <Route path="point-exchange" element={<PointExchange />} />
+
+          {/* 시계열 분석 라우트 */}
+          <Route path="timeseries-analysis" element={<TimeSeriesAnalysis />} />
 
           {/* 관리자 페이지 라우트 */}
           <Route path="admin" element={<AdminDashboard />} />

@@ -913,6 +913,14 @@ try:
 except ImportError as e:
     print(f"Hair Encyclopedia Paper API 라우터 마운트 실패: {e}")
 
+# Time-Series Analysis 라우터 마운트
+try:
+    from services.time_series.api.router import router as timeseries_router
+    app.include_router(timeseries_router)
+    print("Time-Series Analysis API 라우터 마운트 완료")
+except ImportError as e:
+    print(f"Time-Series Analysis API 라우터 마운트 실패: {e}")
+
 # Gemini Hair Check 모듈
 try:
     from services.hair_gemini_check import analyze_hair_with_gemini
