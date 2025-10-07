@@ -27,7 +27,8 @@ public class RagV2CheckController {
     private final UserRepository userRepository;
 
     /**
-     * RAG v2 기반 여성 탈모 분석 (Top 이미지만 사용)
+     * RAG 기반 여성 탈모 분석 (Top 이미지만 사용)
+     * Python /hair_rag_check 엔드포인트 호출
      */
     @PostMapping("/analyze")
     public ResponseEntity<Map<String, Object>> analyze(
@@ -41,7 +42,7 @@ public class RagV2CheckController {
             @RequestParam(value = "stress", required = false) String stress) {
 
         try {
-            System.out.println("=== RAG v2 분석 요청 ===");
+            System.out.println("=== RAG 분석 요청 ===");
             System.out.println("user_id: " + userId);
             System.out.println("top_image: " + topImage.getOriginalFilename());
             System.out.println("설문 데이터 - 성별: " + gender + ", 나이: " + age + ", 가족력: " + familyHistory + ", 스트레스: " + stress);
@@ -51,7 +52,7 @@ public class RagV2CheckController {
                 saveUserInfo(userId, gender, age, familyHistory, recentHairLoss, stress);
             }
 
-            // 2. RAG v2로 분석 수행 (Top 이미지만, 설문 데이터 포함)
+            // 2. RAG로 분석 수행 (Top 이미지만, 설문 데이터 포함)
             Map<String, Object> analysisResult = ragV2CheckService.analyzeHairWithRagV2(
                 topImage, gender, age, familyHistory, recentHairLoss, stress
             );
@@ -72,7 +73,7 @@ public class RagV2CheckController {
             System.out.println("오류 발생: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "RAG v2 분석 중 오류가 발생했습니다: " + e.getMessage()));
+                    .body(Map.of("error", "RAG 분석 중 오류가 발생했습니다: " + e.getMessage()));
         }
     }
 

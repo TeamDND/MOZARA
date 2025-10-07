@@ -19,6 +19,9 @@ import numpy as np
 from PIL import Image
 import io
 from torchvision import transforms
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class DensityAnalyzer:
@@ -106,17 +109,22 @@ class DensityAnalyzer:
             # 4. 헤어 마스크 추출 (클래스 17)
             hair_mask = (mask == 17).astype(np.uint8) * 255
 
-            # 5. 얼굴 영역으로 정규화된 밀도 계산
+            # 5. 머리 밀도 계산 (전체 이미지 대비)
             total_hair_pixels = int(np.sum(hair_mask > 0))
             face_pixels = int(np.sum(mask == 1))  # 클래스 1 = skin (얼굴 피부)
+            total_pixels = hair_mask.shape[0] * hair_mask.shape[1]
 
-            # 얼굴 대비 머리 비율 (거리 무관)
-            if face_pixels > 0:
-                density_percentage = (total_hair_pixels / face_pixels) * 100
-            else:
-                # fallback: 얼굴이 안 보이면 전체 이미지 대비
-                total_pixels = hair_mask.shape[0] * hair_mask.shape[1]
-                density_percentage = (total_hair_pixels / total_pixels) * 100
+            # 🔍 상세 로그
+            logger.info(f"🎨 세그멘테이션 결과:")
+            logger.info(f"  전체 픽셀: {total_pixels:,}")
+            logger.info(f"  머리 픽셀: {total_hair_pixels:,}")
+            logger.info(f"  얼굴 픽셀: {face_pixels:,}")
+
+            # ✅ 수정: 전체 이미지 대비 머리 비율 (0-100%)
+            # 이유: 얼굴 대비 비율은 각도/거리에 따라 변동이 심함
+            # 예: 위에서 찍은 사진 → 얼굴 작음 → 밀도가 비정상적으로 높게 나옴 (226%)
+            density_percentage = (total_hair_pixels / total_pixels) * 100
+            logger.info(f"  밀도 계산: 머리/전체 = {total_hair_pixels:,}/{total_pixels:,} = {density_percentage:.2f}%")
 
             # 6. 8x8 그리드 분포 맵 생성
             grid_size = 8

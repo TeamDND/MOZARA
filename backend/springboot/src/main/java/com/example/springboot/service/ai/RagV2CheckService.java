@@ -31,16 +31,16 @@ public class RagV2CheckService {
     private final UserRepository userRepository;
 
     /**
-     * RAG v2 기반 여성 탈모 이미지 분석 (Python /hair_rag_v2_check 프록시)
+     * RAG 기반 여성 탈모 이미지 분석 (Python router 프록시)
      * Top 이미지만 사용 (여성용)
      */
     public Map<String, Object> analyzeHairWithRagV2(MultipartFile topImage,
                                                      String gender, String age, String familyHistory,
                                                      String recentHairLoss, String stress) throws Exception {
-        log.info("RAG v2 탈모 분석 요청 - Top: {}", topImage.getOriginalFilename());
+        log.info("RAG 탈모 분석 요청 - Top: {}", topImage.getOriginalFilename());
 
-        // Python API의 URL을 hair_rag_v2_check로 설정
-        String url = pythonBaseUrl + "/hair_rag_v2_check";
+        // Python API의 URL을 /api/hair-classification-rag/analyze-upload로 설정
+        String url = pythonBaseUrl + "/api/hair-classification-rag/analyze-upload";
 
         // HTTP 헤더를 MULTIPART_FORM_DATA로 설정
         HttpHeaders headers = new HttpHeaders();
@@ -49,8 +49,8 @@ public class RagV2CheckService {
         // MultiValueMap을 사용하여 요청 본문(body)을 구성
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
-        // Top 이미지 추가
-        body.add("top_image", new ByteArrayResource(topImage.getBytes()) {
+        // Top 이미지 추가 (router.py의 'file' 파라미터와 매칭)
+        body.add("file", new ByteArrayResource(topImage.getBytes()) {
             @Override
             public String getFilename() {
                 return topImage.getOriginalFilename();
@@ -74,23 +74,23 @@ public class RagV2CheckService {
             ResponseEntity<Map> response = restTemplate.postForEntity(url, requestEntity, Map.class);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                log.info("Python RAG v2 분석 응답 성공");
+                log.info("Python RAG 분석 응답 성공");
                 return response.getBody();
             } else {
-                throw new Exception("Python RAG v2 응답 오류: " + response.getStatusCode());
+                throw new Exception("Python RAG 응답 오류: " + response.getStatusCode());
             }
         } catch (Exception e) {
-            log.error("Python RAG v2 통신 오류: {}", e.getMessage());
-            throw new Exception("RAG v2 분석 서비스 연결 오류: " + e.getMessage());
+            log.error("Python RAG 통신 오류: {}", e.getMessage());
+            throw new Exception("RAG 분석 서비스 연결 오류: " + e.getMessage());
         }
     }
 
     /**
-     * RAG v2 분석 결과를 데이터베이스에 저장
+     * RAG 분석 결과를 데이터베이스에 저장
      */
     public Map<String, Object> saveAnalysisResult(Map<String, Object> ragV2Result, Integer userId, String imageUrl) throws Exception {
-        log.info("RAG v2 분석 결과 저장 요청 - 사용자: {}", userId);
-        System.out.println("=== RAG v2 저장 요청 ===");
+        log.info("RAG 분석 결과 저장 요청 - 사용자: {}", userId);
+        System.out.println("=== RAG 저장 요청 ===");
         System.out.println("userId: " + userId);
         System.out.println("ragV2Result: " + ragV2Result);
 
@@ -111,7 +111,7 @@ public class RagV2CheckService {
                 throw new Exception("사용자를 찾을 수 없습니다: " + userId);
             }
 
-            // RAG v2 결과를 데이터베이스 형식으로 변환
+            // RAG 결과를 데이터베이스 형식으로 변환
             String title = (String) ragV2Result.get("title");
             String description = (String) ragV2Result.get("description");
             String analysisSummary = title + "\n" + description;
@@ -120,7 +120,7 @@ public class RagV2CheckService {
             String advice = (String) ragV2Result.getOrDefault("advice", "");
 
             // 디버깅: 데이터 길이 확인
-            log.info("=== RAG v2 저장 데이터 길이 확인 ===");
+            log.info("=== RAG 저장 데이터 길이 확인 ===");
             log.info("analysisSummary 길이: {} 바이트", analysisSummary.getBytes("UTF-8").length);
             log.info("advice 길이: {} 바이트", advice.getBytes("UTF-8").length);
             log.info("analysisSummary 내용: {}", analysisSummary);
@@ -132,12 +132,21 @@ public class RagV2CheckService {
                 analysisType = "rag_v2_analysis";
             }
 
+            // grade 값 추출 (프로젝트 표시 단계 0-3)
+            Integer gradeValue = (Integer) ragV2Result.get("grade");
+            Integer sinclairStage = (Integer) ragV2Result.get("sinclair_stage");
+
+            log.info("=== Grade 값 확인 (변경된 변수명) ===");
+            log.info("grade (프로젝트 표시 0-3): {}", gradeValue);
+            log.info("sinclair_stage (AI 원본 1-5): {}", sinclairStage);
+            log.info("ragV2Result keys: {}", ragV2Result.keySet());
+
             // AnalysisResultEntity 생성
             AnalysisResultEntity entity = new AnalysisResultEntity();
             entity.setInspectionDate(LocalDate.now());
             entity.setAnalysisSummary(analysisSummary);
             entity.setAdvice(advice);
-            entity.setGrade((Integer) ragV2Result.get("stage"));
+            entity.setGrade(gradeValue);
             entity.setImageUrl(imageUrl != null ? imageUrl : "");
             entity.setAnalysisType(analysisType);
             entity.setUserEntityIdForeign(user);
@@ -145,7 +154,7 @@ public class RagV2CheckService {
             // AnalysisResultDAO를 통해 데이터베이스에 저장
             AnalysisResultEntity savedEntity = analysisResultDAO.save(entity);
 
-            log.info("RAG v2 분석 결과 저장 성공: ID {}", savedEntity.getId());
+            log.info("RAG 분석 결과 저장 성공: ID {}", savedEntity.getId());
 
             return Map.of(
                 "message", "분석 완료 및 저장 완료",
@@ -154,7 +163,7 @@ public class RagV2CheckService {
             );
 
         } catch (Exception e) {
-            log.error("RAG v2 분석 결과 저장 오류: {}", e.getMessage());
+            log.error("RAG 분석 결과 저장 오류: {}", e.getMessage());
             throw new Exception("분석 결과 저장 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
