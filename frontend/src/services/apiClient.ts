@@ -55,11 +55,12 @@ apiClient.interceptors.response.use(
     async (error: AxiosError) => {
         const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-        // 로그인 요청은 401 처리 건너뛰기
+        // 로그인 요청과 이메일 인증 요청은 401 처리 건너뛰기
         const isLoginRequest = originalRequest?.url?.includes('/login');
+        const isEmailAuthRequest = originalRequest?.url?.includes('/email-auth');
 
-        // 401 또는 456 에러 처리 (토큰 갱신) - 로그인 요청 제외
-        if((error.response?.status === 401 || error.response?.status === 456) && !originalRequest._retry && !isLoginRequest){
+        // 401 또는 456 에러 처리 (토큰 갱신) - 로그인 요청과 이메일 인증 요청 제외
+        if((error.response?.status === 401 || error.response?.status === 456) && !originalRequest._retry && !isLoginRequest && !isEmailAuthRequest){
             originalRequest._retry = true;
             try{
                 console.log('토큰 갱신 시도 중...');

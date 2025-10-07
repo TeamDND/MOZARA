@@ -1396,6 +1396,17 @@ async def search_youtube_videos(q: str, order: str = "viewCount", max_results: i
     youtube_api_key = os.getenv("YOUTUBE_API_KEY")
     print(f"🔑 YouTube API 키 상태: {'설정됨' if youtube_api_key and youtube_api_key != 'your_youtube_api_key_here' else '설정되지 않음'}")
     
+    # API 키가 없거나 기본값인 경우 대체 응답 반환
+    if not youtube_api_key or youtube_api_key == 'your_youtube_api_key_here':
+        print("⚠️ YouTube API 키가 설정되지 않음 - 대체 응답 반환")
+        return {
+            "kind": "youtube#searchListResponse",
+            "etag": "no-api-key",
+            "items": [],
+            "pageInfo": {"totalResults": 0, "resultsPerPage": 0},
+            "message": "YouTube API 키가 설정되지 않았습니다. 관리자에게 문의하세요."
+        }
+    
     try:
         api_url = f"https://www.googleapis.com/youtube/v3/search"
         params = {
@@ -1421,7 +1432,28 @@ async def search_youtube_videos(q: str, order: str = "viewCount", max_results: i
         
     except requests.exceptions.RequestException as e:
         print(f"❌ YouTube API 호출 실패: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"YouTube API 호출 실패: {str(e)}")
+        
+        # 403 오류인 경우 구체적인 메시지 제공
+        if hasattr(e, 'response') and e.response is not None:
+            status_code = e.response.status_code
+            if status_code == 403:
+                # 403 오류의 경우 빈 결과를 반환하여 서비스 중단 방지
+                print("⚠️ YouTube API 403 오류 - 빈 결과 반환")
+                return {
+                    "kind": "youtube#searchListResponse",
+                    "etag": "api-error-403",
+                    "items": [],
+                    "pageInfo": {"totalResults": 0, "resultsPerPage": 0},
+                    "message": "YouTube API 접근이 제한되었습니다. 잠시 후 다시 시도해주세요."
+                }
+            elif status_code == 400:
+                error_detail = "YouTube API 요청 파라미터가 잘못되었습니다."
+            else:
+                error_detail = f"YouTube API 오류 (상태코드: {status_code})"
+        else:
+            error_detail = "YouTube API 연결에 실패했습니다."
+            
+        raise HTTPException(status_code=500, detail=error_detail)
     except Exception as e:
         print(f"❌ 예상치 못한 오류: {str(e)}")
         raise HTTPException(status_code=500, detail=f"예상치 못한 오류: {str(e)}")
@@ -2015,6 +2047,35 @@ async def location_service_status():
         "kakaoApiConfigured": bool(kakao_api_key),
         "timestamp": datetime.now().isoformat()
     }
+
+
+@app.post("/generate-related-questions")
+async def generate_related_questions_api(request: dict):
+    """
+    AI 응답을 기반으로 연관 질문들을 생성합니다.
+    """
+    try:
+        from services.rag_chatbot.related_questions_service import generate_related_questions
+        
+        response_text = request.get("response", "")
+        questions = generate_related_questions(response_text)
+        
+        return {
+            "questions": questions,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        print(f"연관 질문 생성 오류: {e}")
+        return {
+            "questions": [
+                "이 치료법의 부작용은?",
+                "다른 치료법도 있나요?",
+                "효과가 언제 나타나나요?",
+                "주의사항이 있나요?"
+            ],
+            "timestamp": datetime.now().isoformat()
+        }
 
 
 if __name__ == "__main__":

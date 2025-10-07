@@ -263,102 +263,105 @@ const ChatBot: React.FC = () => {
 
       {/* 메시지 영역 */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-        {/* 빠른 질문 (처음에만 표시) */}
-        {showQuickQuestions && messages.length === 1 && (
-          <div className="bg-white rounded-xl p-4 shadow-sm border">
-            <div className="flex items-center gap-2 mb-3">
-              <MessageSquare className="w-4 h-4 text-indigo-500" />
-              <span className="text-sm font-medium text-gray-700">자주 묻는 질문</span>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {quickQuestions.map((question) => (
-                <button
-                  key={question.id}
-                  onClick={() => handleQuickQuestion(question)}
-                  className="text-left p-3 bg-gray-50 hover:bg-indigo-50 rounded-lg border border-gray-200 hover:border-indigo-200 transition-all duration-200 group"
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className={`text-xs px-2 py-1 rounded-full ${getCategoryColor(question.category)}`}>
-                      {question.category}
-                    </span>
-                    <ChevronDown className="w-3 h-3 text-gray-400 group-hover:text-indigo-500 transform group-hover:translate-x-1 transition-all" />
-                  </div>
-                  <p className="text-sm text-gray-700 group-hover:text-indigo-700">
-                    {question.text}
-                  </p>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* 메시지 목록 */}
         {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${
-              message.sender === 'user' ? 'justify-end' : 'justify-start'
-            }`}
-          >
+          <div key={message.id}>
             <div
-              className={`max-w-xs lg:max-w-md px-4 py-3 rounded-xl ${
-                message.sender === 'user'
-                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-br-sm shadow-lg'
-                  : 'bg-white text-gray-900 rounded-bl-sm shadow-sm border border-gray-100'
+              className={`flex ${
+                message.sender === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
-              {/* 봇 메시지 헤더 */}
-              {message.sender === 'bot' && (
-                <div className="flex items-start gap-2 mb-2">
-                  <Bot className="w-4 h-4 text-indigo-500 mt-1 flex-shrink-0" />
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500 font-medium">AI 상담사</span>
-                    {message.contextUsed && (
-                      <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full flex items-center gap-1">
-                        <BookOpen className="w-3 h-3" />
-                        논문 참조
-                      </span>
-                    )}
+              <div
+                className={`max-w-xs lg:max-w-md px-4 py-3 rounded-xl ${
+                  message.sender === 'user'
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-br-sm shadow-lg'
+                    : 'bg-white text-gray-900 rounded-bl-sm shadow-sm border border-gray-100'
+                }`}
+              >
+                {/* 봇 메시지 헤더 */}
+                {message.sender === 'bot' && (
+                  <div className="flex items-start gap-2 mb-2">
+                    <Bot className="w-4 h-4 text-indigo-500 mt-1 flex-shrink-0" />
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-500 font-medium">AI 상담사</span>
+                      {message.contextUsed && (
+                        <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full flex items-center gap-1">
+                          <BookOpen className="w-3 h-3" />
+                          논문 참조
+                        </span>
+                      )}
+                    </div>
                   </div>
+                )}
+
+                {/* 메시지 내용 */}
+                <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                  {message.text}
                 </div>
-              )}
 
-              {/* 메시지 내용 */}
-              <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                {message.text}
-              </div>
-
-              {/* 출처 정보 */}
-              {message.sources && message.sources.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-gray-100">
-                  <div className="flex items-center gap-1 mb-2">
-                    <BookOpen className="w-3 h-3 text-indigo-500" />
-                    <span className="text-xs text-gray-500 font-medium">참고 자료</span>
+                {/* 출처 정보 */}
+                {message.sources && message.sources.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-gray-100">
+                    <div className="flex items-center gap-1 mb-2">
+                      <BookOpen className="w-3 h-3 text-indigo-500" />
+                      <span className="text-xs text-gray-500 font-medium">참고 자료</span>
+                    </div>
+                    <div className="space-y-1">
+                      {message.sources.map((source, index) => (
+                        <div
+                          key={index}
+                          className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded border border-indigo-200 flex items-center gap-1"
+                        >
+                          <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full" />
+                          {source}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    {message.sources.map((source, index) => (
-                      <div
-                        key={index}
-                        className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded border border-indigo-200 flex items-center gap-1"
+                )}
+
+                {/* 시간 */}
+                <div className={`flex items-center gap-1 mt-2 ${
+                  message.sender === 'user' ? 'text-blue-100' : 'text-gray-400'
+                }`}>
+                  <Clock className="w-3 h-3" />
+                  <span className="text-xs">
+                    {formatTime(message.timestamp)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 빠른 질문 (첫 번째 봇 메시지의 시간 표시 바로 아래) */}
+            {showQuickQuestions && message.sender === 'bot' && messages.indexOf(message) === 0 && (
+              <div className="mt-4">
+                <div className="bg-white rounded-xl p-4 shadow-sm border">
+                  <div className="flex items-center gap-2 mb-3">
+                    <MessageSquare className="w-4 h-4 text-indigo-500" />
+                    <span className="text-sm font-medium text-gray-700">자주 묻는 질문</span>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {quickQuestions.map((question) => (
+                      <button
+                        key={question.id}
+                        onClick={() => handleQuickQuestion(question)}
+                        className="text-left p-3 bg-gray-50 hover:bg-indigo-50 rounded-lg border border-gray-200 hover:border-indigo-200 transition-all duration-200 group"
                       >
-                        <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full" />
-                        {source}
-                      </div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className={`text-xs px-2 py-1 rounded-full ${getCategoryColor(question.category)}`}>
+                            {question.category}
+                          </span>
+                          <ChevronDown className="w-3 h-3 text-gray-400 group-hover:text-indigo-500 transform group-hover:translate-x-1 transition-all" />
+                        </div>
+                        <p className="text-sm text-gray-700 group-hover:text-indigo-700">
+                          {question.text}
+                        </p>
+                      </button>
                     ))}
                   </div>
                 </div>
-              )}
-
-              {/* 시간 */}
-              <div className={`flex items-center gap-1 mt-2 ${
-                message.sender === 'user' ? 'text-blue-100' : 'text-gray-400'
-              }`}>
-                <Clock className="w-3 h-3" />
-                <span className="text-xs">
-                  {formatTime(message.timestamp)}
-                </span>
               </div>
-            </div>
+            )}
           </div>
         ))}
 
