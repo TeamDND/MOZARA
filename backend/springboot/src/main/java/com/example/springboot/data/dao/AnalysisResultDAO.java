@@ -113,6 +113,13 @@ public class AnalysisResultDAO {
     }
 
     /**
+     * 사용자 ID와 분석 타입으로 분석 결과 조회 (기본: 최신순)
+     */
+    public List<AnalysisResultEntity> findByUserIdAndAnalysisType(Integer userId, String analysisType) {
+        return findByUserIdAndAnalysisTypeOrderByDateDesc(userId, analysisType);
+    }
+
+    /**
      * 사용자 ID로 분석 결과 개수 조회
      */
     public long countByUserId(Integer userId) {
