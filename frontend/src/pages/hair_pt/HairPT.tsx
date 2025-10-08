@@ -743,7 +743,7 @@ const HairPT: React.FC = () => {
               className="px-3 py-1.5 rounded-lg font-bold bg-[#1F0101] hover:bg-[#2A0202] text-white active:scale-[0.98] whitespace-nowrap text-sm"
               onClick={() => !isCompleted && toggleMission(mission.key)}
             >
-              미션 시작
+              미션 완료
             </button>
           ) : (
             <span className="px-3 py-1.5 rounded-lg font-bold bg-gray-300 text-gray-500 whitespace-nowrap text-sm">미완료</span>
@@ -1062,7 +1062,7 @@ const HairPT: React.FC = () => {
                                   }
                                 }}
                               >
-                                시작하기
+                                미션 완료
                               </button>
                             ) : (
                               <span className="px-3 py-1.5 rounded-lg font-bold bg-gray-300 text-gray-500 whitespace-nowrap text-sm">미완료</span>

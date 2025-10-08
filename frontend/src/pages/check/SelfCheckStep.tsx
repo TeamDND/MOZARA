@@ -25,7 +25,7 @@ const SelfCheckStep: React.FC<SelfCheckStepProps> = ({ baspAnswers, setBaspAnswe
   return (
     <div className="space-y-8">
       <div className="text-center space-y-3">
-        <Brain className="w-12 h-12 text-[#222222] mx-auto" />
+        <Brain className="w-12 h-12 text-[#1f0101] mx-auto" />
         <h2 className="text-xl font-bold text-gray-800">분석 전 자가체크</h2>
         <p className="text-sm text-gray-600">
           생활 습관과 유전적 요인을 파악하여 정확한 분석을 도와드려요

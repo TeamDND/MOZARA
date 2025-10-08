@@ -109,24 +109,24 @@ const BottomNavigationBar: React.FC = () => {
               onClick={() => {
                 closeChatBotModal();
                 if (isLoggedIn) {
-                  navigate('/d-care')
+                  navigate('/daily-care')
                 } else {
                   navigate('/login')
                 }
               }}
               className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all flex-1 ${
-                location.pathname.startsWith('/d-care') || location.pathname.startsWith('/hair_dailycare')
+                location.pathname.startsWith('/daily-care') || location.pathname.startsWith('/hair_dailycare')
                   ? 'bg-[#1f0101]/10' 
                   : ''
               }`}
             >
               <Calendar className={`h-5 w-5 mb-1 ${
-                location.pathname.startsWith('/d-care') || location.pathname.startsWith('/hair_dailycare')
+                location.pathname.startsWith('/daily-care') || location.pathname.startsWith('/hair_dailycare')
                   ? 'text-[#1f0101]' 
                   : 'text-gray-600'
               }`} />
               <span className={`text-xs font-medium ${
-                location.pathname.startsWith('/d-care') || location.pathname.startsWith('/hair_dailycare')
+                location.pathname.startsWith('/daily-care') || location.pathname.startsWith('/hair_dailycare')
                   ? 'text-[#1f0101]' 
                   : 'text-gray-600'
               }`}>

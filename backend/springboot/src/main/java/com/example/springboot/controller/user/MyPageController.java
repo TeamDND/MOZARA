@@ -160,4 +160,35 @@ public class MyPageController {
                     .body("{\"error\": \"분석 결과 개수 조회 중 오류가 발생했습니다.\"}");
         }
     }
+
+    /**
+     * 오늘 날짜의 특정 분석 타입 결과 조회
+     */
+    @GetMapping("/today-analysis/{userId}/{analysisType}")
+    public ResponseEntity<?> getTodayAnalysisByType(@PathVariable Integer userId, @PathVariable String analysisType) {
+        try {
+            AnalysisResultDTO result = myPageService.getTodayAnalysisByType(userId, analysisType);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "오늘 날짜의 분석 결과 조회 중 오류가 발생했습니다."));
+        }
+    }
+
+    /**
+     * 이번주 일주일치 daily 분석 점수 조회 (일월화수목금토)
+     */
+    @GetMapping("/weekly-daily-analysis/{userId}")
+    public ResponseEntity<?> getWeeklyDailyAnalysis(@PathVariable Integer userId) {
+        try {
+            Map<String, Object> result = myPageService.getWeeklyDailyAnalysis(userId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "주간 분석 결과 조회 중 오류가 발생했습니다."));
+        }
+    }
 }

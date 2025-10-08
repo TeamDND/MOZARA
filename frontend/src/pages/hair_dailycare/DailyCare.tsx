@@ -86,6 +86,14 @@ const DailyCare: React.FC = () => {
   const [products, setProducts] = useState<HairProduct[] | null>(null);
   const [tips, setTips] = useState<string[]>([]);
   
+  // 오늘의 분석 결과 (DB에서 로드된 데이터)
+  const [todayAnalysisData, setTodayAnalysisData] = useState<{
+    date: string;
+    imageUrl: string;
+    grade: number;
+    summary: string;
+  } | null>(null);
+  
   // 새싹 관련 상태
   const [seedlingPoints, setSeedlingPoints] = useState(0);
   const [seedlingLevel, setSeedlingLevel] = useState(1);
@@ -100,11 +108,29 @@ const DailyCare: React.FC = () => {
   });
   const [streak, setStreak] = useState<number>(1);
 
+  // 주간 분석 데이터 상태
+  const [weeklyData, setWeeklyData] = useState<{ day: string; height: number; score: number | null }[]>([
+    { day: '일', height: 18, score: null },
+    { day: '월', height: 55, score: null },
+    { day: '화', height: 62, score: null },
+    { day: '수', height: 20, score: null },
+    { day: '목', height: 18, score: null },
+    { day: '금', height: 65, score: null },
+    { day: '토', height: 75, score: null }
+  ]);
+
+  // 주간 통계 상태
+  const [weeklyAverage, setWeeklyAverage] = useState<number>(0);
+  const [weeklyCount, setWeeklyCount] = useState<number>(0);
+
   // 시계열 비교 모달 상태
   const [isComparisonModalOpen, setIsComparisonModalOpen] = useState(false);
   const [comparisonData, setComparisonData] = useState<any>(null);
   const [isComparingImages, setIsComparingImages] = useState(false);
   const [comparisonError, setComparisonError] = useState<string | null>(null);
+
+  // 재분석 상태
+  const [isReanalyzing, setIsReanalyzing] = useState(false);
 
   // 최근 2개 Daily 이미지 상태
   const [latestDailyImages, setLatestDailyImages] = useState<{
@@ -189,6 +215,51 @@ const DailyCare: React.FC = () => {
       }
     } catch (err) {
       console.error('❌ Daily 이미지 로드 실패:', err);
+    }
+  }, [userId]);
+
+  // 주간 분석 데이터 불러오기
+  const loadWeeklyAnalysis = useCallback(async () => {
+    if (!userId) return;
+
+    try {
+      console.log('🔄 주간 분석 데이터 불러오는 중...');
+      const response = await apiClient.get(`/weekly-daily-analysis/${userId}`);
+
+      if (response.data && response.data.weeklyData) {
+        const data = response.data.weeklyData;
+        console.log('✅ 주간 분석 데이터:', data);
+
+        // 요일별 데이터 업데이트
+        const updatedWeeklyData = [
+          { day: '일', score: data['일'], height: data['일'] ? Math.max(18, data['일'] * 0.75) : 18 },
+          { day: '월', score: data['월'], height: data['월'] ? Math.max(18, data['월'] * 0.75) : 18 },
+          { day: '화', score: data['화'], height: data['화'] ? Math.max(18, data['화'] * 0.75) : 18 },
+          { day: '수', score: data['수'], height: data['수'] ? Math.max(18, data['수'] * 0.75) : 18 },
+          { day: '목', score: data['목'], height: data['목'] ? Math.max(18, data['목'] * 0.75) : 18 },
+          { day: '금', score: data['금'], height: data['금'] ? Math.max(18, data['금'] * 0.75) : 18 },
+          { day: '토', score: data['토'], height: data['토'] ? Math.max(18, data['토'] * 0.75) : 18 }
+        ];
+
+        setWeeklyData(updatedWeeklyData);
+
+        // 평균 점수 및 진단 횟수 계산
+        const scores = updatedWeeklyData
+          .map(item => item.score)
+          .filter((score): score is number => score !== null);
+        
+        const count = scores.length;
+        const average = count > 0 
+          ? Math.round(scores.reduce((sum, score) => sum + score, 0) / count * 10) / 10
+          : 0;
+
+        setWeeklyCount(count);
+        setWeeklyAverage(average);
+
+        console.log('📊 주간 통계 - 평균:', average, ', 횟수:', count);
+      }
+    } catch (err) {
+      console.error('❌ 주간 분석 데이터 로드 실패:', err);
     }
   }, [userId]);
 
@@ -380,6 +451,84 @@ const DailyCare: React.FC = () => {
   return finalScore;
   };
 
+  // 오늘 날짜의 daily 분석결과 자동 로드
+  const loadTodayDailyAnalysis = useCallback(async () => {
+    if (!userId) {
+      return;
+    }
+
+    try {
+      console.log('Daily 분석결과 조회 시도:', userId);
+      const response = await apiClient.get(`/today-analysis/${userId}/daily`);
+
+      if (response.data) {
+        console.log('Daily 분석결과 발견:', response.data);
+        
+        // AnalysisResultDTO 형식으로 받은 데이터 처리
+        const dto = response.data;
+        
+        // 오늘의 분석 데이터 설정 (UI용)
+        setTodayAnalysisData({
+          date: dto.inspectionDate || new Date().toISOString().split('T')[0],
+          imageUrl: dto.imageUrl || '',
+          grade: dto.grade || 75,
+          summary: dto.analysisSummary || ''
+        });
+        
+        // 분석결과를 HairAnalysisResponse 형태로 변환
+        const todayAnalysis: HairAnalysisResponse = {
+          success: true,
+          analysis: {
+            primary_category: dto.analysisType || "0.양호",
+            primary_severity: "0.양호",
+            average_confidence: 0.8,
+            category_distribution: {},
+            severity_distribution: {},
+            diagnosis_scores: {},
+            recommendations: dto.advice ? [dto.advice] : []
+          },
+          similar_cases: [],
+          total_similar_cases: 0,
+          model_info: {},
+          preprocessing_used: true,
+          preprocessing_info: {
+            enabled: true,
+            description: "Daily 분석 결과"
+          }
+        };
+
+        setAnalysis(todayAnalysis);
+        
+        // 분석결과의 이미지 URL을 latestDailyImages에 설정
+        if (dto.imageUrl) {
+          setLatestDailyImages(prev => ({
+            ...prev,
+            current: dto.imageUrl
+          }));
+        }
+        
+        // 두피 점수 계산 및 대시보드 업데이트 (DB에 저장된 grade 사용)
+        const calculatedScore = dto.grade || 75;
+        setScalpScore(calculatedScore);
+        
+        updateDashboardWithFilteredData({
+          primary_category: todayAnalysis.analysis?.primary_category || "0.양호",
+          primary_severity: "0.양호",
+          average_confidence: 0.8,
+          diagnosis_scores: {}
+        });
+
+        // 심각도에 따른 제품 추천
+        const severityLevel = 0; // daily는 기본적으로 0 (양호)
+        const stage = Math.min(3, Math.max(0, severityLevel));
+        const prodRes = await hairProductApi.getProductsByStage(stage);
+        setProducts(prodRes.products.slice(0, 6));
+      }
+    } catch (error: any) {
+      console.log('Daily 분석결과 없음 또는 에러:', error.response?.data?.error || error.message);
+    }
+  }, [userId, hairProductApi]);
+
   // 연속 케어 일수 계산
   React.useEffect(() => {
     // createdAt 기반 연속 케어 일수 계산
@@ -407,7 +556,17 @@ const DailyCare: React.FC = () => {
 
     // 최근 Daily 이미지 로드
     loadLatestDailyImages();
-  }, [createdAt, loadSeedlingInfo, loadLatestDailyImages]);
+
+    // 주간 분석 데이터 로드
+    loadWeeklyAnalysis();
+  }, [createdAt, loadSeedlingInfo, loadLatestDailyImages, loadWeeklyAnalysis]);
+
+  // 오늘 날짜의 daily 분석결과 자동 로드 (별도 useEffect)
+  React.useEffect(() => {
+    if (userId) {
+      loadTodayDailyAnalysis();
+    }
+  }, [userId, loadTodayDailyAnalysis]);
 
   const handleCheckboxChange = (id: number) => {
     setChecklist(prev => prev.map(item => 
@@ -433,7 +592,8 @@ const DailyCare: React.FC = () => {
         <div className="bg-gradient-to-r from-[#1F0101] to-[#2A0202] text-white p-4 mx-4 rounded-xl">
           <div className="text-center">
             <p className="text-sm opacity-90">{todayStr}</p>
-            <h1 className="text-xl font-bold mt-1">좋은 하루예요! 데일리 케어를 시작해볼까요?</h1>
+            <h1 className="text-xl font-bold mt-1">좋은 하루예요!</h1>
+            <h1 className="text-xl font-bold mt-1">데일리 케어를 시작해볼까요?</h1>
             <p className="mt-1 text-white/90">{streak}일 연속 케어 중 ✨</p>
           </div>
         </div>
@@ -443,16 +603,138 @@ const DailyCare: React.FC = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-lg text-[#1f0101]">오늘의 두피 분석</CardTitle>
             <p className="text-sm text-gray-600 mt-1">오늘의 두피 상태를 확인해보세요. (정수리 영역 사진) </p>
+            <p className="text-xs text-green-600 mt-1">본 분석은 어디까지나 프로토타입으로 정확성이 떨어지면 정확한 진단은 병원에서 진행해주세요</p>
+            
           </CardHeader>
           <CardContent className="space-y-3">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
-              className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 hover:file:bg-gray-200"
-            />
-            <Button
-              onClick={async () => {
+            {/* 오늘의 분석 결과가 있을 때 */}
+            {todayAnalysisData && !isReanalyzing ? (
+              <div className="space-y-4">
+                {/* 날짜 및 점수 */}
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-[#1f0101] to-[#2A0202] rounded-xl text-white">
+                  <div>
+                    <p className="text-xs opacity-90">분석 날짜</p>
+                    <p className="text-lg font-bold">
+                      {new Date(todayAnalysisData.date).toLocaleDateString('ko-KR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs opacity-90">두피 점수</p>
+                    <p className="text-2xl font-bold">{todayAnalysisData.grade}점</p>
+                  </div>
+                </div>
+
+                {/* 분석 이미지 */}
+                <div className="text-center">
+                  <div className="w-full max-w-xs mx-auto rounded-xl overflow-hidden border-2 border-[#1f0101]">
+                    <img
+                      src={todayAnalysisData.imageUrl || '/default-scalp-image.jpg'}
+                      alt="오늘의 두피 분석"
+                      className="w-full aspect-square object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/default-scalp-image.jpg';
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* 분석 요약 카드들 */}
+                {todayAnalysisData.summary && todayAnalysisData.summary.trim() !== '' && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-semibold text-[#1f0101]">📋 분석 요약</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      {todayAnalysisData.summary.split(', ').filter(item => item.trim() !== '').map((item, index) => {
+                        const trimmedItem = item.trim();
+                        
+                        // 텍스트 내용에 따라 배경색, 글자색, 테두리색, 이모티콘 결정
+                        let bgColor = '#f0f9ff'; // 연한 파란색 배경
+                        let textColor = '#1e40af'; // 진한 파란색 글자
+                        let borderColor = '#3b82f6'; // 파란색 테두리
+                        let emoji = '💡'; // 기본 전구 이모티콘
+                        
+                        if (trimmedItem.includes('양호')) {
+                          bgColor = '#f0fdf4'; // 연한 초록색 배경
+                          textColor = '#166534'; // 진한 초록색 글자
+                          borderColor = '#22c55e'; // 초록색 테두리
+                          emoji = '✅';
+                        } else if (trimmedItem.includes('경고')) {
+                          bgColor = '#fffbeb'; // 연한 노란색 배경
+                          textColor = '#92400e'; // 진한 갈색 글자
+                          borderColor = '#fbbf24'; // 노란색 테두리
+                          emoji = '⚠️';
+                        } else if (trimmedItem.includes('주의')) {
+                          bgColor = '#fff7ed'; // 연한 주황색 배경
+                          textColor = '#c2410c'; // 진한 주황색 글자
+                          borderColor = '#f97316'; // 주황색 테두리
+                          emoji = '🔶';
+                        }
+                        
+                        return (
+                          <Card 
+                            key={index}
+                            className="border-2 rounded-xl" 
+                            style={{ 
+                              backgroundColor: bgColor,
+                              borderColor: borderColor
+                            }}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-start gap-3">
+                                <span className="text-lg flex-shrink-0">{emoji}</span>
+                                <p className="text-sm leading-relaxed" style={{ color: textColor }}>
+                                  {trimmedItem}
+                                </p>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* 재분석하기 버튼 */}
+                <Button
+                  onClick={() => {
+                    setIsReanalyzing(true);
+                    setSelectedImage(null);
+                  }}
+                  className="w-full h-12 bg-[#1f0101] text-white rounded-xl hover:bg-[#2A0202] font-semibold"
+                >
+                  재분석하기
+                </Button>
+              </div>
+            ) : (
+              /* 분석 결과가 없을 때 또는 재분석 모드 - 파일 업로드 UI */
+              <>
+                {isReanalyzing && (
+                  <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm text-blue-800">재분석 모드입니다. 새로운 사진을 업로드하세요.</p>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
+                  className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 hover:file:bg-gray-200"
+                />
+                {isReanalyzing && todayAnalysisData && (
+                  <Button
+                    onClick={() => {
+                      setIsReanalyzing(false);
+                      setSelectedImage(null);
+                    }}
+                    className="w-full h-10 bg-gray-400 text-white rounded-xl hover:bg-gray-500 font-semibold mb-2"
+                  >
+                    취소
+                  </Button>
+                )}
+                <Button
+                  onClick={async () => {
                 if (!selectedImage) return alert('두피 사진을 업로드해주세요.');
                 setIsAnalyzing(true);
                 setProducts(null);
@@ -528,6 +810,15 @@ const DailyCare: React.FC = () => {
 
                               // Daily 이미지 새로고침
                               loadLatestDailyImages();
+                              
+                              // 오늘의 분석결과 새로고침
+                              loadTodayDailyAnalysis();
+
+                              // 주간 분석 데이터 새로고침
+                              loadWeeklyAnalysis();
+
+                              // 재분석 모드 해제
+                              setIsReanalyzing(false);
                             } catch (saveError) {
                               console.error('두피 점수 저장 실패:', saveError);
                             }
@@ -553,10 +844,12 @@ const DailyCare: React.FC = () => {
             >
               {isAnalyzing ? '분석 중...' : '사진으로 AI 분석'}
             </Button>
+              </>
+            )}
           </CardContent>
         </Card>
 
-        {/* 분석 결과 통계 카드 */}
+        {/* 분석 결과 통계 카드
         {analysis && (
           <div className="grid grid-cols-2 gap-3 mx-4 mt-4">
             <Card className="border-0" style={{ backgroundColor: '#1f0101' }}>
@@ -588,10 +881,10 @@ const DailyCare: React.FC = () => {
               </CardContent>
             </Card>
           </div>
-        )}
+        )} */}
 
-        {/* 시계열 변화 분석 버튼 */}
-        {analysis && (
+        {/* 시계열 변화 분석 버튼
+        {todayAnalysisData && (
           <div className="mx-4 mt-4">
             <Button
               onClick={() => navigate('/timeseries-analysis')}
@@ -601,7 +894,7 @@ const DailyCare: React.FC = () => {
               변화 추이 보기
             </Button>
           </div>
-        )}
+        )} */}
 
         {/* 새싹 키우기 UI */}
         <Card className="mx-4 mt-4 border-0" style={{ backgroundColor: '#1F0101' }}>
@@ -658,26 +951,20 @@ const DailyCare: React.FC = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2 text-[#1f0101]">
               <BarChart3 className="h-5 w-5 text-[#1f0101]" />
-              모발 건강 점수 변화
+              주간 분석 로그
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-36 flex items-end justify-around px-2">
-              {[
-                { day: '월', height: 55 },
-                { day: '화', height: 62 },
-                { day: '수', height: 20 },
-                { day: '목', height: 18 },
-                { day: '금', height: 65 },
-                { day: '토', height: 75 },
-                { day: '일', height: 18 }
-              ].map((item, index) => (
+              {weeklyData.map((item, index) => (
                 <div key={index} className="flex flex-col items-center flex-1 max-w-10">
                   <div 
                     className="w-full rounded-sm relative mb-2"
-                    style={{ height: `${item.height}px`, backgroundColor: '#1f0101', opacity: 0.1 }}
+                    style={{ height: `${item.height}px`, backgroundColor: '#1f0101', opacity: item.score ? 0.8 : 0.1 }}
                   >
-                    <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#1f0101' }}></div>
+                    {item.score && (
+                      <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#1f0101' }}></div>
+                    )}
                   </div>
                   <span className="text-xs text-gray-600">{item.day}</span>
                 </div>
@@ -694,10 +981,11 @@ const DailyCare: React.FC = () => {
                 <TrendingUp className="h-4 w-4" />
                 <span className="text-sm opacity-90">평균 점수</span>
               </div>
-              <div className="text-3xl font-bold mb-1">82.5</div>
-              <div className="text-sm opacity-90 flex items-center gap-1">
-                <TrendingUp className="h-3 w-3" />
-                +5.2%
+              <div className="text-3xl font-bold mb-1">
+                {weeklyAverage > 0 ? weeklyAverage.toFixed(1) : '-'}
+              </div>
+              <div className="text-sm opacity-90">
+                {weeklyCount > 0 ? '이번 주' : '데이터 없음'}
               </div>
             </CardContent>
           </Card>
@@ -708,28 +996,11 @@ const DailyCare: React.FC = () => {
                 <Target className="h-4 w-4" />
                 <span className="text-sm opacity-90">진단 횟수</span>
               </div>
-              <div className="text-3xl font-bold mb-1">7회</div>
+              <div className="text-3xl font-bold mb-1">{weeklyCount}회</div>
               <div className="text-sm opacity-90">이번 주</div>
             </CardContent>
           </Card>
         </div>
-
-        {/* AI Coach Message */}
-        <Card className="mx-4 mt-4 border-0" style={{ backgroundColor: '#1f0101', opacity: 0.9 }}>
-          <CardContent className="p-4 text-white">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <span className="text-xl">🤖</span>
-              </div>
-              <div className="flex-1">
-                <h4 className="text-base font-semibold mb-1">AI 케어 코치</h4>
-                <p className="text-sm opacity-90">
-                  "최근 3일간 점수가 상승 중이에요! 오늘은 특히 두피 마사지에 집중해보세요."
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Daily Care Checklist */}
         <Card className="mx-4 mt-4">

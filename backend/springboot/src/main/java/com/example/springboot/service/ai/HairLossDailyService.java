@@ -306,28 +306,48 @@ public class HairLossDailyService {
                 log.warn("advice가 250자를 초과하여 자름. 길이: {}", advice.length());
             }
 
-            // AnalysisResultEntity 생성
-            AnalysisResultEntity entity = new AnalysisResultEntity();
-            entity.setInspectionDate(LocalDate.now());
+            // 오늘 날짜의 기존 daily 분석 결과 확인
+            LocalDate today = LocalDate.now();
+            List<AnalysisResultEntity> existingResults = analysisResultDAO.findByUserIdAndAnalysisTypeAndDate(
+                    userId, "daily", today);
+
+            AnalysisResultEntity entity;
+            boolean isUpdate = false;
+
+            if (existingResults != null && !existingResults.isEmpty()) {
+                // 기존 레코드가 있으면 업데이트
+                entity = existingResults.get(0); // 첫 번째 레코드 사용
+                isUpdate = true;
+                log.info("기존 Daily 분석 결과 업데이트 - ID: {}", entity.getId());
+            } else {
+                // 새로운 레코드 생성
+                entity = new AnalysisResultEntity();
+                entity.setInspectionDate(today);
+                entity.setAnalysisType("daily");
+                entity.setUserEntityIdForeign(user);
+                log.info("새로운 Daily 분석 결과 생성");
+            }
+
+            // 데이터 업데이트
             entity.setAnalysisSummary(analysisSummary);
             entity.setAdvice(advice);
             entity.setGrade(grade);
             entity.setImageUrl(imageUrl != null ? imageUrl : "");
-            entity.setAnalysisType("daily"); // analysis_type을 "daily"로 설정
-            entity.setUserEntityIdForeign(user);
 
-            log.info("저장할 엔티티 정보: inspectionDate={}, analysisSummary={}, advice={}, grade={}, imageUrl={}, analysisType={}, userId={}", 
+            log.info("{}할 엔티티 정보: inspectionDate={}, analysisSummary={}, advice={}, grade={}, imageUrl={}, analysisType={}, userId={}", 
+                    isUpdate ? "업데이트" : "저장",
                     entity.getInspectionDate(), entity.getAnalysisSummary(), entity.getAdvice(), 
                     entity.getGrade(), entity.getImageUrl(), entity.getAnalysisType(), 
                     entity.getUserEntityIdForeign() != null ? entity.getUserEntityIdForeign().getId() : "null");
 
-            // DAO를 통해 데이터베이스에 저장
+            // DAO를 통해 데이터베이스에 저장/업데이트
             AnalysisResultEntity savedEntity = analysisResultDAO.save(entity);
             
             return Map.of(
                 "success", true,
-                "message", "Daily 분석 결과가 성공적으로 저장되었습니다.",
+                "message", isUpdate ? "Daily 분석 결과가 성공적으로 업데이트되었습니다." : "Daily 분석 결과가 성공적으로 저장되었습니다.",
                 "saved", true,
+                "isUpdate", isUpdate,
                 "saved_id", savedEntity != null ? savedEntity.getId() : null,
                 "savedAt", System.currentTimeMillis()
             );
