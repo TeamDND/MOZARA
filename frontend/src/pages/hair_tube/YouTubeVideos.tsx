@@ -236,7 +236,7 @@ export default function YouTubeVideos() {
               </select>
               <button
                 onClick={handleStageRecommendation}
-                className="w-full bg-[#222222] text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-all active:scale-[0.98]"
+                className="w-full bg-[#1f0101] text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-all active:scale-[0.98]"
               >
                 맞춤 영상 보기
               </button>

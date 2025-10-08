@@ -128,6 +128,9 @@ const DailyCare: React.FC = () => {
   const [isComparingImages, setIsComparingImages] = useState(false);
   const [comparisonError, setComparisonError] = useState<string | null>(null);
 
+  // 재분석 상태
+  const [isReanalyzing, setIsReanalyzing] = useState(false);
+
   // 최근 2개 Daily 이미지 상태
   const [latestDailyImages, setLatestDailyImages] = useState<{
     current: string | null;
@@ -629,7 +632,8 @@ const DailyCare: React.FC = () => {
         <div className="bg-gradient-to-r from-[#1F0101] to-[#2A0202] text-white p-4 mx-4 rounded-xl">
           <div className="text-center">
             <p className="text-sm opacity-90">{todayStr}</p>
-            <h1 className="text-xl font-bold mt-1">좋은 하루예요! 데일리 케어를 시작해볼까요?</h1>
+            <h1 className="text-xl font-bold mt-1">좋은 하루예요!</h1>
+            <h1 className="text-xl font-bold mt-1">데일리 케어를 시작해볼까요?</h1>
             <p className="mt-1 text-white/90">{streak}일 연속 케어 중 ✨</p>
           </div>
         </div>
@@ -639,10 +643,12 @@ const DailyCare: React.FC = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-lg text-[#1f0101]">오늘의 두피 분석</CardTitle>
             <p className="text-sm text-gray-600 mt-1">오늘의 두피 상태를 확인해보세요. (정수리 영역 사진) </p>
+            <p className="text-xs text-green-600 mt-1">본 분석은 어디까지나 프로토타입으로 정확성이 떨어지면 정확한 진단은 병원에서 진행해주세요</p>
+            
           </CardHeader>
           <CardContent className="space-y-3">
             {/* 오늘의 분석 결과가 있을 때 */}
-            {todayAnalysisData ? (
+            {todayAnalysisData && !isReanalyzing ? (
               <div className="space-y-4">
                 {/* 날짜 및 점수 */}
                 <div className="flex items-center justify-between p-4 bg-gradient-to-r from-[#1f0101] to-[#2A0202] rounded-xl text-white">
@@ -682,16 +688,47 @@ const DailyCare: React.FC = () => {
                     <p className="text-sm font-semibold text-[#1f0101]">📋 분석 요약</p>
                     <div className="grid grid-cols-2 gap-3">
                       {todayAnalysisData.summary.split(', ').filter(item => item.trim() !== '').map((item, index) => {
-                        const opacityValues = [1, 0.8, 0.6, 0.4];
-                        const opacity = opacityValues[index % opacityValues.length];
+                        const trimmedItem = item.trim();
+                        
+                        // 텍스트 내용에 따라 배경색, 글자색, 테두리색, 이모티콘 결정
+                        let bgColor = '#f0f9ff'; // 연한 파란색 배경
+                        let textColor = '#1e40af'; // 진한 파란색 글자
+                        let borderColor = '#3b82f6'; // 파란색 테두리
+                        let emoji = '💡'; // 기본 전구 이모티콘
+                        
+                        if (trimmedItem.includes('양호')) {
+                          bgColor = '#f0fdf4'; // 연한 초록색 배경
+                          textColor = '#166534'; // 진한 초록색 글자
+                          borderColor = '#22c55e'; // 초록색 테두리
+                          emoji = '✅';
+                        } else if (trimmedItem.includes('경고')) {
+                          bgColor = '#fffbeb'; // 연한 노란색 배경
+                          textColor = '#92400e'; // 진한 갈색 글자
+                          borderColor = '#fbbf24'; // 노란색 테두리
+                          emoji = '⚠️';
+                        } else if (trimmedItem.includes('주의')) {
+                          bgColor = '#fff7ed'; // 연한 주황색 배경
+                          textColor = '#c2410c'; // 진한 주황색 글자
+                          borderColor = '#f97316'; // 주황색 테두리
+                          emoji = '🔶';
+                        }
+                        
                         return (
                           <Card 
                             key={index}
-                            className="border-0" 
-                            style={{ backgroundColor: '#1f0101', opacity }}
+                            className="border-2 rounded-xl" 
+                            style={{ 
+                              backgroundColor: bgColor,
+                              borderColor: borderColor
+                            }}
                           >
-                            <CardContent className="p-4 text-white">
-                              <p className="text-sm leading-relaxed">{item.trim()}</p>
+                            <CardContent className="p-4">
+                              <div className="flex items-start gap-3">
+                                <span className="text-lg flex-shrink-0">{emoji}</span>
+                                <p className="text-sm leading-relaxed" style={{ color: textColor }}>
+                                  {trimmedItem}
+                                </p>
+                              </div>
                             </CardContent>
                           </Card>
                         );
@@ -699,16 +736,43 @@ const DailyCare: React.FC = () => {
                     </div>
                   </div>
                 )}
+
+                {/* 재분석하기 버튼 */}
+                <Button
+                  onClick={() => {
+                    setIsReanalyzing(true);
+                    setSelectedImage(null);
+                  }}
+                  className="w-full h-12 bg-[#1f0101] text-white rounded-xl hover:bg-[#2A0202] font-semibold"
+                >
+                  재분석하기
+                </Button>
               </div>
             ) : (
-              /* 분석 결과가 없을 때 - 파일 업로드 UI */
+              /* 분석 결과가 없을 때 또는 재분석 모드 - 파일 업로드 UI */
               <>
+                {isReanalyzing && (
+                  <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm text-blue-800">재분석 모드입니다. 새로운 사진을 업로드하세요.</p>
+                  </div>
+                )}
                 <input
                   type="file"
                   accept="image/*"
                   onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
                   className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 hover:file:bg-gray-200"
                 />
+                {isReanalyzing && todayAnalysisData && (
+                  <Button
+                    onClick={() => {
+                      setIsReanalyzing(false);
+                      setSelectedImage(null);
+                    }}
+                    className="w-full h-10 bg-gray-400 text-white rounded-xl hover:bg-gray-500 font-semibold mb-2"
+                  >
+                    취소
+                  </Button>
+                )}
                 <Button
                   onClick={async () => {
                 if (!selectedImage) return alert('두피 사진을 업로드해주세요.');
@@ -792,6 +856,9 @@ const DailyCare: React.FC = () => {
 
                               // 주간 분석 데이터 새로고침
                               loadWeeklyAnalysis();
+
+                              // 재분석 모드 해제
+                              setIsReanalyzing(false);
                             } catch (saveError) {
                               console.error('두피 점수 저장 실패:', saveError);
                             }
@@ -822,7 +889,7 @@ const DailyCare: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* 분석 결과 통계 카드 */}
+        {/* 분석 결과 통계 카드
         {analysis && (
           <div className="grid grid-cols-2 gap-3 mx-4 mt-4">
             <Card className="border-0" style={{ backgroundColor: '#1f0101' }}>
@@ -854,9 +921,9 @@ const DailyCare: React.FC = () => {
               </CardContent>
             </Card>
           </div>
-        )}
+        )} */}
 
-        {/* 시계열 변화 분석 버튼 */}
+        {/* 시계열 변화 분석 버튼
         {todayAnalysisData && (
           <div className="mx-4 mt-4">
             <Button
@@ -867,7 +934,7 @@ const DailyCare: React.FC = () => {
               변화 추이 보기
             </Button>
           </div>
-        )}
+        )} */}
 
         {/* 새싹 키우기 UI */}
         <Card className="mx-4 mt-4 border-0" style={{ backgroundColor: '#1F0101' }}>

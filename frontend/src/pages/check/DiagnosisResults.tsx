@@ -448,7 +448,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </div>
             <Button 
               onClick={() => {
-                  navigate('/d-care');
+                  navigate('/daily-care');
               }}
               className="ml-3 h-10 px-4 text-white rounded-xl active:scale-[0.98]"
               style={{ backgroundColor: "#1f0101" }}
