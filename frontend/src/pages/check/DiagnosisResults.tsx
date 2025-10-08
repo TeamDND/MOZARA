@@ -448,7 +448,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </div>
             <Button 
               onClick={() => {
-                  navigate('/d-care');
+                  navigate('/daily-care');
               }}
               className="ml-3 h-10 px-4 text-white rounded-xl active:scale-[0.98]"
               style={{ backgroundColor: "#1f0101" }}
@@ -545,7 +545,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
               <div className="bg-white p-4 rounded-xl shadow-md">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <Brain className="w-5 h-5 text-[#222222]" />
+                    <Brain className="w-5 h-5 text-[#1f0101]" />
                     <h3 className="text-lg font-semibold text-gray-800">
                       AI 맞춤 영상 추천
                       <span className="text-sm font-normal text-gray-600">

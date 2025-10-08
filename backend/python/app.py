@@ -800,7 +800,7 @@ def normalize_image_url(url: str, domain: str) -> str:
 
 # MOZARA Hair Change 모듈
 try:
-    from services.hair_change.hair_change import generate_wig_style_service, get_wig_styles_service
+    from services.hair_change.hair_change import generate_wig_style_service
     HAIR_CHANGE_AVAILABLE = True
     print("Hair Change 모듈 로드 성공")
 except ImportError as e:
@@ -1467,11 +1467,6 @@ if HAIR_CHANGE_AVAILABLE:
         image_data = await image.read()
         result = await generate_wig_style_service(image_data, hairstyle, custom_prompt)
         return HairstyleResponse(**result)
-
-    @app.get('/hairstyles')
-    async def get_hairstyles():
-        """사용 가능한 가발 스타일 목록 반환"""
-        return get_wig_styles_service()
 
 # Hair Loss Products Service Import
 from services.hair_loss_products import build_stage_response, search_11st_products

@@ -277,7 +277,7 @@ const HairQuiz: React.FC = () => {
               {/* 다시 풀기 버튼 */}
               <button
                 onClick={initQuiz}
-                className="w-full bg-[#222222] text-white py-3.5 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-all active:scale-[0.98]"
+                className="w-full bg-[#1f0101] text-white py-3.5 px-6 rounded-xl font-semibold hover:bg-[#2A0202] transition-all active:scale-[0.98]"
               >
                 새로운 퀴즈 풀기
               </button>
@@ -305,7 +305,7 @@ const HairQuiz: React.FC = () => {
               </div>
               <button
                 onClick={initQuiz}
-                className="w-full bg-[#222222] text-white py-3.5 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-all active:scale-[0.98]"
+                className="w-full bg-[#1f0101] text-white py-3.5 px-6 rounded-xl font-semibold hover:bg-[#2A0202] transition-all active:scale-[0.98]"
               >
                 퀴즈 시작하기
               </button>

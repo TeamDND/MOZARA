@@ -73,7 +73,7 @@ export default function Header() {
               className="flex items-center justify-center active:scale-95 pl-1"
               aria-label="마이페이지"
             >
-              <User className="h-5 w-5 mb-1 text-[#1f0101]" />
+              <User className="h-5 w-5 text-[#1f0101]" />
             </button>
           </div>
         ) : (

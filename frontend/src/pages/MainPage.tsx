@@ -6,7 +6,7 @@ import { fetchSeedlingInfo, updateSeedlingNickname, setSeedling } from '../utils
 import { hairProductApi, HairProduct } from '../services/hairProductApi';
 import apiClient from '../services/apiClient';
 import { Button } from '../components/ui/button';
-import { Target, Camera, Award, Sprout, MapPin, Video, HelpCircle } from 'lucide-react';
+import { Target, Camera, Award, Sprout, MapPin, Video, HelpCircle, Scissors } from 'lucide-react';
 import { locationService, Location } from '../services/locationService';
 import MapPreview from '../components/ui/MapPreview';
 import LikeButton from '../components/LikeButton';
@@ -322,11 +322,17 @@ const MainPage: React.FC = () => {
               <p className="text-sm font-medium text-gray-800 mb-4">
                 탈모를 예방하기 위해 매일 샴푸를 하는 것이 좋다.
               </p>
-              <div className="flex gap-2">
-                <button className="flex-1 h-12 px-4 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] font-semibold active:scale-[0.98] transition-all">
+              <div className="flex justify-center gap-4">
+                <button 
+                  onClick={() => navigate('/hair-quiz')}
+                  className="w-20 h-20 rounded-full border-4 bg-white border-gray-200 text-blue-600 hover:border-blue-500 active:scale-95 transition-all cursor-pointer shadow-sm text-3xl font-bold"
+                >
                   O
                 </button>
-                <button className="flex-1 h-12 px-4 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] font-semibold active:scale-[0.98] transition-all">
+                <button 
+                  onClick={() => navigate('/hair-quiz')}
+                  className="w-20 h-20 rounded-full border-4 bg-white border-gray-200 text-red-600 hover:border-red-500 active:scale-95 transition-all cursor-pointer shadow-sm text-3xl font-bold"
+                >
                   X
                 </button>
               </div>
@@ -338,7 +344,7 @@ const MainPage: React.FC = () => {
           <div className="bg-white p-4 rounded-xl border border-gray-200">
             <div className="flex items-center gap-2 mb-3">
               <Video className="w-5 h-5 text-[#1F0101]" />
-              <h3 className="text-lg font-semibold text-gray-800">오늘의 탈모 영상</h3>
+              <h3 className="text-lg font-semibold text-gray-800">오늘의 영상</h3>
             </div>
             
             {/* 로딩 상태 */}
@@ -411,51 +417,35 @@ const MainPage: React.FC = () => {
                 </div>
               </>
             )}
-            
-            <div className="flex gap-2">
-              <Button 
-                onClick={() => {
-                  if (todayVideo) {
-                    window.open(`https://www.youtube.com/watch?v=${todayVideo.videoId}`, '_blank');
-                  }
-                }}
-                className="flex-1 h-12 px-4 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] font-semibold active:scale-[0.98] transition-all"
-                disabled={!todayVideo}
-              >
-                영상 보기
-              </Button>
-              <Button 
-                onClick={fetchTodayVideo}
-                className="flex-1 h-12 px-4 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] font-semibold active:scale-[0.98] transition-all"
-                disabled={videoLoading}
-              >
-                {videoLoading ? '로딩...' : '다른 영상'}
-              </Button>
-            </div>
           </div>
 
-          {/* 6. 헤어스타일 바꾸기 */}
+          {/* 6. 헤어체인지 */}
           <div className="bg-white p-4 rounded-xl shadow-md">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <div className="text-2xl">💇‍♀️</div>
-                <h3 className="text-lg font-semibold text-gray-800">헤어스타일 바꾸기</h3>
+                <Scissors className="w-5 h-5 text-[#1F0101]" />
+                <h3 className="text-lg font-semibold text-gray-800">헤어체인지</h3>
               </div>
               <p className="text-sm text-gray-600">새로운 헤어스타일을 시도해보세요</p>
               
-              {/* 물음표 그림 영역 */}
-              <div className="relative bg-gray-100 rounded-lg h-48 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <div className="text-6xl mb-2">❓</div>
-                  <p className="text-sm">새로운 스타일을 찾아보세요</p>
-                </div>
+              {/* 헤어체인지 이미지 영역 */}
+              <div className="relative bg-gray-100 rounded-lg h-48 overflow-hidden">
+                <img
+                  src="/assets/images/main/hairchange.png"
+                  alt="헤어체인지 Before & After"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://placehold.co/400x225/1F0101/FFFFFF?text=헤어체인지';
+                  }}
+                />
               </div>
               
               <Button 
                 onClick={() => navigate('/hair-change')}
                 className="w-full h-12 bg-[#1F0101] hover:bg-[#2A0202] text-white rounded-xl font-semibold active:scale-[0.98] transition-all"
               >
-                페이지 이동하기
+                헤어체인지 시작하기
               </Button>
             </div>
           </div>
