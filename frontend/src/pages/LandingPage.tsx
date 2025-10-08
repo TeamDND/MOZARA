@@ -131,7 +131,7 @@ useEffect(() => {
        
 
         {/* 서비스 슬라이더 */}
-        <div className="py-8">
+        {/* <div className="py-8">
           <div className="max-w-6xl mx-auto px-4">
             <div className="relative overflow-hidden">
               <div 
@@ -160,7 +160,7 @@ useEffect(() => {
             </div>
 
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   )
