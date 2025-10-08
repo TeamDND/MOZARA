@@ -2,11 +2,11 @@
 """
 MOZARA Python Backend 통합 애플리케이션
 """
-# Windows 환경에서 UTF-8 인코딩 강제 설정
+# Windows 환경에서 UTF-8 인코딩 강제 설정 + 버퍼링 비활성화
 import sys
 import io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True)
 
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -807,6 +807,57 @@ except ImportError as e:
     print(f"Hair Change 모듈 로드 실패: {e}")
     HAIR_CHANGE_AVAILABLE = False
 
+# ============================================
+# BiSeNet 싱글턴 인스턴스 생성 (VRAM 절약)
+# ⚠️ Hair Loss Daily import 이전에 로드해야 함!
+# ============================================
+try:
+    import torch
+    from services.swin_hair_classification.models.face_parsing.model import BiSeNet
+
+    print("🔄 BiSeNet 모델 로딩 시작...")
+
+    # 디바이스 설정
+    bisenet_device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"   디바이스: {bisenet_device}")
+
+    # BiSeNet 모델 생성
+    bisenet_model = BiSeNet(n_classes=19)
+    print("   BiSeNet 모델 인스턴스 생성 완료")
+
+    # 모델 가중치 경로
+    bisenet_model_path = os.path.join(
+        os.path.dirname(__file__),
+        'services',
+        'swin_hair_classification',
+        'models',
+        'face_parsing',
+        'res',
+        'cp',
+        '79999_iter.pth'
+    )
+    print(f"   모델 경로: {bisenet_model_path}")
+
+    if not os.path.exists(bisenet_model_path):
+        raise FileNotFoundError(f"BiSeNet 모델 파일을 찾을 수 없습니다: {bisenet_model_path}")
+
+    # 모델 가중치 로드
+    print("   가중치 로딩 중...")
+    bisenet_model.load_state_dict(torch.load(bisenet_model_path, map_location=bisenet_device))
+    bisenet_model.to(bisenet_device)
+    bisenet_model.eval()
+
+    print(f"✅ BiSeNet 싱글턴 인스턴스 생성 완료 (device: {bisenet_device})")
+    BISENET_AVAILABLE = True
+
+except Exception as e:
+    import traceback
+    print(f"❌ BiSeNet 싱글턴 생성 실패: {e}")
+    traceback.print_exc()
+    bisenet_model = None
+    bisenet_device = None
+    BISENET_AVAILABLE = False
+
 # Hair Loss Daily 모듈 - services 폴더 내에 있다고 가정하고 경로 수정
 try:
     # app 객체를 가져와 마운트하기 때문에, 이 파일에 uvicorn 실행 코드는 없어야 합니다.
@@ -869,11 +920,21 @@ else:
 # Hair Classification RAG 라우터 include (조건부)
 if HAIR_RAG_AVAILABLE:
     try:
-        from services.hair_classification_rag.api.router import router as hair_rag_router
-        app.include_router(hair_rag_router, prefix="/api")
+        # importlib를 사용해서 모듈을 명시적으로 import
+        import importlib
+        rag_router_module = importlib.import_module('services.hair_classification_rag.api.router')
+
+        # BiSeNet 싱글턴 주입
+        if BISENET_AVAILABLE and bisenet_model is not None:
+            rag_router_module.set_bisenet_singleton(bisenet_model)
+
+        # router 객체를 include
+        app.include_router(rag_router_module.router, prefix="/api")
         print("Hair Classification RAG 라우터 include 완료 (/api/hair-classification-rag)")
     except Exception as e:
         print(f"Hair Classification RAG 라우터 include 실패: {e}")
+        import traceback
+        traceback.print_exc()
 else:
     print("Hair Classification RAG 라우터 include 건너뜀 (모듈 로드 실패)")
 
@@ -925,6 +986,12 @@ except Exception as e:
 # Time-Series Analysis 라우터 마운트
 try:
     from services.time_series.api.router import router as timeseries_router
+    from services.time_series.services import analysis_service as timeseries_analysis_service
+
+    # BiSeNet 싱글턴 주입
+    if BISENET_AVAILABLE and bisenet_model is not None:
+        timeseries_analysis_service.set_bisenet_singleton(bisenet_model)
+
     app.include_router(timeseries_router)
     print("Time-Series Analysis API 라우터 마운트 완료")
 except ImportError as e:

@@ -12,10 +12,14 @@ from ..config.ensemble_config import get_ensemble_config
 from PIL import Image
 
 class HairLossAnalyzer:
-    def __init__(self):
-        """여성형 탈모 RAG 분석기 초기화 (ROI BiSeNet + ConvNeXt + ViT 듀얼 앙상블)"""
+    def __init__(self, bisenet_model=None):
+        """여성형 탈모 RAG 분석기 초기화 (ROI BiSeNet + ConvNeXt + ViT 듀얼 앙상블)
+
+        Args:
+            bisenet_model: 외부에서 주입받은 BiSeNet 모델 (싱글턴)
+        """
         try:
-            self.image_processor = ImageProcessor()
+            self.image_processor = ImageProcessor(bisenet_model=bisenet_model)
             self.dual_manager = DualPineconeManager()
             self.llm_analyzer = GeminiHairAnalyzer()
             self.ensemble_config = get_ensemble_config()
