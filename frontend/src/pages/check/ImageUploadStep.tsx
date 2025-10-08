@@ -130,7 +130,7 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
   return (
     <div className="space-y-8">
       <div className="text-center space-y-3">
-        <Camera className="w-12 h-12 text-[#222222] mx-auto" />
+        <Camera className="w-12 h-12 text-[#1f0101] mx-auto" />
         <h2 className="text-xl font-bold text-gray-800">AI 탈모 분석</h2>
         <p className="text-sm text-gray-600">
           두피와 탈모 상태를 AI가 객관적으로 분석해드려요

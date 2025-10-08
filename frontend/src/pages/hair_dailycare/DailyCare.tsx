@@ -420,6 +420,70 @@ const DailyCare: React.FC = () => {
   return finalScore;
   };
 
+  // 오늘 날짜의 daily 분석결과 자동 로드
+  const loadTodayDailyAnalysis = useCallback(async () => {
+    if (!userId) {
+      return;
+    }
+
+    try {
+      console.log('Daily 분석결과 조회 시도:', userId);
+      const response = await apiClient.get(`/api/today-analysis/${userId}/daily`);
+
+      if (response.data) {
+        console.log('Daily 분석결과 발견:', response.data);
+        // 분석결과를 HairAnalysisResponse 형태로 변환
+        const todayAnalysis: HairAnalysisResponse = {
+          success: true,
+          analysis: {
+            primary_category: response.data.analysisType || "0.양호",
+            primary_severity: "0.양호",
+            average_confidence: 0.8,
+            category_distribution: {},
+            severity_distribution: {},
+            diagnosis_scores: {},
+            recommendations: []
+          },
+          similar_cases: [],
+          total_similar_cases: 0,
+          model_info: {},
+          preprocessing_used: true,
+          preprocessing_info: {
+            enabled: true,
+            description: "Daily 분석 결과"
+          }
+        };
+
+        setAnalysis(todayAnalysis);
+        
+        // 분석결과의 이미지 URL을 latestDailyImages에 설정
+        if (response.data.imageUrl) {
+          setLatestDailyImages(prev => ({
+            ...prev,
+            current: response.data.imageUrl
+          }));
+        }
+        
+        // 두피 점수 계산 및 대시보드 업데이트
+        const calculatedScore = response.data.grade || 75;
+        updateDashboardWithFilteredData({
+          primary_category: todayAnalysis.analysis?.primary_category || "0.양호",
+          primary_severity: "0.양호",
+          average_confidence: 0.8,
+          diagnosis_scores: {}
+        });
+
+        // 심각도에 따른 제품 추천
+        const severityLevel = 0; // daily는 기본적으로 0 (양호)
+        const stage = Math.min(3, Math.max(0, severityLevel));
+        const prodRes = await hairProductApi.getProductsByStage(stage);
+        setProducts(prodRes.products.slice(0, 6));
+      }
+    } catch (error: any) {
+      console.log('Daily 분석결과 없음 또는 에러:', error.response?.data?.error || error.message);
+    }
+  }, [userId, hairProductApi]);
+
   // 연속 케어 일수 계산
   React.useEffect(() => {
     // createdAt 기반 연속 케어 일수 계산
@@ -448,6 +512,13 @@ const DailyCare: React.FC = () => {
     // 최근 Daily 이미지 로드
     loadLatestDailyImages();
   }, [createdAt, loadSeedlingInfo, loadLatestDailyImages]);
+
+  // 오늘 날짜의 daily 분석결과 자동 로드 (별도 useEffect)
+  React.useEffect(() => {
+    if (userId) {
+      loadTodayDailyAnalysis();
+    }
+  }, [userId, loadTodayDailyAnalysis]);
 
   const handleCheckboxChange = (id: number) => {
     setChecklist(prev => prev.map(item => 
@@ -485,6 +556,26 @@ const DailyCare: React.FC = () => {
             <p className="text-sm text-gray-600 mt-1">오늘의 두피 상태를 확인해보세요. (정수리 영역 사진) </p>
           </CardHeader>
           <CardContent className="space-y-3">
+            {/* 분석결과가 있을 때 사진 표시 */}
+            {analysis && (
+              <div className="mb-4">
+                <div className="text-center mb-3">
+                  <p className="text-sm font-medium text-[#1f0101] mb-2">오늘의 분석 결과</p>
+                  <div className="w-32 h-32 mx-auto rounded-xl overflow-hidden border-2 border-[#1f0101]">
+                    <img
+                      src={latestDailyImages.current || '/default-scalp-image.jpg'}
+                      alt="오늘의 두피 분석"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/default-scalp-image.jpg';
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-600 mt-2">분석 완료된 이미지</p>
+                </div>
+              </div>
+            )}
+            
             <input
               type="file"
               accept="image/*"
@@ -568,6 +659,9 @@ const DailyCare: React.FC = () => {
 
                               // Daily 이미지 새로고침
                               loadLatestDailyImages();
+                              
+                              // 오늘의 분석결과 새로고침
+                              loadTodayDailyAnalysis();
                             } catch (saveError) {
                               console.error('두피 점수 저장 실패:', saveError);
                             }
@@ -591,7 +685,7 @@ const DailyCare: React.FC = () => {
               disabled={isAnalyzing}
               className="w-full h-12 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] disabled:opacity-50 font-semibold"
             >
-              {isAnalyzing ? '분석 중...' : '사진으로 AI 분석'}
+              {isAnalyzing ? '분석 중...' : analysis ? '새로운 분석하기' : '사진으로 AI 분석'}
             </Button>
           </CardContent>
         </Card>

@@ -503,14 +503,14 @@ export default function MyPage() {
               </TabsTrigger>
               <TabsTrigger
                 value="favorites"
-                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
               >
                 <Heart className="h-4 w-4 mr-1" />
                 내 찜
               </TabsTrigger>
               <TabsTrigger
                 value="profile"
-                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
               >
                 <User className="h-4 w-4 mr-1" />
                 회원정보
@@ -545,19 +545,19 @@ export default function MyPage() {
               <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
                 <TabsTrigger 
                   value="all" 
-                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-[#1f0101] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
+                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg !bg-[#1f0101] !text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
                 >
                   전체
                 </TabsTrigger>
                 <TabsTrigger 
                   value="hairloss" 
-                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
                 >
                   탈모분석
                 </TabsTrigger>
                 <TabsTrigger 
                   value="daily" 
-                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                  className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
                 >
                   두피분석
                 </TabsTrigger>

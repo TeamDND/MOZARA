@@ -174,7 +174,7 @@ const LogIn: React.FC = () => {
               <span className="text-gray-700 font-medium">Google로 계속하기</span>
             </Button>
 
-            <Button
+            {/* <Button
               variant="outline"
               className="w-full h-12 bg-[#FEE500] hover:bg-[#FDD800] border-[#FEE500] rounded-xl active:scale-[0.98] transition-all"
               onClick={() => handleSocialLogin('kakao')}
@@ -183,7 +183,7 @@ const LogIn: React.FC = () => {
                 K
               </span>
               <span className="text-gray-900 font-medium">카카오로 계속하기</span>
-            </Button>
+            </Button> */}
           </div>
 
           {/* 회원가입 링크 */}
