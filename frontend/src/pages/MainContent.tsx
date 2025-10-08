@@ -43,11 +43,6 @@ export default function Home() {
       description: "AI가 만드는 매일 새로운 탈모 상식 퀴즈로 지식을 쌓아보세요",
       image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=300&h=300&fit=crop&crop=center" // 퀴즈/학습 느낌
     },
-    { 
-      name: "DailyCare", 
-      description: "두피와 모발을 위한 맞춤 케어 프로그램으로 건강한 헤어 관리",
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=300&fit=crop&crop=center" // 케어/관리 느낌
-    },
   ];
 
   // 도구 클릭 핸들러
@@ -73,9 +68,6 @@ export default function Home() {
         break;
       case "탈모 OX":
         navigate('/hair-quiz');
-        break;
-      case "DailyCare":
-        navigate('/d-care');
         break;
       default:
         break;

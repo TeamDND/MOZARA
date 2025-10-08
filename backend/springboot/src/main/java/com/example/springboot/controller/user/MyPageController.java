@@ -177,4 +177,18 @@ public class MyPageController {
                     .body(Map.of("error", "오늘 날짜의 분석 결과 조회 중 오류가 발생했습니다."));
         }
     }
+
+    /**
+     * 이번주 일주일치 daily 분석 점수 조회 (일월화수목금토)
+     */
+    @GetMapping("/weekly-daily-analysis/{userId}")
+    public ResponseEntity<?> getWeeklyDailyAnalysis(@PathVariable Integer userId) {
+        try {
+            Map<String, Object> result = myPageService.getWeeklyDailyAnalysis(userId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "주간 분석 결과 조회 중 오류가 발생했습니다."));
+        }
+    }
 }

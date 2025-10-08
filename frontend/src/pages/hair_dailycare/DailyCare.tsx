@@ -107,6 +107,21 @@ const DailyCare: React.FC = () => {
   });
   const [streak, setStreak] = useState<number>(1);
 
+  // 주간 분석 데이터 상태
+  const [weeklyData, setWeeklyData] = useState<{ day: string; height: number; score: number | null }[]>([
+    { day: '일', height: 18, score: null },
+    { day: '월', height: 55, score: null },
+    { day: '화', height: 62, score: null },
+    { day: '수', height: 20, score: null },
+    { day: '목', height: 18, score: null },
+    { day: '금', height: 65, score: null },
+    { day: '토', height: 75, score: null }
+  ]);
+
+  // 주간 통계 상태
+  const [weeklyAverage, setWeeklyAverage] = useState<number>(0);
+  const [weeklyCount, setWeeklyCount] = useState<number>(0);
+
   // 시계열 비교 모달 상태
   const [isComparisonModalOpen, setIsComparisonModalOpen] = useState(false);
   const [comparisonData, setComparisonData] = useState<any>(null);
@@ -196,6 +211,51 @@ const DailyCare: React.FC = () => {
       }
     } catch (err) {
       console.error('❌ Daily 이미지 로드 실패:', err);
+    }
+  }, [userId]);
+
+  // 주간 분석 데이터 불러오기
+  const loadWeeklyAnalysis = useCallback(async () => {
+    if (!userId) return;
+
+    try {
+      console.log('🔄 주간 분석 데이터 불러오는 중...');
+      const response = await apiClient.get(`/weekly-daily-analysis/${userId}`);
+
+      if (response.data && response.data.weeklyData) {
+        const data = response.data.weeklyData;
+        console.log('✅ 주간 분석 데이터:', data);
+
+        // 요일별 데이터 업데이트
+        const updatedWeeklyData = [
+          { day: '일', score: data['일'], height: data['일'] ? Math.max(18, data['일'] * 0.75) : 18 },
+          { day: '월', score: data['월'], height: data['월'] ? Math.max(18, data['월'] * 0.75) : 18 },
+          { day: '화', score: data['화'], height: data['화'] ? Math.max(18, data['화'] * 0.75) : 18 },
+          { day: '수', score: data['수'], height: data['수'] ? Math.max(18, data['수'] * 0.75) : 18 },
+          { day: '목', score: data['목'], height: data['목'] ? Math.max(18, data['목'] * 0.75) : 18 },
+          { day: '금', score: data['금'], height: data['금'] ? Math.max(18, data['금'] * 0.75) : 18 },
+          { day: '토', score: data['토'], height: data['토'] ? Math.max(18, data['토'] * 0.75) : 18 }
+        ];
+
+        setWeeklyData(updatedWeeklyData);
+
+        // 평균 점수 및 진단 횟수 계산
+        const scores = updatedWeeklyData
+          .map(item => item.score)
+          .filter((score): score is number => score !== null);
+        
+        const count = scores.length;
+        const average = count > 0 
+          ? Math.round(scores.reduce((sum, score) => sum + score, 0) / count * 10) / 10
+          : 0;
+
+        setWeeklyCount(count);
+        setWeeklyAverage(average);
+
+        console.log('📊 주간 통계 - 평균:', average, ', 횟수:', count);
+      }
+    } catch (err) {
+      console.error('❌ 주간 분석 데이터 로드 실패:', err);
     }
   }, [userId]);
 
@@ -533,7 +593,10 @@ const DailyCare: React.FC = () => {
 
     // 최근 Daily 이미지 로드
     loadLatestDailyImages();
-  }, [createdAt, loadSeedlingInfo, loadLatestDailyImages]);
+
+    // 주간 분석 데이터 로드
+    loadWeeklyAnalysis();
+  }, [createdAt, loadSeedlingInfo, loadLatestDailyImages, loadWeeklyAnalysis]);
 
   // 오늘 날짜의 daily 분석결과 자동 로드 (별도 useEffect)
   React.useEffect(() => {
@@ -726,6 +789,9 @@ const DailyCare: React.FC = () => {
                               
                               // 오늘의 분석결과 새로고침
                               loadTodayDailyAnalysis();
+
+                              // 주간 분석 데이터 새로고침
+                              loadWeeklyAnalysis();
                             } catch (saveError) {
                               console.error('두피 점수 저장 실패:', saveError);
                             }
@@ -858,26 +924,20 @@ const DailyCare: React.FC = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2 text-[#1f0101]">
               <BarChart3 className="h-5 w-5 text-[#1f0101]" />
-              모발 건강 점수 변화
+              주간 분석 로그
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-36 flex items-end justify-around px-2">
-              {[
-                { day: '월', height: 55 },
-                { day: '화', height: 62 },
-                { day: '수', height: 20 },
-                { day: '목', height: 18 },
-                { day: '금', height: 65 },
-                { day: '토', height: 75 },
-                { day: '일', height: 18 }
-              ].map((item, index) => (
+              {weeklyData.map((item, index) => (
                 <div key={index} className="flex flex-col items-center flex-1 max-w-10">
                   <div 
                     className="w-full rounded-sm relative mb-2"
-                    style={{ height: `${item.height}px`, backgroundColor: '#1f0101', opacity: 0.1 }}
+                    style={{ height: `${item.height}px`, backgroundColor: '#1f0101', opacity: item.score ? 0.8 : 0.1 }}
                   >
-                    <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#1f0101' }}></div>
+                    {item.score && (
+                      <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#1f0101' }}></div>
+                    )}
                   </div>
                   <span className="text-xs text-gray-600">{item.day}</span>
                 </div>
@@ -894,10 +954,11 @@ const DailyCare: React.FC = () => {
                 <TrendingUp className="h-4 w-4" />
                 <span className="text-sm opacity-90">평균 점수</span>
               </div>
-              <div className="text-3xl font-bold mb-1">82.5</div>
-              <div className="text-sm opacity-90 flex items-center gap-1">
-                <TrendingUp className="h-3 w-3" />
-                +5.2%
+              <div className="text-3xl font-bold mb-1">
+                {weeklyAverage > 0 ? weeklyAverage.toFixed(1) : '-'}
+              </div>
+              <div className="text-sm opacity-90">
+                {weeklyCount > 0 ? '이번 주' : '데이터 없음'}
               </div>
             </CardContent>
           </Card>
@@ -908,7 +969,7 @@ const DailyCare: React.FC = () => {
                 <Target className="h-4 w-4" />
                 <span className="text-sm opacity-90">진단 횟수</span>
               </div>
-              <div className="text-3xl font-bold mb-1">7회</div>
+              <div className="text-3xl font-bold mb-1">{weeklyCount}회</div>
               <div className="text-sm opacity-90">이번 주</div>
             </CardContent>
           </Card>
