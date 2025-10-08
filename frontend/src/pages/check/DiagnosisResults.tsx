@@ -349,7 +349,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             <div className="grid grid-cols-3 gap-3">
               <div className="text-center p-3 bg-white rounded-xl">
                 <div className="flex items-center justify-center gap-1 mb-1">
-                  <p className="text-xs text-gray-600">🧠 Swin AI 분석</p>
+                  <p className="text-xs text-gray-600">🧠 AI 분석</p>
                   <button
                     onClick={() => setShowStageInfo(true)}
                     className="text-gray-400 hover:text-gray-600 transition-colors"

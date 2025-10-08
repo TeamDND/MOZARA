@@ -17,14 +17,6 @@ router = APIRouter(prefix="/hair-classification-rag", tags=["hair-classification
 
 # 전역 분석기 인스턴스
 analyzer = None
-_bisenet_singleton = None  # 싱글턴 BiSeNet 저장
-
-
-def set_bisenet_singleton(bisenet_model):
-    """app.py에서 싱글턴 BiSeNet을 주입받음"""
-    global _bisenet_singleton
-    _bisenet_singleton = bisenet_model
-    logging.info("✅ hair_classification_rag: BiSeNet 싱글턴 주입 완료")
 
 
 def get_analyzer():
@@ -32,7 +24,7 @@ def get_analyzer():
     global analyzer
     if analyzer is None:
         try:
-            analyzer = HairLossAnalyzer(bisenet_model=_bisenet_singleton)
+            analyzer = HairLossAnalyzer()
         except Exception as e:
             logging.error(f"분석기 초기화 실패: {e}")
             raise HTTPException(status_code=500, detail=f"분석기 초기화 실패: {str(e)}")

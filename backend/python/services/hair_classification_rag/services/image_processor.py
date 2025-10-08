@@ -14,15 +14,10 @@ from ..config.settings import settings
 from ..config.ensemble_config import get_ensemble_config
 
 class ImageProcessor:
-    def __init__(self, bisenet_model=None):
-        """ConvNeXt + ViT-S/16 앙상블 이미지 처리 클래스
-
-        Args:
-            bisenet_model: 외부에서 주입받은 BiSeNet 모델 (싱글턴)
-        """
+    def __init__(self):
+        """ConvNeXt + ViT-S/16 앙상블 이미지 처리 클래스"""
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.ensemble_config = get_ensemble_config()
-        self.bisenet_model = bisenet_model  # 싱글턴 BiSeNet 저장
 
         # ConvNeXt 모델 로드
         try:
@@ -237,52 +232,9 @@ class ImageProcessor:
 
     def simulate_bisenet_segmentation(self, image: Image.Image) -> Image.Image:
         """
-        BiSeNet 세그멘테이션 (두피 영역 추출)
-
-        싱글턴 BiSeNet 모델이 주입되어 있으면 실제 세그멘테이션 수행
-        없으면 중앙 70% 영역을 ROI로 크롭 (fallback)
+        중앙 70% 영역을 ROI로 크롭
+        (BiSeNet 사용 시 효용성 감소로 단순 크롭 방식 사용)
         """
-        if self.bisenet_model is not None:
-            # 실제 BiSeNet 세그멘테이션 수행
-            try:
-                # 이미지를 512x512로 리사이즈
-                image_np = np.array(image)
-                image_resized = cv2.resize(image_np, (512, 512))
-
-                # 전처리
-                transform_512 = transforms.Compose([
-                    transforms.ToTensor(),
-                    transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
-                ])
-                input_tensor = transform_512(image_resized).unsqueeze(0).to(self.device)
-
-                # BiSeNet으로 마스크 생성
-                with torch.no_grad():
-                    output = self.bisenet_model(input_tensor)[0]
-                    mask = torch.argmax(output, dim=1).squeeze().cpu().numpy()
-
-                # 헤어 마스크 추출 (클래스 17 = hair)
-                hair_mask = (mask == 17).astype(np.uint8) * 255
-
-                # 마스크 적용하여 ROI 추출
-                mask_3ch = cv2.cvtColor(hair_mask, cv2.COLOR_GRAY2RGB)
-                masked_img = cv2.bitwise_and(image_resized, mask_3ch)
-
-                # 원본 크기로 복원
-                width, height = image.size
-                masked_img_resized = cv2.resize(masked_img, (width, height))
-
-                # PIL Image로 변환
-                roi_img = Image.fromarray(masked_img_resized)
-
-                self.logger.info("✅ BiSeNet 세그멘테이션 완료")
-                return roi_img
-
-            except Exception as e:
-                self.logger.warning(f"BiSeNet 세그멘테이션 실패, fallback 사용: {e}")
-                # fallback으로 중앙 크롭 사용
-
-        # Fallback: 중앙 70% 영역 크롭 (시뮬레이션)
         width, height = image.size
         left = int(width * 0.15)
         top = int(height * 0.15)

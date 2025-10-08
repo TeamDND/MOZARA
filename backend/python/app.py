@@ -920,16 +920,8 @@ else:
 # Hair Classification RAG 라우터 include (조건부)
 if HAIR_RAG_AVAILABLE:
     try:
-        # importlib를 사용해서 모듈을 명시적으로 import
-        import importlib
-        rag_router_module = importlib.import_module('services.hair_classification_rag.api.router')
-
-        # BiSeNet 싱글턴 주입
-        if BISENET_AVAILABLE and bisenet_model is not None:
-            rag_router_module.set_bisenet_singleton(bisenet_model)
-
-        # router 객체를 include
-        app.include_router(rag_router_module.router, prefix="/api")
+        from services.hair_classification_rag.api.router import router as hair_rag_router
+        app.include_router(hair_rag_router, prefix="/api")
         print("Hair Classification RAG 라우터 include 완료 (/api/hair-classification-rag)")
     except Exception as e:
         print(f"Hair Classification RAG 라우터 include 실패: {e}")
