@@ -57,6 +57,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showAutoFillModal, setShowAutoFillModal] = useState(false);
   const [showLoginRequiredModal, setShowLoginRequiredModal] = useState(false);
+  const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState(0);
 
   const totalSteps = 4;
 
@@ -154,10 +155,19 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         '개인 맞춤 계획 수립 완료'
       ];
 
+      // 단계별 시간 (밀리초)
+      const stepDelays = [800, 800, 2000, 800, 800, 800];
+      const totalTime = stepDelays.reduce((a, b) => a + b, 0);
+      setEstimatedTimeRemaining(Math.ceil(totalTime / 1000));
+
       // 단계별 진행 시뮬레이션
       for (let i = 0; i < steps.length; i++) {
         setAnalysisSteps(prev => [...prev, steps[i]]);
         setAnalysisProgress((i + 1) / steps.length * 100);
+
+        // 남은 시간 업데이트
+        const remainingTime = stepDelays.slice(i + 1).reduce((a, b) => a + b, 0);
+        setEstimatedTimeRemaining(Math.ceil(remainingTime / 1000));
 
         if (i === 2) {
           // 실제 API 호출은 3번째 단계에서
@@ -212,7 +222,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         }
 
         // 각 단계 사이의 지연
-        await new Promise(resolve => setTimeout(resolve, i === 2 ? 2000 : 800));
+        await new Promise(resolve => setTimeout(resolve, stepDelays[i]));
       }
 
       setAnalysisComplete(true);
@@ -320,6 +330,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
             analysisError={analysisError}
             isAnalyzing={isAnalyzing}
             gender={baspAnswers.gender}
+            estimatedTimeRemaining={estimatedTimeRemaining}
             onRetry={() => {
                     setAnalysisError(null);
                     setCurrentStep(2);

@@ -1,6 +1,7 @@
+import { useState, useEffect } from 'react';
 import { Button } from '../../components/ui/button';
 import { Progress } from '../../components/ui/progress';
-import { CheckCircle, AlertCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { SwinAnalysisResult, getStageDescription, getStageColor } from '../../services/swinAnalysisService';
 
 interface AnalysisProgressStepProps {
@@ -13,6 +14,7 @@ interface AnalysisProgressStepProps {
   onRetry: () => void;
   onGoBack: () => void;
   gender?: string;  // 성별 추가
+  estimatedTimeRemaining?: number;  // 남은 시간 (초)
 }
 
 const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
@@ -24,9 +26,25 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
   isAnalyzing,
   onRetry,
   onGoBack,
-  gender
+  gender,
+  estimatedTimeRemaining = 0
 }) => {
   const isMale = gender === 'male' || gender === '남';
+  const [displayTime, setDisplayTime] = useState(estimatedTimeRemaining);
+
+  // 실시간 카운트다운
+  useEffect(() => {
+    setDisplayTime(estimatedTimeRemaining);
+  }, [estimatedTimeRemaining]);
+
+  // 시간 포맷 함수
+  const formatTime = (seconds: number) => {
+    if (seconds <= 0) return '곧 완료';
+    if (seconds < 60) return `약 ${seconds}초`;
+    const minutes = Math.ceil(seconds / 60);
+    return `약 ${minutes}분`;
+  };
+
   return (
     <div className="space-y-8">
       <div className="text-center space-y-3">
@@ -51,7 +69,15 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
 
       {!analysisComplete && !analysisError && (
         <div className="space-y-6">
-          <Progress value={analysisProgress} className="h-3" />
+          <div className="space-y-2">
+            <Progress value={analysisProgress} className="h-3" />
+            {displayTime > 0 && (
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                <Clock className="w-4 h-4" />
+                <span>남은 시간: {formatTime(displayTime)}</span>
+              </div>
+            )}
+          </div>
 
           <div className="space-y-4">
             {analysisSteps.map((step, index) => (
