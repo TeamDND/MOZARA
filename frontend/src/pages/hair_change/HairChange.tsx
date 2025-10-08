@@ -1,53 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { hairChangeService, HairChangeRequest, HairChangeResponse, Hairstyle } from '../../services/hairChangeService';
 
 export default function HairChange() {
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [selectedHairstyle, setSelectedHairstyle] = useState<string>('-');
-  const [customPrompt, setCustomPrompt] = useState<string>('');
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedHairstyle, setSelectedHairstyle] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<HairChangeResponse | null>(null);
   const [mode, setMode] = useState<'wig' | 'fill_bald'>('wig');
-  const [hairstyles, setHairstyles] = useState<Hairstyle>({
-    "short": "짧은 가발 스타일",
-    "medium": "중간 길이 가발 스타일",
-    "long": "긴 가발 스타일",
-    "undercut": "울프컷 가발 스타일",
-    "pompadour": "포마드 가발 스타일",
-    "quiff": "퀴프 가발 스타일",
-    "slick_back": "슬릭백 가발 스타일",
-    "textured": "텍스처드 가발 스타일",
-    "buzz_cut": "버즈컷 가발 스타일",
-    "fade": "페이드 가발 스타일",
-    "curtain": "커튼 가발 스타일",
-    "mullet": "멀렛 가발 스타일",
-    "fill_bald": "빈머리 매꾸기"
-  });
-  const [error, setError] = useState<string>('');
-
-  useEffect(() => {
-    loadHairstyles();
-  }, []);
-
-  const loadHairstyles = async () => {
-    try {
-      console.log('헤어스타일 목록 로드 시작...');
-      const styles = await hairChangeService.getHairstyles();
-      console.log('헤어스타일 목록 로드 성공:', styles);
-      setHairstyles(styles);
-    } catch (error) {
-      console.error('헤어스타일 목록 로드 실패:', error);
-      setError('헤어스타일 목록을 불러오는데 실패했습니다.');
-    }
+  const hairstyles: Hairstyle = {
+    "short": "짧은 가발",
+    "medium": "중간 길이 가발",
+    "long": "긴 가발",
+    "undercut": "울프컷 가발",
+    "pompadour": "포마드 가발",
+    "quiff": "퀴프 가발",
+    "slick_back": "슬릭백 가발",
+    "textured": "텍스처드 가발",
+    "buzz_cut": "버즈컷 가발",
+    "fade": "페이드 가발",
+    "curtain": "커튼 가발",
+    "mullet": "멀렛 가발"
   };
+  const [error, setError] = useState<string>('');
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedImage(file);
       setError('');
+      
+      // 이미지 미리보기 생성
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -70,7 +60,6 @@ export default function HairChange() {
       const request: HairChangeRequest = {
         image: selectedImage,
         hairstyle: mode === 'fill_bald' ? 'fill_bald' : selectedHairstyle,
-        customPrompt: customPrompt.trim() || undefined,
       };
 
       const response = await hairChangeService.generateHairstyle(request);
@@ -85,8 +74,8 @@ export default function HairChange() {
 
   const handleReset = () => {
     setSelectedImage(null);
+    setImagePreview(null);
     setSelectedHairstyle('');
-    setCustomPrompt('');
     setResult(null);
     setError('');
     setMode('wig');
@@ -216,10 +205,12 @@ export default function HairChange() {
                   ? 'border-green-400 bg-green-50' 
                   : 'border-gray-100 hover:border-gray-300'
               }`}>
-                {selectedImage ? (
+                {imagePreview ? (
                   <div className="space-y-2">
-                    <div className="text-green-600 text-3xl">✓</div>
-                    <div className="text-green-700 font-semibold text-sm">{selectedImage.name}</div>
+                    <div className="rounded-lg overflow-hidden mx-auto max-w-xs">
+                      <img src={imagePreview} alt="미리보기" className="w-full h-auto" />
+                    </div>
+                    <div className="text-green-700 font-semibold text-sm">{selectedImage?.name}</div>
                     <div className="text-green-600 text-xs">다른 사진으로 변경하려면 클릭</div>
                   </div>
                 ) : (
@@ -237,20 +228,21 @@ export default function HairChange() {
           {mode === 'wig' && (
             <div className="mb-4">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">원하는 가발 스타일</h3>
-              <select
-                value={selectedHairstyle}
-                onChange={(e) => setSelectedHairstyle(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-[#1f0101] focus:border-transparent bg-white text-gray-700 text-sm"
-              >
-                <option value="">가발 스타일을 선택하세요</option>
-                {Object.entries(hairstyles)
-                  .filter(([key]) => key !== 'fill_bald')
-                  .map(([key, value]) => (
-                    <option key={key} value={key}>
-                      {value}
-                    </option>
-                  ))}
-              </select>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.entries(hairstyles).map(([key, value]) => (
+                  <button
+                    key={key}
+                    onClick={() => setSelectedHairstyle(key)}
+                    className={`px-4 py-3 rounded-xl font-medium transition-all text-sm ${
+                      selectedHairstyle === key
+                        ? 'bg-[#1f0101] text-white border-2 border-[#1f0101]'
+                        : 'bg-white text-gray-700 border-2 border-gray-100 hover:border-gray-300'
+                    }`}
+                  >
+                    {value}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -266,18 +258,6 @@ export default function HairChange() {
               </div>
             </div>
           )}
-
-          {/* 추가 요청사항 */}
-          <div className="mb-4">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">추가 요청사항 (선택)</h3>
-            <textarea
-              value={customPrompt}
-              onChange={(e) => setCustomPrompt(e.target.value)}
-              placeholder="특별한 요청사항이 있다면 입력하세요..."
-              className="w-full px-4 py-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-[#1f0101] focus:border-transparent resize-none text-gray-700 text-sm"
-              rows={3}
-            />
-          </div>
 
           {/* 액션 버튼들 */}
           <div className="space-y-2 mb-4">

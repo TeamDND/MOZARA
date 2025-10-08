@@ -41,6 +41,7 @@ interface HairAnalysisResponse {
     severity_distribution: Record<string, number>;
     diagnosis_scores: Record<string, number>;
     recommendations: string[];
+    scalp_score?: number;  // 백엔드에서 계산된 두피 점수 (0-100)
   };
   similar_cases: Array<{
     id: string;
@@ -235,85 +236,44 @@ const DailyCare: React.FC = () => {
   const [dandruffSub, setDandruffSub] = useState<string>('정상');
 
   const updateDashboardFromAnalysis = (res: HairAnalysisResponse): number | null => {
-    // LLM 기반 종합 두피 점수 계산
+    // 백엔드에서 계산된 분석 결과 사용 (비듬/탈모는 이미 백엔드에서 제외됨)
     if (!res.analysis) return null;
     
-    const primaryCategory = res.analysis.primary_category;
-    const primarySeverity = res.analysis.primary_severity;
-    const avgConfidence = res.analysis.average_confidence;
-    const diagnosisScores = res.analysis.diagnosis_scores;
+    console.log('[DEBUG] ===== 백엔드 응답 분석 시작 =====');
+    console.log('[DEBUG] 백엔드 응답 전체:', res);
+    console.log('[DEBUG] res.analysis:', res.analysis);
+    console.log('[DEBUG] res.analysis에 있는 모든 키:', Object.keys(res.analysis || {}));
+    console.log('[DEBUG] res.analysis.scalp_score:', res.analysis?.scalp_score);
+    console.log('[DEBUG] res.analysis.scalp_score 타입:', typeof res.analysis?.scalp_score);
+    console.log('[DEBUG] ===========================');
     
-    // 비듬과 탈모 관련 내용 필터링
-    const category = primaryCategory.toLowerCase();
-    if (category.includes('비듬') || category.includes('탈모')) {
-      // 비듬이나 탈모가 주요 카테고리인 경우 "양호"로 처리
-      const filteredCategory = "0.양호";
-      const filteredSeverity = "0.양호";
-      
-      // 필터링된 데이터로 계속 처리
-      const filteredAnalysis = {
-        ...res.analysis,
-        primary_category: filteredCategory,
-        primary_severity: filteredSeverity,
-        diagnosis_scores: Object.fromEntries(
-          Object.entries(diagnosisScores).filter(([key]) => 
-            !key.includes('비듬') && !key.includes('탈모')
-          )
-        )
-      };
-      
-      // 필터링된 분석으로 대시보드 업데이트
-      return updateDashboardWithFilteredData(filteredAnalysis);
-    }
-
-    // 비듬/탈모가 아닌 경우 정상 처리
+    // 백엔드에서 비듬/탈모를 이미 제외하고 분석했으므로 그대로 사용
     return updateDashboardWithFilteredData(res.analysis);
   };
   
   const updateDashboardWithFilteredData = (analysis: any): number => {
+    // 카테고리 표시용 매핑 테이블
+    const categoryDisplayMap: Record<string, string> = {
+      "모낭사이홍반": "모낭사이변색",
+      "3.모낭사이홍반": "3.모낭사이변색"
+    };
+    
     const primaryCategory = analysis.primary_category;
     const primarySeverity = analysis.primary_severity;
-    const avgConfidence = analysis.average_confidence;
-    const diagnosisScores = analysis.diagnosis_scores;
-
-    // 심각도에 따른 단계 계산 (0.양호=0, 1.경증=1, 2.중등도=2, 3.중증=3)
-    const severityLevel = parseInt(primarySeverity.split('.')[0]) || 0;
-    const stage01to03 = Math.min(3, Math.max(0, severityLevel)); // 0~3
-    const conf = typeof avgConfidence === 'number' ? avgConfidence : 0.7; // 0~1
-
-    // LLM 기반 종합 점수 계산 (더 정교한 알고리즘)
-    let baseScore = 100; // 기본 점수
     
-    // 심각도에 따른 감점
-    baseScore -= stage01to03 * 20; // 심각도별 20점씩 감점
-    
-    // 진단 점수 기반 조정
-    if (diagnosisScores) {
-      const scores = Object.values(diagnosisScores) as number[];
-      const avgDiagnosisScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-      baseScore -= (avgDiagnosisScore - 0.5) * 30; // 진단 점수 기반 조정
-    }
-    
-    // 신뢰도 기반 보정
-    baseScore += (conf - 0.5) * 20; // 신뢰도 기반 보정
-    
-    // 카테고리별 특별 감점 (비듬/탈모는 이미 필터링됨)
-    const category = primaryCategory.toLowerCase();
-    if (category.includes('홍반') || category.includes('농포')) {
-      baseScore -= 10; // 염증 관련 추가 감점
-    }
-    if (category.includes('피지과다')) {
-      baseScore -= 8; // 피지과다는 추가 감점
-    }
-    if (category.includes('미세각질')) {
-      baseScore -= 6; // 미세각질은 추가 감점
-    }
-    
-    const finalScore = Math.max(0, Math.min(100, Math.round(baseScore)));
+    // 백엔드에서 계산된 점수 사용미세각질 양호, 피지과다 경고, 모낭사이홍반 주의, 모낭홍반농포 양호
+    const finalScore = analysis.scalp_score || 100;
     setScalpScore(finalScore);
 
-    // finalScore 반환 (백엔드 저장용)
-    console.log('계산된 두피 점수:', finalScore);
+    console.log('백엔드에서 받은 두피 점수:', finalScore);
+
+    // 심각도에 따른 단계 계산 (UI 표시용)
+    const severityLevel = parseInt(primarySeverity.split('.')[0]) || 0;
+    const stage01to03 = Math.min(3, Math.max(0, severityLevel)); // 0~3
+    
+    // 카테고리 (UI 표시용 - 매핑 적용)
+    const displayCategory = categoryDisplayMap[primaryCategory] || primaryCategory;
+    const category = displayCategory.toLowerCase();
 
     // 카테고리와 심각도에 따른 상태 추정 (새로운 카테고리)
     
@@ -341,16 +301,16 @@ const DailyCare: React.FC = () => {
       setFlakeSub('개선됨');
     }
 
-    // 홍반 상태 판정
-    if (category.includes('홍반') || category.includes('농포') || stage01to03 >= 2) {
+    // 모낭 상태 판정 (변색 포함)
+    if (category.includes('홍반') || category.includes('변색') || category.includes('농포') || stage01to03 >= 2) {
       setRednessLabel('주의');
-      setRednessSub('케어 필요');
+      setRednessSub('모낭 관리 필요');
     } else if (stage01to03 === 1) {
       setRednessLabel('보통');
-      setRednessSub('관찰중');
+      setRednessSub('모낭 관찰중');
     } else {
       setRednessLabel('양호');
-      setRednessSub('정상');
+      setRednessSub('모낭 정상');
     }
 
     // 비듬 상태 판정

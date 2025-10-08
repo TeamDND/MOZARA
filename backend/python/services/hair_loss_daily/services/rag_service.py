@@ -43,12 +43,18 @@ class RAGService:
                     "error": "이미지 특징 추출에 실패했습니다."
                 }
             
-            # 2. Pinecone에서 유사한 케이스 검색
-            print("🔍 유사 케이스 검색 중...")
+            # 2. Pinecone에서 유사한 케이스 검색 (비듬/탈모 제외)
+            print("🔍 유사 케이스 검색 중 (비듬/탈모 제외)...")
             # NumPy 배열을 리스트로 변환
             query_vector_list = query_vector.tolist() if hasattr(query_vector, 'tolist') else query_vector
+            
+            # 비듬과 탈모를 제외하는 필터
+            exclude_filter = {
+                "category": {"$nin": ["5.비듬", "비듬", "탈모"]}
+            }
+            
             similar_cases = self.pinecone_service.search_similar_vectors(
-                query_vector_list, top_k=top_k
+                query_vector_list, top_k=top_k, filter_dict=exclude_filter
             )
             
             if similar_cases is None or len(similar_cases) == 0:
@@ -317,6 +323,7 @@ class RAGService:
                     continue
                 
                 scores.append(score)
+                print(f"[DEBUG] 케이스: {category}, 심각도: {metadata.get('severity', '')}, 유사도: {score:.3f}")
                 
                 # 유사도 점수를 가중치로 사용
                 severity = metadata.get("severity", "")
@@ -341,6 +348,7 @@ class RAGService:
             
             # 진단 점수 계산 (가중치 적용)
             diagnosis_scores = self._calculate_weighted_diagnosis_scores(values, scores)
+            print(f"[DEBUG] 계산된 diagnosis_scores: {diagnosis_scores}")
             
             # 중복 데이터 제거 (같은 이미지 ID에 대해 가장 높은 유사도만 유지)
             unique_cases = {}
@@ -367,6 +375,23 @@ class RAGService:
                 }
             }
             
+            # scalp_score 계산 및 추가
+            try:
+                scalp_score = self._calculate_scalp_score(
+                    primary_category, 
+                    primary_severity, 
+                    diagnosis_scores, 
+                    statistics.mean(scores) if scores else 0
+                )
+                analysis["scalp_score"] = scalp_score
+                print(f"[DEBUG] analysis에 scalp_score 추가 완료: {scalp_score}")
+                print(f"[DEBUG] analysis 키 목록: {list(analysis.keys())}")
+            except Exception as e:
+                print(f"[ERROR] scalp_score 계산 중 오류: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                analysis["scalp_score"] = 100  # 기본값
+            
             return analysis
             
         except Exception as e:
@@ -382,6 +407,105 @@ class RAGService:
         
         counter = Counter(items)
         return counter.most_common(1)[0][0]
+    
+    def _calculate_scalp_score(self, primary_category: str, primary_severity: str, 
+                               diagnosis_scores: Dict[str, float], avg_confidence: float) -> int:
+        """두피 점수 계산 (0-100점)"""
+        print(f"\n[DEBUG] 두피 점수 계산 시작")
+        print(f"[DEBUG] primary_category: {primary_category}")
+        print(f"[DEBUG] primary_severity: {primary_severity}")
+        print(f"[DEBUG] diagnosis_scores: {diagnosis_scores}")
+        print(f"[DEBUG] avg_confidence: {avg_confidence}")
+        
+        # primary_severity 파싱 디버깅
+        print(f"[DEBUG] primary_severity 원본: '{primary_severity}'")
+        print(f"[DEBUG] '.' 포함 여부: {'.' in primary_severity if primary_severity else False}")
+        
+        base_score = 100
+        
+        # 심각도 추출 (0.양호=0, 1.경증=1, 2.중등도=2, 3.중증=3)
+        severity_level = 0
+        if primary_severity:
+            severity_level = int(primary_severity.split('.')[0]) if '.' in primary_severity else 0
+        
+        print(f"[DEBUG] severity_level: {severity_level}")
+        
+        # 심각도에 따른 감점 (조정)
+        severity_penalty = severity_level * 15  # 25 → 15로 감소
+        base_score -= severity_penalty
+        print(f"[DEBUG] 심각도 감점: -{severity_penalty}, 현재 점수: {base_score}")
+        
+        # 진단 점수 기반 감점 (0~3 범위)
+        if diagnosis_scores:
+            scores = list(diagnosis_scores.values())
+            avg_diagnosis_score = sum(scores) / len(scores)
+            diagnosis_penalty = avg_diagnosis_score * 8  # 15 → 8로 감소
+            base_score -= diagnosis_penalty
+            print(f"[DEBUG] 평균 진단 점수: {avg_diagnosis_score:.2f}")
+            print(f"[DEBUG] 진단 점수 감점: -{diagnosis_penalty:.2f}, 현재 점수: {base_score:.2f}")
+        
+        # 신뢰도 기반 보정 (낮은 신뢰도면 덜 감점)
+        confidence_adjustment = (avg_confidence - 0.5) * 10
+        base_score += confidence_adjustment
+        print(f"[DEBUG] 신뢰도 보정: {confidence_adjustment:+.2f}, 현재 점수: {base_score:.2f}")
+        
+        # 카테고리별 추가 감점
+        category_penalty = 0
+        category_lower = primary_category.lower()
+        
+        # 홍반/농포 감점 (RGB 기반 조정)
+        if '홍반' in category_lower or '농포' in category_lower:
+            # RGB 기반 홍반 심각도별 감점
+            erythema_penalty = self._calculate_erythema_penalty(diagnosis_scores)
+            category_penalty = erythema_penalty
+        elif '피지과다' in category_lower:
+            category_penalty = 8
+        elif '미세각질' in category_lower:
+            category_penalty = 5
+        
+        base_score -= category_penalty
+        print(f"[DEBUG] 카테고리 감점: -{category_penalty}, 현재 점수: {base_score:.2f}")
+        
+        # 최종 점수는 0~100 범위로 제한
+        final_score = max(0, min(100, round(base_score)))
+        
+        print(f"[DEBUG] 최종 두피 점수: {final_score}\n")
+        
+        return final_score
+    
+    def _calculate_erythema_penalty(self, diagnosis_scores: Dict[str, float]) -> int:
+        """RGB 기반 홍반 심각도별 감점 계산"""
+        # RGB 홍반 기준값 (중증, 중등도, 경증)
+        erythema_rgb_standards = {
+            "severe": {"r": 177, "g": 114, "b": 125, "penalty": 15},      # 중증: 높은 감점
+            "moderate": {"r": 196, "g": 135, "b": 143, "penalty": 10},    # 중등도: 중간 감점  
+            "mild": {"r": 173, "g": 152, "b": 125, "penalty": 5}          # 경증: 낮은 감점
+        }
+        
+        # 모낭사이홍반 점수 확인
+        erythema_score = diagnosis_scores.get("모낭사이홍반", 0)
+        
+        # 점수 기반 심각도 판정
+        if erythema_score >= 2.0:
+            # 중증: 2.0 이상
+            penalty = erythema_rgb_standards["severe"]["penalty"]
+            severity = "중증"
+        elif erythema_score >= 1.0:
+            # 중등도: 1.0-1.9
+            penalty = erythema_rgb_standards["moderate"]["penalty"]
+            severity = "중등도"
+        elif erythema_score >= 0.5:
+            # 경증: 0.5-0.9
+            penalty = erythema_rgb_standards["mild"]["penalty"]
+            severity = "경증"
+        else:
+            # 양호: 0.5 미만
+            penalty = 0
+            severity = "양호"
+        
+        print(f"[DEBUG] 홍반 RGB 분석: 점수={erythema_score:.2f}, 심각도={severity}, 감점={penalty}")
+        
+        return penalty
     
     def _calculate_diagnosis_scores(self, values: Dict[str, List[int]]) -> Dict[str, float]:
         """각 진단 카테고리별 평균 점수 계산"""
@@ -445,37 +569,38 @@ class RAGService:
         return weighted_scores
     
     def _get_primary_category_with_threshold(self, weighted_categories: Dict[str, float], scores: List[float]) -> str:
-        """임계값을 적용한 주요 카테고리 결정 (분석점수와 일치)"""
+        """임계값을 적용한 주요 카테고리 결정 (비듬/탈모 제외)"""
         if not weighted_categories:
-            return ""
+            return "0.양호"
+        
+        # 비듬과 탈모를 제외한 카테고리만 필터링
+        filtered_categories = {
+            k: v for k, v in weighted_categories.items() 
+            if '비듬' not in k and '탈모' not in k
+        }
+        
+        if not filtered_categories:
+            print("[DEBUG] 비듬/탈모 제외 후 남은 카테고리 없음 -> 양호")
+            return "0.양호"
         
         # 평균 유사도 점수 계산
         avg_score = statistics.mean(scores) if scores else 0
         
-        # 임계값: 평균 유사도가 0.5 미만이면 "양호" 반환 (더 엄격하게)
-        if avg_score < 0.5:  # 0.3 → 0.5로 강화
+        # 임계값: 평균 유사도가 0.5 미만이면 "양호" 반환
+        if avg_score < 0.5:
             return "0.양호"
         
-        # 가장 높은 가중치를 가진 카테고리 선택 (분석점수와 동일한 로직)
-        primary_category = max(weighted_categories.items(), key=lambda x: float(x[1]))[0]
+        # 가장 높은 가중치를 가진 카테고리 선택 (비듬/탈모 제외된 카테고리에서)
+        primary_category = max(filtered_categories.items(), key=lambda x: float(x[1]))[0]
+        category_score = float(filtered_categories[primary_category])
         
-        # 모든 카테고리에 대해 엄격한 기준 적용
-        category_score = float(weighted_categories[primary_category])
+        print(f"[DEBUG] 비듬/탈모 제외 후 primary_category: {primary_category}, score: {category_score}")
         
-        # 비듬 카테고리는 완전히 제외 (빛반사 오인 문제)
-        if primary_category == "비듬":
-            # 두 번째로 높은 카테고리로 변경
-            sorted_categories = sorted(weighted_categories.items(), key=lambda x: float(x[1]), reverse=True)
-            if len(sorted_categories) > 1:
-                primary_category = sorted_categories[1][0]
-            else:
-                return "0.양호"
-        
-        # 다른 카테고리들도 엄격한 기준 적용
-        elif category_score < 0.6:  # 일반 카테고리는 0.6 이상 필요
-            # 두 번째로 높은 카테고리로 변경
-            sorted_categories = sorted(weighted_categories.items(), key=lambda x: float(x[1]), reverse=True)
-            if len(sorted_categories) > 1:
+        # 엄격한 기준 적용
+        if category_score < 0.6:
+            # 두 번째로 높은 카테고리 확인
+            sorted_categories = sorted(filtered_categories.items(), key=lambda x: float(x[1]), reverse=True)
+            if len(sorted_categories) > 1 and float(sorted_categories[1][1]) >= 0.6:
                 primary_category = sorted_categories[1][0]
             else:
                 return "0.양호"
