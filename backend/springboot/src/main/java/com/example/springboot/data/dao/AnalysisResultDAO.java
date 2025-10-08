@@ -263,4 +263,21 @@ public class AnalysisResultDAO {
                 .map(this::convertEntityToMap)
                 .collect(Collectors.toList());
     }
+
+    /**
+     * 사용자 ID와 분석 타입으로 오늘 날짜의 분석 결과 1개 조회
+     */
+    public AnalysisResultEntity findTodayAnalysisByUserIdAndType(Integer userId, String analysisType) {
+        try {
+            LocalDate today = LocalDate.now();
+            AnalysisResultEntity result = analysisResultRepository.findFirstByUserIdAndAnalysisTypeAndDate(userId, analysisType, today);
+            log.info("[AnalysisResultDAO] 오늘 날짜 분석 결과 조회 - userId: {}, analysisType: {}, date: {}, found: {}", 
+                    userId, analysisType, today, result != null ? "true" : "false");
+            return result;
+        } catch (Exception e) {
+            log.error("[AnalysisResultDAO] 오늘 날짜 분석 결과 조회 실패 - userId: {}, analysisType: {}, error: {}", 
+                    userId, analysisType, e.getMessage(), e);
+            return null;
+        }
+    }
 }

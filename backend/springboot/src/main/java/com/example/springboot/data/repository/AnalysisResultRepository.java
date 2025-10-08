@@ -69,4 +69,12 @@ public interface AnalysisResultRepository extends JpaRepository<AnalysisResultEn
     @Query("SELECT a FROM AnalysisResultEntity a WHERE a.userEntityIdForeign.id = :userId AND a.analysisType = :analysisType ORDER BY a.inspectionDate ASC")
     List<AnalysisResultEntity> findByUserIdAndAnalysisTypeOrderByDateAsc(@Param("userId") Integer userId, 
                                                                          @Param("analysisType") String analysisType);
+
+    /**
+     * 사용자 ID와 분석 타입으로 특정 날짜의 가장 최근 분석 결과 1개 조회 (ID 내림차순)
+     */
+    @Query("SELECT a FROM AnalysisResultEntity a WHERE a.userEntityIdForeign.id = :userId AND a.analysisType = :analysisType AND a.inspectionDate = :date ORDER BY a.id DESC")
+    AnalysisResultEntity findFirstByUserIdAndAnalysisTypeAndDate(@Param("userId") Integer userId, 
+                                                                  @Param("analysisType") String analysisType, 
+                                                                  @Param("date") LocalDate date);
 }

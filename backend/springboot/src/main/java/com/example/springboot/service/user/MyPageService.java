@@ -174,4 +174,17 @@ public class MyPageService {
         List<AnalysisResultEntity> entities = analysisResultDAO.findByUserIdAndAnalysisTypeOrderByDateDesc(userId, analysisType);
         return entities.size();
     }
+
+    /**
+     * 오늘 날짜의 특정 분석 타입 결과 조회
+     */
+    public AnalysisResultDTO getTodayAnalysisByType(Integer userId, String analysisType) {
+        AnalysisResultEntity entity = analysisResultDAO.findTodayAnalysisByUserIdAndType(userId, analysisType);
+        
+        if (entity == null) {
+            throw new RuntimeException("오늘 날짜의 " + analysisType + " 분석 결과가 없습니다.");
+        }
+        
+        return convertToDTO(entity);
+    }
 }

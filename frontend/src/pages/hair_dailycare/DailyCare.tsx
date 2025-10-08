@@ -85,6 +85,14 @@ const DailyCare: React.FC = () => {
   const [products, setProducts] = useState<HairProduct[] | null>(null);
   const [tips, setTips] = useState<string[]>([]);
   
+  // 오늘의 분석 결과 (DB에서 로드된 데이터)
+  const [todayAnalysisData, setTodayAnalysisData] = useState<{
+    date: string;
+    imageUrl: string;
+    grade: number;
+    summary: string;
+  } | null>(null);
+  
   // 새싹 관련 상태
   const [seedlingPoints, setSeedlingPoints] = useState(0);
   const [seedlingLevel, setSeedlingLevel] = useState(1);
@@ -428,21 +436,33 @@ const DailyCare: React.FC = () => {
 
     try {
       console.log('Daily 분석결과 조회 시도:', userId);
-      const response = await apiClient.get(`/api/today-analysis/${userId}/daily`);
+      const response = await apiClient.get(`/today-analysis/${userId}/daily`);
 
       if (response.data) {
         console.log('Daily 분석결과 발견:', response.data);
+        
+        // AnalysisResultDTO 형식으로 받은 데이터 처리
+        const dto = response.data;
+        
+        // 오늘의 분석 데이터 설정 (UI용)
+        setTodayAnalysisData({
+          date: dto.inspectionDate || new Date().toISOString().split('T')[0],
+          imageUrl: dto.imageUrl || '',
+          grade: dto.grade || 75,
+          summary: dto.analysisSummary || ''
+        });
+        
         // 분석결과를 HairAnalysisResponse 형태로 변환
         const todayAnalysis: HairAnalysisResponse = {
           success: true,
           analysis: {
-            primary_category: response.data.analysisType || "0.양호",
+            primary_category: dto.analysisType || "0.양호",
             primary_severity: "0.양호",
             average_confidence: 0.8,
             category_distribution: {},
             severity_distribution: {},
             diagnosis_scores: {},
-            recommendations: []
+            recommendations: dto.advice ? [dto.advice] : []
           },
           similar_cases: [],
           total_similar_cases: 0,
@@ -457,15 +477,17 @@ const DailyCare: React.FC = () => {
         setAnalysis(todayAnalysis);
         
         // 분석결과의 이미지 URL을 latestDailyImages에 설정
-        if (response.data.imageUrl) {
+        if (dto.imageUrl) {
           setLatestDailyImages(prev => ({
             ...prev,
-            current: response.data.imageUrl
+            current: dto.imageUrl
           }));
         }
         
-        // 두피 점수 계산 및 대시보드 업데이트
-        const calculatedScore = response.data.grade || 75;
+        // 두피 점수 계산 및 대시보드 업데이트 (DB에 저장된 grade 사용)
+        const calculatedScore = dto.grade || 75;
+        setScalpScore(calculatedScore);
+        
         updateDashboardWithFilteredData({
           primary_category: todayAnalysis.analysis?.primary_category || "0.양호",
           primary_severity: "0.양호",
@@ -556,34 +578,76 @@ const DailyCare: React.FC = () => {
             <p className="text-sm text-gray-600 mt-1">오늘의 두피 상태를 확인해보세요. (정수리 영역 사진) </p>
           </CardHeader>
           <CardContent className="space-y-3">
-            {/* 분석결과가 있을 때 사진 표시 */}
-            {analysis && (
-              <div className="mb-4">
-                <div className="text-center mb-3">
-                  <p className="text-sm font-medium text-[#1f0101] mb-2">오늘의 분석 결과</p>
-                  <div className="w-32 h-32 mx-auto rounded-xl overflow-hidden border-2 border-[#1f0101]">
+            {/* 오늘의 분석 결과가 있을 때 */}
+            {todayAnalysisData ? (
+              <div className="space-y-4">
+                {/* 날짜 및 점수 */}
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-[#1f0101] to-[#2A0202] rounded-xl text-white">
+                  <div>
+                    <p className="text-xs opacity-90">분석 날짜</p>
+                    <p className="text-lg font-bold">
+                      {new Date(todayAnalysisData.date).toLocaleDateString('ko-KR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs opacity-90">두피 점수</p>
+                    <p className="text-2xl font-bold">{todayAnalysisData.grade}점</p>
+                  </div>
+                </div>
+
+                {/* 분석 이미지 */}
+                <div className="text-center">
+                  <div className="w-full max-w-xs mx-auto rounded-xl overflow-hidden border-2 border-[#1f0101]">
                     <img
-                      src={latestDailyImages.current || '/default-scalp-image.jpg'}
+                      src={todayAnalysisData.imageUrl || '/default-scalp-image.jpg'}
                       alt="오늘의 두피 분석"
-                      className="w-full h-full object-cover"
+                      className="w-full aspect-square object-cover"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = '/default-scalp-image.jpg';
                       }}
                     />
                   </div>
-                  <p className="text-xs text-gray-600 mt-2">분석 완료된 이미지</p>
                 </div>
+
+                {/* 분석 요약 카드들 */}
+                {todayAnalysisData.summary && todayAnalysisData.summary.trim() !== '' && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-semibold text-[#1f0101]">📋 분석 요약</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      {todayAnalysisData.summary.split(', ').filter(item => item.trim() !== '').map((item, index) => {
+                        const opacityValues = [1, 0.8, 0.6, 0.4];
+                        const opacity = opacityValues[index % opacityValues.length];
+                        return (
+                          <Card 
+                            key={index}
+                            className="border-0" 
+                            style={{ backgroundColor: '#1f0101', opacity }}
+                          >
+                            <CardContent className="p-4 text-white">
+                              <p className="text-sm leading-relaxed">{item.trim()}</p>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-            
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
-              className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 hover:file:bg-gray-200"
-            />
-            <Button
-              onClick={async () => {
+            ) : (
+              /* 분석 결과가 없을 때 - 파일 업로드 UI */
+              <>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
+                  className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 hover:file:bg-gray-200"
+                />
+                <Button
+                  onClick={async () => {
                 if (!selectedImage) return alert('두피 사진을 업로드해주세요.');
                 setIsAnalyzing(true);
                 setProducts(null);
@@ -685,8 +749,10 @@ const DailyCare: React.FC = () => {
               disabled={isAnalyzing}
               className="w-full h-12 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] disabled:opacity-50 font-semibold"
             >
-              {isAnalyzing ? '분석 중...' : analysis ? '새로운 분석하기' : '사진으로 AI 분석'}
+              {isAnalyzing ? '분석 중...' : '사진으로 AI 분석'}
             </Button>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -725,7 +791,7 @@ const DailyCare: React.FC = () => {
         )}
 
         {/* 시계열 변화 분석 버튼 */}
-        {analysis && (
+        {todayAnalysisData && (
           <div className="mx-4 mt-4">
             <Button
               onClick={() => navigate('/timeseries-analysis')}
@@ -847,23 +913,6 @@ const DailyCare: React.FC = () => {
             </CardContent>
           </Card>
         </div>
-
-        {/* AI Coach Message */}
-        <Card className="mx-4 mt-4 border-0" style={{ backgroundColor: '#1f0101', opacity: 0.9 }}>
-          <CardContent className="p-4 text-white">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <span className="text-xl">🤖</span>
-              </div>
-              <div className="flex-1">
-                <h4 className="text-base font-semibold mb-1">AI 케어 코치</h4>
-                <p className="text-sm opacity-90">
-                  "최근 3일간 점수가 상승 중이에요! 오늘은 특히 두피 마사지에 집중해보세요."
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Daily Care Checklist */}
         <Card className="mx-4 mt-4">
