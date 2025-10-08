@@ -46,11 +46,6 @@ class HairChangeService {
     return response.data;
   }
 
-  async getHairstyles(): Promise<Hairstyle> {
-    const response = await apiClient.get<Hairstyle>(`${this.baseUrl}/hairstyles`);
-    return response.data;
-  }
-
   async healthCheck(): Promise<{ status: string; service: string }> {
     const response = await apiClient.get<{ status: string; service: string }>(`${this.baseUrl}/health`);
     return response.data;

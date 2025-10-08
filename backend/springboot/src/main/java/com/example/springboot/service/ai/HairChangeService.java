@@ -53,20 +53,4 @@ public class HairChangeService {
             throw new RuntimeException("Python 백엔드 호출 중 오류 발생: " + e.getMessage(), e);
         }
     }
-
-    public Map<String, String> getHairstyles() {
-        String url = pythonBackendUrl + "/hairstyles";
-        System.out.println("Python 백엔드 호출 URL: " + url);
-        
-        try {
-            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
-            System.out.println("Python 백엔드 응답 상태: " + response.getStatusCode());
-            System.out.println("Python 백엔드 응답 본문: " + response.getBody());
-            return response.getBody();
-        } catch (Exception e) {
-            System.err.println("Python 백엔드 호출 실패: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("헤어스타일 목록 조회 중 오류 발생: " + e.getMessage(), e);
-        }
-    }
 }
