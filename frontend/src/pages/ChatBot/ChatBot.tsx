@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Loader, MessageSquare, BookOpen, Clock, ChevronDown, RefreshCw } from 'lucide-react';
+import pythonClient from '../../services/pythonClient';
 
 // 타입 정의
 interface Message {
@@ -126,22 +127,12 @@ const ChatBot: React.FC = () => {
     setShowQuickQuestions(false);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/rag-chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: textToSend,
-          conversation_id: conversationId,
-        }),
+      const response = await pythonClient.post('/rag-chat', {
+        message: textToSend,
+        conversation_id: conversationId,
       });
 
-      if (!response.ok) {
-        throw new Error(`서버 응답 오류: ${response.status}`);
-      }
-
-      const data: ChatResponse = await response.json();
+      const data: ChatResponse = response.data;
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -205,10 +196,8 @@ const ChatBot: React.FC = () => {
     setInputMessage('');
 
     // 백엔드에도 대화 기록 삭제 요청 (선택적)
-    fetch('http://127.0.0.1:8000/rag-chat/clear', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ conversation_id: userConversationId }),
+    pythonClient.post('/rag-chat/clear', {
+      conversation_id: userConversationId,
     }).catch(err => console.log('백엔드 대화 기록 삭제 실패:', err));
   };
 

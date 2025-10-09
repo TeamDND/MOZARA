@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { RootState, AppDispatch } from '../../utils/store';
 import { fetchSeedlingInfo, updateSeedlingNickname, setSeedling } from '../../utils/seedlingSlice';
+import { incrementCounter, decrementCounter, setCounter } from '../../utils/missionCounterSlice';
 import apiClient from '../../services/apiClient';
 import ScalpPhotoCapture from '../hair_mobile_photo/ScalpPhotoCapture';
 
@@ -68,11 +69,9 @@ const HairPT: React.FC = () => {
   const navigate = useNavigate();
   const { seedlingId, seedlingName, currentPoint, loading: seedlingLoading, error: seedlingError } = useSelector((state: RootState) => state.seedling);
   const { username, userId } = useSelector((state: RootState) => state.user);
-  
-  const [counters, setCounters] = useState<Counters>({
-    water: 0,
-    effector: 0
-  });
+
+  // Redux에서 카운터 가져오기
+  const counters = useSelector((state: RootState) => state.missionCounter.counters);
   const [missionState, setMissionState] = useState<MissionState>({
     morningBooster: false,
     nightBooster: false,
@@ -138,11 +137,12 @@ const HairPT: React.FC = () => {
   const resetDailyMissions = useCallback(() => {
     const today = new Date().toDateString();
     if (lastResetDate !== today) {
-      // 날짜가 바뀌었으므로 카운터만 초기화 (미션 상태는 백엔드에서 가져옴)
-      setCounters({ water: 0, effector: 0 });
+      // 날짜가 바뀌었으므로 카운터 초기화 (Redux)
+      dispatch(setCounter({ key: 'water', value: 0 }));
+      dispatch(setCounter({ key: 'effector', value: 0 }));
       setLastResetDate(today);
     }
-  }, [lastResetDate]);
+  }, [lastResetDate, dispatch]);
 
   // daily_habits 데이터 로드 (날짜별)
   const loadDailyHabits = async (date?: Date) => {
@@ -190,20 +190,20 @@ const HairPT: React.FC = () => {
       });
       setMissionData(convertedMissions);
 
-      // 카운터 방식 미션들의 완료 상태에 따라 카운터 설정
+      // 카운터 방식 미션들의 완료 상태에 따라 카운터 설정 (Redux)
       const waterMission = convertedMissions.find(m => m.name === '물 마시기');
       const effectorMission = convertedMissions.find(m => m.name === '이펙터 사용');
-      
+
       if (waterMission?.completed) {
-        setCounters(prev => ({ ...prev, water: 7 }));
+        dispatch(setCounter({ key: 'water', value: 7 }));
       } else if (isToday) {
-        setCounters(prev => ({ ...prev, water: 0 }));
+        dispatch(setCounter({ key: 'water', value: 0 }));
       }
-      
+
       if (effectorMission?.completed) {
-        setCounters(prev => ({ ...prev, effector: 4 }));
+        dispatch(setCounter({ key: 'effector', value: 4 }));
       } else if (isToday) {
-        setCounters(prev => ({ ...prev, effector: 0 }));
+        dispatch(setCounter({ key: 'effector', value: 0 }));
       }
 
       // 오늘 날짜인 경우 daily 레포트 확인
@@ -578,32 +578,26 @@ const HairPT: React.FC = () => {
     return uniqueMissions;
   };
 
-  const incrementCounter = async (id: keyof Counters) => {
-    setCounters(prev => {
-      const newValue = prev[id] + 1;
-      // 물 7잔, 이펙터 4번 제한
-      if (id === 'water' && newValue > 7) return prev;
-      if (id === 'effector' && newValue > 4) return prev;
-      
-      // 카운터 완료 시 로그 저장 (물 7잔, 이펙터 4번 완료 시)
-      if ((id === 'water' && newValue === 7) || (id === 'effector' && newValue === 4)) {
-        const missionInfo = missionData.find(m => 
-          (id === 'water' && m.name === '물 마시기') || 
-          (id === 'effector' && m.name === '이펙터 사용')
-        );
-        if (missionInfo) {
-          saveMissionLog(missionInfo.id, missionInfo.rewardPoints).then(() => {
-            // 미션 완료 후 습관 데이터 다시 로드하여 완료 상태 업데이트
-            loadDailyHabits();
-          });
-        }
+  const incrementMissionCounter = async (id: 'water' | 'effector') => {
+    // Redux 카운터 증가
+    dispatch(incrementCounter(id));
+
+    // 증가 후 값 확인을 위해 현재 카운터 값 가져오기
+    const newValue = counters[id] + 1;
+    const targetCount = id === 'water' ? 7 : 4;
+
+    // 목표 달성 시 백엔드에 완료 로그 저장
+    if (newValue === targetCount) {
+      const missionInfo = missionData.find(m =>
+        (id === 'water' && m.name === '물 마시기') ||
+        (id === 'effector' && m.name === '이펙터 사용')
+      );
+      if (missionInfo) {
+        await saveMissionLog(missionInfo.id, missionInfo.rewardPoints);
+        // 미션 완료 후 습관 데이터 다시 로드하여 완료 상태 업데이트
+        await loadDailyHabits();
       }
-      
-      return {
-        ...prev,
-        [id]: newValue
-      };
-    });
+    }
   };
 
 
@@ -645,8 +639,13 @@ const HairPT: React.FC = () => {
     
     // 물마시기와 이펙터 사용은 카운터 방식으로 처리
     if (mission.key === 'water' || mission.key === 'effector') {
-      const currentCount = counters[mission.key];
       const targetCount = mission.key === 'water' ? 7 : 4; // 물마시기 7잔, 이펙터 4회
+
+      // 오늘이면 Redux 카운터 사용, 과거면 완료 여부에 따라 목표치 또는 0
+      const currentCount = isToday
+        ? counters[mission.key]
+        : (mission.completed ? targetCount : 0);
+
       const isCounterCompleted = currentCount >= targetCount;
       
       return (
@@ -687,24 +686,21 @@ const HairPT: React.FC = () => {
           {/* 하단 조작 버튼 (완료 전에는 카운터, 완료 시 버튼 없음, 과거 날짜는 비활성화) */}
           {!isCounterCompleted && isToday && (
             <div className="flex gap-3 justify-end">
-              <button 
+              <button
                 className="w-12 h-12 rounded-xl font-bold bg-gray-400 hover:bg-gray-500 text-white transition-colors flex items-center justify-center active:scale-[0.95]"
                 onClick={() => {
-                  const currentCount = counters[mission.key as keyof Counters];
-                  if (currentCount > 0) {
-                    setCounters(prev => ({
-                      ...prev,
-                      [mission.key as keyof Counters]: currentCount - 1
-                    }));
+                  const key = mission.key as 'water' | 'effector';
+                  if (counters[key] > 0) {
+                    dispatch(decrementCounter(key));
                   }
                 }}
-                disabled={counters[mission.key as keyof Counters] <= 0}
+                disabled={counters[mission.key as 'water' | 'effector'] <= 0}
               >
                 -1
               </button>
-              <button 
+              <button
                 className="w-12 h-12 rounded-xl font-bold bg-[#1F0101] hover:bg-[#2A0202] text-white transition-colors flex items-center justify-center active:scale-[0.95]"
-                onClick={() => incrementCounter(mission.key as keyof Counters)}
+                onClick={() => incrementMissionCounter(mission.key as 'water' | 'effector')}
               >
                 +1
               </button>
@@ -832,13 +828,41 @@ const HairPT: React.FC = () => {
                   </>
                 )}
               </div>
-              <button
-                className="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+              <div
+                className="relative"
                 onMouseEnter={() => setShowInfoModal(true)}
                 onMouseLeave={() => setShowInfoModal(false)}
               >
-                <i className="fas fa-question text-white text-xs"></i>
-              </button>
+                <button
+                  className="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                >
+                  <i className="fas fa-question text-white text-xs"></i>
+                </button>
+                {showInfoModal && (
+                  <div className="absolute top-8 right-0 z-50 w-80">
+                    <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4">
+                      <div className="flex items-start space-x-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <i className="fas fa-info-circle text-blue-500 text-sm"></i>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-800 mb-2">탈모 PT란?</h3>
+                          <p className="text-sm text-gray-600 mb-3">
+                            개인 맞춤형 탈모 예방 및 개선을 위한 체계적인 관리 프로그램입니다.
+                            루틴, 영양, 청결 세 가지 영역의 습관을 통해 건강한 모발을 기를 수 있어요.
+                          </p>
+                          <div className="border-t border-gray-100 pt-3">
+                            <h4 className="font-medium text-gray-800 mb-2">포인트 사용처</h4>
+                            <p className="text-sm text-gray-600">
+                              새싹을 전부 키우면 상품을 드립니다!
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             
             <div className="text-center mb-4">
@@ -1134,31 +1158,6 @@ const HairPT: React.FC = () => {
           </>
         )}
 
-        {/* Info Modal */}
-        {showInfoModal && (
-          <div className="fixed top-20 left-4 right-4 z-50">
-            <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 max-w-sm mx-auto">
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <i className="fas fa-info-circle text-blue-500 text-sm"></i>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-800 mb-2">탈모 PT란?</h3>
-                  <p className="text-sm text-gray-600 mb-3">
-                    개인 맞춤형 탈모 예방 및 개선을 위한 체계적인 관리 프로그램입니다. 
-                    루틴, 영양, 청결 세 가지 영역의 습관을 통해 건강한 모발을 기를 수 있어요.
-                  </p>
-                  <div className="border-t border-gray-100 pt-3">
-                    <h4 className="font-medium text-gray-800 mb-2">포인트 사용처</h4>
-                    <p className="text-sm text-gray-600">
-                      새싹을 전부 키우면 상품을 드립니다!
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Toast */}
         {toast.visible && (

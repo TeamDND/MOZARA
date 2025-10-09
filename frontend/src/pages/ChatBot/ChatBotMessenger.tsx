@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, ChevronLeft, Sparkles, MessageCircle } from 'lucide-react';
 import apiClient from '../../services/apiClient';
+import pythonClient from '../../services/pythonClient';
 
 // 타입 정의
 interface Message {
@@ -166,18 +167,12 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose, isModalClo
     setTimeout(() => scrollToBottom(), 100);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/rag-chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: messageText,
-          conversation_id: userConversationId,
-        }),
+      const response = await pythonClient.post('/rag-chat', {
+        message: messageText,
+        conversation_id: userConversationId,
       });
 
-      if (!response.ok) throw new Error(`서버 응답 오류: ${response.status}`);
-
-      const data: ChatResponse = await response.json();
+      const data: ChatResponse = response.data;
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -236,12 +231,8 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose, isModalClo
   const handleNewConversation = async () => {
     try {
       // 서버에 대화 기록 초기화 요청
-      await fetch('http://127.0.0.1:8000/rag-chat/clear', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          conversation_id: userConversationId,
-        }),
+      await pythonClient.post('/rag-chat/clear', {
+        conversation_id: userConversationId,
       });
 
       // 로컬 스토리지 초기화
