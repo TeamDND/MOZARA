@@ -18,6 +18,7 @@ router = APIRouter(prefix="/hair-classification-rag", tags=["hair-classification
 # 전역 분석기 인스턴스
 analyzer = None
 
+
 def get_analyzer():
     """분석기 인스턴스 가져오기"""
     global analyzer

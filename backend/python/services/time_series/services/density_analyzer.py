@@ -27,17 +27,25 @@ logger = logging.getLogger(__name__)
 class DensityAnalyzer:
     """BiSeNet 기반 헤어 밀도 측정기"""
 
-    def __init__(self, device='cpu'):
+    def __init__(self, bisenet_model=None, device='cpu'):
         """
         Args:
+            bisenet_model: 외부에서 주입받은 BiSeNet 모델 (싱글턴)
             device: 'cpu' 또는 'cuda'
         """
         self.device = torch.device(device)
-        self.model = None
-        self._load_model()
+
+        if bisenet_model is not None:
+            # 외부에서 주입받은 싱글턴 모델 사용
+            self.model = bisenet_model
+            print(f"✅ DensityAnalyzer: 싱글턴 BiSeNet 모델 주입 완료")
+        else:
+            # 하위 호환성: 직접 로드 (레거시)
+            self.model = None
+            self._load_model()
 
     def _load_model(self):
-        """BiSeNet 모델 로드"""
+        """BiSeNet 모델 로드 (레거시 - 하위 호환성)"""
         try:
             self.model = BiSeNet(n_classes=19)
 
@@ -66,7 +74,7 @@ class DensityAnalyzer:
             self.model.to(self.device)
             self.model.eval()
 
-            print(f"✅ BiSeNet 모델 로드 완료: {model_path}")
+            print(f"✅ BiSeNet 모델 로드 완료 (레거시): {model_path}")
         except Exception as e:
             print(f"❌ BiSeNet 모델 로드 실패: {e}")
             raise

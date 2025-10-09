@@ -2,27 +2,23 @@
 """
 MOZARA Python Backend 통합 애플리케이션
 """
-# Windows 환경에서 UTF-8 인코딩 강제 설정
+# Windows 환경에서 UTF-8 인코딩 강제 설정 + 버퍼링 비활성화
 import sys
 import io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True)
 
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pydantic import BaseModel
-from typing import Optional, List
-import json
-from typing import Annotated
+from typing import Optional, List, Annotated
 import threading
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import urllib.parse
 import hashlib
-import json
-from datetime import datetime, timedelta
 
 # .env 파일 로드 (Docker 환경에서는 환경변수 직접 사용)
 try:
@@ -811,6 +807,57 @@ except ImportError as e:
     print(f"Hair Change 모듈 로드 실패: {e}")
     HAIR_CHANGE_AVAILABLE = False
 
+# ============================================
+# BiSeNet 싱글턴 인스턴스 생성 (VRAM 절약)
+# ⚠️ Hair Loss Daily import 이전에 로드해야 함!
+# ============================================
+try:
+    import torch
+    from services.swin_hair_classification.models.face_parsing.model import BiSeNet
+
+    print("🔄 BiSeNet 모델 로딩 시작...")
+
+    # 디바이스 설정
+    bisenet_device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"   디바이스: {bisenet_device}")
+
+    # BiSeNet 모델 생성
+    bisenet_model = BiSeNet(n_classes=19)
+    print("   BiSeNet 모델 인스턴스 생성 완료")
+
+    # 모델 가중치 경로
+    bisenet_model_path = os.path.join(
+        os.path.dirname(__file__),
+        'services',
+        'swin_hair_classification',
+        'models',
+        'face_parsing',
+        'res',
+        'cp',
+        '79999_iter.pth'
+    )
+    print(f"   모델 경로: {bisenet_model_path}")
+
+    if not os.path.exists(bisenet_model_path):
+        raise FileNotFoundError(f"BiSeNet 모델 파일을 찾을 수 없습니다: {bisenet_model_path}")
+
+    # 모델 가중치 로드
+    print("   가중치 로딩 중...")
+    bisenet_model.load_state_dict(torch.load(bisenet_model_path, map_location=bisenet_device))
+    bisenet_model.to(bisenet_device)
+    bisenet_model.eval()
+
+    print(f"✅ BiSeNet 싱글턴 인스턴스 생성 완료 (device: {bisenet_device})")
+    BISENET_AVAILABLE = True
+
+except Exception as e:
+    import traceback
+    print(f"❌ BiSeNet 싱글턴 생성 실패: {e}")
+    traceback.print_exc()
+    bisenet_model = None
+    bisenet_device = None
+    BISENET_AVAILABLE = False
+
 # Hair Loss Daily 모듈 - services 폴더 내에 있다고 가정하고 경로 수정
 try:
     # app 객체를 가져와 마운트하기 때문에, 이 파일에 uvicorn 실행 코드는 없어야 합니다.
@@ -878,6 +925,8 @@ if HAIR_RAG_AVAILABLE:
         print("Hair Classification RAG 라우터 include 완료 (/api/hair-classification-rag)")
     except Exception as e:
         print(f"Hair Classification RAG 라우터 include 실패: {e}")
+        import traceback
+        traceback.print_exc()
 else:
     print("Hair Classification RAG 라우터 include 건너뜀 (모듈 로드 실패)")
 
@@ -929,6 +978,12 @@ except Exception as e:
 # Time-Series Analysis 라우터 마운트
 try:
     from services.time_series.api.router import router as timeseries_router
+    from services.time_series.services import analysis_service as timeseries_analysis_service
+
+    # BiSeNet 싱글턴 주입
+    if BISENET_AVAILABLE and bisenet_model is not None:
+        timeseries_analysis_service.set_bisenet_singleton(bisenet_model)
+
     app.include_router(timeseries_router)
     print("Time-Series Analysis API 라우터 마운트 완료")
 except ImportError as e:
@@ -1512,169 +1567,7 @@ async def refresh_token():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-@app.get("/paper/{paper_id}", response_model=PaperDetail)
-async def get_paper_detail(paper_id: str):
-    if not index:
-        raise HTTPException(status_code=503, detail="Thesis search service is not available")
-    
-    try:
-        results = index.fetch(ids=[paper_id])
-        vectors = results.vectors
-        if not vectors:
-            raise HTTPException(status_code=404, detail="Paper not found")
-        
-        vector_obj = vectors.get(paper_id)
-        if vector_obj is None:
-            raise HTTPException(status_code=404, detail="Paper not found")
-        
-        metadata = getattr(vector_obj, 'metadata', None)
-        if metadata is None and isinstance(vector_obj, dict):
-            metadata = vector_obj.get('metadata', {})
-        if metadata is None:
-            metadata = {}
-        
-        full_summary = (
-            metadata.get('summary') or
-            metadata.get('full_summary') or
-            metadata.get('text', '')
-        )
-        
-        title_safe = str(metadata.get('title', 'Unknown')).encode('utf-8', errors='ignore').decode('utf-8')
-        source_safe = str(metadata.get('source', 'Unknown')).encode('utf-8', errors='ignore').decode('utf-8')
-        summary_safe = str(full_summary).encode('utf-8', errors='ignore').decode('utf-8')
-        
-        return PaperDetail(
-            id=paper_id,
-            title=title_safe,
-            source=source_safe,
-            full_summary=summary_safe
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/papers/count")
-async def get_papers_count():
-    if not index:
-        return {"count": 0, "system": "service_disabled"}
-    
-    try:
-        results = index.query(
-            vector=[0.0] * 1536,
-            top_k=10000,
-            include_metadata=True
-        )
-        
-        unique_papers = set()
-        for match in results['matches']:
-            metadata = match.get('metadata', {})
-            file_path = metadata.get('file_path')
-            if file_path:
-                unique_papers.add(file_path)
-        
-        return {"count": len(unique_papers), "system": "pinecone_deduped"}
-    except Exception as e:
-        return {"count": 0, "system": "error", "error": str(e)}
-
-@app.get("/paper/{paper_id}/analysis", response_model=PaperAnalysis)
-async def get_paper_analysis(paper_id: str):
-    if not index:
-        raise HTTPException(status_code=503, detail="Thesis search service is not available")
-    
-    try:
-        results = index.fetch(ids=[paper_id])
-        vectors = results.vectors
-        if not vectors:
-            raise HTTPException(status_code=404, detail="Chunk not found")
-
-        clicked_chunk_metadata = vectors[paper_id].metadata if paper_id in vectors else {}
-        original_file_path = clicked_chunk_metadata.get('file_path')
-        original_title = clicked_chunk_metadata.get('title')
-
-        if not original_file_path:
-            raise HTTPException(status_code=404, detail="Original paper path not found for this chunk.")
-
-        analysis_results = index.query(
-            vector=[0.0] * 1536,
-            top_k=1,
-            include_metadata=True,
-            filter={
-                "file_path": original_file_path,
-                "chunk_index": 0
-            }
-        )
-
-        if not analysis_results['matches']:
-            raise HTTPException(status_code=404, detail="Structured analysis for paper not found.")
-
-        paper_analysis_metadata = analysis_results['matches'][0].metadata
-
-        main_topics_parsed = []
-        raw_main_topics = paper_analysis_metadata.get('main_topics')
-        if isinstance(raw_main_topics, list):
-            main_topics_parsed = [str(t).encode('utf-8', errors='ignore').decode('utf-8') for t in raw_main_topics if isinstance(t, str)]
-        elif isinstance(raw_main_topics, str):
-            safe_topics = raw_main_topics.encode('utf-8', errors='ignore').decode('utf-8')
-            main_topics_parsed = [safe_topics]
-
-        raw_conclusions = paper_analysis_metadata.get('key_conclusions', '')
-        key_conclusions_parsed = str(raw_conclusions).encode('utf-8', errors='ignore').decode('utf-8')
-
-        section_summaries_parsed = []
-        raw_section_summaries = paper_analysis_metadata.get('section_summaries')
-        
-        if isinstance(raw_section_summaries, str):
-            try:
-                safe_json_string = raw_section_summaries.encode('utf-8', errors='ignore').decode('utf-8')
-                temp_parsed = json.loads(safe_json_string)
-                if isinstance(temp_parsed, list):
-                    section_summaries_parsed = []
-                    for s in temp_parsed:
-                        if isinstance(s, dict):
-                            safe_section = {}
-                            for key, value in s.items():
-                                safe_key = str(key).encode('utf-8', errors='ignore').decode('utf-8')
-                                safe_value = str(value).encode('utf-8', errors='ignore').decode('utf-8')
-                                safe_section[safe_key] = safe_value
-                            section_summaries_parsed.append(safe_section)
-            except json.JSONDecodeError:
-                pass
-        elif isinstance(raw_section_summaries, list):
-            section_summaries_parsed = []
-            for s in raw_section_summaries:
-                if isinstance(s, dict):
-                    safe_section = {}
-                    for key, value in s.items():
-                        safe_key = str(key).encode('utf-8', errors='ignore').decode('utf-8')
-                        safe_value = str(value).encode('utf-8', errors='ignore').decode('utf-8')
-                        safe_section[safe_key] = safe_value
-                    section_summaries_parsed.append(safe_section)
-        
-        if not section_summaries_parsed:
-            section_summaries_parsed = []
-
-        title_raw = paper_analysis_metadata.get('title', original_title or 'Unknown')
-        title_safe = str(title_raw).encode('utf-8', errors='ignore').decode('utf-8')
-        
-        source_raw = paper_analysis_metadata.get('source', 'Unknown')
-        source_safe = str(source_raw).encode('utf-8', errors='ignore').decode('utf-8')
-
-        return PaperAnalysis(
-            id=paper_id,
-            title=title_safe,
-            source=source_safe,
-            main_topics=main_topics_parsed,
-            key_conclusions=key_conclusions_parsed,
-            section_summaries=section_summaries_parsed
-        )
-
-    except Exception as e:
-        print(f"설정 조회 중 오류: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="설정 조회 중 오류가 발생했습니다."
-        )
-
+# 논문 관련 엔드포인트는 services/hair_encyclopedia/paper_api.py에서 처리됨
 @app.get("/api/location/status")
 async def get_location_status():
     """위치 서비스 상태 확인 API"""

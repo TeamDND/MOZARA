@@ -13,7 +13,7 @@ from PIL import Image
 
 class HairLossAnalyzer:
     def __init__(self):
-        """여성형 탈모 RAG 분석기 초기화 (ROI BiSeNet + ConvNeXt + ViT 듀얼 앙상블)"""
+        """여성형 탈모 RAG 분석기 초기화 (ROI 크롭 + ConvNeXt + ViT 듀얼 앙상블)"""
         try:
             self.image_processor = ImageProcessor()
             self.dual_manager = DualPineconeManager()

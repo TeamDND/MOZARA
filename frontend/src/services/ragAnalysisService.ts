@@ -1,7 +1,5 @@
 import axios from 'axios';
-
-// Spring Boot 백엔드 기본 URL (Swin과 동일하게 변경)
-const SPRING_BOOT_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
+import apiClient from './apiClient';
 
 // RAG 분석 결과 인터페이스 (Swin과 동일한 구조로 통일)
 export interface RAGAnalysisResult {
@@ -73,8 +71,8 @@ export const analyzeHairWithRAG = async (
     }
 
     // API 호출 (Spring Boot 경유)
-    const response = await axios.post<RAGAnalysisResponse>(
-      `${SPRING_BOOT_BASE_URL}/api/ai/rag-v2-check/analyze`,
+    const response = await apiClient.post<RAGAnalysisResponse>(
+      '/ai/rag-v2-check/analyze',
       formData,
       {
         headers: {

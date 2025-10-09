@@ -25,38 +25,45 @@ from torchvision import transforms
 class FeatureExtractor:
     """SwinTransformer 기반 feature vector 추출기"""
 
-    def __init__(self, device='cpu'):
+    def __init__(self, bisenet_model=None, device='cpu'):
         """
         Args:
+            bisenet_model: 외부에서 주입받은 BiSeNet 모델 (싱글턴)
             device: 'cpu' 또는 'cuda'
         """
         self.device = torch.device(device)
         self.face_parser = None
         self.swin_model = None
-        self._load_models()
+        self._load_models(bisenet_model)
 
-    def _load_models(self):
+    def _load_models(self, bisenet_model=None):
         """BiSeNet + Swin 모델 로드"""
         try:
             # 1. BiSeNet 로드 (마스킹용)
-            self.face_parser = BiSeNet(n_classes=19)
-            face_model_path = os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                'swin_hair_classification',
-                'models',
-                'face_parsing',
-                'res',
-                'cp',
-                '79999_iter.pth'
-            )
+            if bisenet_model is not None:
+                # 외부에서 주입받은 싱글턴 모델 사용
+                self.face_parser = bisenet_model
+                print(f"✅ FeatureExtractor: 싱글턴 BiSeNet 모델 주입 완료")
+            else:
+                # 하위 호환성: 직접 로드 (레거시)
+                self.face_parser = BiSeNet(n_classes=19)
+                face_model_path = os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)),
+                    'swin_hair_classification',
+                    'models',
+                    'face_parsing',
+                    'res',
+                    'cp',
+                    '79999_iter.pth'
+                )
 
-            if not os.path.exists(face_model_path):
-                raise FileNotFoundError(f"BiSeNet 모델 파일을 찾을 수 없습니다: {face_model_path}")
+                if not os.path.exists(face_model_path):
+                    raise FileNotFoundError(f"BiSeNet 모델 파일을 찾을 수 없습니다: {face_model_path}")
 
-            self.face_parser.load_state_dict(torch.load(face_model_path, map_location=self.device))
-            self.face_parser.to(self.device)
-            self.face_parser.eval()
-            print(f"✅ BiSeNet 로드 완료 (마스킹용)")
+                self.face_parser.load_state_dict(torch.load(face_model_path, map_location=self.device))
+                self.face_parser.to(self.device)
+                self.face_parser.eval()
+                print(f"✅ BiSeNet 로드 완료 (레거시, 마스킹용)")
 
             # 2. Swin 모델 로드 (Top view)
             self.swin_model = SwinHairClassifier(num_classes=4, in_chans=6)

@@ -232,9 +232,8 @@ class ImageProcessor:
 
     def simulate_bisenet_segmentation(self, image: Image.Image) -> Image.Image:
         """
-        BiSeNet 세그멘테이션 시뮬레이션 (두피 영역 추출)
-        실제 구현에서는 BiSeNet 모델을 사용하여 두피 영역을 정확히 추출
-        현재는 중앙 70% 영역을 ROI로 크롭하여 시뮬레이션
+        중앙 70% 영역을 ROI로 크롭
+        (BiSeNet 사용 시 효용성 감소로 단순 크롭 방식 사용)
         """
         width, height = image.size
         left = int(width * 0.15)

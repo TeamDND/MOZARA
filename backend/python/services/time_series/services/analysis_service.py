@@ -17,6 +17,14 @@ logger = logging.getLogger(__name__)
 _density_analyzer = None
 # _feature_extractor = None  # ← 경량화: 주석 처리
 _comparator = TimeSeriesComparator()
+_bisenet_singleton = None  # 싱글턴 BiSeNet 저장
+
+
+def set_bisenet_singleton(bisenet_model):
+    """app.py에서 싱글턴 BiSeNet을 주입받음"""
+    global _bisenet_singleton
+    _bisenet_singleton = bisenet_model
+    logger.info("✅ time_series: BiSeNet 싱글턴 주입 완료")
 
 
 def _initialize_models():
@@ -25,7 +33,17 @@ def _initialize_models():
 
     if _density_analyzer is None:
         logger.info("🔄 DensityAnalyzer 초기화 중...")
-        _density_analyzer = DensityAnalyzer(device='cpu')
+
+        # BiSeNet 모델의 디바이스를 자동 감지
+        device = 'cpu'
+        if _bisenet_singleton is not None:
+            try:
+                device = str(next(_bisenet_singleton.parameters()).device)
+                logger.info(f"   BiSeNet 디바이스 감지: {device}")
+            except Exception as e:
+                logger.warning(f"   디바이스 감지 실패, CPU 사용: {e}")
+
+        _density_analyzer = DensityAnalyzer(bisenet_model=_bisenet_singleton, device=device)
         logger.info("✅ DensityAnalyzer 초기화 완료")
 
     # ← 경량화: Feature 추출 비활성화
