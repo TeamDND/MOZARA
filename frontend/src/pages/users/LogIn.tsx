@@ -66,11 +66,12 @@ const LogIn: React.FC = () => {
       console.log('사용자 정보:', userResponse.data);
 
       dispatch(setUser(userResponse.data));
-      navigate('/daily-care'); // 대시보드로 이동
+      navigate('/main-page'); // 대시보드로 이동
     } catch (error: any) {
       console.error('로그인 오류:', error);
       const errorMessage = error.response?.data?.error || '로그인 중 오류가 발생했습니다.';
       setError(errorMessage);
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -81,7 +82,7 @@ const LogIn: React.FC = () => {
     // TODO: 소셜 로그인 API 구현
     console.log(`${provider} 로그인 시도`);
     // 데일리케어로 이동
-    navigate('/daily-care');
+    navigate('/main-page');
   };
 
   // 게스트 로그인 핸들러
@@ -142,7 +143,7 @@ const LogIn: React.FC = () => {
 
             <Button
               type="submit"
-              className="w-full h-12 bg-[#222222] hover:bg-[#333333] text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
+              className="w-full h-12 bg-[#1f0101] hover:bg-[#333333] text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
               disabled={isLoading}
             >
               {isLoading ? '로그인 중...' : '로그인하고 진단 시작'}
@@ -173,7 +174,7 @@ const LogIn: React.FC = () => {
               <span className="text-gray-700 font-medium">Google로 계속하기</span>
             </Button>
 
-            <Button
+            {/* <Button
               variant="outline"
               className="w-full h-12 bg-[#FEE500] hover:bg-[#FDD800] border-[#FEE500] rounded-xl active:scale-[0.98] transition-all"
               onClick={() => handleSocialLogin('kakao')}
@@ -182,7 +183,7 @@ const LogIn: React.FC = () => {
                 K
               </span>
               <span className="text-gray-900 font-medium">카카오로 계속하기</span>
-            </Button>
+            </Button> */}
           </div>
 
           {/* 회원가입 링크 */}

@@ -6,10 +6,10 @@ import { Progress } from '../../components/ui/progress';
 import { ArrowLeft, ArrowRight, Info } from 'lucide-react';
 import { analyzeHairWithSwin, getStageDescription, getStageColor, SwinAnalysisResult } from '../../services/swinAnalysisService';
 import { analyzeHairWithRAG } from '../../services/ragAnalysisService';
-import SelfCheckStep from '../../components/check/SelfCheckStep';
-import ImageUploadStep from '../../components/check/ImageUploadStep';
-import AnalysisProgressStep from '../../components/check/AnalysisProgressStep';
-import AnalysisResultStep from '../../components/check/AnalysisResultStep';
+import SelfCheckStep from './SelfCheckStep';
+import ImageUploadStep from './ImageUploadStep';
+import AnalysisProgressStep from './AnalysisProgressStep';
+import AnalysisResultStep from './AnalysisResultStep';
 import apiClient from '../../services/apiClient';
 import {
   AlertDialog,
@@ -47,6 +47,8 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
   const [uploadedPhotoFile, setUploadedPhotoFile] = useState<File | null>(null);
   const [uploadedSidePhoto, setUploadedSidePhoto] = useState<string | null>(null);
   const [uploadedSidePhotoFile, setUploadedSidePhotoFile] = useState<File | null>(null);
+  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState<string | null>(null); // S3 URL
+  const [uploadedSidePhotoUrl, setUploadedSidePhotoUrl] = useState<string | null>(null); // S3 URL
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [analysisSteps, setAnalysisSteps] = useState<string[]>([]);
@@ -55,6 +57,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showAutoFillModal, setShowAutoFillModal] = useState(false);
   const [showLoginRequiredModal, setShowLoginRequiredModal] = useState(false);
+  const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState(0);
 
   const totalSteps = 4;
 
@@ -152,10 +155,19 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         '개인 맞춤 계획 수립 완료'
       ];
 
+      // 단계별 시간 (밀리초)
+      const stepDelays = [800, 800, 2000, 800, 800, 800];
+      const totalTime = stepDelays.reduce((a, b) => a + b, 0);
+      setEstimatedTimeRemaining(Math.ceil(totalTime / 1000));
+
       // 단계별 진행 시뮬레이션
       for (let i = 0; i < steps.length; i++) {
         setAnalysisSteps(prev => [...prev, steps[i]]);
         setAnalysisProgress((i + 1) / steps.length * 100);
+
+        // 남은 시간 업데이트
+        const remainingTime = stepDelays.slice(i + 1).reduce((a, b) => a + b, 0);
+        setEstimatedTimeRemaining(Math.ceil(remainingTime / 1000));
 
         if (i === 2) {
           // 실제 API 호출은 3번째 단계에서
@@ -163,12 +175,19 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
           if (isMale) {
             // 남성: Swin Transformer 분석 (Top + Side)
             console.log('🔄 남성 - Swin API 분석 시작');
+            console.log('📸 Top View URL:', uploadedPhotoUrl);
+            console.log('📸 Side View URL:', uploadedSidePhotoUrl);
+
+            // S3 URL 결합 (|||로 구분)
+            const combinedImageUrl = uploadedPhotoUrl && uploadedSidePhotoUrl
+              ? `${uploadedPhotoUrl}|||${uploadedSidePhotoUrl}`
+              : undefined;
 
             const result = await analyzeHairWithSwin(
               uploadedPhotoFile,
               uploadedSidePhotoFile!,
               user?.userId || undefined,
-              undefined,
+              combinedImageUrl,
               {
                 gender: baspAnswers.gender,
                 age: baspAnswers.age,
@@ -183,11 +202,12 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
           } else {
             // 여성: RAG v2 분석 (Top만)
             console.log('🔄 여성 - RAG v2 API 분석 시작');
+            console.log('📸 Top View URL:', uploadedPhotoUrl);
 
             const result = await analyzeHairWithRAG(
               uploadedPhotoFile,
               user?.userId || undefined,
-              undefined, // imageUrl (선택적)
+              uploadedPhotoUrl || undefined,
               {
                 gender: baspAnswers.gender,
                 age: baspAnswers.age,
@@ -202,7 +222,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         }
 
         // 각 단계 사이의 지연
-        await new Promise(resolve => setTimeout(resolve, i === 2 ? 2000 : 800));
+        await new Promise(resolve => setTimeout(resolve, stepDelays[i]));
       }
 
       setAnalysisComplete(true);
@@ -295,6 +315,8 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
             setUploadedSidePhoto={setUploadedSidePhoto}
             setUploadedSidePhotoFile={setUploadedSidePhotoFile}
             gender={baspAnswers.gender}
+            setUploadedPhotoUrl={setUploadedPhotoUrl}
+            setUploadedSidePhotoUrl={setUploadedSidePhotoUrl}
           />
         );
 
@@ -308,6 +330,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
             analysisError={analysisError}
             isAnalyzing={isAnalyzing}
             gender={baspAnswers.gender}
+            estimatedTimeRemaining={estimatedTimeRemaining}
             onRetry={() => {
                     setAnalysisError(null);
                     setCurrentStep(2);
@@ -363,7 +386,8 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
             </AlertDialogAction>
             <AlertDialogAction 
               onClick={handleAutoFillConfirm}
-              className="w-full sm:w-auto bg-[#222222] hover:bg-[#333333] text-white px-8"
+              className="w-full sm:w-auto text-white px-8"
+              style={{ backgroundColor: "#1f0101" }}
             >
               확인
             </AlertDialogAction>
@@ -396,7 +420,8 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
             </AlertDialogAction>
             <AlertDialogAction 
               onClick={() => navigate('/login')}
-              className="w-full sm:w-auto bg-[#222222] hover:bg-[#333333] text-white px-8"
+              className="w-full sm:w-auto text-white px-8"
+              style={{ backgroundColor: "#1f0101" }}
             >
               로그인
             </AlertDialogAction>
@@ -443,7 +468,8 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
                     setCurrentStep(3);
                     performRealAnalysis();
                   }}
-                  className="flex-1 h-12 rounded-xl bg-[#222222] hover:bg-[#333333] active:scale-[0.98]"
+                  className="flex-1 h-12 rounded-xl text-white active:scale-[0.98]"
+                  style={{ backgroundColor: "#1f0101" }}
                   disabled={isAnalyzing}
                 >
                   {isAnalyzing ? (
@@ -464,7 +490,8 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
                 <Button 
                   onClick={() => setCurrentStep(2)}
                   disabled={!baspAnswers.gender || !baspAnswers.age || !baspAnswers.familyHistory || !baspAnswers.recentHairLoss || !baspAnswers.stress}
-                  className="flex-1 h-12 rounded-xl bg-[#222222] hover:bg-[#333333] active:scale-[0.98] disabled:opacity-50"
+                  className="flex-1 h-12 rounded-xl text-white active:scale-[0.98] disabled:opacity-50"
+                  style={{ backgroundColor: "#1f0101" }}
                 >
                   다음
                   <ArrowRight className="w-4 h-4 ml-2" />

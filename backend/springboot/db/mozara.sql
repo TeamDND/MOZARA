@@ -27,10 +27,10 @@ DROP TABLE IF EXISTS `analysis_results`;
 CREATE TABLE `analysis_results` (
   `result_id` int NOT NULL AUTO_INCREMENT,
   `inspection_date` date DEFAULT NULL,
-  `analysis_summary` tinytext,
-  `advice` tinytext,
+  `analysis_summary` varchar(5000) DEFAULT NULL,
+  `advice` varchar(5000) DEFAULT NULL,
   `grade` int DEFAULT NULL,
-  `image_url` varchar(255) DEFAULT NULL,
+  `image_url` varchar(1000) DEFAULT NULL,
   `user_id_foreign` int DEFAULT NULL,
   `analysis_type` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`result_id`),
@@ -142,9 +142,10 @@ DROP TABLE IF EXISTS `user_log`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user_log` (
   `list_id` int NOT NULL AUTO_INCREMENT,
-  `map_like` varchar(255) DEFAULT NULL,
-  `youtube_like` varchar(255) DEFAULT NULL,
-  `hospital_like` varchar(255) DEFAULT NULL,
+  `map_like` varchar(2000) DEFAULT NULL,
+  `youtube_like` varchar(2000) DEFAULT NULL,
+  `hospital_like` varchar(2000) DEFAULT NULL,
+  `product_like` varchar(2000) DEFAULT NULL,
   `user_id_foreign` int DEFAULT NULL,
   PRIMARY KEY (`list_id`),
   KEY `user_id_foreign` (`user_id_foreign`),

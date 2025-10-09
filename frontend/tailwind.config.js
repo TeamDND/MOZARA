@@ -9,7 +9,7 @@ module.exports = {
       // 커스텀 색상 정의
       colors: {
         primary: {
-          DEFAULT: '#222222', // 기본 primary 색상
+          DEFAULT: '#1f0101', // 기본 primary 색상
           foreground: '#ffffff', // primary 색상 위의 텍스트 색상
         },
         secondary: {

@@ -8,7 +8,11 @@ import com.example.springboot.data.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,13 +38,20 @@ public class MyPageService {
     }
 
     /**
-     * 사용자 ID로 분석 결과 리스트 조회
+     * 사용자 ID로 분석 결과 리스트 조회 (정렬 옵션 포함)
      */
-    public List<AnalysisResultDTO> getAnalysisResultsByUserId(Integer userId) {
-        List<AnalysisResultEntity> entities = analysisResultDAO.findByUserId(userId);
+    public List<AnalysisResultDTO> getAnalysisResultsByUserId(Integer userId, String sortOrder) {
+        List<AnalysisResultEntity> entities = analysisResultDAO.findByUserId(userId, sortOrder);
         return entities.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 사용자 ID로 분석 결과 리스트 조회 (기본값: 최신순)
+     */
+    public List<AnalysisResultDTO> getAnalysisResultsByUserId(Integer userId) {
+        return getAnalysisResultsByUserId(userId, "newest");
     }
 
     /**
@@ -87,7 +98,7 @@ public class MyPageService {
                 .advice(entity.getAdvice())
                 .grade(entity.getGrade())
                 .imageUrl(entity.getImageUrl())
-                .type(entity.getAnalysisType() != null ? entity.getAnalysisType() : determineAnalysisType(entity.getAnalysisSummary()))
+                .analysisType(entity.getAnalysisType() != null ? entity.getAnalysisType() : determineAnalysisType(entity.getAnalysisSummary()))
                 .improvement(calculateImprovement(entity.getGrade()))
                 .build();
     }
@@ -141,5 +152,112 @@ public class MyPageService {
         System.out.println("exists: " + exists);
         
         return exists;
+    }
+
+    /**
+     * 사용자 ID와 분석 타입으로 분석 결과 리스트 조회 (정렬 옵션 포함)
+     */
+    public List<AnalysisResultDTO> getAnalysisResultsByUserIdAndType(Integer userId, String analysisType, String sortOrder) {
+        List<AnalysisResultEntity> entities = analysisResultDAO.findByUserIdAndAnalysisType(userId, analysisType, sortOrder);
+        return entities.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 사용자 ID와 분석 타입으로 분석 결과 리스트 조회 (기본값: 최신순)
+     */
+    public List<AnalysisResultDTO> getAnalysisResultsByUserIdAndType(Integer userId, String analysisType) {
+        return getAnalysisResultsByUserIdAndType(userId, analysisType, "newest");
+    }
+
+    /**
+     * 사용자 ID와 분석 타입으로 분석 결과 개수 조회
+     */
+    public long getAnalysisCountByUserIdAndType(Integer userId, String analysisType) {
+        List<AnalysisResultEntity> entities = analysisResultDAO.findByUserIdAndAnalysisTypeOrderByDateDesc(userId, analysisType);
+        return entities.size();
+    }
+
+    /**
+     * 오늘 날짜의 특정 분석 타입 결과 조회
+     */
+    public AnalysisResultDTO getTodayAnalysisByType(Integer userId, String analysisType) {
+        AnalysisResultEntity entity = analysisResultDAO.findTodayAnalysisByUserIdAndType(userId, analysisType);
+        
+        if (entity == null) {
+            throw new RuntimeException("오늘 날짜의 " + analysisType + " 분석 결과가 없습니다.");
+        }
+        
+        return convertToDTO(entity);
+    }
+
+    /**
+     * 이번주 일주일치 daily 분석 결과 조회 (일월화수목금토)
+     */
+    public Map<String, Object> getWeeklyDailyAnalysis(Integer userId) {
+        // 이번주 일요일 계산
+        LocalDate today = LocalDate.now();
+        LocalDate sunday = today.with(DayOfWeek.SUNDAY);
+        
+        // 만약 오늘이 일요일보다 이전이면 (이번주가 아직 안 시작했으면) 지난주로 설정
+        if (today.isBefore(sunday)) {
+            sunday = sunday.minusWeeks(1);
+        }
+        
+        LocalDate saturday = sunday.plusDays(6);
+        
+        // daily 타입의 분석 결과 조회
+        List<AnalysisResultEntity> entities = analysisResultDAO.findByUserIdAndAnalysisTypeAndDateRange(
+            userId, 
+            "daily", 
+            sunday, 
+            saturday
+        );
+        
+        // 요일별로 그룹화 (일월화수목금토 순서)
+        Map<String, Integer> weeklyData = new HashMap<>();
+        weeklyData.put("일", null);
+        weeklyData.put("월", null);
+        weeklyData.put("화", null);
+        weeklyData.put("수", null);
+        weeklyData.put("목", null);
+        weeklyData.put("금", null);
+        weeklyData.put("토", null);
+        
+        // 각 날짜의 최신 분석 결과의 grade를 요일별로 저장
+        for (AnalysisResultEntity entity : entities) {
+            LocalDate date = entity.getInspectionDate();
+            DayOfWeek dayOfWeek = date.getDayOfWeek();
+            String dayName = getDayName(dayOfWeek);
+            
+            // 해당 요일에 이미 데이터가 있으면 최신 것만 유지 (ID가 큰 것)
+            if (weeklyData.get(dayName) == null) {
+                weeklyData.put(dayName, entity.getGrade());
+            }
+        }
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("weeklyData", weeklyData);
+        result.put("startDate", sunday);
+        result.put("endDate", saturday);
+        
+        return result;
+    }
+    
+    /**
+     * DayOfWeek를 한글 요일명으로 변환
+     */
+    private String getDayName(DayOfWeek dayOfWeek) {
+        switch (dayOfWeek) {
+            case SUNDAY: return "일";
+            case MONDAY: return "월";
+            case TUESDAY: return "화";
+            case WEDNESDAY: return "수";
+            case THURSDAY: return "목";
+            case FRIDAY: return "금";
+            case SATURDAY: return "토";
+            default: return "";
+        }
     }
 }
