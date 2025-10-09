@@ -18,7 +18,7 @@ public class UserInfoDTO {
     private String gender;
     private Integer age;
     private String role;
-    private Boolean familyHistory;
+    private String familyHistory;  // 'none', 'father', 'mother', 'both'
     private Boolean isLoss;
     private String stress;
     private SeedlingStatusDTO seedlingStatus;
