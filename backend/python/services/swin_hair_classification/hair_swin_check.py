@@ -210,61 +210,96 @@ def analyze_single_image(image_bytes: bytes, model: SwinHairClassifier,
 
 def calculate_survey_score(survey_data: Dict[str, Any]) -> float:
     """
-    설문 데이터를 기반으로 위험도 점수 계산 (0-3 범위)
+    의학 문헌 기반 설문 점수 계산 (0-3 범위)
+
+    참고 문헌:
+    - NCBI (2024): 유전적 기여도 80% (heritability=0.817)
+    - PLOS One (2024): 가족력 68%, 부계 유전 62.8%, 모계 유전 8.6%
+    - NCBI Bookshelf: 연령별 유병률 - 20대(25%), 30대(30%), 40대(40%), 50대(50%)
+    - StatPearls: 스트레스 시 70% 모발 휴지기 전환 (telogen effluvium)
     """
     score = 0.0
 
-    # 나이 (0-0.5)
+    # 1. 가족력 (최대 1.5점) - 가장 강력한 예측 인자
+    # 근거: 유전적 기여도 80%, 부계 유전이 모계보다 7배 강함
+    family_history = survey_data.get('familyHistory', 'none')
+    if family_history == 'both':
+        score += 1.5  # 부모 모두 (최고 위험)
+    elif family_history == 'father':
+        score += 1.2  # 부계 유전 (62.8%)
+    elif family_history == 'mother':
+        score += 0.5  # 모계 유전 (8.6%)
+    # 'none'이면 0점
+
+    # 2. 나이 (최대 0.9점) - 선형 증가 패턴
+    # 근거: 10년당 약 10%p 유병률 증가 (연구 기반)
     age = int(survey_data.get('age', 25))
     if age >= 50:
-        score += 0.5
+        score += 0.9  # 50대: 50% 유병률
     elif age >= 40:
-        score += 0.3
+        score += 0.7  # 40대: 40% 유병률
     elif age >= 30:
-        score += 0.1
+        score += 0.4  # 30대: 30% 유병률
+    elif age >= 20:
+        score += 0.2  # 20대: 25% 유병률
 
-    # 가족력 (0-0.8)
-    if survey_data.get('familyHistory') == 'yes':
-        score += 0.8
-
-    # 최근 탈모 (0-0.8)
+    # 3. 최근 탈모 (최대 0.6점) - 진행성 지표
+    # 근거: 현재 진행 중인 탈모는 중요한 임상 징후
     if survey_data.get('recentHairLoss') == 'yes':
-        score += 0.8
+        score += 0.6
 
-    # 스트레스 (0-0.5)
+    # 4. 스트레스 (최대 0.3점) - 촉발 요인
+    # 근거: 70% 모발 휴지기 전환, 하지만 일시적 효과
     stress = survey_data.get('stress', 'low')
     if stress == 'high':
-        score += 0.5
+        score += 0.3
     elif stress == 'medium':
-        score += 0.25
+        score += 0.15
 
-    # 0-3 범위로 정규화 (최대 2.6이므로 약간 조정)
-    normalized_score = min(score * (3.0 / 2.6), 3.0)
-
-    return normalized_score
+    # 최대 3.0으로 제한
+    return min(score, 3.0)
 
 def calculate_dynamic_weights(age: int, family_history: str,
                               top_confidence: float, side_confidence: float) -> Dict[str, float]:
     """
-    나이/증상별 + 신뢰도 기반 동적 가중치 계산 (B + C 결합)
-    """
-    # 1단계: 나이별 기본 가중치 (B)
-    if age < 30:
-        base_top = 0.6
-        base_side = 0.4
-        base_survey = 0.0
-    elif age < 50:
-        base_top = 0.5
-        base_side = 0.35
-        base_survey = 0.15
-    else:  # 50대 이상
-        base_top = 0.45
-        base_side = 0.3
-        base_survey = 0.25
+    의학 문헌 기반 동적 가중치 계산
 
-    # 가족력이 있으면 설문 가중치 증가
-    if family_history == 'yes':
-        base_survey += 0.1
+    참고 문헌:
+    - Hamilton-Norwood Scale: 정수리(vertex) + 전두부(frontal) 모두 평가 필요
+    - 임상 가이드라인: 360도 종합 평가 권장
+    - Top view: 정수리 탈모 (AGA 핵심 지표)
+    - Side view: 전두부 후퇴 (진행 패턴)
+
+    나이별 가중치 근거:
+    - 젊을수록 이미지 분석 신뢰도 높음 (명확한 패턴)
+    - 고령일수록 설문 중요도 증가 (복합 요인)
+    """
+    # 1단계: 나이별 기본 가중치
+    if age < 30:
+        # 20대: 유병률 25%, 이미지 패턴 명확
+        base_top = 0.55    # Top 중심 (정수리 탈모 명확)
+        base_side = 0.35   # Side 보조 (M자 진행 확인)
+        base_survey = 0.10 # 설문 최소
+    elif age < 40:
+        # 30대: 유병률 30%, 진행 단계
+        base_top = 0.50
+        base_side = 0.30
+        base_survey = 0.20
+    elif age < 50:
+        # 40대: 유병률 40%, 복합 요인
+        base_top = 0.45
+        base_side = 0.25
+        base_survey = 0.30
+    else:
+        # 50대+: 유병률 50%, 생활습관/건강 영향↑
+        base_top = 0.40
+        base_side = 0.20
+        base_survey = 0.40
+
+    # 2단계: 가족력 보정
+    # 근거: 유전적 기여도 80% (가족력 있으면 설문 신뢰도↑)
+    if family_history in ['father', 'mother', 'both']:
+        base_survey += 0.10
         base_top -= 0.05
         base_side -= 0.05
 
@@ -333,7 +368,7 @@ def fuse_results(top_result: Dict[str, Any], side_result: Dict[str, Any] = None,
     # 설문 데이터가 있으면 동적 가중치 계산
     if survey_data:
         age = int(survey_data.get('age', 25))
-        family_history = survey_data.get('familyHistory', 'no')
+        family_history = survey_data.get('familyHistory', 'none')
 
         # B+C 결합: 동적 가중치 계산
         weights = calculate_dynamic_weights(age, family_history, top_confidence, side_confidence)
@@ -670,17 +705,44 @@ def analyze_hair_with_swin(top_image_data: bytes, side_image_data: bytes = None,
 
         # advice 배열을 하나의 텍스트로 합치기 (구분자: 줄바꿈)
         advice_text = "\n".join(llm_result['advice']) if isinstance(llm_result['advice'], list) else str(llm_result['advice'])
-        
+
+        # 가중치 정보 구성 (프론트에 표시용)
+        weights_info = fused_result.get('weights', {'top': 1.0, 'side': 0.0, 'survey': 0.0})
+        survey_score = fused_result.get('survey_score', 0.0)
+
         result = {
             "stage": final_stage,
             "title": llm_result['title'],
             "description": llm_result['description'],
             "advice": advice_text,
             "confidence": final_confidence,
-            "analysis_type": "swin_dual_model_llm_enhanced"
+            "analysis_type": "swin_dual_model_llm_enhanced",
+            # 가중치 정보 추가 (프론트 표시용)
+            "weights": {
+                "top": round(weights_info['top'] * 100, 1),      # % 단위
+                "side": round(weights_info['side'] * 100, 1),
+                "survey": round(weights_info['survey'] * 100, 1)
+            },
+            "survey_score": round(survey_score, 2),
+            # 설명 텍스트
+            "weight_explanation": {
+                "title": "분석 가중치 (의학 논문 기반)",
+                "description": "이 분석은 의학 연구를 바탕으로 정수리 사진, 측면 사진, 설문 데이터를 종합하여 진단합니다.",
+                "details": [
+                    f"정수리 사진 (Top): {round(weights_info['top'] * 100, 1)}% - Hamilton-Norwood Scale의 핵심 지표",
+                    f"측면 사진 (Side): {round(weights_info['side'] * 100, 1)}% - 전두부 후퇴 패턴 확인",
+                    f"설문 조사: {round(weights_info['survey'] * 100, 1)}% - 유전적 요인 및 생활습관 반영"
+                ],
+                "references": [
+                    "유전적 기여도 80% (NCBI 2024)",
+                    "부계 유전 62.8%, 모계 8.6% (PLOS One 2024)",
+                    "나이별 유병률: 20대(25%), 30대(30%), 40대(40%), 50대(50%)"
+                ]
+            }
         }
 
         log_message(f"✅ 분석 완료: Stage {final_stage}, 신뢰도 {final_confidence:.2%}")
+        log_message(f"   가중치 - Top: {weights_info['top']:.1%}, Side: {weights_info['side']:.1%}, Survey: {weights_info['survey']:.1%}")
         return result
 
     except Exception as e:

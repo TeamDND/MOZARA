@@ -108,15 +108,42 @@ const AnalysisResultStep: React.FC<AnalysisResultStepProps> = ({ analysisResult,
 
             <div className="p-4 space-y-4">
               <div className="bg-blue-50 p-3 rounded-lg">
-                <p className="text-xs text-blue-800 mb-2">
-                  🤖 AI 분석은 다음 요소들을 종합적으로 고려합니다:
+                <p className="text-xs text-blue-800 font-semibold mb-2">
+                  🤖 AI 분석은 의학 논문을 기반으로 다음 요소를 종합합니다:
                 </p>
                 <ul className="text-xs text-blue-700 space-y-1">
-                  <li>• 이미지 분석 (정수리, 측면)</li>
-                  <li>• 나이 및 성별</li>
-                  <li>• 가족력 유무</li>
-                  <li>• 최근 탈모 증상</li>
-                  <li>• 스트레스 수준</li>
+                  <li>• 이미지 분석 (정수리, 측면) - Hamilton-Norwood Scale 기준</li>
+                  <li>• 가족력 (유전 기여도 80%, NCBI 2024)</li>
+                  <li>• 나이 (연령별 유병률 반영)</li>
+                  <li>• 최근 탈모 증상 (진행성 지표)</li>
+                  <li>• 스트레스 (일시적 촉발 요인)</li>
+                </ul>
+              </div>
+
+              {analysisResult?.weights && (
+                <div className="bg-purple-50 p-3 rounded-lg">
+                  <p className="text-xs text-purple-800 font-semibold mb-2">
+                    📊 분석 가중치 (당신의 경우)
+                  </p>
+                  <ul className="text-xs text-purple-700 space-y-1">
+                    <li>• 정수리 사진: {analysisResult.weights.top}%</li>
+                    <li>• 측면 사진: {analysisResult.weights.side}%</li>
+                    <li>• 설문 데이터: {analysisResult.weights.survey}%</li>
+                  </ul>
+                  <p className="text-xs text-purple-600 mt-2 italic">
+                    가중치는 나이, 가족력, AI 신뢰도에 따라 자동 조정됩니다
+                  </p>
+                </div>
+              )}
+
+              <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                <p className="text-xs text-gray-700 font-semibold mb-2">
+                  📚 참고 문헌
+                </p>
+                <ul className="text-xs text-gray-600 space-y-1">
+                  <li>• NCBI (2024): 유전적 기여도 80%</li>
+                  <li>• PLOS One (2024): 부계 62.8%, 모계 8.6%</li>
+                  <li>• Hamilton-Norwood Scale: 임상 진단 기준</li>
                 </ul>
               </div>
 

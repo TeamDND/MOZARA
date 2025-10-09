@@ -9,6 +9,19 @@ export interface SwinAnalysisResult {
   title: string;
   description: string;
   advice: string;
+  confidence?: number;
+  weights?: {
+    top: number;
+    side: number;
+    survey: number;
+  };
+  survey_score?: number;
+  weight_explanation?: {
+    title: string;
+    description: string;
+    details: string[];
+    references: string[];
+  };
 }
 
 // API 응답 인터페이스
