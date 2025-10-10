@@ -111,11 +111,16 @@ public class DailyHabitService {
             throw new RuntimeException("이미 오늘 완료한 습관입니다.");
         }
         
+        // 목표치 결정 (물=7, 이펙터=4, 일반=1)
+        Integer targetCount = getTargetCount(habit.getHabitName());
+        
         // 로그 저장
         UserHabitLogEntity logEntity = UserHabitLogEntity.builder()
                 .userEntityIdForeign(user)
                 .habitIdForeign(habit)
                 .completionDate(today)
+                .progressCount(targetCount)  // 완료 시 목표치만큼 저장
+                .targetCount(targetCount)
                 .build();
         
         UserHabitLogEntity savedLog = userHabitLogRepository.save(logEntity);
@@ -134,6 +139,133 @@ public class DailyHabitService {
                 .habitId(habitId)
                 .userId(userId)
                 .completionDate(today)
+                .progressCount(savedLog.getProgressCount())
+                .targetCount(savedLog.getTargetCount())
+                .build();
+    }
+
+    /**
+     * 습관별 목표치 반환
+     */
+    private Integer getTargetCount(String habitName) {
+        if ("물 마시기".equals(habitName)) {
+            return 7;
+        } else if ("이펙터 사용".equals(habitName)) {
+            return 4;
+        } else {
+            return 1;  // 일반 미션
+        }
+    }
+
+    /**
+     * 진행 상태 업데이트 (완료 전 중간 진행 저장)
+     */
+    @Transactional
+    public UserHabitLogDTO updateHabitProgress(Integer userId, Integer habitId, Integer progressCount) {
+        UserEntity user = new UserEntity();
+        user.setId(userId);
+        
+        DailyHabitEntity habit = dailyHabitRepository.findById(habitId)
+                .orElseThrow(() -> new RuntimeException("습관을 찾을 수 없습니다."));
+        
+        LocalDate today = LocalDate.now();
+        Integer targetCount = getTargetCount(habit.getHabitName());
+        
+        // 오늘 날짜의 로그가 있는지 확인
+        List<UserHabitLogEntity> existingLogs = userHabitLogRepository.findByUserEntityIdForeignAndCompletionDate(user, today);
+        UserHabitLogEntity logEntity = existingLogs.stream()
+                .filter(log -> log.getHabitIdForeign().getHabitId().equals(habitId))
+                .findFirst()
+                .orElse(null);
+        
+        // 이전 진행 수를 저장 (포인트 중복 지급 방지)
+        Integer oldProgressCount = 0;
+        boolean shouldAddPoints = false;
+        
+        if (logEntity == null) {
+            // 로그가 없으면 새로 생성
+            logEntity = UserHabitLogEntity.builder()
+                    .userEntityIdForeign(user)
+                    .habitIdForeign(habit)
+                    .completionDate(today)
+                    .progressCount(progressCount)
+                    .targetCount(targetCount)
+                    .build();
+            
+            // 첫 생성 시 바로 목표 달성했으면 포인트 추가
+            if (progressCount >= targetCount) {
+                shouldAddPoints = true;
+            }
+        } else {
+            // 기존 로그 업데이트 - 이전 값 저장
+            oldProgressCount = logEntity.getProgressCount() != null ? logEntity.getProgressCount() : 0;
+            logEntity.setProgressCount(progressCount);
+            
+            // 목표 달성 시 포인트 추가 (한 번만)
+            // 이전에는 목표치 미달이었는데 이번에 달성한 경우만
+            if (progressCount >= targetCount && oldProgressCount < targetCount) {
+                shouldAddPoints = true;
+            }
+        }
+        
+        UserHabitLogEntity savedLog = userHabitLogRepository.save(logEntity);
+        
+        // 포인트 추가 (save 후에 실행)
+        if (shouldAddPoints) {
+            try {
+                seedlingService.updateSeedlingPoint(userId, habit.getRewardPoints());
+                log.info("습관 목표 달성 - 포인트 추가: userId={}, habitId={}, points={}", 
+                        userId, habitId, habit.getRewardPoints());
+            } catch (Exception ex) {
+                log.error("새싹 포인트 업데이트 실패 - userId: {}, points: {}", userId, habit.getRewardPoints(), ex);
+            }
+        }
+        
+        return UserHabitLogDTO.builder()
+                .logId(savedLog.getLogId())
+                .habitId(habitId)
+                .userId(userId)
+                .completionDate(today)
+                .progressCount(savedLog.getProgressCount())
+                .targetCount(savedLog.getTargetCount())
+                .build();
+    }
+
+    /**
+     * 오늘의 진행 상태 조회
+     */
+    public UserHabitLogDTO getTodayProgress(Integer userId, Integer habitId) {
+        return getProgressByDate(userId, habitId, LocalDate.now());
+    }
+
+    /**
+     * 특정 날짜의 진행 상태 조회
+     */
+    public UserHabitLogDTO getProgressByDate(Integer userId, Integer habitId, LocalDate date) {
+        UserEntity user = new UserEntity();
+        user.setId(userId);
+        
+        DailyHabitEntity habit = dailyHabitRepository.findById(habitId)
+                .orElseThrow(() -> new RuntimeException("습관을 찾을 수 없습니다."));
+        
+        List<UserHabitLogEntity> logs = userHabitLogRepository.findByUserEntityIdForeignAndCompletionDate(user, date);
+        
+        UserHabitLogEntity logEntity = logs.stream()
+                .filter(log -> log.getHabitIdForeign().getHabitId().equals(habitId))
+                .findFirst()
+                .orElse(null);
+        
+        if (logEntity == null) {
+            return null;
+        }
+        
+        return UserHabitLogDTO.builder()
+                .logId(logEntity.getLogId())
+                .habitId(habitId)
+                .userId(userId)
+                .completionDate(date)
+                .progressCount(logEntity.getProgressCount())
+                .targetCount(logEntity.getTargetCount())
                 .build();
     }
 
