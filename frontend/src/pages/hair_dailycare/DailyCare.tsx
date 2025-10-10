@@ -862,7 +862,7 @@ const DailyCare: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-md mx-auto bg-white min-h-screen pb-20">
+      <div className="max-w-md mx-auto bg-white min-h-screen pb-32">
 
         {/* Main Title Section */}
         <div className="px-4 py-6 text-center">
