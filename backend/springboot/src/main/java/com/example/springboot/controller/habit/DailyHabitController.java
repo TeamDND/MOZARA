@@ -60,11 +60,11 @@ public class DailyHabitController {
     /**
      * 습관 완료 로그 저장
      */
-    @PostMapping("/complete")
-    public ResponseEntity<?> completeHabit(@RequestParam Integer userId, @RequestParam Integer habitId) {
+    @PostMapping("/complete/{userId}/{habitId}")
+    public ResponseEntity<?> completeHabit(@PathVariable Integer userId, @PathVariable Integer habitId) {
         try {
-            UserHabitLogDTO log = dailyHabitService.saveHabitCompletion(userId, habitId);
-            return ResponseEntity.ok(log);
+            UserHabitLogDTO logDTO = dailyHabitService.saveHabitCompletion(userId, habitId);
+            return ResponseEntity.ok(logDTO);
         } catch (RuntimeException ex) {
             log.error("[DailyHabit] 습관 완료 실패 - userId: {}, habitId: {}, error: {}", userId, habitId, ex.getMessage(), ex);
             Map<String, Object> error = new HashMap<>();
@@ -113,46 +113,6 @@ public class DailyHabitController {
             Map<String, Object> error = new HashMap<>();
             error.put("message", "완료한 습관 정보를 불러오는데 실패했습니다.");
             error.put("reason", "completed_habits_fetch_error");
-            return ResponseEntity.status(500).body(error);
-        }
-    }
-
-    /**
-     * 오늘의 미션 조회 (모든 사용자 공통)
-     */
-    @GetMapping("/today-missions")
-    public ResponseEntity<?> getTodayMissions() {
-        try {
-            List<DailyHabitDTO> todayMissions = dailyHabitService.getTodayMissions();
-            return ResponseEntity.ok(todayMissions);
-        } catch (Exception ex) {
-            log.error("[DailyHabit] 오늘의 미션 조회 실패: {}", ex.getMessage(), ex);
-            Map<String, Object> error = new HashMap<>();
-            error.put("message", "오늘의 미션을 불러오는데 실패했습니다.");
-            error.put("reason", "today_missions_fetch_error");
-            return ResponseEntity.status(500).body(error);
-        }
-    }
-
-    /**
-     * 사용자별 오늘의 미션 완료 상태 조회
-     */
-    @GetMapping("/today-missions/{userId}")
-    public ResponseEntity<?> getTodayMissionsWithStatus(@PathVariable Integer userId) {
-        try {
-            List<DailyHabitDTO> todayMissions = dailyHabitService.getTodayMissionsWithStatus(userId);
-            List<DailyHabitDTO> completedHabits = dailyHabitService.getTodayCompletedHabits(userId);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("todayMissions", todayMissions);
-            response.put("completedHabits", completedHabits);
-
-            return ResponseEntity.ok(response);
-        } catch (Exception ex) {
-            log.error("[DailyHabit] 사용자별 오늘의 미션 조회 실패 - userId: {}, error: {}", userId, ex.getMessage(), ex);
-            Map<String, Object> error = new HashMap<>();
-            error.put("message", "오늘의 미션 정보를 불러오는데 실패했습니다.");
-            error.put("reason", "today_missions_status_fetch_error");
             return ResponseEntity.status(500).body(error);
         }
     }

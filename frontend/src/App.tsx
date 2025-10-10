@@ -17,7 +17,6 @@ import MainPage from './pages/MainPage';
 import DailyCare from './pages/hair_dailycare/DailyCare';
 import StoreFinder from './pages/hair_map/StoreFinder';
 
-
 // new_fn_flow.md에 따른 새로운 컴포넌트들
 import Dashboard from './pages/hair_dailycare/Dashboard';
 import IntegratedDiagnosis from './pages/check/IntegratedDiagnosis';
@@ -38,7 +37,6 @@ import TimeSeriesAnalysis from './pages/timeseries/TimeSeriesAnalysis';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUserDetail from './pages/admin/AdminUserDetail';
 import AdminReportView from './pages/admin/AdminReportView';
-import D_care from './pages/hair_solutions/D_care';
 
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
@@ -79,7 +77,6 @@ const App: React.FC = () => {
           <Route path="mypage" element={<MyPage />} />
           <Route path="my-report" element={<MyReportPage />} />
           <Route path="store-finder" element={<StoreFinder />} />
-          <Route path="d-care" element={<D_care />} />
           {/* Chat 라우트 제거 - 이제 모달로 사용 */}
           <Route path="chat" element={<Chat />} />
           <Route path="point-exchange" element={<PointExchange />} />

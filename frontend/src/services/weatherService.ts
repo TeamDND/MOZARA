@@ -337,18 +337,26 @@ export const getWeatherData = async (): Promise<WeatherData> => {
     };
 
     items.forEach((item: any) => {
+      const value = parseFloat(item.obsrValue || item.fcstValue);
+
+      // 기상청 결측값 필터링 (-99, -998, -999 등 음수 제외)
+      if (isNaN(value) || value < 0) {
+        return;
+      }
+
       switch (item.category) {
-        case 'T1H': // 기온
-          weatherData.temperature = parseFloat(item.obsrValue);
+        case 'T1H': // 기온 (초단기실황)
+        case 'TMP': // 기온 (단기예보)
+          weatherData.temperature = value;
           break;
-        case 'REH': // 습도
-          weatherData.humidity = parseFloat(item.obsrValue);
+        case 'REH': // 습도 (공통)
+          weatherData.humidity = value;
           break;
-        case 'UVI': // 자외선지수
-          weatherData.uvIndex = parseFloat(item.obsrValue);
+        case 'UVI': // 자외선지수 (초단기만)
+          weatherData.uvIndex = value;
           break;
         case 'PM10': // 미세먼지
-          weatherData.fineDust = parseFloat(item.obsrValue);
+          weatherData.fineDust = value;
           break;
       }
     });
