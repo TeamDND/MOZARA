@@ -448,7 +448,7 @@ def generate_advice(stage: int) -> List[str]:
     }
     return advice_map.get(stage, advice_map[0])
 
-def enhance_with_llm(stage: int, confidence: float, survey_data: Dict[str, Any] = None) -> Dict[str, Any]:
+def enhance_with_llm(stage: int, confidence: float, survey_data: Dict[str, Any] = None, has_side_image: bool = False) -> Dict[str, Any]:
     """
     LLM을 사용하여 분석 결과를 자연스럽고 상세하게 포장
     Args:
@@ -519,7 +519,17 @@ def enhance_with_llm(stage: int, confidence: float, survey_data: Dict[str, Any] 
         info = stage_info.get(stage, stage_info[0])
 
         # 성별 정보 추가
-        gender_text = "남성" if survey_data and survey_data.get('gender') == 'male' else "여성"
+        gender = survey_data.get('gender') if survey_data else None
+        log_message(f"🚹🚺 성별 정보: {gender}")
+
+        if gender == 'male' or gender == '남' or gender == '남성':
+            gender_text = "남성"
+        elif gender == 'female' or gender == '여' or gender == '여성':
+            gender_text = "여성"
+        else:
+            # 성별 정보가 없으면 side_image 유무로 추론
+            gender_text = "남성" if has_side_image else "여성"
+            log_message(f"⚠️ 성별 정보 없음, 이미지 유무로 추론: {gender_text}")
 
         # LLM 프롬프트
         prompt = f"""당신은 경험이 풍부한 탈모 전문의입니다. AI 분석 결과와 환자의 설문조사 정보를 종합적으로 분석하여, 환자 개개인에게 맞춤화된 상세한 설명과 조언을 제공해주세요.
@@ -693,7 +703,7 @@ def analyze_hair_with_swin(top_image_data: bytes, side_image_data: bytes = None,
         log_message("LLM으로 결과 포장 중...")
         log_message(f"입력 정보 - Stage: {final_stage}, Confidence: {final_confidence:.2%}")
 
-        llm_result = enhance_with_llm(final_stage, final_confidence, survey_data)
+        llm_result = enhance_with_llm(final_stage, final_confidence, survey_data, has_side_image=bool(side_image_data))
 
         log_message(f"LLM 포장 결과:")
         log_message(f"  - 제목: {llm_result['title']}")
@@ -716,7 +726,7 @@ def analyze_hair_with_swin(top_image_data: bytes, side_image_data: bytes = None,
             "description": llm_result['description'],
             "advice": advice_text,
             "confidence": final_confidence,
-            "analysis_type": "swin_dual_model_llm_enhanced",
+            "analysis_type": "hair_loss_male",
             # 가중치 정보 추가 (프론트 표시용)
             "weights": {
                 "top": round(weights_info['top'] * 100, 1),      # % 단위

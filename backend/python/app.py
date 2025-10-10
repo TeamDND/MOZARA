@@ -1132,15 +1132,15 @@ async def api_hair_swin_check(
 
         # 설문 데이터 구성
         survey_data = None
-        if age and familyHistory:
+        if gender or age or familyHistory:  # gender도 체크
             survey_data = {
                 'gender': gender,
-                'age': age,
+                'age': int(age) if age else None,  # age를 정수로 변환
                 'familyHistory': familyHistory,
-                'recentHairLoss': recentHairLoss,
+                'recentHairLoss': recentHairLoss == 'true' if recentHairLoss else None,  # boolean 변환
                 'stress': stress
             }
-            print(f"--- [DEBUG] Survey data: {survey_data} ---")
+            print(f"--- [DEBUG] Survey data received: {survey_data} ---")
 
         # bytes 데이터와 설문 데이터를 함께 전달
         result = analyze_hair_with_swin(top_image_bytes, side_image_bytes, survey_data)
