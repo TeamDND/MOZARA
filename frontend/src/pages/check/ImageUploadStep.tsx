@@ -4,7 +4,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Badge } from '../../components/ui/badge';
 import { Camera } from 'lucide-react';
-import { validateImageFile } from '../../services/geminiAnalysisService';
+import { validateImageFile } from '../../utils/imageValidation';
 import apiClient from '../../services/apiClient';
 
 interface ImageUploadStepProps {

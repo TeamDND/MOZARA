@@ -248,3 +248,10 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-09-30 13:18:17
+
+-- ========================================
+-- 진행 상태 저장을 위한 컬럼 추가 (2025-10-10)
+-- ========================================
+ALTER TABLE `user_habit_log` 
+ADD COLUMN `progress_count` INT DEFAULT 0 COMMENT '현재 진행 수 (물 5잔이면 5)',
+ADD COLUMN `target_count` INT DEFAULT NULL COMMENT '목표치 (물=7, 이펙터=4, 일반 미션=1)';

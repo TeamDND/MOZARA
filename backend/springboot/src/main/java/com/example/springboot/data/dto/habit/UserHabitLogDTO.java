@@ -18,4 +18,6 @@ public class UserHabitLogDTO {
     private Integer habitId;
     private Integer userId;
     private LocalDate completionDate;
+    private Integer progressCount;
+    private Integer targetCount;
 }
