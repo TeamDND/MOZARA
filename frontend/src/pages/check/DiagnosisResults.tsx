@@ -7,6 +7,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/ta
 import { ImageWithFallback } from '../../hooks/ImageWithFallback';
 import { getStageDescription, getStageColor } from '../../services/swinAnalysisService';
 import apiClient from '../../services/apiClient';
+import { locationService, Hospital } from '../../services/locationService';
+import { hairProductApi, HairProduct } from '../../services/hairProductApi';
+import { elevenStApi } from '../../services/elevenStApi';
+import StoreFinderTab from './result/StoreFinderTab';
+import HairLossProductsTab from './result/HairLossProductsTab';
+import YouTubeVideosTab from './result/YouTubeVideosTab';
+import DailyCareTab from './result/DailyCareTab';
 import {
   CheckCircle,
   MapPin,
@@ -23,7 +30,8 @@ import {
   Award,
   Brain,
   HelpCircle,
-  X
+  X,
+  ArrowRight
 } from 'lucide-react';
 
 interface DiagnosisResultsProps {
@@ -53,8 +61,22 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
   const [videosLoading, setVideosLoading] = useState(false);
   const [videosError, setVideosError] = useState<string | null>(null);
   const [showStageInfo, setShowStageInfo] = useState(false);
+  
+  // 위치 정보 상태
+  const [currentLocation, setCurrentLocation] = useState<{latitude: number, longitude: number} | null>(null);
+  
   // URL state 또는 props에서 Swin 분석 결과 가져오기
   const swinResult = location.state?.swinResult || diagnosisData?.photo?.swinResult;
+
+  // 이미지 URL 처리 (남성 탈모 검사는 top|||side 형식)
+  const imageUrl = location.state?.imageUrl || diagnosisData?.imageUrl || '';
+  const analysisType = location.state?.analysisType || diagnosisData?.analysisType || '';
+  const [topImageUrl, sideImageUrl] = imageUrl.includes('|||')
+    ? imageUrl.split('|||')
+    : [imageUrl, null];
+  // analysis_result의 grade를 기반으로 단계 결정
+  const analysisGrade = location.state?.analysis_result?.grade || diagnosisData?.analysis_result?.grade;
+  const currentStage = analysisGrade !== undefined ? analysisGrade : (swinResult?.stage !== undefined ? swinResult.stage : 0);
   const stageRecommendations: Record<number, StageRecommendation> = {
     0: {
       title: '정상 - 예방 및 두피 관리',
@@ -129,20 +151,31 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
     }
   }, []);
   
-  // 컴포넌트 마운트 시 Swin 단계에 맞는 영상 로드
+  // 위치 정보 가져오기
   useEffect(() => {
-    let query = '탈모 관리 예방 두피케어'; // 기본 검색어
-    
-    if (swinResult && swinResult.stage !== undefined) {
-      const recommendation = stageRecommendations[swinResult.stage];
-      if (recommendation) {
-        query = recommendation.query;
-      }
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCurrentLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error('위치 정보를 가져올 수 없습니다:', error);
+        }
+      );
     }
-    
-    fetchYouTubeVideos(query);
+  }, []);
+
+  // 컴포넌트 마운트 시 현재 단계에 맞는 YouTube 영상 로드
+  useEffect(() => {
+    const recommendation = stageRecommendations[currentStage];
+    if (recommendation) {
+      fetchYouTubeVideos(recommendation.query);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [swinResult?.stage]); // swinResult.stage가 변경될 때만 실행
+  }, [currentStage]); // currentStage가 변경될 때만 실행
 
   // 진단 결과에 따른 추천 데이터 생성 (Swin 결과 반영)
   const getRecommendations = () => {
@@ -314,9 +347,9 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </div>
             
             <div className="grid grid-cols-3 gap-3">
-              <div className="text-center p-3 bg-white rounded-lg">
+              <div className="text-center p-3 bg-white rounded-xl">
                 <div className="flex items-center justify-center gap-1 mb-1">
-                  <p className="text-xs text-gray-600">🧠 Swin AI 분석</p>
+                  <p className="text-xs text-gray-600">🧠 AI 분석</p>
                   <button
                     onClick={() => setShowStageInfo(true)}
                     className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -326,37 +359,41 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                   </button>
                 </div>
                 <p className="text-xl font-bold text-gray-800">
-                  {swinResult ? `${swinResult.stage}단계` : '분석 중'}
+                  {currentStage}단계
                 </p>
                 <Badge
                   className={`text-xs px-2 py-1 ${
-                    swinResult ? getStageColor(swinResult.stage) : 'bg-gray-100 text-gray-600'
+                    getStageColor(currentStage)
                   }`}
                 >
-                  {swinResult ? getStageDescription(swinResult.stage) : "분석 중"}
+                  {getStageDescription(currentStage)}
                 </Badge>
               </div>
-              <div className="text-center p-3 bg-white rounded-lg">
+              <div className="text-center p-3 bg-white rounded-xl">
                 <p className="text-xs text-gray-600">모발 밀도</p>
                 <p className="text-xl font-bold text-gray-800">{diagnosisData?.photo?.hairDensity || 72}%</p>
                 <Badge variant="outline" className="text-xs px-2 py-1">양호</Badge>
               </div>
-              <div className="text-center p-3 bg-white rounded-lg">
+              <div className="text-center p-3 bg-white rounded-xl">
                 <p className="text-xs text-gray-600">두피 건강</p>
                 <p className="text-xl font-bold text-gray-800">{diagnosisData?.photo?.scalpHealth || 85}%</p>
                 <Badge variant="default" className="text-xs px-2 py-1">우수</Badge>
               </div>
             </div>
 
-            {/* Swin 분석 결과 요약 */}
-            {swinResult && (
-              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+            {/* AI 분석 결과 요약 */}
+            {(swinResult || analysisGrade !== undefined) && (
+              <div className="mt-4 p-3 bg-blue-50 rounded-xl">
                 <div className="flex items-center gap-2 mb-2">
                   <Brain className="w-4 h-4 text-blue-600" />
-                  <h3 className="text-sm font-semibold text-blue-800">{swinResult.title}</h3>
+                  <h3 className="text-sm font-semibold text-blue-800">
+                    {swinResult?.title || `${currentStage}단계 분석 결과`}
+                  </h3>
                 </div>
-                <p className="text-xs text-blue-700 mb-3">{swinResult.description}</p>
-                {swinResult.advice && (
+                <p className="text-xs text-blue-700 mb-3">
+                  {swinResult?.description || stageRecommendations[currentStage]?.description}
+                </p>
+                {swinResult?.advice && (
                   <div className="space-y-1 pt-2 border-t border-blue-200">
                     <p className="text-xs font-semibold text-blue-800 mb-1">AI 추천 조언:</p>
                     {swinResult.advice.split('\n').map((advice: string, index: number) => (
@@ -367,6 +404,35 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* 남성 탈모 검사 이미지 표시 (swin_dual_model_llm_enhanced) */}
+            {analysisType === 'swin_dual_model_llm_enhanced' && topImageUrl && sideImageUrl && (
+              <div className="mt-4 p-3 bg-white rounded-lg">
+                <h3 className="text-sm font-semibold text-gray-800 mb-3">분석 이미지</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-gray-600 mb-2 text-center">정수리</p>
+                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                      <ImageWithFallback
+                        src={topImageUrl}
+                        alt="정수리 이미지"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600 mb-2 text-center">측면</p>
+                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                      <ImageWithFallback
+                        src={sideImageUrl}
+                        alt="측면 이미지"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -382,11 +448,12 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </div>
             <Button 
               onClick={() => {
-                  navigate('/d-care');
+                  navigate('/daily-care');
               }}
-              className="ml-3 h-10 px-4 bg-[#222222] hover:bg-[#333333] text-white rounded-xl active:scale-[0.98]"
+              className="ml-3 h-10 px-4 text-white rounded-xl active:scale-[0.98]"
+              style={{ backgroundColor: "#1f0101" }}
             >
-              D_care
+              DailyCare
             </Button>
           </div>
         </div>
@@ -396,25 +463,29 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
               <TabsTrigger 
                 value="hospitals" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-[#222222] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 transition-colors"
+                style={{ backgroundColor: "#1f0101" }}
               >
                 탈모 맵
               </TabsTrigger>
               <TabsTrigger 
                 value="products" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                data-state-active-style={{ backgroundColor: "#1f0101", color: "white" }}
               >
                 제품 추천
               </TabsTrigger>
               <TabsTrigger 
                 value="videos" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                data-state-active-style={{ backgroundColor: "#1f0101", color: "white" }}
               >
                 영상 컨텐츠
               </TabsTrigger>
               <TabsTrigger 
                 value="lifestyle" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#222222] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                data-state-active-style={{ backgroundColor: "#1f0101", color: "white" }}
               >
                 생활습관
               </TabsTrigger>
@@ -425,284 +496,82 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
               <div className="bg-white p-4 rounded-xl shadow-md">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-800">내 주변 탈모 맵</h3>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-gray-600" />
-                    <select 
-                      value={selectedRegion}
-                      onChange={(e) => setSelectedRegion(e.target.value)}
-                      className="bg-white border border-gray-300 rounded-lg px-2 py-1 text-sm"
-                    >
-                      {regions.map(region => (
-                        <option key={region} value={region}>{region}</option>
-                      ))}
-                    </select>
-                  </div>
+                  <Button 
+                    onClick={() => navigate('/store-finder', { 
+                      state: { 
+                        diagnosisResult: { stage: currentStage },
+                        analysis_result: { grade: currentStage }
+                      } 
+                    })}
+                    className="h-8 px-3 text-white text-xs rounded-xl"
+                    style={{ backgroundColor: "#1f0101" }}
+                  >
+                    더보기
+                    <ArrowRight className="w-3 h-3 ml-1" />
+                  </Button>
                 </div>
-
-                {/* 이중 탭 - 카테고리 선택 */}
-                <div className="mb-4">
-                  <div className="flex overflow-x-auto space-x-1 pb-2">
-                    {categories.map((category) => (
-                      <button
-                        key={category}
-                        onClick={() => setSelectedCategory(category)}
-                        className={`flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
-                          selectedCategory === category
-                            ? 'bg-[#222222] text-white'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        {category}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  {filteredHospitals.map((hospital, index) => (
-                    <div key={index} className="bg-gray-50 p-4 rounded-xl">
-                      <div className="aspect-video rounded-lg overflow-hidden mb-3 bg-gray-200">
-                        <ImageWithFallback 
-                          src={hospital.image}
-                          alt={hospital.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      
-                      <h4 className="text-base font-semibold text-gray-800 mb-2">{hospital.name}</h4>
-                      <p className="text-sm text-gray-600 mb-2">
-                        {hospital.specialty}
-                      </p>
-                      
-                      <div className="flex items-center gap-4 text-sm mb-3">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          <span>{hospital.rating}</span>
-                          <span className="text-gray-500">({hospital.reviews})</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="w-4 h-4 text-gray-500" />
-                          <span>{hospital.distance}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-gray-50 p-3 rounded-lg text-xs mb-3">
-                        💡 {hospital.matchReason}
-                      </div>
-                      
-                      <Button className="w-full h-10 rounded-lg bg-[#222222] hover:bg-[#333333] text-white active:scale-[0.98]">
-                        자세히 보기
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+                <StoreFinderTab 
+                  currentStage={currentStage} 
+                  currentLocation={currentLocation} 
+                />
               </div>
             </TabsContent>
 
             {/* 제품 추천 (Mobile-First) */}
             <TabsContent value="products" className="space-y-4">
               <div className="bg-white p-4 rounded-xl shadow-md">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">맞춤형 제품 추천</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  진단 결과에 따라 선별된 헤어케어 제품들입니다
-                </p>
-                
-                <div className="space-y-4">
-                  {recommendations.products.map((product, index) => (
-                    <div key={index} className="bg-gray-50 p-4 rounded-xl">
-                      <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-gray-200">
-                        <ImageWithFallback 
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      
-                      <Badge variant="outline" className="mb-2 text-xs px-2 py-1">
-                        {product.category}
-                      </Badge>
-                      
-                      <h4 className="text-base font-semibold text-gray-800 mb-1">{product.name}</h4>
-                      <p className="text-sm text-gray-600 mb-2">
-                        {product.brand}
-                      </p>
-                      
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="font-semibold text-lg text-gray-800">{product.price}</span>
-                        <div className="flex items-center gap-1 text-sm">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          <span>{product.rating}</span>
-                          <span className="text-gray-500">({product.reviews})</span>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-green-50 p-3 rounded-lg text-xs mb-3">
-                        ✨ {product.matchReason}
-                      </div>
-                      
-                      <Button className="w-full h-10 rounded-lg bg-[#222222] hover:bg-[#333333] active:scale-[0.98]">
-                        <ShoppingCart className="w-4 h-4 mr-2" />
-                        구매하기
-                      </Button>
-                    </div>
-                  ))}
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-800">맞춤형 제품 추천</h3>
+                  <Button 
+                    onClick={() => navigate('/hair-loss-products', { 
+                      state: { 
+                        diagnosisResult: { stage: currentStage },
+                        analysis_result: { grade: currentStage }
+                      } 
+                    })}
+                    className="h-8 px-3 text-white text-xs rounded-xl"
+                    style={{ backgroundColor: "#1f0101" }}
+                  >
+                    더보기
+                    <ArrowRight className="w-3 h-3 ml-1" />
+                  </Button>
                 </div>
+                <HairLossProductsTab currentStage={currentStage} />
               </div>
             </TabsContent>
 
             {/* 영상 가이드 (Mobile-First) - YouTube API 연동 */}
             <TabsContent value="videos" className="space-y-4">
               <div className="bg-white p-4 rounded-xl shadow-md">
-                <div className="flex items-center gap-2 mb-2">
-                  <Brain className="w-5 h-5 text-[#222222]" />
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    AI 맞춤 영상 추천
-                    {swinResult && (
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Brain className="w-5 h-5 text-[#1f0101]" />
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      AI 맞춤 영상 추천
                       <span className="text-sm font-normal text-gray-600">
-                        ({getStageDescription(swinResult.stage)} 맞춤)
-
+                        ({getStageDescription(currentStage)} 맞춤)
                       </span>
-                    )}
-                  </h3>
-                </div>
-                <p className="text-sm text-gray-600 mb-4">
-                  {swinResult && stageRecommendations[swinResult.stage]
-                    ? stageRecommendations[swinResult.stage].description
-                    : "탈모 관리와 예방에 도움이 되는 영상을 추천합니다"
-                  }
-                </p>
-
-                {videosLoading && (
-                  <div className="text-center py-8">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#222222] mb-2"></div>
-                    <p className="text-sm text-gray-600">맞춤 영상을 불러오는 중...</p>
+                    </h3>
                   </div>
-                )}
-
-                {videosError && (
-                  <div className="bg-yellow-50 p-3 rounded-lg mb-4">
-                    <p className="text-sm text-yellow-800">⚠️ {videosError}</p>
-                    <p className="text-xs text-yellow-600 mt-1">샘플 영상을 표시합니다.</p>
-                  </div>
-                )}
-
-                <div className="space-y-4">
-                  {youtubeVideos.map((video, index) => (
-                    <div key={video.videoId} className="bg-gray-50 p-4 rounded-xl">
-                      <div className="aspect-video rounded-lg overflow-hidden mb-3 bg-gray-200 relative">
-                        <ImageWithFallback
-                          src={video.thumbnailUrl}
-                          alt={video.title}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = 'https://placehold.co/300x168/E8E8E8/424242?text=YouTube+Video';
-                          }}
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors">
-                            <Play className="w-6 h-6 text-white fill-white" />
-                          </div>
-                        </div>
-                      </div>
-
-                      <h4 className="text-base font-semibold text-gray-800 mb-2 line-clamp-2">{video.title}</h4>
-                      <p className="text-sm text-gray-600 mb-2">
-                        {video.channelName}
-                      </p>
-
-                      {swinResult && (
-                        <div className="bg-blue-50 p-3 rounded-lg text-xs mb-3">
-                          🎯 {stageRecommendations[swinResult.stage]?.title || '맞춤 추천'}
-                        </div>
-                      )}
-
-                      <Button
-                        variant="outline"
-                        className="w-full h-10 rounded-lg active:scale-[0.98]"
-                        onClick={() => {
-                          const url = video.videoId.startsWith('dummy')
-                            ? '#'  // 더미 데이터인 경우
-                            : `https://www.youtube.com/watch?v=${video.videoId}`;
-                          if (!video.videoId.startsWith('dummy')) {
-                            window.open(url, '_blank', 'noopener,noreferrer');
-                          }
-                        }}
-                      >
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        시청하기
-                      </Button>
-                    </div>
-                  ))}
+                  <Button 
+                    onClick={() => navigate('/youtube-videos')}
+                    className="h-8 px-3 text-white text-xs rounded-xl"
+                    style={{ backgroundColor: "#1f0101" }}
+                  >
+                    더보기
+                    <ArrowRight className="w-3 h-3 ml-1" />
+                  </Button>
                 </div>
+                <YouTubeVideosTab currentStage={currentStage} />
               </div>
             </TabsContent>
 
             {/* 생활습관 가이드 (Mobile-First) */}
             <TabsContent value="lifestyle" className="space-y-4">
-              <div className="space-y-4">
-                {recommendations.lifestyleGuides.map((guide, index) => (
-                  <div key={index} className="bg-white p-4 rounded-xl shadow-md">
-                    <div className="flex items-center gap-3 mb-3">
-                      {guide.icon}
-                      <h3 className="text-lg font-semibold text-gray-800">{guide.title}</h3>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-4">
-                      {guide.description}
-                    </p>
-                    
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-semibold text-gray-800">실천 방법:</h4>
-                      <ul className="space-y-2">
-                        {guide.tips.map((tip, tipIndex) => (
-                          <li key={tipIndex} className="text-sm flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                            <span className="text-gray-700">{tip}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* 맞춤형 루틴 제안 (Mobile-First) */}
-              <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-xl">
-                <div className="text-center space-y-4">
-                  <Award className="w-12 h-12 text-purple-600 mx-auto" />
-                  <h3 className="text-lg font-semibold text-gray-800">나만의 맞춤 루틴 시작하기</h3>
-                  <p className="text-sm text-gray-600">
-                    진단 결과를 바탕으로 개인 맞춤형 관리 루틴을 시작해보세요
-                  </p>
-                  <div className="space-y-3">
-                    <Button 
-                      onClick={() => {
-                        if (setCurrentView) {
-                          setCurrentView('challenges');
-                        } else {
-                          navigate('/weekly-challenges');
-                        }
-                      }}
-                      className="w-full h-12 bg-purple-600 hover:bg-purple-700 text-white rounded-xl active:scale-[0.98]"
-                    >
-                      주간 챌린지 시작
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => {
-                        if (setCurrentView) {
-                          setCurrentView('tracking');
-                        } else {
-                          navigate('/progress-tracking');
-                        }
-                      }}
-                      className="w-full h-12 rounded-xl active:scale-[0.98]"
-                    >
-                      진행 상황 추적
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              <DailyCareTab 
+                currentStage={currentStage}
+                onNavigateToDailyCare={() => navigate('/hair-dailycare')}
+              />
             </TabsContent>
           </Tabs>
         </div>
@@ -723,7 +592,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </div>
 
             <div className="p-4 space-y-4">
-              <div className="bg-blue-50 p-3 rounded-lg">
+              <div className="bg-blue-50 p-3 rounded-xl">
                 <p className="text-xs text-blue-800 mb-2">
                   🤖 AI 분석은 다음 요소들을 종합적으로 고려합니다:
                 </p>
@@ -819,7 +688,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
                 </div>
               </div>
 
-              <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="bg-gray-50 p-3 rounded-xl">
                 <p className="text-xs text-gray-600">
                   ⚠️ 이 결과는 AI 분석에 기반한 참고용이며, 정확한 진단을 위해서는 반드시 전문의 상담이 필요합니다.
                 </p>
@@ -827,9 +696,10 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </div>
 
             <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 rounded-b-2xl">
-              <Button
+                <Button
                 onClick={() => setShowStageInfo(false)}
-                className="w-full h-10 bg-[#222222] hover:bg-[#333333] text-white rounded-lg"
+                className="w-full h-10 text-white rounded-xl"
+                style={{ backgroundColor: "#1f0101" }}
               >
                 확인
               </Button>

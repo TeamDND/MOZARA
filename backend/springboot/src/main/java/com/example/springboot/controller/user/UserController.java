@@ -117,6 +117,23 @@ public class UserController {
     }
 
     /**
+     * 비밀번호 확인 (비밀번호 변경 전 현재 비밀번호 확인)
+     */
+    @PostMapping("/verify-password/{username}")
+    public ResponseEntity<?> verifyPassword(@PathVariable String username, @RequestBody String password) {
+        try {
+            boolean isValid = userService.verifyPassword(username, password);
+            return ResponseEntity.ok("{\"valid\": " + isValid + "}");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body("{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"비밀번호 확인 중 오류가 발생했습니다.\"}");
+        }
+    }
+
+    /**
      * 비밀번호 변경
      */
     @PutMapping("/password/reset/{username}")

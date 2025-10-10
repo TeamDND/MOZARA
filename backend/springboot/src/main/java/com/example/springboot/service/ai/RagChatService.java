@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -61,6 +62,40 @@ public class RagChatService {
         } catch (Exception e) {
             log.error("Python RAG 백엔드 통신 오류: {}", e.getMessage());
             throw new Exception("AI 채팅 서비스 연결 오류: " + e.getMessage());
+        }
+    }
+
+    /**
+     * AI 응답을 기반으로 연관 질문들을 생성
+     */
+    public List<String> generateRelatedQuestions(String responseText) throws Exception {
+        log.info("연관 질문 생성 요청 - 응답 길이: {}", 
+                responseText != null ? responseText.length() : 0);
+
+        String url = pythonBaseUrl + "/generate-related-questions";
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("response", responseText);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+        
+        try {
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
+            
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                Map<String, Object> responseBody = response.getBody();
+                List<String> questions = (List<String>) responseBody.get("questions");
+                log.info("연관 질문 생성 성공 - 질문 개수: {}", questions != null ? questions.size() : 0);
+                return questions;
+            } else {
+                throw new Exception("연관 질문 생성 서비스 응답 오류: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            log.error("연관 질문 생성 서비스 통신 오류: {}", e.getMessage());
+            throw new Exception("연관 질문 생성 서비스 연결 오류: " + e.getMessage());
         }
     }
 }

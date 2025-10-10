@@ -148,7 +148,3 @@ async def generate_wig_style_service(image_data: bytes, wig_style: str, custom_p
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'오류가 발생했습니다: {str(e)}')
-
-def get_wig_styles_service():
-    """사용 가능한 가발 스타일 목록 반환"""
-    return WIG_STYLES

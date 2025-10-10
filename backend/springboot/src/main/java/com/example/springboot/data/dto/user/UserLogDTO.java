@@ -15,5 +15,6 @@ public class UserLogDTO {
     private String mapLike;
     private String youtubeLike;
     private String hospitalLike;
+    private String productLike;
     private String username;
 }

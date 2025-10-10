@@ -193,9 +193,10 @@ const SignUp: React.FC = () => {
           setResendCooldown(response.remainingTime);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('인증코드 발송 오류:', error);
-      alert('인증코드 발송 중 오류가 발생했습니다.');
+      const errorMessage = error.response?.data?.message || error.message || '인증코드 발송 중 오류가 발생했습니다.';
+      alert(`인증코드 발송 실패: ${errorMessage}`);
     } finally {
       setEmailAuthLoading(false);
     }
@@ -305,15 +306,8 @@ const SignUp: React.FC = () => {
       {/* Mobile-First 컨테이너 */}
       <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col items-center">
         {/* 모바일 헤더 */}
-        <div className="flex items-center justify-between w-full p-4 border-b border-gray-100">
-          <button 
-            onClick={() => navigate('/login')}
-            className="p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg active:scale-95"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
+        <div className="flex items-center justify-center w-full p-4 border-b border-gray-100">
           <h1 className="text-lg font-semibold">회원가입</h1>
-          <div className="w-10"></div>
         </div>
 
         {/* 메인 컨텐츠 */}
@@ -346,7 +340,9 @@ const SignUp: React.FC = () => {
                   className={`min-w-[90px] h-12 rounded-xl ${
                     usernameChecked 
                       ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-50' 
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                      : !formData.username || usernameChecked
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-[#1f0101] text-white hover:bg-[#2a0202]'
                   } active:scale-[0.98] transition-all`}
                 >
                   {usernameChecked ? '✓ 확인됨' : '중복확인'}
@@ -464,7 +460,9 @@ const SignUp: React.FC = () => {
                   className={`min-w-[90px] h-12 rounded-xl ${
                     emailVerified 
                       ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-50' 
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                      : !formData.email || emailAuthLoading || resendCooldown > 0
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-[#1f0101] text-white hover:bg-[#2a0202]'
                   } active:scale-[0.98] transition-all`}
                 >
                   {emailVerified ? (
@@ -513,7 +511,11 @@ const SignUp: React.FC = () => {
                     type="button"
                     onClick={verifyAuthCode}
                     disabled={!authCode || emailAuthLoading || countdown === 0}
-                    className="min-w-[90px] h-12 rounded-xl bg-green-600 text-white hover:bg-green-700 active:scale-[0.98] transition-all"
+                    className={`min-w-[90px] h-12 rounded-xl ${
+                      !authCode || emailAuthLoading || countdown === 0
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-green-600 text-white hover:bg-green-700'
+                    } active:scale-[0.98] transition-all`}
                   >
                     {emailAuthLoading ? '확인중...' : '인증확인'}
                   </Button>
@@ -555,7 +557,9 @@ const SignUp: React.FC = () => {
                   className={`min-w-[90px] h-12 rounded-xl ${
                     nicknameChecked 
                       ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-50' 
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                      : !formData.nickname || nicknameChecked
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-[#1f0101] text-white hover:bg-[#2a0202]'
                   } active:scale-[0.98] transition-all`}
                 >
                   {nicknameChecked ? '✓ 확인됨' : '중복확인'}
@@ -571,7 +575,11 @@ const SignUp: React.FC = () => {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`w-full h-12 text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all ${
+                isLoading 
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+                  : 'bg-[#1f0101] hover:bg-[#2a0202]'
+              }`}
             >
               {isLoading ? '회원가입 중...' : '회원가입하고 진단 시작'}
             </Button>

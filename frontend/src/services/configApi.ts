@@ -57,7 +57,7 @@ export const configApi = {
       // 환경 변수에서 직접 읽어오기 (React 환경 변수는 REACT_APP_ 접두사 필요)
       const youtubeApiKey = process.env.REACT_APP_YOUTUBE_API_KEY || null;
       const elevenStApiKey = process.env.REACT_APP_ELEVEN_ST_API_KEY || null;
-      const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+      const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api';
       
       return {
         apiBaseUrl,

@@ -5,7 +5,7 @@ const SPRING_BOOT_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://local
 
 // Gemini 분석 결과 인터페이스
 export interface GeminiAnalysisResult {
-  stage: number;
+  grade: number;
   title: string;
   description: string;
   advice: string[];

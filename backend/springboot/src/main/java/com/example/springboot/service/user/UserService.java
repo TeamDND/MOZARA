@@ -97,6 +97,7 @@ public class UserService {
                 .username(userEntity.getUsername())
                 .email(userEntity.getEmail())
                 .nickname(userEntity.getNickname())
+                .role(userEntity.getRole())
                 .gender(usersInfoEntity != null ? usersInfoEntity.getGender() : null)
                 .age(usersInfoEntity != null ? usersInfoEntity.getAge() : null)
                 .familyHistory(usersInfoEntity != null ? usersInfoEntity.getFamilyHistory() : null)
@@ -191,6 +192,17 @@ public class UserService {
                 .stress(updatedUserInfo.getStress())
                 .seedlingStatus(seedlingStatusDTO)
                 .build();
+    }
+
+    /**
+     * 비밀번호 확인 (비밀번호 변경 전 현재 비밀번호 확인)
+     */
+    public boolean verifyPassword(String username, String password) {
+        UserEntity userEntity = userDAO.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 입력한 비밀번호와 저장된 암호화된 비밀번호 비교
+        return passwordEncoder.matches(password, userEntity.getPassword());
     }
 
     /**
