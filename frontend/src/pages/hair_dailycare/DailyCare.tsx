@@ -177,6 +177,7 @@ const DailyCare: React.FC = () => {
   const [comparisonData, setComparisonData] = useState<any>(null);
   const [isComparingImages, setIsComparingImages] = useState(false);
   const [comparisonError, setComparisonError] = useState<string | null>(null);
+  const [comparisonPeriod, setComparisonPeriod] = useState<'latest' | '3months' | '6months'>('latest');
 
   // 재분석 상태
   const [isReanalyzing, setIsReanalyzing] = useState(false);
@@ -241,7 +242,76 @@ const DailyCare: React.FC = () => {
     }
   }, [dispatch, userId]);
 
-  // 최근 2개 Daily 이미지 불러오기
+  // 기간별 Daily 이미지 불러오기
+  const loadDailyImagesByPeriod = useCallback(async (period: 'latest' | '3months' | '6months') => {
+    if (!userId) return;
+
+    try {
+      console.log('🔄 Daily 이미지 불러오는 중... period:', period);
+
+      // 모든 Daily 데이터 가져오기
+      const allDailyResponse = await apiClient.get(`/analysis-results/${userId}/type/daily`);
+
+      if (allDailyResponse.data && allDailyResponse.data.length > 0) {
+        // 날짜 내림차순 정렬 (최신순)
+        const sortedData = allDailyResponse.data.sort((a: any, b: any) =>
+          new Date(b.inspectionDate).getTime() - new Date(a.inspectionDate).getTime()
+        );
+
+        const currentData = sortedData[0];
+        const currentDate = new Date(currentData.inspectionDate);
+
+        let previousData = null;
+
+        if (period === 'latest') {
+          // 최신 2건
+          previousData = sortedData[1] || null;
+        } else if (period === '3months') {
+          // 3개월 이내에서 가장 오래된 데이터
+          const threeMonthsAgo = new Date(currentDate);
+          threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+          const filtered = sortedData
+            .filter((item: any) => {
+              const itemDate = new Date(item.inspectionDate);
+              return itemDate >= threeMonthsAgo && item.id !== currentData.id;
+            });
+
+          // 필터링된 배열의 마지막 요소 (최신순 정렬이므로 마지막이 가장 오래된 것)
+          previousData = filtered.length > 0 ? filtered[filtered.length - 1] : null;
+        } else if (period === '6months') {
+          // 6개월 이내에서 가장 오래된 데이터
+          const sixMonthsAgo = new Date(currentDate);
+          sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+          const filtered = sortedData
+            .filter((item: any) => {
+              const itemDate = new Date(item.inspectionDate);
+              return itemDate >= sixMonthsAgo && item.id !== currentData.id;
+            });
+
+          // 필터링된 배열의 마지막 요소 (최신순 정렬이므로 마지막이 가장 오래된 것)
+          previousData = filtered.length > 0 ? filtered[filtered.length - 1] : null;
+        }
+
+        setLatestDailyImages({
+          current: currentData?.imageUrl || null,
+          previous: previousData?.imageUrl || null
+        });
+
+        console.log('✅ Daily 이미지 로드 완료');
+        console.log('📸 현재:', currentData?.inspectionDate, currentData?.imageUrl);
+        console.log('📸 이전:', previousData?.inspectionDate || 'none', previousData?.imageUrl || 'none');
+      } else {
+        setLatestDailyImages({ current: null, previous: null });
+      }
+    } catch (err) {
+      console.error('❌ Daily 이미지 로드 실패:', err);
+      setLatestDailyImages({ current: null, previous: null });
+    }
+  }, [userId]);
+
+  // 최근 2개 Daily 이미지 불러오기 (기존 방식 - 빠른 로드)
   const loadLatestDailyImages = useCallback(async () => {
     if (!userId) return;
 
@@ -324,8 +394,8 @@ const DailyCare: React.FC = () => {
     setComparisonData(null);
 
     try {
-      console.log('🔄 Daily 시계열 비교 시작...');
-      const response = await apiClient.get(`/timeseries/daily-comparison/${userId}`);
+      console.log('🔄 Daily 시계열 비교 시작... period:', comparisonPeriod);
+      const response = await apiClient.get(`/timeseries/daily-comparison/${userId}?period=${comparisonPeriod}`);
 
       console.log('📥 비교 결과:', response.data);
 
@@ -818,6 +888,12 @@ const DailyCare: React.FC = () => {
     }
   }, [environmentInfo.humidity, loadHumidityBasedProducts]);
 
+  // 비교 기간 변경 시 이미지 리렌더링 (최신 제외)
+  React.useEffect(() => {
+    if (userId && comparisonPeriod !== 'latest') {
+      loadDailyImagesByPeriod(comparisonPeriod);
+    }
+  }, [comparisonPeriod, userId, loadDailyImagesByPeriod]);
 
   // 케어 스트릭 정보 로드
   const loadStreakInfo = async () => {
@@ -1442,6 +1518,36 @@ const DailyCare: React.FC = () => {
                 <Camera className="h-5 w-5" style={{ color: '#1f0101' }} />
                 두피 관리 변화 추적
               </CardTitle>
+              {/* 비교 기간 선택 버튼 */}
+              <div className="flex gap-1">
+                <Button
+                  variant={comparisonPeriod === 'latest' ? 'default' : 'outline'}
+                  size="sm"
+                  className="text-[10px] h-6 px-2"
+                  onClick={() => {
+                    setComparisonPeriod('latest');
+                    loadLatestDailyImages(); // 기존 API로 최신 2건 로드
+                  }}
+                >
+                  최신
+                </Button>
+                <Button
+                  variant={comparisonPeriod === '3months' ? 'default' : 'outline'}
+                  size="sm"
+                  className="text-[10px] h-6 px-2"
+                  onClick={() => setComparisonPeriod('3months')}
+                >
+                  3개월
+                </Button>
+                <Button
+                  variant={comparisonPeriod === '6months' ? 'default' : 'outline'}
+                  size="sm"
+                  className="text-[10px] h-6 px-2"
+                  onClick={() => setComparisonPeriod('6months')}
+                >
+                  6개월
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -1476,7 +1582,7 @@ const DailyCare: React.FC = () => {
                 <p className="text-xs" style={{ color: '#1f0101' }}>최신 레포트</p>
               </div>
             </div>
-            
+
             <Button
               variant="outline"
               className="w-full"
