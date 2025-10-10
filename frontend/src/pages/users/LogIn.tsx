@@ -94,7 +94,7 @@ const LogIn: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile-First 컨테이너 */}
-      <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col items-center">
+      <div className="max-w-md mx-auto min-h-screen bg-white flex flex-col items-center">
         {/* 모바일 헤더 */}
         <h1 className="text-xl font-semibold text-center py-6">
           로그인

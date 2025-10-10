@@ -430,7 +430,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
       </AlertDialog>
 
       {/* Mobile-First 컨테이너 */}
-      <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col">
+      <div className="max-w-md mx-auto min-h-screen bg-white flex flex-col">
         
         {/* 헤더 (Mobile-First) */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4">
