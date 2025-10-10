@@ -31,4 +31,7 @@ public class DailyHabitEntity {
 
     @Column(name = "category", length = 100)
     private String category;
+
+    @Column(name = "is_today_mission")
+    private Boolean isTodayMission = false;
 }

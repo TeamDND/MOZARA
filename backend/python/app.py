@@ -989,6 +989,14 @@ try:
 except ImportError as e:
     print(f"Time-Series Analysis API 라우터 마운트 실패: {e}")
 
+# Weather API 라우터
+try:
+    from services.hair_daily_care_weather import router as weather_router
+    app.include_router(weather_router)
+    print("Weather API 라우터 마운트 완료")
+except ImportError as e:
+    print(f"Weather API 라우터 마운트 실패: {e}")
+
 # Gemini Hair Check 모듈
 try:
     from services.hair_gemini_check import analyze_hair_with_gemini

@@ -1,5 +1,6 @@
 // Python Backend를 통한 위치 기반 검색 API 클라이언트
 import { Location, Hospital, SearchParams } from './locationService';
+import pythonClient from './pythonClient';
 
 /**
  * Python Backend LocationProvider
@@ -10,15 +11,8 @@ import { Location, Hospital, SearchParams } from './locationService';
  * - SpringBoot 의존성 제거
  */
 class LocationProvider {
-  private pythonBaseUrl: string;
-
   constructor() {
-    // Python FastAPI 서버 URL (포트 8000)
-    const envBase = (process.env.REACT_APP_PYTHON_API_URL || '').trim();
-    this.pythonBaseUrl = envBase || 'http://localhost:8000';
-
-    console.log('LocationProvider 초기화:');
-    console.log('Python API Base URL:', this.pythonBaseUrl);
+    console.log('LocationProvider 초기화 (pythonClient 사용)');
   }
 
   /**
@@ -28,30 +22,12 @@ class LocationProvider {
    */
   async searchWithNaver(query: string): Promise<any> {
     try {
-      const url = `${this.pythonBaseUrl}/api/naver/local/search?query=${encodeURIComponent(query)}`;
-      console.log('네이버 API 호출:', url);
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        signal: controller.signal,
+      console.log('네이버 API 호출:', query);
+      const response = await pythonClient.get(`/api/naver/local/search`, {
+        params: { query }
       });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        console.error('네이버 API 응답 오류:', response.status, response.statusText);
-        throw new Error(`네이버 API 호출 실패: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('네이버 API 결과:', data);
-      return data;
+      console.log('네이버 API 결과:', response.data);
+      return response.data;
     } catch (error: any) {
       console.error('네이버 검색 중 오류:', error);
       throw new Error(error.message || '네이버 검색 서비스에 문제가 발생했습니다.');
@@ -73,35 +49,17 @@ class LocationProvider {
     radius: number = 5000
   ): Promise<any> {
     try {
-      let url = `${this.pythonBaseUrl}/api/kakao/local/search?query=${encodeURIComponent(query)}`;
-
+      const params: any = { query };
       if (x !== undefined && y !== undefined) {
-        url += `&x=${x}&y=${y}&radius=${radius}`;
+        params.x = x;
+        params.y = y;
+        params.radius = radius;
       }
 
-      console.log('카카오 API 호출:', url);
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        console.error('카카오 API 응답 오류:', response.status, response.statusText);
-        throw new Error(`카카오 API 호출 실패: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('카카오 API 결과:', data);
-      return data;
+      console.log('카카오 API 호출:', params);
+      const response = await pythonClient.get(`/api/kakao/local/search`, { params });
+      console.log('카카오 API 결과:', response.data);
+      return response.data;
     } catch (error: any) {
       console.error('카카오 검색 중 오류:', error);
       throw new Error(error.message || '카카오 검색 서비스에 문제가 발생했습니다.');
@@ -120,24 +78,9 @@ class LocationProvider {
     timestamp?: string;
   }> {
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-      const response = await fetch(`${this.pythonBaseUrl}/api/location/status`, {
-        method: 'GET',
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        console.error('위치 서비스 상태 확인 실패:', response.status);
-        throw new Error(`상태 확인 실패: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('Python 위치 서비스 상태:', data);
-      return data;
+      const response = await pythonClient.get(`/api/location/status`);
+      console.log('Python 위치 서비스 상태:', response.data);
+      return response.data;
     } catch (error: any) {
       console.error('Python 위치 서비스 상태 확인 실패:', error);
       return {
