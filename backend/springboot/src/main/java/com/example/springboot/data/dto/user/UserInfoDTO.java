@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,5 +24,6 @@ public class UserInfoDTO {
     private Boolean isLoss;
     private String stress;
     private SeedlingStatusDTO seedlingStatus;
+    private Instant createdAt;
 
 }

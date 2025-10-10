@@ -110,6 +110,7 @@ public class UserService {
                 .isLoss(usersInfoEntity != null ? usersInfoEntity.getIsLoss() : null)
                 .stress(usersInfoEntity != null ? usersInfoEntity.getStress() : null)
                 .seedlingStatus(seedlingStatusDTO)
+                .createdAt(userEntity.getCreatedat())
                 .build();
     }
 
