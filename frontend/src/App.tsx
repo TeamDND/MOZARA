@@ -16,6 +16,7 @@ import HairQuiz from './pages/hair_ox/HairQuiz';
 import MainPage from './pages/MainPage';
 import DailyCare from './pages/hair_dailycare/DailyCare';
 import StoreFinder from './pages/hair_map/StoreFinder';
+import D_care from './pages/hair_solutions/D_care';
 
 
 // new_fn_flow.md에 따른 새로운 컴포넌트들
@@ -75,6 +76,7 @@ const App: React.FC = () => {
           <Route path="main-page" element={<MainPage />} />
           <Route path="daily-care" element={<DailyCare />} />
           <Route path="hair-dailycare" element={<DailyCare />} />
+          <Route path="d-care" element={<D_care />} />
           <Route path="mypage" element={<MyPage />} />
           <Route path="my-report" element={<MyReportPage />} />
           <Route path="store-finder" element={<StoreFinder />} />

@@ -23,8 +23,16 @@ import hashlib
 # .env 파일 로드 (Docker 환경에서는 환경변수 직접 사용)
 try:
     load_dotenv("../../.env")
-    # load_dotenv(".env")
-except:
+    print(f"✅ .env 파일 로드 시도: ../../.env")
+
+    # 11번가 API 키 확인
+    eleven_st_key = os.getenv("ELEVEN_ST_API_KEY")
+    if eleven_st_key:
+        print(f"✅ ELEVEN_ST_API_KEY 로드됨: {eleven_st_key[:4]}****")
+    else:
+        print("⚠️  ELEVEN_ST_API_KEY 로드 실패 - .env 파일을 확인하세요")
+except Exception as e:
+    print(f"⚠️  .env 로드 중 오류: {e}")
     pass  # Docker 환경에서는 환경변수를 직접 사용
 
 # 이미지 캐시 저장소 (메모리 기반)
