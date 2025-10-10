@@ -487,9 +487,18 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
               )}
               
               {currentStep === 1 && (
-                <Button 
+                <Button
                   onClick={() => setCurrentStep(2)}
-                  disabled={!baspAnswers.gender || !baspAnswers.age || !baspAnswers.familyHistory || !baspAnswers.recentHairLoss || !baspAnswers.stress}
+                  disabled={
+                    !baspAnswers.gender ||
+                    !baspAnswers.age ||
+                    !baspAnswers.familyHistory ||
+                    !baspAnswers.recentHairLoss ||
+                    !baspAnswers.stress ||
+                    parseInt(baspAnswers.age) < 0 ||
+                    parseInt(baspAnswers.age) > 100 ||
+                    isNaN(parseInt(baspAnswers.age))
+                  }
                   className="flex-1 h-12 rounded-xl text-white active:scale-[0.98] disabled:opacity-50"
                   style={{ backgroundColor: "#1f0101" }}
                 >
