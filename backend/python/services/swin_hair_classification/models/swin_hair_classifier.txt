@@ -1,0 +1,402 @@
+================================================================================
+                    Swin Transformer 기반 탈모 분류 모델 설명서
+================================================================================
+
+📌 개요
+--------------------------------------------------------------------------------
+이 모델은 Swin Transformer 아키텍처를 기반으로 탈모 단계를 4단계로 분류하는
+딥러닝 모델입니다.
+
+- 모델명: SwinHairClassifier
+- 입력: 6채널 이미지 (RGB 3채널 + 헤어 마스크 3채널)
+- 출력: 4개 클래스 (탈모 레벨 0~3)
+- 이미지 크기: 224x224
+- 논문: "Swin Transformer: Hierarchical Vision Transformer using Shifted Windows"
+
+
+🎯 탈모 단계 분류
+--------------------------------------------------------------------------------
+Level 0: 정상 (노드우드 1단계)
+  - 탈모 징후 없음
+  - 건강한 모발 상태
+
+Level 1: 경미 (노드우드 2-3단계)
+  - 초기 탈모 징후
+  - M자 이마 또는 정수리 초기 변화
+
+Level 2: 중등도 (노드우드 4-5단계)
+  - 명확한 탈모 진행
+  - 두피가 드러나기 시작
+
+Level 3: 심각 (노드우드 6-7단계)
+  - 진행된 탈모 상태
+  - 넓은 범위의 탈모
+
+
+🏗️ 모델 아키텍처
+--------------------------------------------------------------------------------
+
+1. 입력 처리
+   - 원본 이미지: (B, 3, 224, 224) - RGB
+   - 헤어 마스크: (B, 3, 224, 224) - BiSeNet으로 생성
+   - 결합 입력: (B, 6, 224, 224) - 6채널
+
+2. Patch Embedding
+   - 4x4 크기의 패치로 분할
+   - 224x224 → 56x56 패치
+   - 총 3,136개의 패치
+   - 각 패치를 96차원 벡터로 임베딩
+
+3. 4개의 Stage (계층적 구조)
+
+   Stage 1:
+   - 해상도: 56x56
+   - 채널 수: 96
+   - Transformer 블록: 2개
+   - Attention Head: 3개
+
+   Stage 2:
+   - 해상도: 28x28 (Patch Merging으로 다운샘플링)
+   - 채널 수: 192
+   - Transformer 블록: 2개
+   - Attention Head: 6개
+
+   Stage 3:
+   - 해상도: 14x14
+   - 채널 수: 384
+   - Transformer 블록: 6개 (메인 특징 추출)
+   - Attention Head: 12개
+
+   Stage 4:
+   - 해상도: 7x7
+   - 채널 수: 768
+   - Transformer 블록: 2개
+   - Attention Head: 24개
+
+4. Classification Head
+   - Global Average Pooling: (B, 768)
+   - FC Layer 1: 768 → 256 (ReLU + Dropout 0.3)
+   - FC Layer 2: 256 → 4 (최종 분류)
+
+
+🔑 핵심 기술 - Swin Transformer
+--------------------------------------------------------------------------------
+
+1. Window-based Multi-head Self Attention (W-MSA)
+   - 이미지를 7x7 윈도우로 분할
+   - 각 윈도우 내에서만 Attention 계산
+   - 계산 복잡도: O(N^2) → O(M^2) 감소
+   - 메모리 효율적
+
+2. Shifted Window Multi-head Self Attention (SW-MSA)
+   - 윈도우를 3픽셀씩 이동 (shift)
+   - 인접 윈도우 간 정보 교환 가능
+   - W-MSA와 SW-MSA를 번갈아가며 사용
+
+3. Relative Position Bias
+   - 절대 위치가 아닌 상대 위치로 학습
+   - 각 윈도우 내 토큰 쌍의 상대적 위치 정보
+   - 위치 정보를 효과적으로 인코딩
+
+4. Patch Merging (다운샘플링)
+   - 2x2 패치를 하나로 병합
+   - 해상도 1/2, 채널 수 2배
+   - CNN의 Pooling과 유사한 역할
+   - 계층적 특징 추출 가능
+
+
+📊 모델 상세 사양
+--------------------------------------------------------------------------------
+
+Swin-Tiny (현재 사용 중)
+  - 파라미터 수: 약 28M
+  - Stage별 블록: [2, 2, 6, 2]
+  - 추론 속도: 빠름
+  - 정확도: 중상
+  - 용도: 실시간 분석, 프로덕션 환경
+
+Swin-Small (고성능 버전)
+  - 파라미터 수: 약 50M
+  - Stage별 블록: [2, 2, 18, 2]
+  - 추론 속도: 보통
+  - 정확도: 높음
+  - 용도: 높은 정확도가 필요한 경우
+
+
+💾 학습된 모델 파일
+--------------------------------------------------------------------------------
+
+best_swin_hair_classifier_top.pth
+  - Top/정수리 뷰 전용 모델
+  - 정수리 탈모 패턴 특화
+  - Hamilton-Norwood Scale의 핵심 지표
+
+best_swin_hair_classifier_side.pth
+  - Side/측면 뷰 전용 모델
+  - M자 탈모, 전두부 후퇴 특화
+  - 측면 진행 패턴 분석
+
+
+🔄 데이터 전처리 파이프라인
+--------------------------------------------------------------------------------
+
+1. 이미지 로드
+   - PIL Image로 읽기
+   - RGB 형식 확인
+
+2. 헤어 마스크 생성 (BiSeNet)
+   - 512x512로 리사이즈
+   - Face Parsing 수행
+   - 클래스 17번 추출 (헤어 영역)
+   - 이진 마스크 생성 (0 또는 255)
+
+3. 이미지 전처리
+   - 224x224로 리사이즈
+   - 정규화: mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+   - Tensor 변환
+
+4. 마스크 전처리
+   - 224x224로 리사이즈
+   - 0~1 범위로 정규화
+   - 3채널로 복제 (그레이스케일 → RGB 형태)
+
+5. 6채널 결합
+   - RGB 이미지 (3채널) + 헤어 마스크 (3채널)
+   - 최종 shape: (1, 6, 224, 224)
+
+
+⚙️ 추론 과정
+--------------------------------------------------------------------------------
+
+1. 모델 로드
+   device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+   model = SwinHairClassifier(num_classes=4)
+   model.load_state_dict(torch.load('best_swin_hair_classifier_top.pth'))
+   model.to(device)
+   model.eval()
+
+2. 이미지 전처리
+   - 위 "데이터 전처리 파이프라인" 참고
+
+3. 순전파 (Forward Pass)
+   with torch.no_grad():
+       outputs = model(input_tensor)
+       probabilities = torch.softmax(outputs, dim=1)
+       predicted_class = torch.argmax(outputs, dim=1).item()
+       confidence = probabilities[0][predicted_class].item()
+
+4. 결과 해석
+   - predicted_class: 0~3 (탈모 레벨)
+   - confidence: 신뢰도 (0~1)
+   - probabilities: 각 클래스별 확률
+
+
+🎨 특징 시각화
+--------------------------------------------------------------------------------
+
+Attention Map 시각화
+  - 각 Stage의 Attention Weight 추출
+  - 모델이 주목하는 영역 확인
+  - 정수리, M자 부분에 집중하는지 검증
+
+특징 맵 (Feature Map)
+  - Stage별 활성화 맵 추출
+  - 저수준 특징 → 고수준 특징 변화 관찰
+  - 탈모 패턴 학습 확인
+
+
+📈 성능 지표
+--------------------------------------------------------------------------------
+
+평가 메트릭
+  - Accuracy (정확도)
+  - Precision (정밀도)
+  - Recall (재현율)
+  - F1-Score
+  - Confusion Matrix (혼동 행렬)
+
+교차 검증
+  - K-Fold Cross Validation
+  - Stratified Split (클래스 불균형 고려)
+
+
+🔧 하이퍼파라미터
+--------------------------------------------------------------------------------
+
+학습 관련
+  - Batch Size: 16-32
+  - Learning Rate: 1e-4 ~ 5e-5 (AdamW)
+  - Epochs: 50-100
+  - Weight Decay: 0.05
+  - Drop Path Rate: 0.1 (Stochastic Depth)
+  - Dropout: 0.3 (Classification Head)
+
+Augmentation
+  - RandomHorizontalFlip
+  - RandomRotation (±15도)
+  - ColorJitter (밝기, 대비, 채도)
+  - RandomResizedCrop
+
+
+🚀 최적화 기법
+--------------------------------------------------------------------------------
+
+1. Mixed Precision Training (AMP)
+   - FP16 연산으로 속도 향상
+   - 메모리 사용량 감소
+
+2. Gradient Accumulation
+   - 작은 배치 크기로도 안정적 학습
+   - 효과적인 배치 크기 증가
+
+3. Learning Rate Scheduler
+   - CosineAnnealingLR
+   - Warmup (초기 5 에폭)
+
+4. Early Stopping
+   - Validation Loss 기준
+   - Patience: 10 에폭
+
+
+🎯 실전 활용 (hair_swin_check.py)
+--------------------------------------------------------------------------------
+
+1. Top + Side 이중 모델 분석
+   - Top 모델: 정수리 탈모 분석
+   - Side 모델: M자 탈모 분석
+   - 가중치 융합: 동적 가중치 시스템
+
+2. 동적 가중치 계산 (의학 논문 기반)
+   - 나이별 가중치 조정
+     * 20대: Top 55%, Side 35%, 설문 10%
+     * 30대: Top 50%, Side 30%, 설문 20%
+     * 40대: Top 45%, Side 25%, 설문 30%
+     * 50대+: Top 40%, Side 20%, 설문 40%
+
+   - 가족력 보정
+     * 가족력 있으면 설문 가중치 +10%
+
+   - 신뢰도 기반 조정
+     * AI 확신 (>85%): 이미지 가중치 증가
+     * AI 불확실 (<60%): 설문 가중치 증가
+
+3. 설문 점수 계산
+   - 가족력 (최대 1.5점)
+     * 부모 모두: 1.5점
+     * 부계: 1.2점
+     * 모계: 0.5점
+
+   - 나이 (최대 0.9점)
+     * 50대: 0.9점
+     * 40대: 0.7점
+     * 30대: 0.4점
+     * 20대: 0.2점
+
+   - 최근 탈모 (최대 0.6점)
+   - 스트레스 (최대 0.3점)
+
+4. LLM 결과 포장 (Gemini API)
+   - 분석 결과를 자연스러운 문장으로 변환
+   - 성별, 나이, 가족력 등 개인 맞춤형 설명
+   - 실천 가능한 조언 생성
+
+
+🔍 모델 선택 가이드
+--------------------------------------------------------------------------------
+
+Top 모델 사용 시기
+  - 정수리 사진 (위에서 촬영)
+  - 가르마 라인 탈모
+  - 여성 탈모 (주로 정수리)
+
+Side 모델 사용 시기
+  - 측면 사진 (옆에서 촬영)
+  - M자 탈모
+  - 전두부 후퇴
+
+두 모델 모두 사용 (권장)
+  - 남성 탈모 (종합 분석)
+  - 정확도 향상
+  - 360도 평가
+
+
+💡 개발 팁
+--------------------------------------------------------------------------------
+
+1. 새 모델 학습 시
+   - 사전 학습 가중치 활용 (Transfer Learning)
+   - ImageNet Pre-trained Swin 사용
+   - Classification Head만 재학습 (Freeze Backbone)
+
+2. 데이터 부족 시
+   - Data Augmentation 강화
+   - Mixup, CutMix 적용
+   - Synthetic Data 생성
+
+3. 과적합 방지
+   - Dropout 비율 증가
+   - Weight Decay 조정
+   - Early Stopping 활용
+
+4. 추론 속도 개선
+   - TorchScript 변환
+   - ONNX 변환
+   - Quantization (INT8)
+
+
+📚 참고 자료
+--------------------------------------------------------------------------------
+
+논문
+  - Swin Transformer: Hierarchical Vision Transformer using Shifted Windows
+  - An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale
+
+의학 논문 (가중치 근거)
+  - NCBI (2024): 유전적 기여도 80% (heritability=0.817)
+  - PLOS One (2024): 가족력 68%, 부계 유전 62.8%, 모계 유전 8.6%
+  - NCBI Bookshelf: 연령별 유병률
+  - StatPearls: 스트레스와 탈모 (telogen effluvium)
+
+Hamilton-Norwood Scale
+  - 남성형 탈모 표준 분류 체계
+  - 1~7단계 (본 모델은 0~3으로 단순화)
+
+
+🛠️ 문제 해결 (Troubleshooting)
+--------------------------------------------------------------------------------
+
+Q1: CUDA Out of Memory 오류
+A1: Batch Size 줄이기, Mixed Precision 사용, Gradient Checkpointing
+
+Q2: 특정 클래스 편향
+A2: Class Weighting, Focal Loss, Over/Under Sampling
+
+Q3: 낮은 정확도
+A3: 학습 데이터 증강, 하이퍼파라미터 튜닝, Ensemble
+
+Q4: 느린 추론 속도
+A4: 모델 경량화 (Pruning), Quantization, TorchScript
+
+
+📝 버전 관리
+--------------------------------------------------------------------------------
+
+v1.0 - 초기 버전
+  - Swin-Tiny 아키텍처
+  - 4단계 분류
+
+v1.1 - 성능 개선
+  - 6채널 입력 (RGB + Mask)
+  - BiSeNet 마스크 추가
+
+v2.0 - 의학 논문 기반 시스템
+  - 동적 가중치 시스템
+  - 설문 데이터 통합
+  - LLM 결과 포장
+
+
+================================================================================
+작성일: 2025
+작성자: MOZARA 팀
+모델 파일: best_swin_hair_classifier_top.pth, best_swin_hair_classifier_side.pth
+================================================================================
