@@ -1171,9 +1171,31 @@ async def search_naver_local(query: str):
         response.raise_for_status()
 
         data = response.json()
-        
+
+        # 동물병원, 애견, 수의과 등 관련 없는 결과 필터링
+        def is_valid_hair_loss_place(item):
+            """탈모 관련 병원/미용실인지 확인"""
+            title = item.get('title', '').lower().replace('<b>', '').replace('</b>', '')
+            category = item.get('category', '').lower()
+
+            # 제외할 키워드 (동물병원, 애견, 반려동물 등)
+            exclude_keywords = [
+                '동물병원', '동물의료', '수의', '애견', '반려동물', '펫', 'pet',
+                '동물클리닉', '수의과', '동물진료', '동물외과', '동물내과',
+                '강아지', '고양이', '멍멍', '야옹', '동물종합병원'
+            ]
+
+            # 제외 키워드가 포함되어 있으면 False
+            for keyword in exclude_keywords:
+                if keyword in title or keyword in category:
+                    return False
+
+            return True
+
         # 각 항목에 이미지 URL 추가 (네이버 API 우선 활용)
         if 'items' in data:
+            # 관련 없는 결과 필터링
+            data['items'] = [item for item in data['items'] if is_valid_hair_loss_place(item)]
             for item in data['items']:
                 # 네이버 지역검색 결과에서 이미지 정보 추출 시도 (동기 버전)
                 try:
@@ -1309,9 +1331,31 @@ async def search_kakao_local(
         response.raise_for_status()
 
         data = response.json()
-        
+
+        # 동물병원, 애견, 수의과 등 관련 없는 결과 필터링
+        def is_valid_hair_loss_place(place):
+            """탈모 관련 병원/미용실인지 확인"""
+            place_name = place.get('place_name', '').lower()
+            category_name = place.get('category_name', '').lower()
+
+            # 제외할 키워드 (동물병원, 애견, 반려동물 등)
+            exclude_keywords = [
+                '동물병원', '동물의료', '수의', '애견', '반려동물', '펫', 'pet',
+                '동물클리닉', '수의과', '동물진료', '동물외과', '동물내과',
+                '강아지', '고양이', '멍멍', '야옹', '동물종합병원'
+            ]
+
+            # 제외 키워드가 포함되어 있으면 False
+            for keyword in exclude_keywords:
+                if keyword in place_name or keyword in category_name:
+                    return False
+
+            return True
+
         # 각 항목에 이미지 URL 추가 (카카오 API 우선 활용)
         if 'documents' in data:
+            # 관련 없는 결과 필터링
+            data['documents'] = [doc for doc in data['documents'] if is_valid_hair_loss_place(doc)]
             for doc in data['documents']:
                 # 카카오 장소 상세 정보에서 이미지 추출 시도
                 try:
