@@ -24,20 +24,27 @@ const portalStyle: React.CSSProperties = {
 const DirectionModal: React.FC<DirectionModalProps> = ({ isOpen, onClose, name, address, latitude, longitude, userLocation }) => {
   // 길찾기 URL 생성
   const naverDirectionUrl = useMemo(() => {
-    if (!userLocation || !latitude || !longitude) {
-      const q = encodeURIComponent(address || name);
-      return `https://map.naver.com/v5/search/${q}`;
+    // 좌표가 있는 경우: 좌표로 장소 표시
+    if (latitude && longitude) {
+      const encodedName = encodeURIComponent(name);
+      // 네이버 지도 v5 URL - 좌표와 장소명을 함께 전달
+      return `https://map.naver.com/v5/search/${encodedName}?c=${longitude},${latitude},15,0,0,0,dh`;
     }
-    return `https://map.naver.com/v5/directions/-/-/-/car?c=${longitude},${latitude},15,0,0,0,dh`;
-  }, [name, address, latitude, longitude, userLocation]);
+    // 좌표가 없는 경우: 주소 또는 장소명으로 검색
+    const q = encodeURIComponent(address || name);
+    return `https://map.naver.com/v5/search/${q}`;
+  }, [name, address, latitude, longitude]);
 
   const kakaoDirectionUrl = useMemo(() => {
-    if (!userLocation || !latitude || !longitude) {
-      const q = latitude && longitude ? `${latitude},${longitude}` : encodeURIComponent(address || name);
-      return `https://map.kakao.com/?q=${q}`;
+    // 좌표가 있는 경우: 좌표로 장소 표시
+    if (latitude && longitude) {
+      // 카카오맵 장소 표시 URL - x(경도), y(위도) 좌표로 정확한 위치 표시
+      return `https://map.kakao.com/link/map/${encodeURIComponent(name)},${latitude},${longitude}`;
     }
-    return `https://map.kakao.com/link/to/${encodeURIComponent(name)},${latitude},${longitude}`;
-  }, [name, address, latitude, longitude, userLocation]);
+    // 좌표가 없는 경우: 주소 또는 장소명으로 검색
+    const q = encodeURIComponent(address || name);
+    return `https://map.kakao.com/?q=${q}`;
+  }, [name, address, latitude, longitude]);
 
   const googleDirectionUrl = useMemo(() => {
     if (!userLocation || !latitude || !longitude) {
