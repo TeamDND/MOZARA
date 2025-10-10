@@ -483,12 +483,7 @@ const HairPT: React.FC = () => {
 
     try {
       
-      const response = await apiClient.post('/habit/complete', null, {
-        params: {
-          userId: userId,
-          habitId: habitId
-        }
-      });
+      const response = await apiClient.post(`/habit/complete/${userId}/${habitId}`);
       
       console.log('미션 완료 로그 저장 성공:', response.data);
       

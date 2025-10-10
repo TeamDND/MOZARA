@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../utils/store';
 import { fetchSeedlingInfo, updateSeedlingNickname, setSeedling } from '../../utils/seedlingSlice';
 import { hairProductApi, HairProduct } from '../../services/hairProductApi';
+import { elevenStApi } from '../../services/elevenStApi';
 import apiClient from '../../services/apiClient';
 import pythonClient from '../../services/pythonClient';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
@@ -114,6 +115,9 @@ const DailyCare: React.FC = () => {
   const [analysis, setAnalysis] = useState<HairAnalysisResponse | null>(null);
   const [products, setProducts] = useState<HairProduct[] | null>(null);
   const [tips, setTips] = useState<string[]>([]);
+
+  // 11번가 추천 제품 상태
+  const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
 
   // 오늘의 분석 결과 (DB에서 로드된 데이터)
   const [todayAnalysisData, setTodayAnalysisData] = useState<{
@@ -691,6 +695,74 @@ const DailyCare: React.FC = () => {
     };
   };
 
+  // 날씨 기반 케어 팁 생성
+  const getWeatherBasedTips = (): string[] => {
+    const { humidity, uvIndex, airQuality } = environmentInfo;
+    const weatherTips: string[] = [];
+
+    // 습도 기반 팁
+    if (humidity <= 40) {
+      weatherTips.push('💧 건조한 날씨입니다. 두피 보습 토너를 사용하여 수분을 공급하세요.');
+      weatherTips.push('🚿 샴푸 후 미온수로 마무리하여 두피 건조를 방지하세요.');
+    } else if (humidity <= 70) {
+      weatherTips.push('🌤️ 적절한 습도입니다. 균형잡힌 두피 관리를 유지하세요.');
+      weatherTips.push('💆‍♀️ 두피 마사지로 혈액순환을 개선하면 좋습니다.');
+    } else {
+      weatherTips.push('💦 습한 날씨입니다. 피지 조절 샴푸로 두피를 깨끗이 관리하세요.');
+      weatherTips.push('🌬️ 두피가 습하지 않도록 드라이어로 완전히 건조시키세요.');
+    }
+
+    // 자외선 기반 팁
+    if (uvIndex >= 8) {
+      weatherTips.push('☀️ 자외선이 매우 강합니다. 외출 시 모자를 착용하여 두피를 보호하세요.');
+    } else if (uvIndex >= 5) {
+      weatherTips.push('🌞 자외선이 높습니다. 장시간 야외활동 시 두피 보호에 신경 쓰세요.');
+    } else if (uvIndex >= 3) {
+      weatherTips.push('🌤️ 적당한 자외선 수준입니다. 기본적인 두피 보호를 유지하세요.');
+    }
+
+    // 미세먼지 기반 팁
+    if (airQuality >= 76) {
+      weatherTips.push('😷 미세먼지가 나쁩니다. 외출 후에는 꼼꼼하게 두피를 클렌징하세요.');
+      weatherTips.push('🚪 실내 활동을 권장하며, 외출 시 모자로 두피를 보호하세요.');
+    } else if (airQuality >= 36) {
+      weatherTips.push('🌫️ 미세먼지가 보통입니다. 외출 후 샴푸로 두피의 먼지를 제거하세요.');
+    }
+
+    // 기본 팁 추가
+    weatherTips.push('🧴 하루 1회 저자극 샴푸로 두피를 깨끗하게 관리하세요.');
+    weatherTips.push('🌙 충분한 수면과 스트레스 관리로 두피 건강을 지켜주세요.');
+
+    return weatherTips.slice(0, 5); // 최대 5개 팁 반환
+  };
+
+  // 습도 기반 11번가 제품 로드
+  const loadHumidityBasedProducts = useCallback(async () => {
+    const humidity = environmentInfo.humidity;
+    let keyword = '';
+
+    if (humidity <= 40) {
+      keyword = '두피 수분 에센스';
+    } else if (humidity <= 70) {
+      keyword = '두피 밸런스 토너';
+    } else {
+      keyword = '피지 컨트롤 샴푸';
+    }
+
+    try {
+      console.log(`습도 ${humidity}%에 따른 제품 검색: ${keyword}`);
+      const response = await elevenStApi.searchProducts(keyword, 1, 1);
+      
+      if (response.products.length > 0) {
+        setRecommendedProducts([response.products[0]]);
+        console.log('제품 1개 로드 완료');
+      }
+    } catch (error) {
+      console.error('11번가 제품 검색 실패:', error);
+      setRecommendedProducts([]);
+    }
+  }, [environmentInfo.humidity]);
+
   // 연속 케어 일수 계산
   React.useEffect(() => {
     // createdAt 기반 연속 케어 일수 계산
@@ -734,6 +806,13 @@ const DailyCare: React.FC = () => {
       loadStreakInfo(); // 케어 스트릭 로드
     }
   }, [userId, loadTodayDailyAnalysis, loadDiagnosisHistory]);
+
+  // 습도 정보가 로드되면 제품 추천
+  React.useEffect(() => {
+    if (environmentInfo.humidity > 0) {
+      loadHumidityBasedProducts();
+    }
+  }, [environmentInfo.humidity, loadHumidityBasedProducts]);
 
 
   // 케어 스트릭 정보 로드
@@ -1411,28 +1490,46 @@ const DailyCare: React.FC = () => {
 
 
         {/* Product Recommendation */}
-        <Card className="mx-4 mt-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2 text-[#1f0101]">
-              <Droplets className="h-5 w-5" style={{ color: '#1f0101' }} />
-              오늘의 추천 제품
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#1f0101' }}>
-                <Droplets className="h-6 w-6 text-white" />
+        {recommendedProducts.length > 0 && (
+          <Card className="mx-4 mt-4">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2 text-[#1f0101]">
+                <Droplets className="h-5 w-5" style={{ color: '#1f0101' }} />
+                오늘의 추천 제품
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="p-3 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#1f0101' }}>
+                    <Droplets className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{recommendedProducts[0].productName}</p>
+                    <p className="text-xs text-gray-600">
+                      {environmentInfo.humidity <= 40 
+                        ? '건조한 두피에 효과적' 
+                        : environmentInfo.humidity <= 70
+                        ? '균형잡힌 두피 관리'
+                        : '과다 피지 조절에 효과적'}
+                    </p>
+                    <Badge variant="secondary" className="mt-1" style={{ backgroundColor: '#1f0101', color: 'white', opacity: 0.1 }}>
+                      {recommendedProducts[0].productPrice.toLocaleString()}원
+                    </Badge>
+                  </div>
+                </div>
+                <Button 
+                  size="sm"
+                  className="w-full h-8 text-xs"
+                  style={{ backgroundColor: '#1f0101' }}
+                  onClick={() => window.open(recommendedProducts[0].productUrl, '_blank')}
+                >
+                  구매하러 가기
+                </Button>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">수분 에센스</p>
-                <p className="text-xs text-gray-600">건조한 두피에 효과적</p>
-                <Badge variant="secondary" className="mt-1" style={{ backgroundColor: '#1f0101', color: 'white', opacity: 0.1 }}>
-                  15% 할인중
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* History Section */}
         <Card className="mx-4 mt-4">
@@ -1560,35 +1657,22 @@ const DailyCare: React.FC = () => {
         </Card>
 
         {/* Daily Tip */}
-        <Card className="mx-4 mt-4 bg-gray-50 border-gray-200">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <Lightbulb className="h-4 w-4" style={{ color: '#1f0101' }} />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-1">
-                  <h4 className="text-sm font-semibold" style={{ color: '#1f0101' }}>오늘의 건강 팁</h4>
+        {environmentInfo.humidity > 0 && (
+          <Card className="mx-4 mt-4 bg-gray-50 border-gray-200">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Lightbulb className="h-4 w-4" style={{ color: '#1f0101' }} />
                 </div>
-                <p className="text-xs text-gray-700">
-                  "샴푸 전 빗질을 하면 노폐물 제거와 혈액순환에 도움이 됩니다. 
-                  두피부터 모발 끝까지 부드럽게 빗어주세요."
-                </p>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-semibold" style={{ color: '#1f0101' }}>오늘의 건강 팁</h4>
+                  </div>
+                  <ol className="list-decimal ml-4 text-xs text-gray-700 space-y-1.5">
+                    {getWeatherBasedTips().map((tip, i) => <li key={i}>{tip}</li>)}
+                  </ol>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 오늘의 케어 팁 */}
-        {tips.length > 0 && (
-          <Card className="mx-4 mt-4">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg text-[#1f0101]">오늘의 케어 팁</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ol className="list-decimal ml-5 text-sm text-gray-700 space-y-2">
-                {tips.map((t, i) => <li key={i}>{t}</li>)}
-              </ol>
             </CardContent>
           </Card>
         )}
