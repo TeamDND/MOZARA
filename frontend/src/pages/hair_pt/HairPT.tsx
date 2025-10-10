@@ -195,7 +195,7 @@ const HairPT: React.FC = () => {
 
       // 카운터 방식 미션들의 진행 상태 로드 (Redux)
       const waterMission = convertedMissions.find(m => m.name === '물 마시기');
-      const effectorMission = convertedMissions.find(m => m.name === '이펙터 사용');
+      const effectorMission = convertedMissions.find(m => m.name === 'HairFit 방문하기');
 
       // 오늘 날짜든 과거 날짜든 모두 DB에서 진행 상태 가져오기
       if (waterMission) {
@@ -229,7 +229,7 @@ const HairPT: React.FC = () => {
           const progressCount = progressResponse.data.progressCount || 0;
           dispatch(setCounter({ key: 'effector', value: progressCount }));
         } catch (error) {
-          console.error('❌ 이펙터 사용 진행 상태 로드 실패:', error);
+          console.error('❌ HairFit 방문하기 진행 상태 로드 실패:', error);
           dispatch(setCounter({ key: 'effector', value: 0 }));
         }
       }
@@ -247,7 +247,7 @@ const HairPT: React.FC = () => {
   const getMissionKey = (habitName: string): keyof MissionState => {
     const keyMap: { [key: string]: keyof MissionState } = {
       '물 마시기': 'water',
-      '이펙터 사용': 'effector',
+      'HairFit 방문하기': 'effector',
       '아침 부스터 사용': 'morningBooster',
       '밤 부스터 사용': 'nightBooster',
       '백회혈/사신총혈 마사지': 'massage',
@@ -553,9 +553,9 @@ const HairPT: React.FC = () => {
   const getMissionsByCategory = (category: 'routine' | 'nutrient' | 'cleanliness') => {
     const filteredMissions = missionData.filter(mission => mission.category === category);
     
-    // 중복된 미션 제거 (물마시기와 이펙터 사용은 각각 하나씩만 표시)
+    // 중복된 미션 제거 (물마시기와 HairFit 방문하기는 각각 하나씩만 표시)
     const uniqueMissions = filteredMissions.filter((mission, index, array) => {
-      if (mission.name === '물 마시기' || mission.name === '이펙터 사용') {
+      if (mission.name === '물 마시기' || mission.name === 'HairFit 방문하기') {
         // 같은 이름의 첫 번째 미션만 유지
         return array.findIndex(m => m.name === mission.name) === index;
       }
@@ -590,7 +590,7 @@ const HairPT: React.FC = () => {
     // 해당 미션 정보 찾기
     const missionInfo = missionData.find(m =>
       (id === 'water' && m.name === '물 마시기') ||
-      (id === 'effector' && m.name === '이펙터 사용')
+      (id === 'effector' && m.name === 'HairFit 방문하기')
     );
 
     if (!missionInfo) {
@@ -641,7 +641,7 @@ const HairPT: React.FC = () => {
   const getMissionIcon = (missionName: string) => {
     const iconMap: { [key: string]: { icon: string; bgColor: string; textColor: string } } = {
       '물 마시기': { icon: 'fas fa-tint', bgColor: 'bg-gray-100', textColor: 'text-gray-500' },
-      '이펙터 사용': { icon: 'fas fa-wand-magic-sparkles', bgColor: 'bg-purple-100', textColor: 'text-purple-500' },
+      'HairFit 방문하기': { icon: 'fas fa-wand-magic-sparkles', bgColor: 'bg-purple-100', textColor: 'text-purple-500' },
       '아침 부스터 사용': { icon: 'fas fa-sun', bgColor: 'bg-yellow-100', textColor: 'text-yellow-500' },
       '밤 부스터 사용': { icon: 'fas fa-moon', bgColor: 'bg-indigo-100', textColor: 'text-indigo-500' },
       '백회혈/사신총혈 마사지': { icon: 'fas fa-hand-holding-medical', bgColor: 'bg-pink-100', textColor: 'text-pink-500' },
@@ -668,9 +668,9 @@ const HairPT: React.FC = () => {
     const isToday = selectedDate.toDateString() === new Date().toDateString();
     const isPastDate = selectedDate < new Date() && !isToday;
     
-    // 물마시기와 이펙터 사용은 카운터 방식으로 처리
+    // 물마시기와 HairFit 방문하기는 카운터 방식으로 처리
     if (mission.key === 'water' || mission.key === 'effector') {
-      const targetCount = mission.key === 'water' ? 7 : 4; // 물마시기 7잔, 이펙터 4회
+      const targetCount = mission.key === 'water' ? 7 : 4; // 물마시기 7잔, HairFit 4회
 
       // 오늘이든 과거든 모두 Redux 카운터 사용 (실제 진행 상태 반영)
       const currentCount = counters[mission.key];
