@@ -239,10 +239,10 @@ const MainPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile-First 컨테이너 */}
-      <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col">
+      <div className="max-w-md mx-auto min-h-screen bg-white flex flex-col">
         
         {/* 메인 컨텐츠 */}
-        <div className="flex-1 p-4 overflow-y-auto space-y-4">
+        <div className="flex-1 p-4 pb-24 overflow-y-auto space-y-4">
           {/* 0. 탈모분석 (최초 기준이고 한번이라도 분석하면 안보임) */}
           {!userProgress.hasCompletedInitialAnalysis && (
             <div className="bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded-xl border-2 border-red-200">
@@ -264,7 +264,7 @@ const MainPage: React.FC = () => {
 
 
           {/* 3. 탈모 맵 (내 위치기반 지도 화면) */}
-          <div className="bg-white p-4 rounded-xl shadow-md">
+          <div className="bg-white p-4 rounded-xl border border-gray-200">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-[#1F0101]" />
@@ -420,7 +420,7 @@ const MainPage: React.FC = () => {
           </div>
 
           {/* 6. 헤어체인지 */}
-          <div className="bg-white p-4 rounded-xl shadow-md">
+          <div className="bg-white p-4 rounded-xl border border-gray-200">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Scissors className="w-5 h-5 text-[#1F0101]" />
