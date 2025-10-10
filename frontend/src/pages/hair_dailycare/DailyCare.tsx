@@ -569,9 +569,25 @@ const DailyCare: React.FC = () => {
     if (!userId) return;
 
     try {
-      // 탈모분석 최근 3건
-      const hairlossResponse = await apiClient.get(`/analysis-results/${userId}/type/hairloss?sort=newest`);
-      const hairlossTop3 = hairlossResponse.data.slice(0, 3).map((result: any) => ({
+      // 탈모분석 최근 3건 (hair_loss_male, hair_loss_female, hairloss 모두 조회)
+      const [maleResponse, femaleResponse, hairlossResponse] = await Promise.all([
+        apiClient.get(`/analysis-results/${userId}/type/hair_loss_male?sort=newest`).catch(() => ({ data: [] })),
+        apiClient.get(`/analysis-results/${userId}/type/hair_loss_female?sort=newest`).catch(() => ({ data: [] })),
+        apiClient.get(`/analysis-results/${userId}/type/hairloss?sort=newest`).catch(() => ({ data: [] }))
+      ]);
+
+      // 세 가지 타입의 결과를 모두 합치고 날짜순으로 정렬
+      const allHairlossResults = [
+        ...maleResponse.data,
+        ...femaleResponse.data,
+        ...hairlossResponse.data
+      ].sort((a: any, b: any) => {
+        const dateA = new Date(a.inspectionDate || 0).getTime();
+        const dateB = new Date(b.inspectionDate || 0).getTime();
+        return dateB - dateA; // 최신순 정렬
+      });
+
+      const hairlossTop3 = allHairlossResults.slice(0, 3).map((result: any) => ({
         id: result.id,
         inspectionDate: result.inspectionDate
           ? new Date(result.inspectionDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -1042,6 +1058,12 @@ const DailyCare: React.FC = () => {
                           // 두피 점수 계산 및 대시보드 업데이트
                           const calculatedScore = updateDashboardFromAnalysis(result);
 
+                          console.log('🔍 Daily 저장 조건 체크:', {
+                            userId,
+                            calculatedScore,
+                            willSave: !!(userId && calculatedScore !== null)
+                          });
+
                           // scalpScore를 포함하여 백엔드로 grade 저장 요청
                           if (userId && calculatedScore !== null) {
                             try {
@@ -1055,8 +1077,15 @@ const DailyCare: React.FC = () => {
                                 image_url: imageUrl || ''
                               };
 
-                              await apiClient.post('/ai/hair-loss-daily/save-result', savePayload);
-                              console.log('두피 점수 저장 완료:', calculatedScore);
+                              console.log('💾 Daily 분석 결과 저장 시작:', {
+                                userId,
+                                grade: calculatedScore,
+                                hasAnalysis: !!result.analysis,
+                                imageUrl: imageUrl || 'none'
+                              });
+
+                              const saveResponse = await apiClient.post('/ai/hair-loss-daily/save-result', savePayload);
+                              console.log('✅ 두피 점수 저장 완료:', saveResponse.data);
 
                               // Daily 이미지 새로고침
                               loadLatestDailyImages();
@@ -1070,8 +1099,14 @@ const DailyCare: React.FC = () => {
                               // 재분석 모드 해제
                               setIsReanalyzing(false);
                             } catch (saveError) {
-                              console.error('두피 점수 저장 실패:', saveError);
+                              console.error('❌ 두피 점수 저장 실패:', saveError);
                             }
+                          } else {
+                            console.warn('⚠️ Daily 분석 결과 저장 건너뜀:', {
+                              reason: !userId ? 'userId 없음' : 'calculatedScore가 null',
+                              userId,
+                              calculatedScore
+                            });
                           }
 
 

@@ -138,11 +138,8 @@ public class SwinCheckService {
             log.info("analysisSummary 내용: {}", analysisSummary);
             log.info("advice 내용: {}", advice);
 
-            // analysis_type 추출
-            String analysisType = (String) swinResult.get("analysis_type");
-            if (analysisType == null || analysisType.isEmpty()) {
-                analysisType = "swin_analysis";
-            }
+            // analysis_type을 "hair_loss_male"로 고정
+            String analysisType = "hair_loss_male";
 
             // AnalysisResultEntity 생성
             AnalysisResultEntity entity = new AnalysisResultEntity();

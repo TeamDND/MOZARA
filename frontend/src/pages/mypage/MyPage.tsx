@@ -180,10 +180,26 @@ export default function MyPage() {
 
       setAnalysisResults(formattedResults)
 
-      // 탈모분석 결과 조회
+      // 탈모분석 결과 조회 (hair_loss_male, hair_loss_female, hairloss 모두 조회)
       try {
-        const hairlossResponse = await apiClient.get(`/analysis-results/${user.userId}/type/hairloss?sort=${sortOrder}`)
-        const hairlossFormatted = hairlossResponse.data.map((result: any, index: number) => ({
+        const [maleResponse, femaleResponse, hairlossResponse] = await Promise.all([
+          apiClient.get(`/analysis-results/${user.userId}/type/hair_loss_male?sort=${sortOrder}`).catch(() => ({ data: [] })),
+          apiClient.get(`/analysis-results/${user.userId}/type/hair_loss_female?sort=${sortOrder}`).catch(() => ({ data: [] })),
+          apiClient.get(`/analysis-results/${user.userId}/type/hairloss?sort=${sortOrder}`).catch(() => ({ data: [] }))
+        ]);
+
+        // 세 가지 타입의 결과를 모두 합치고 날짜순으로 정렬
+        const allHairlossData = [
+          ...maleResponse.data,
+          ...femaleResponse.data,
+          ...hairlossResponse.data
+        ].sort((a: any, b: any) => {
+          const dateA = new Date(a.inspectionDate || 0).getTime();
+          const dateB = new Date(b.inspectionDate || 0).getTime();
+          return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+        });
+
+        const hairlossFormatted = allHairlossData.map((result: any, index: number) => ({
           id: result.id,
           inspectionDate: result.inspectionDate ?
             new Date(result.inspectionDate).toLocaleDateString('ko-KR', {
@@ -299,7 +315,9 @@ export default function MyPage() {
     if (!type) return '종합 진단';
     if (type === 'daily') return '두피 분석';
     // 탈모 단계 검사로 처리되는 모든 타입
-    if (type === 'swin_dual_model_llm_enhanced' ||
+    if (type === 'hair_loss_male' ||
+        type === 'hair_loss_female' ||
+        type === 'swin_dual_model_llm_enhanced' ||
         type === 'rag_v2_analysis' ||
         type === 'swin_analysis' ||
         type === 'gemini_analysis' ||
