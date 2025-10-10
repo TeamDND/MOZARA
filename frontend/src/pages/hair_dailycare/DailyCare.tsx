@@ -1408,27 +1408,7 @@ const DailyCare: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Community Challenge */}
-        <Card className="mx-4 mt-4 border-0" style={{ backgroundColor: '#1f0101', opacity: 0.8 }}>
-          <CardContent className="p-4 text-white">
-            <div className="flex items-center gap-2 mb-2">
-              <Users className="h-5 w-5" />
-              <h3 className="text-base font-semibold">이번 주 챌린지</h3>
-            </div>
-            <p className="text-sm mb-3">매일 두피 마사지 5분</p>
-            
-            <div className="bg-white bg-opacity-20 p-3 rounded-xl">
-              <div className="flex justify-between text-xs mb-2">
-                <span>234명 참여중</span>
-                <span>3/7일 완료</span>
-              </div>
-              <Progress
-                value={43}
-                className="h-2 bg-white bg-opacity-30"
-              />
-            </div>
-          </CardContent>
-        </Card>
+
 
         {/* Product Recommendation */}
         <Card className="mx-4 mt-4">
