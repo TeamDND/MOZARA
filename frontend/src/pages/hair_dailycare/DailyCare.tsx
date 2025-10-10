@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../utils/store';
 import { fetchSeedlingInfo, updateSeedlingNickname, setSeedling } from '../../utils/seedlingSlice';
-import { incrementCounter, decrementCounter } from '../../utils/missionCounterSlice';
 import { hairProductApi, HairProduct } from '../../services/hairProductApi';
 import apiClient from '../../services/apiClient';
 import pythonClient from '../../services/pythonClient';
@@ -71,12 +70,6 @@ const DailyCare: React.FC = () => {
   const { createdAt, username, userId } = useSelector((state: RootState) => state.user);
   const { seedlingId, seedlingName, currentPoint, loading: seedlingLoading, error: seedlingError } = useSelector((state: RootState) => state.seedling);
 
-  // Redux에서 카운터 가져오기 (물 마시기, 이펙터 사용)
-  const missionCounters = useSelector((state: RootState) => state.missionCounter.counters);
-
-  // 오늘의 미션 4개 (API에서 가져올 예정)
-  const [todayMissions, setTodayMissions] = useState<any[]>([]);
-  const [completedMissions, setCompletedMissions] = useState<number[]>([]);
 
   // 케어 스트릭 상태 (통합)
   const [streakInfo, setStreakInfo] = useState({
@@ -89,13 +82,30 @@ const DailyCare: React.FC = () => {
   const [showStreakInfoModal, setShowStreakInfoModal] = useState(false);
 
   // 환경 정보 상태 (날씨 API)
-  const [environmentInfo, setEnvironmentInfo] = useState({
+  const [environmentInfo, setEnvironmentInfo] = useState<{
+    uvIndex: number;
+    uvLevel: string;
+    humidity: number;
+    humidityAdvice: string;
+    airQuality: number;
+    airQualityLevel: string;
+    recommendations: {
+      uv: { type: string; message: string; icon: string } | null;
+      humidity: { type: string; message: string; icon: string } | null;
+      air: { type: string; message: string; icon: string } | null;
+    };
+  }>({
     uvIndex: 0,
     uvLevel: '정보 없음',
     humidity: 0,
     humidityAdvice: '정보 없음',
     airQuality: 0,
-    airQualityLevel: '정보 없음'
+    airQualityLevel: '정보 없음',
+    recommendations: {
+      uv: null,
+      humidity: null,
+      air: null
+    }
   });
 
   // 두피 분석 관련 상태
@@ -625,12 +635,17 @@ const DailyCare: React.FC = () => {
 
             if (result.success && result.data) {
               setEnvironmentInfo({
-                uvIndex: result.data.uvIndex,
-                uvLevel: result.data.uvLevel,
-                humidity: result.data.humidity,
-                humidityAdvice: result.data.humidityAdvice,
-                airQuality: result.data.airQuality,
-                airQualityLevel: result.data.airQualityLevel
+                uvIndex: result.data.uvIndex || 0,
+                uvLevel: result.data.uvLevel || '정보 없음',
+                humidity: result.data.humidity || 0,
+                humidityAdvice: result.data.humidityAdvice || '정보 없음',
+                airQuality: result.data.airQuality || 0,
+                airQualityLevel: result.data.airQualityLevel || '정보 없음',
+                recommendations: result.data.recommendations || {
+                  uv: null,
+                  humidity: null,
+                  air: null
+                }
               });
             } else {
               console.error('날씨 정보 로드 실패:', result.error);
@@ -648,27 +663,15 @@ const DailyCare: React.FC = () => {
     }
   }, []);
 
-  // 날씨 정보 기반 탈모 케어 조언 생성
+  // 날씨 정보 기반 탈모 케어 조언 생성 (백엔드 우선)
   const getHairCareAdvice = () => {
-    const { uvIndex, humidity, airQuality } = environmentInfo;
+    const { recommendations } = environmentInfo;
 
+    // 백엔드 recommendations 사용, 없으면 기본 메시지
     return {
-      uv: uvIndex >= 11 ? '외출 자제 권장' :
-          uvIndex >= 8 ? '모자 필수 착용' :
-          uvIndex >= 6 ? '두피 자외선 차단' :
-          uvIndex >= 3 ? '외출 시 주의' : '안전',
-
-      humidity: humidity === 0 ? '정보 없음' :
-                humidity < 30 ? '두피 보습 필수' :
-                humidity < 40 ? '보습 샴푸 권장' :
-                humidity > 70 ? '청결 관리 필요' :
-                humidity > 60 ? '유분 조절 필요' : '적정 상태',
-
-      air: airQuality === 0 ? '정보 없음' :
-           airQuality >= 5 ? '외출 자제' :
-           airQuality >= 4 ? '두피 세정 필수' :
-           airQuality >= 3 ? '외출 후 세정' :
-           airQuality >= 2 ? '약한 자극 주의' : '양호'
+      uv: (recommendations.uv && recommendations.uv.message) || '날씨 정보를 불러오는 중...',
+      humidity: (recommendations.humidity && recommendations.humidity.message) || '날씨 정보를 불러오는 중...',
+      air: (recommendations.air && recommendations.air.message) || '날씨 정보를 불러오는 중...'
     };
   };
 
@@ -711,98 +714,11 @@ const DailyCare: React.FC = () => {
   React.useEffect(() => {
     if (userId) {
       loadTodayDailyAnalysis();
-      loadTodayMissions(); // 오늘의 미션 로드
       loadDiagnosisHistory(); // 진단 히스토리 로드
+      loadStreakInfo(); // 케어 스트릭 로드
     }
   }, [userId, loadTodayDailyAnalysis, loadDiagnosisHistory]);
 
-  // 오늘의 미션 완료 처리
-  const handleMissionComplete = async (habitId: number) => {
-    if (!userId) return;
-
-    try {
-      // 오늘 첫 미션인지 체크 (보너스 미션 제외)
-      const regularMissionsCompleted = completedMissions.filter(id => id !== 17 && id !== 18);
-      const isFirstMissionToday = regularMissionsCompleted.length === 0;
-
-      // 백엔드에 완료 저장
-      await apiClient.post('/habit/complete', null, {
-        params: { userId, habitId }
-      });
-
-      // 완료 목록 업데이트
-      setCompletedMissions(prev => [...prev, habitId]);
-
-      // 보너스 미션 알림
-      if (habitId === 17) {
-        alert('20포인트를 받았습니다! 🎉');
-      } else if (habitId === 18) {
-        alert('100포인트를 받았습니다! 🎉 10일 연속 출석 달성!');
-        setStreakInfo(prev => ({ ...prev, completed: true }));
-      }
-
-      // 일반 미션만 다시 로드
-      const response = await apiClient.get(`/habit/today-missions/${userId}`);
-      const { todayMissions: missions, completedHabits } = response.data;
-      setTodayMissions(missions);
-      setCompletedMissions(completedHabits.map((h: any) => h.habitId));
-
-      // 🔑 오늘 첫 미션이면 스트릭 갱신 (0→1)
-      if (isFirstMissionToday && habitId !== 17 && habitId !== 18) {
-        loadStreakInfo();
-      }
-    } catch (error) {
-      console.error('미션 완료 실패:', error);
-    }
-  };
-
-  // 카운터 미션 증가 처리
-  const handleCounterIncrement = async (id: 'water' | 'effector', habitId: number) => {
-    if (!userId) return;
-
-    // 오늘 첫 미션인지 체크 (보너스 미션 제외)
-    const regularMissionsCompleted = completedMissions.filter(cid => cid !== 17 && cid !== 18);
-    const isFirstMissionToday = regularMissionsCompleted.length === 0;
-
-    dispatch(incrementCounter(id));
-    const newValue = missionCounters[id] + 1;
-    const targetCount = id === 'water' ? 7 : 4;
-
-    if (newValue === targetCount) {
-      // 목표 달성 시 백엔드에 완료 저장
-      try {
-        await apiClient.post('/habit/complete', null, {
-          params: { userId, habitId }
-        });
-        setCompletedMissions(prev => [...prev, habitId]);
-
-        // 🔑 오늘 첫 미션이면 스트릭 갱신 (0→1)
-        if (isFirstMissionToday) {
-          loadStreakInfo();
-        }
-      } catch (error) {
-        console.error('카운터 미션 완료 실패:', error);
-      }
-    }
-  };
-
-  // 오늘의 미션 로드
-  const loadTodayMissions = async () => {
-    if (!userId) return;
-
-    try {
-      const response = await apiClient.get(`/habit/today-missions/${userId}`);
-      const { todayMissions: missions, completedHabits } = response.data;
-
-      setTodayMissions(missions);
-      setCompletedMissions(completedHabits.map((h: any) => h.habitId));
-
-      // 미션 로드 후 스트릭 정보도 업데이트
-      loadStreakInfo();
-    } catch (error) {
-      console.error('오늘의 미션 로드 실패:', error);
-    }
-  };
 
   // 케어 스트릭 정보 로드
   const loadStreakInfo = async () => {
@@ -823,10 +739,27 @@ const DailyCare: React.FC = () => {
     }
   };
 
-  // 완료율 계산 (보너스 미션 17, 18번 제외)
-  const completedCount = completedMissions.filter(id => id !== 17 && id !== 18).length;
-  const totalCount = todayMissions.length;
-  const completionRate = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+  // 케어 스트릭 10일 달성 포인트 받기
+  const handleStreakReward = async () => {
+    if (!userId) return;
+
+    try {
+      // habitId 18번은 10일 연속 출석 보너스 미션
+      await apiClient.post(`/habit/complete/${userId}/18`);
+
+      alert('100포인트를 받았습니다! 🎉 10일 연속 출석 달성!');
+
+      // 스트릭 정보 갱신
+      setStreakInfo(prev => ({ ...prev, completed: true }));
+
+      // 새싹 포인트 갱신
+      dispatch(fetchSeedlingInfo(userId));
+    } catch (error) {
+      console.error('스트릭 보상 수령 실패:', error);
+      alert('포인트 수령에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-white">
@@ -844,7 +777,11 @@ const DailyCare: React.FC = () => {
             <p className="text-sm opacity-90">{todayStr}</p>
             <h1 className="text-xl font-bold mt-1">좋은 하루예요!</h1>
             <h1 className="text-xl font-bold mt-1">데일리 케어를 시작해볼까요?</h1>
-            <p className="mt-1 text-white/90">{streak}일 연속 케어 중 ✨</p>
+            <p className="mt-1 text-white/90">
+              {streakInfo.days === 0
+                ? "오늘부터 케어를 시작해보세요! 💪"
+                : `${streakInfo.days}일 연속 케어 중 ✨`}
+            </p>
           </div>
         </div>
 
@@ -1252,128 +1189,6 @@ const DailyCare: React.FC = () => {
           </Card>
         </div>
 
-        {/* Daily Care Checklist */}
-        <Card className="mx-4 mt-4">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2 text-[#1f0101]">
-                <CheckCircle className="h-5 w-5" style={{ color: '#1f0101' }} />
-                오늘의 케어 미션
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {todayMissions.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <p>오늘의 미션을 불러오는 중...</p>
-              </div>
-            ) : (
-              todayMissions.map((mission: any) => {
-                const isCompleted = completedMissions.includes(mission.habitId);
-                const isCounterMission = mission.habitName === '물 마시기' || mission.habitName === '이펙터 사용';
-
-                // 카운터 미션인 경우
-                if (isCounterMission) {
-                  const counterKey = mission.habitName === '물 마시기' ? 'water' : 'effector';
-                  const currentCount = missionCounters[counterKey];
-                  const targetCount = counterKey === 'water' ? 7 : 4;
-                  const progress = (currentCount / targetCount) * 100;
-
-                  return (
-                    <div key={mission.habitId} className="bg-gray-50 rounded-xl p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex-1">
-                          <div className="text-sm font-medium">{mission.habitName}</div>
-                          <div className="text-xs text-gray-600">{mission.description}</div>
-                        </div>
-                        <Badge variant="secondary" style={{ backgroundColor: '#1f0101', color: 'white', opacity: 0.8 }}>
-                          +{mission.rewardPoints}P
-                        </Badge>
-                      </div>
-                      <div className="mb-2">
-                        <div className="flex justify-between text-xs mb-1">
-                          <span className="text-gray-600">진행률</span>
-                          <span className="font-medium">{currentCount}/{targetCount}</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-[#1f0101] h-2 rounded-full transition-all"
-                            style={{ width: `${Math.min(progress, 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                      {isCompleted ? (
-                        <div className="text-center text-xs text-green-600 font-medium">✓ 완료됨</div>
-                      ) : (
-                        <div className="flex gap-3 justify-end">
-                          <button
-                            className="w-8 h-8 rounded-xl font-bold bg-gray-400 hover:bg-gray-500 text-white transition-colors flex items-center justify-center active:scale-[0.95]"
-                            onClick={() => {
-                              if (currentCount > 0) {
-                                dispatch(decrementCounter(counterKey));
-                              }
-                            }}
-                            disabled={currentCount <= 0}
-                          >
-                            -1
-                          </button>
-                          <button
-                            className="w-8 h-8 rounded-xl font-bold bg-[#1F0101] hover:bg-[#2A0202] text-white transition-colors flex items-center justify-center active:scale-[0.95]"
-                            onClick={() => handleCounterIncrement(counterKey, mission.habitId)}
-                          >
-                            +1
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-
-                // 일반 미션
-                return (
-                  <div
-                    key={mission.habitId}
-                    className="flex items-center p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => !isCompleted && handleMissionComplete(mission.habitId)}
-                  >
-                    {isCompleted ? (
-                      <CheckCircle className="h-5 w-5 mr-3 flex-shrink-0" style={{ color: '#1f0101' }} />
-                    ) : (
-                      <Circle className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
-                    )}
-                    <div className="flex-1">
-                      <div className="text-sm font-medium">{mission.habitName}</div>
-                      <div className="text-xs text-gray-600">{mission.description}</div>
-                    </div>
-                    <Badge variant="secondary" style={{ backgroundColor: '#1f0101', color: 'white', opacity: 0.8 }}>
-                      +{mission.rewardPoints}P
-                    </Badge>
-                  </div>
-                );
-              })
-            )}
-            
-            <div className="pt-3 border-t border-gray-200">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium">완료율</span>
-                <span className="text-sm font-semibold" style={{ color: '#1f0101' }}>
-                  {completedCount}/{totalCount} ({completionRate}%)
-                </span>
-              </div>
-              <Progress value={completionRate} className="h-2" />
-
-              {/* 100% 달성 시 보너스 미션 버튼 */}
-              {completionRate === 100 && !completedMissions.includes(17) && (
-                <Button
-                  onClick={() => handleMissionComplete(17)}
-                  className="w-full mt-6 bg-[#1f0101] hover:bg-[#2f0202] text-white font-bold py-3 rounded-xl shadow-lg opacity-80"
-                >
-                  오늘의 미션 포인트 받기 (+20P)
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Care Streak */}
         <Card className="mx-4 mt-4">
@@ -1447,14 +1262,23 @@ const DailyCare: React.FC = () => {
               <span>10일 연속 달성시 보너스 포인트 100P!</span>
             </div>
 
-            {/* 10일 달성 & 미완료 시 버튼 표시 */}
-            {streakInfo.achieved10Days && !streakInfo.completed && (
-              <Button
-                onClick={() => handleMissionComplete(18)}
-                className="w-full bg-[#1f0101] hover:bg-[#2f0202] text-white font-bold py-3 rounded-xl shadow-lg opacity-80"
-              >
-                🎉 이번달 케어 스트릭 달성 (+100P)
-              </Button>
+            {/* 10일 달성 시 버튼 표시 */}
+            {streakInfo.achieved10Days && (
+              streakInfo.completed ? (
+                <Button
+                  disabled
+                  className="w-full bg-gray-400 text-white font-bold py-3 rounded-xl shadow-lg opacity-60 cursor-not-allowed"
+                >
+                  ✓ 케어 스트릭 포인트 지급 완료
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleStreakReward}
+                  className="w-full bg-[#1f0101] hover:bg-[#2f0202] text-white font-bold py-3 rounded-xl shadow-lg opacity-80"
+                >
+                  🎉 이번달 케어 스트릭 달성 (+100P)
+                </Button>
+              )
             )}
           </CardContent>
         </Card>

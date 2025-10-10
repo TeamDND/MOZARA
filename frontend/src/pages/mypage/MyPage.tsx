@@ -496,7 +496,7 @@ export default function MyPage() {
             <TabsList className="flex gap-2 w-full pb-2 bg-transparent">
               <TabsTrigger
                 value="reports"
-                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-[#1f0101] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
+                className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
               >
                 <FileText className="h-4 w-4 mr-1" />
                 내 리포트

@@ -157,28 +157,28 @@ export default function MyFavorites() {
         <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
           <TabsTrigger
             value="youtube"
-            className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-[#1f0101] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
+            className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
           >
             <Youtube className="w-3 h-3 mr-1" />
             유튜브 ({likedItems.youtube.length})
           </TabsTrigger>
           <TabsTrigger
             value="hospital"
-            className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+            className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
           >
             <Building2 className="w-3 h-3 mr-1" />
             탈모병원 ({likedItems.hospital.length})
           </TabsTrigger>
           <TabsTrigger
             value="map"
-            className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+            className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
           >
             <MapPin className="w-3 h-3 mr-1" />
             탈모미용실/가발전문점/두피문신 ({likedItems.map.length})
           </TabsTrigger>
           <TabsTrigger
             value="product"
-            className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+            className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
           >
             <Package className="w-3 h-3 mr-1" />
             제품 ({likedItems.product.length})
