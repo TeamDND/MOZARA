@@ -73,7 +73,7 @@ LOCK TABLES `daily_habits` WRITE;
 /*!40000 ALTER TABLE `daily_habits` DISABLE KEYS */;
 INSERT INTO `daily_habits` VALUES
 (1,'매일 물 7잔 이상 마시기','물 마시기',10,'routine'),
-(2,'이펙터 4번 사용','이펙터 사용',10,'routine'),
+(2,'HairFit 하루 4번 방문하기','HairFit 방문하기',10,'routine'),
 (3,'탈모 에센스로 직접 개선','아침 부스터 사용',5,'routine'),
 (4,'탈모 에센스로 직접 개선','밤 부스터 사용',5,'routine'),
 (5,'상열감 감소로 탈모 예방','백회혈/사신총혈 마사지',5,'routine'),
@@ -254,4 +254,4 @@ UNLOCK TABLES;
 -- ========================================
 ALTER TABLE `user_habit_log` 
 ADD COLUMN `progress_count` INT DEFAULT 0 COMMENT '현재 진행 수 (물 5잔이면 5)',
-ADD COLUMN `target_count` INT DEFAULT NULL COMMENT '목표치 (물=7, 이펙터=4, 일반 미션=1)';
+ADD COLUMN `target_count` INT DEFAULT NULL COMMENT '목표치 (물=7, HairFit=4, 일반 미션=1)';

@@ -653,7 +653,11 @@ const DailyCare: React.FC = () => {
             const response = await pythonClient.get(`/api/weather?lat=${latitude}&lon=${longitude}`);
             const result = response.data;
 
+            console.log('[DailyCare] 파이썬 날씨 API 응답:', result);
+
             if (result.success && result.data) {
+              console.log('[DailyCare] recommendations:', result.data.recommendations);
+
               setEnvironmentInfo({
                 uvIndex: result.data.uvIndex || 0,
                 uvLevel: result.data.uvLevel || '정보 없음',
@@ -668,7 +672,7 @@ const DailyCare: React.FC = () => {
                 }
               });
             } else {
-              console.error('날씨 정보 로드 실패:', result.error);
+              console.error('[DailyCare] 날씨 정보 로드 실패:', result.error);
             }
           } catch (error) {
             console.error('날씨 API 호출 실패:', error);

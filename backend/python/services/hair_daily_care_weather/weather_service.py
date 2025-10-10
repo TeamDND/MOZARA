@@ -127,6 +127,18 @@ def get_weather_info(lat: float, lon: float):
                 'message': '대기질이 나쁩니다. 외출 시 주의하세요.',
                 'icon': '🌫️'
             }
+        elif aqi == 2:
+            recommendations['air'] = {
+                'type': 'info',
+                'message': '대기질이 보통입니다. 야외 활동 가능합니다.',
+                'icon': '🌤️'
+            }
+        elif aqi == 1:
+            recommendations['air'] = {
+                'type': 'info',
+                'message': '대기질이 좋습니다. 두피 건강에 좋은 날입니다!',
+                'icon': '✨'
+            }
 
         return {
             'success': True,

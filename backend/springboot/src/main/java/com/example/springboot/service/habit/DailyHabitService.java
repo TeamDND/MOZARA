@@ -68,7 +68,7 @@ public class DailyHabitService {
             throw new RuntimeException("이미 오늘 완료한 습관입니다.");
         }
         
-        // 목표치 결정 (물=7, 이펙터=4, 일반=1)
+        // 목표치 결정 (물=7, HairFit=4, 일반=1)
         Integer targetCount = getTargetCount(habit.getHabitName());
         
         // 로그 저장
@@ -107,7 +107,7 @@ public class DailyHabitService {
     private Integer getTargetCount(String habitName) {
         if ("물 마시기".equals(habitName)) {
             return 7;
-        } else if ("이펙터 사용".equals(habitName)) {
+        } else if ("HairFit 방문하기".equals(habitName)) {
             return 4;
         } else {
             return 1;  // 일반 미션
