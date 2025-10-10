@@ -8,6 +8,7 @@ import com.example.springboot.data.entity.DailyHabitEntity;
 import com.example.springboot.data.entity.UserEntity;
 import com.example.springboot.data.entity.UserHabitLogEntity;
 import com.example.springboot.service.user.SeedlingService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -34,6 +34,7 @@ public class UserHabitLogEntity {
     private LocalDate completionDate;
 
     @Column(name = "progress_count")
+    @Builder.Default
     private Integer progressCount = 0;
 
     @Column(name = "target_count")
