@@ -239,7 +239,8 @@ const HairPT: React.FC = () => {
       '밤에 머리 감기': 'nightWash',
       '머리 바싹 말리기': 'dryHair',
       '샴푸 전 머리 빗질': 'brushHair',
-      '두피 영양팩하기': 'scalpPack'
+      '두피 영양팩하기': 'scalpPack',
+      '오늘의 미션 달성': 'earlySleep' // 임시로 earlySleep 키 사용
     };
     return keyMap[habitName] || 'morningBooster';
   };
@@ -425,20 +426,34 @@ const HairPT: React.FC = () => {
 
 
   const toggleMission = async (missionKey: keyof MissionState) => {
+    const missionInfo = missionData.find(m => m.key === missionKey);
+    
+    if (!missionInfo) {
+      console.log('미션 정보를 찾을 수 없습니다:', missionKey);
+      return;
+    }
+    
+    // 백엔드에서 이미 완료된 미션인지 확인
+    if (missionInfo.completed) {
+      console.log('이미 완료된 미션입니다:', missionInfo.name);
+      return;
+    }
+    
+    // 로컬 상태도 이미 완료된 경우 확인
+    if (missionState[missionKey]) {
+      console.log('로컬에서 이미 완료된 미션입니다:', missionInfo.name);
+      return;
+    }
+    
     setMissionState(prev => ({
       ...prev,
       [missionKey]: !prev[missionKey]
     }));
     
     // 미션 완료 시 경험치 추가 및 로그 저장
-    if (!missionState[missionKey]) {
-      const missionInfo = missionData.find(m => m.key === missionKey);
-      if (missionInfo) {
-        await saveMissionLog(missionInfo.id, missionInfo.rewardPoints);
-        // 미션 완료 후 습관 데이터 다시 로드하여 완료 상태 업데이트
-        await loadDailyHabits();
-      }
-    }
+    await saveMissionLog(missionInfo.id, missionInfo.rewardPoints);
+    // 미션 완료 후 습관 데이터 다시 로드하여 완료 상태 업데이트
+    await loadDailyHabits();
   };
 
   // 미션 완료 로그 저장 함수 (API 연동)

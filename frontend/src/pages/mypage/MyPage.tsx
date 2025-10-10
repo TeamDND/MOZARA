@@ -95,12 +95,14 @@ export default function MyPage() {
     familyHistory: boolean | null
     isLoss: boolean | null
     stress: string | null
+    createdAt: string | null
   }>({
     gender: '',
     age: 0,
     familyHistory: null,
     isLoss: null,
-    stress: null
+    stress: null,
+    createdAt: null
   })
 
   // UserInfoEdit 컴포넌트 강제 리렌더링을 위한 key
@@ -122,7 +124,8 @@ export default function MyPage() {
         age: response.data.age || 0,
         familyHistory: response.data.familyHistory,
         isLoss: response.data.isLoss,
-        stress: response.data.stress || null
+        stress: response.data.stress || null,
+        createdAt: response.data.createdAt || null
       })
 
       // 강제로 컴포넌트 리렌더링을 위해 key 변경
@@ -177,10 +180,26 @@ export default function MyPage() {
 
       setAnalysisResults(formattedResults)
 
-      // 탈모분석 결과 조회
+      // 탈모분석 결과 조회 (hair_loss_male, hair_loss_female, hairloss 모두 조회)
       try {
-        const hairlossResponse = await apiClient.get(`/analysis-results/${user.userId}/type/hairloss?sort=${sortOrder}`)
-        const hairlossFormatted = hairlossResponse.data.map((result: any, index: number) => ({
+        const [maleResponse, femaleResponse, hairlossResponse] = await Promise.all([
+          apiClient.get(`/analysis-results/${user.userId}/type/hair_loss_male?sort=${sortOrder}`).catch(() => ({ data: [] })),
+          apiClient.get(`/analysis-results/${user.userId}/type/hair_loss_female?sort=${sortOrder}`).catch(() => ({ data: [] })),
+          apiClient.get(`/analysis-results/${user.userId}/type/hairloss?sort=${sortOrder}`).catch(() => ({ data: [] }))
+        ]);
+
+        // 세 가지 타입의 결과를 모두 합치고 날짜순으로 정렬
+        const allHairlossData = [
+          ...maleResponse.data,
+          ...femaleResponse.data,
+          ...hairlossResponse.data
+        ].sort((a: any, b: any) => {
+          const dateA = new Date(a.inspectionDate || 0).getTime();
+          const dateB = new Date(b.inspectionDate || 0).getTime();
+          return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+        });
+
+        const hairlossFormatted = allHairlossData.map((result: any, index: number) => ({
           id: result.id,
           inspectionDate: result.inspectionDate ?
             new Date(result.inspectionDate).toLocaleDateString('ko-KR', {
@@ -280,7 +299,8 @@ export default function MyPage() {
           age: response.data.age || 0,
           familyHistory: response.data.familyHistory,
           isLoss: response.data.isLoss,
-          stress: response.data.stress || null
+          stress: response.data.stress || null,
+          createdAt: response.data.createdAt || null
         })
       } catch (error: any) {
         console.error('사용자 추가 정보 조회 실패:', error);
@@ -295,7 +315,9 @@ export default function MyPage() {
     if (!type) return '종합 진단';
     if (type === 'daily') return '두피 분석';
     // 탈모 단계 검사로 처리되는 모든 타입
-    if (type === 'swin_dual_model_llm_enhanced' ||
+    if (type === 'hair_loss_male' ||
+        type === 'hair_loss_female' ||
+        type === 'swin_dual_model_llm_enhanced' ||
         type === 'rag_v2_analysis' ||
         type === 'swin_analysis' ||
         type === 'gemini_analysis' ||
@@ -475,9 +497,8 @@ export default function MyPage() {
     name: user.nickname || user.username || "사용자",
     email: user.email || "이메일 정보 없음",
     phone: "전화번호 정보 없음", // UserState에 phone 속성이 없음
-    joinDate: "가입일 정보 없음", // UserState에 createdAt 속성이 없음
+    joinDate: userAdditionalInfo.createdAt ? new Date(userAdditionalInfo.createdAt).toLocaleDateString('ko-KR') : "가입일 정보 없음",
     totalAnalysis: loading ? 0 : totalAnalysis, // API에서 가져온 실제 분석 결과 개수
-    satisfaction: 0, // UserState에 satisfaction 속성이 없음
     gender: formatGender(userAdditionalInfo.gender), // API에서 조회한 성별 변환
     age: userAdditionalInfo.age || 0, // API에서 조회한 나이 사용
     role: user.role || "일반 사용자",
