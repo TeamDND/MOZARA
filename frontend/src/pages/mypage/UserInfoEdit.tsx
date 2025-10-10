@@ -16,7 +16,6 @@ interface UserInfo {
   phone: string;
   joinDate: string;
   totalAnalysis: number;
-  satisfaction: number;
   gender: string;
   age: number;
   role: string;

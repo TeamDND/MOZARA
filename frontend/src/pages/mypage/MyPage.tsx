@@ -95,12 +95,14 @@ export default function MyPage() {
     familyHistory: boolean | null
     isLoss: boolean | null
     stress: string | null
+    createdAt: string | null
   }>({
     gender: '',
     age: 0,
     familyHistory: null,
     isLoss: null,
-    stress: null
+    stress: null,
+    createdAt: null
   })
 
   // UserInfoEdit 컴포넌트 강제 리렌더링을 위한 key
@@ -122,7 +124,8 @@ export default function MyPage() {
         age: response.data.age || 0,
         familyHistory: response.data.familyHistory,
         isLoss: response.data.isLoss,
-        stress: response.data.stress || null
+        stress: response.data.stress || null,
+        createdAt: response.data.createdAt || null
       })
 
       // 강제로 컴포넌트 리렌더링을 위해 key 변경
@@ -296,7 +299,8 @@ export default function MyPage() {
           age: response.data.age || 0,
           familyHistory: response.data.familyHistory,
           isLoss: response.data.isLoss,
-          stress: response.data.stress || null
+          stress: response.data.stress || null,
+          createdAt: response.data.createdAt || null
         })
       } catch (error: any) {
         console.error('사용자 추가 정보 조회 실패:', error);
@@ -493,9 +497,8 @@ export default function MyPage() {
     name: user.nickname || user.username || "사용자",
     email: user.email || "이메일 정보 없음",
     phone: "전화번호 정보 없음", // UserState에 phone 속성이 없음
-    joinDate: "가입일 정보 없음", // UserState에 createdAt 속성이 없음
+    joinDate: userAdditionalInfo.createdAt ? new Date(userAdditionalInfo.createdAt).toLocaleDateString('ko-KR') : "가입일 정보 없음",
     totalAnalysis: loading ? 0 : totalAnalysis, // API에서 가져온 실제 분석 결과 개수
-    satisfaction: 0, // UserState에 satisfaction 속성이 없음
     gender: formatGender(userAdditionalInfo.gender), // API에서 조회한 성별 변환
     age: userAdditionalInfo.age || 0, // API에서 조회한 나이 사용
     role: user.role || "일반 사용자",
