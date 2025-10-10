@@ -10,6 +10,13 @@ interface Message {
   sender: 'user' | 'bot';
   timestamp: string;
   sources?: string[];
+  recommendation?: {
+    hasRecommendation: boolean;
+    recommendationText?: string;
+    ageGroup?: string;
+    icon?: string;
+    divider?: string;
+  };
 }
 
 interface ChatResponse {
@@ -162,11 +169,12 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose, isModalClo
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);
-    
+
     // 메시지 추가 후 즉시 스크롤
     setTimeout(() => scrollToBottom(), 100);
 
     try {
+      // 1. Python 챗봇 API 호출
       const response = await pythonClient.post('/rag-chat', {
         message: messageText,
         conversation_id: userConversationId,
@@ -174,17 +182,42 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose, isModalClo
 
       const data: ChatResponse = response.data;
 
+      // 2. UserMetrics에 RAG 검색 저장
+      try {
+        await apiClient.post('/api/metrics/rag-search', {
+          query: messageText,
+          resultCount: data.sources?.length || 0,
+          clicked: false,
+          clickedTitle: ''
+        });
+      } catch (error) {
+        console.log('RAG 검색 메트릭 저장 실패 (무시됨):', error);
+      }
+
+      // 3. AI 개인화 추천 요청 (Spring Boot)
+      let recommendation = null;
+      try {
+        const recResponse = await apiClient.post('/api/ai/rag-v2-check/chat-with-recommendation', {
+          query: messageText,
+          response: data.response
+        });
+        recommendation = recResponse.data.recommendation;
+      } catch (error) {
+        console.log('AI 추천 생성 실패 (무시됨):', error);
+      }
+
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: data.response,
         sender: 'bot',
         timestamp: data.timestamp,
         sources: data.sources,
+        recommendation: recommendation || undefined,
       };
 
       // 모달이 닫혀도 메시지와 연관 질문을 저장
       setMessages(prev => [...prev, botMessage]);
-      
+
       // 봇 응답 후 연관 질문 생성 (모달이 닫혀도 실행)
       try {
         const questions = await getRelatedQuestions(data.response);
@@ -195,7 +228,7 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose, isModalClo
       } catch (error) {
         console.error('연관 질문 생성 실패:', error);
       }
-      
+
       // 봇 응답 후 스크롤 (모달이 열려있을 때만)
       if (!isModalClosing && !propIsModalClosing) {
         setTimeout(() => scrollToBottom(), 100);
@@ -209,7 +242,7 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose, isModalClo
         timestamp: new Date().toISOString(),
       };
       setMessages(prev => [...prev, errorMessage]);
-      
+
       // 에러 메시지 후에도 스크롤 (모달이 열려있을 때만)
       if (!isModalClosing && !propIsModalClosing) {
         setTimeout(() => scrollToBottom(), 100);
@@ -328,6 +361,23 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose, isModalClo
                               • {source}
                             </p>
                           ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ✨ AI 개인화 추천 (NEW!) */}
+                    {message.recommendation && message.recommendation.hasRecommendation && (
+                      <div className="mt-3 pt-3 border-t-2 border-dashed border-gray-300">
+                        <div className="flex items-start gap-2 mb-2">
+                          <span className="text-lg">✨</span>
+                          <div className="flex-1">
+                            <p className="text-xs font-semibold text-purple-600 mb-1">
+                              {message.recommendation.ageGroup}님을 위한 맞춤 추천
+                            </p>
+                            <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap">
+                              {message.recommendation.recommendationText}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     )}

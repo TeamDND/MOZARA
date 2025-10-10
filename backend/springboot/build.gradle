@@ -37,6 +37,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     // AWS S3
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.529'
+    // Google Analytics Data API
+    implementation 'com.google.analytics:google-analytics-data:0.55.0'
+    implementation 'com.google.auth:google-auth-library-oauth2-http:1.19.0'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.mysql:mysql-connector-j'

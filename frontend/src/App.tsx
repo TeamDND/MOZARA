@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './App.css';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { initGA, logPageView } from './utils/analytics';
 import MainLayout from './pages/MainLayout';
 import LandingPage from './pages/LandingPage';
 import SignUp from './pages/users/SignUp';
@@ -41,6 +42,18 @@ import AdminReportView from './pages/admin/AdminReportView';
 
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
+  const location = useLocation();
+
+  // Google Analytics 초기화
+  useEffect(() => {
+    initGA();
+  }, []);
+
+  // 페이지 변경 시 페이지뷰 트래킹
+  useEffect(() => {
+    logPageView();
+  }, [location]);
+
   return (
     <ErrorBoundary>
       {/* 전역 챗봇 모달 */}

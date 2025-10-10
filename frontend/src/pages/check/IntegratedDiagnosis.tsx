@@ -227,6 +227,20 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
 
       setAnalysisComplete(true);
 
+      // UserMetrics에 두피 진단 결과 저장
+      if (analysisResult && user?.userId) {
+        try {
+          await apiClient.post('/api/metrics/scalp-diagnosis', {
+            scalpType: baspAnswers.gender === 'male' ? '남성형 탈모' : '여성형 탈모',
+            scalpScore: analysisResult.stage || 0,
+            sensitivity: baspAnswers.stress || 'normal'
+          });
+          console.log('✅ 두피 진단 메트릭 저장 완료');
+        } catch (error) {
+          console.log('⚠️ 두피 진단 메트릭 저장 실패 (무시됨):', error);
+        }
+      }
+
       // 결과 화면으로 이동
       setTimeout(() => {
         setCurrentStep(4);

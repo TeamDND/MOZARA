@@ -1,16 +1,35 @@
 import React from 'react';
 import { HairProduct } from '../../services/hairProductApi';
 import LikeButton from '../../components/LikeButton';
+import apiClient from '../../services/apiClient';
 
 interface ProductCardProps {
   product: HairProduct;
   onProductClick?: (product: HairProduct) => void;
+  recommendedBy?: string; // '진단결과', '챗봇', '인기제품' 등
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
   product,
-  onProductClick
+  onProductClick,
+  recommendedBy = '직접검색'
 }) => {
+
+  // 제품 클릭 시 메트릭 저장
+  const handleProductClick = async () => {
+    try {
+      await apiClient.post('/api/metrics/product-click', {
+        productCategory: product.category || '탈모케어',
+        productName: product.productName,
+        recommendedBy: recommendedBy
+      });
+    } catch (error) {
+      console.log('제품 클릭 메트릭 저장 실패 (무시됨):', error);
+    }
+
+    // 원래 콜백 실행
+    onProductClick?.(product);
+  };
   
   // 가격 포맷팅 (수정 없음)
   const formatPrice = (price: number): string => {
@@ -63,9 +82,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const defaultImageUrl = 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop&crop=center';
 
   return (
-    <div 
+    <div
       className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
-      onClick={() => onProductClick?.(product)}
+      onClick={handleProductClick}
     >
       {/* 제품 이미지 */}
       <div className="relative h-40 bg-gray-100 overflow-hidden">

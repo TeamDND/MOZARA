@@ -733,6 +733,17 @@ const DailyCare: React.FC = () => {
       // 완료 목록 업데이트
       setCompletedMissions(prev => [...prev, habitId]);
 
+      // UserMetrics에 케어 미션 완료 저장
+      try {
+        const missionName = todayMissions.find(m => m.habitId === habitId)?.habitName || `미션 ${habitId}`;
+        await apiClient.post('/api/metrics/care-mission', {
+          missionType: missionName,
+          streakCount: streakInfo.days
+        });
+      } catch (error) {
+        console.log('케어 미션 메트릭 저장 실패 (무시됨):', error);
+      }
+
       // 보너스 미션 알림
       if (habitId === 17) {
         alert('20포인트를 받았습니다! 🎉');
