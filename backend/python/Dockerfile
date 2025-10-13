@@ -15,8 +15,20 @@ COPY requirements.txt .
 # Python 의존성 설치 (캐시 최적화)
 RUN pip install --no-cache-dir -r requirements.txt
 
+# gdown 설치 (모델 파일 다운로드용)
+RUN pip install gdown
+
 # 소스 코드 복사 (의존성 설치 후)
 COPY . .
+
+# 모델 파일 다운로드 및 설치
+RUN mkdir -p /app/services/swin_hair_classification/models/face_parsing/res/cp
+RUN cd /app/services/swin_hair_classification/models/ && \
+    gdown --folder "https://drive.google.com/drive/folders/1zBUYsLZawETCFIvkDTYDAncwooS_Jn53" -O models_temp && \
+    mv models_temp/best_swin_hair_classifier_side.pth ./ && \
+    mv models_temp/best_swin_hair_classifier_top.pth ./ && \
+    mv models_temp/79999_iter.pth face_parsing/res/cp/ && \
+    rm -rf models_temp
 
 # 포트 8000 노출
 EXPOSE 8000
