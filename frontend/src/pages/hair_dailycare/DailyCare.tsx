@@ -179,6 +179,14 @@ const DailyCare: React.FC = () => {
   const [comparisonError, setComparisonError] = useState<string | null>(null);
   const [comparisonPeriod, setComparisonPeriod] = useState<'latest' | '3months' | '6months'>('latest');
 
+  // 밀도 변화 시각화 상태
+  const [showDensityVisualization, setShowDensityVisualization] = useState(false);
+  const [densityVisualizedImages, setDensityVisualizedImages] = useState<{
+    previous: string | null;
+    current: string | null;
+  }>({ previous: null, current: null });
+  const [isLoadingVisualization, setIsLoadingVisualization] = useState(false);
+
   // 재분석 상태
   const [isReanalyzing, setIsReanalyzing] = useState(false);
 
@@ -411,6 +419,55 @@ const DailyCare: React.FC = () => {
       setComparisonError(err.response?.data?.message || '비교 중 오류가 발생했습니다.');
     } finally {
       setIsComparingImages(false);
+    }
+  };
+
+  // comparisonData가 변경되면 밀도 시각화 리셋
+  useEffect(() => {
+    setDensityVisualizedImages({ previous: null, current: null });
+    setShowDensityVisualization(false);
+  }, [comparisonData]);
+
+  // 밀도 변화 시각화 토글
+  const toggleDensityVisualization = async () => {
+    if (!comparisonData) return;
+
+    // 이미 시각화된 이미지가 있으면 토글만
+    if (densityVisualizedImages.previous) {
+      setShowDensityVisualization(!showDensityVisualization);
+      return;
+    }
+
+    // 처음 시각화를 요청하는 경우
+    setIsLoadingVisualization(true);
+    try {
+      console.log('🔄 밀도 변화 시각화 요청 중...');
+
+      // 이전 이미지에만 밀도 변화 시각화 (이전 → 오늘 비교해서 변화된 영역 표시)
+      const previousResponse = await apiClient.post(
+        '/timeseries/visualize-change',
+        {
+          current_image_url: comparisonData.previous_image_url,
+          past_image_urls: [comparisonData.current_image_url]
+        },
+        { responseType: 'blob' }
+      );
+
+      // Blob을 URL로 변환
+      const previousBlobUrl = URL.createObjectURL(previousResponse.data);
+
+      setDensityVisualizedImages({
+        previous: previousBlobUrl,
+        current: null
+      });
+
+      setShowDensityVisualization(true);
+      console.log('✅ 밀도 변화 시각화 완료');
+    } catch (err: any) {
+      console.error('❌ 밀도 변화 시각화 실패:', err);
+      alert('밀도 변화 시각화에 실패했습니다.');
+    } finally {
+      setIsLoadingVisualization(false);
     }
   };
 
@@ -1818,7 +1875,20 @@ const DailyCare: React.FC = () => {
           <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             {/* 헤더 */}
             <div className="sticky top-0 bg-white border-b p-4 flex items-center justify-between rounded-t-2xl">
-              <h2 className="text-lg font-bold text-[#1f0101]">변화 분석 결과</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold text-[#1f0101]">변화 분석 결과</h2>
+                <button
+                  onClick={toggleDensityVisualization}
+                  disabled={isLoadingVisualization}
+                  className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                    showDensityVisualization
+                      ? 'bg-green-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  {isLoadingVisualization ? '로딩 중...' : showDensityVisualization ? '밀도 표시 ON' : '밀도 표시 OFF'}
+                </button>
+              </div>
               <button
                 onClick={() => setIsComparisonModalOpen(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -1850,7 +1920,11 @@ const DailyCare: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <img
-                    src={comparisonData.previous_image_url}
+                    src={
+                      showDensityVisualization && densityVisualizedImages.previous
+                        ? densityVisualizedImages.previous
+                        : comparisonData.previous_image_url
+                    }
                     alt="이전 사진"
                     className="w-full aspect-square object-cover rounded-lg border-2 border-gray-300"
                   />

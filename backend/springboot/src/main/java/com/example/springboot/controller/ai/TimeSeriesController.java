@@ -309,6 +309,54 @@ public class TimeSeriesController {
     }
 
     /**
+     * 밀도 변화 시각화
+     * POST /api/timeseries/visualize-change
+     *
+     * @param requestBody current_image_url, past_image_urls
+     * @return 시각화된 이미지 (JPEG)
+     */
+    @PostMapping("/visualize-change")
+    public ResponseEntity<byte[]> visualizeChange(@RequestBody Map<String, Object> requestBody) {
+        log.info("[TimeSeriesController] 밀도 변화 시각화 요청");
+
+        try {
+            byte[] imageBytes = timeSeriesService.visualizeChange(requestBody);
+
+            return ResponseEntity.ok()
+                    .header("Content-Type", "image/jpeg")
+                    .body(imageBytes);
+
+        } catch (Exception e) {
+            log.error("[TimeSeriesController] 밀도 변화 시각화 실패: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    /**
+     * 밀도 시각화
+     * POST /api/timeseries/visualize-density
+     *
+     * @param requestBody image_url, threshold
+     * @return 시각화된 이미지 (JPEG)
+     */
+    @PostMapping("/visualize-density")
+    public ResponseEntity<byte[]> visualizeDensity(@RequestBody Map<String, Object> requestBody) {
+        log.info("[TimeSeriesController] 밀도 시각화 요청");
+
+        try {
+            byte[] imageBytes = timeSeriesService.visualizeDensity(requestBody);
+
+            return ResponseEntity.ok()
+                    .header("Content-Type", "image/jpeg")
+                    .body(imageBytes);
+
+        } catch (Exception e) {
+            log.error("[TimeSeriesController] 밀도 시각화 실패: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    /**
      * Health Check
      * GET /api/timeseries/health
      *
