@@ -51,28 +51,27 @@ jobs:
           echo "⏳ Pod 시작 대기 중..."
           sleep 30
           
-          # SSH를 통한 프로젝트 배포
-          echo "📦 프로젝트 파일 배포 중..."
+          # SSH를 통한 Python 배포
+          echo "🐍 Python 서버 배포 중..."
           
-          # SSH 키 설정 (임시)
+          # SSH 키 설정
           mkdir -p ~/.ssh
           echo "${{ secrets.RUNPOD_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ssh.runpod.io >> ~/.ssh/known_hosts
           
-          # 프로젝트 파일 배포 및 Python 서버 시작
+          # Docker 컨테이너 실행
           ssh -o StrictHostKeyChecking=no ${{ secrets.RUNPOD_POD_ID }}-6441140b@ssh.runpod.io << 'EOF'
-            echo "📁 프로젝트 파일 클론 중..."
-            cd /workspace
-            rm -rf .cache
-            git clone https://github.com/TeamDND/MOZARA.git .
+            echo "🐳 기존 Docker 컨테이너 정리 중..."
+            docker stop mozara-python || true
+            docker rm mozara-python || true
             
-            echo "🐍 Python 의존성 설치 중..."
-            cd backend/python
-            pip install -r requirements.txt
+            echo "📥 Docker 이미지 pull 중..."
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api
             
-            echo "🚀 Python 서버 시작 중..."
-            nohup python app.py > app.log 2>&1 &
+            echo "🚀 Docker 컨테이너 실행 중..."
+            docker run -d --name mozara-python -p 8000:8000 \
+              ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api
             
             echo "✅ Python 서버 배포 완료!"
           EOF
