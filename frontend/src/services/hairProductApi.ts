@@ -62,15 +62,12 @@ export const hairProductApi = {
     }
 
     try {
-      console.log(`탈모 ${stage}단계 제품 조회 시작`);
-      
       // 스프링을 통해 Python API 호출
       const response = await apiClient.get<HairProductResponse>('/ai/products', {
         params: { stage },
         timeout: 10000, // 10초 타임아웃
       });
 
-      console.log(`탈모 ${stage}단계 제품 ${response.data.products.length}개 조회 완료`);
       return response.data;
     } catch (error: any) {
       console.error(`탈모 ${stage}단계 제품 조회 중 오류:`, error);
@@ -105,8 +102,6 @@ export const hairProductApi = {
     }
 
     try {
-      console.log(`키워드 '${keyword}' 제품 조회 시작`);
-      
       // 백엔드의 새로운 검색 엔드포인트로 요청
       // 백엔드는 이 요청을 받아 11번가 API를 호출해야 합니다.
       const response = await apiClient.get<HairProductSearchResponse>('/ai/products/search', { 
@@ -114,7 +109,6 @@ export const hairProductApi = {
         timeout: 15000, // 검색은 더 오래 걸릴 수 있으므로 타임아웃 증가
       });
 
-      console.log(`키워드 '${keyword}' 제품 ${response.data.products.length}개 조회 완료`);
       return response.data;
     } catch (error: any) {
       console.error(`키워드 검색 중 오류:`, error);

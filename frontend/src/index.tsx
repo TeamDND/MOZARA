@@ -13,7 +13,6 @@ const onBeforeLift = (): void => {
   const jwtToken = store.getState().token.token;
   if(jwtToken){
     apiClient.defaults.headers.common['authorization'] = jwtToken;
-    console.log('토큰 설정 완료');
   }
 };
 

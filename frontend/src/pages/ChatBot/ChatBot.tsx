@@ -198,7 +198,7 @@ const ChatBot: React.FC = () => {
     // 백엔드에도 대화 기록 삭제 요청 (선택적)
     pythonClient.post('/rag-chat/clear', {
       conversation_id: userConversationId,
-    }).catch(err => console.log('백엔드 대화 기록 삭제 실패:', err));
+    }).catch(err => {});
   };
 
   // 시간 포맷팅

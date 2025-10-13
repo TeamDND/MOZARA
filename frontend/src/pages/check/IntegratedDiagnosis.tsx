@@ -32,10 +32,6 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
   const token = useSelector((state: any) => state.token.jwtToken);
   const [currentStep, setCurrentStep] = useState(1);
   
-  // 디버깅: currentStep 변화 추적
-  useEffect(() => {
-    console.log('🔍 현재 Step:', currentStep);
-  }, [currentStep]);
   const [baspAnswers, setBaspAnswers] = useState({
     gender: '',
     age: '',
@@ -76,13 +72,6 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
 
           // DB에 저장된 값이 있으면 자동으로 채우기
           if (userInfo.gender || userInfo.age || userInfo.familyHistory !== null || userInfo.isLoss !== null || userInfo.stress) {
-            console.log('🔄 사용자 정보 로드:', {
-              gender: userInfo.gender,
-              age: userInfo.age,
-              familyHistory: userInfo.familyHistory,
-              isLoss: userInfo.isLoss,
-              stress: userInfo.stress
-            });
 
             // 한글 성별을 영어로 변환
             let genderValue = userInfo.gender || '';
@@ -179,9 +168,6 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
           // 성별에 따라 다른 분석 방법 사용
           if (isMale) {
             // 남성: Swin Transformer 분석 (Top + Side)
-            console.log('🔄 남성 - Swin API 분석 시작');
-            console.log('📸 Top View URL:', uploadedPhotoUrl);
-            console.log('📸 Side View URL:', uploadedSidePhotoUrl);
 
             // S3 URL 결합 (|||로 구분)
             const combinedImageUrl = uploadedPhotoUrl && uploadedSidePhotoUrl
@@ -202,12 +188,9 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
               }
             );
 
-            console.log('✅ Swin 분석 결과:', result);
             setAnalysisResult(result.analysis);
           } else {
             // 여성: RAG v2 분석 (Top만)
-            console.log('🔄 여성 - RAG v2 API 분석 시작');
-            console.log('📸 Top View URL:', uploadedPhotoUrl);
 
             const result = await analyzeHairWithRAG(
               uploadedPhotoFile,
@@ -310,7 +293,6 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         );
 
       case 2:
-        console.log('📸 ImageUploadStep 렌더링 - gender:', baspAnswers.gender);
         return (
           <ImageUploadStep
             uploadedPhoto={uploadedPhoto}
@@ -493,10 +475,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
                 </Button>
               )}
               
-              {(() => {
-                console.log('🔍 Step 1 버튼 조건 체크:', { currentStep, isStep1: currentStep === 1 });
-                return currentStep === 1;
-              })() && (() => {
+              {currentStep === 1 && (() => {
                 const isButtonDisabled = !baspAnswers.gender ||
                   !baspAnswers.age ||
                   !baspAnswers.familyHistory ||
@@ -506,21 +485,9 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
                   parseInt(baspAnswers.age) > 100 ||
                   isNaN(parseInt(baspAnswers.age));
                 
-                console.log('🔘 다음 버튼 렌더링:', {
-                  disabled: isButtonDisabled,
-                  gender: baspAnswers.gender,
-                  age: baspAnswers.age,
-                  familyHistory: baspAnswers.familyHistory,
-                  recentHairLoss: baspAnswers.recentHairLoss,
-                  stress: baspAnswers.stress
-                });
-                
                 return (
                   <Button
-                    onClick={() => {
-                      console.log('✅ 다음 버튼 클릭됨');
-                      setCurrentStep(2);
-                    }}
+                    onClick={() => setCurrentStep(2)}
                     disabled={isButtonDisabled}
                     className="flex-1 h-12 rounded-xl text-white active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                     style={{ backgroundColor: "#1f0101" }}

@@ -209,28 +209,15 @@ const getCurrentLocation = (): Promise<{ latitude: number; longitude: number; ad
 // 기상청 API에서 날씨 정보 가져오기
 export const getWeatherData = async (): Promise<WeatherData> => {
   try {
-    // API 키 확인
-    console.log('현재 API 키 상태:', {
-      hasKey: !!WEATHER_API_KEY,
-      keyLength: WEATHER_API_KEY.length,
-      keyPreview: WEATHER_API_KEY ? `${WEATHER_API_KEY.substring(0, 4)}...` : '없음',
-      isValid: isValidApiKey(WEATHER_API_KEY)
-    });
-
     if (!isValidApiKey(WEATHER_API_KEY)) {
       console.warn('기상청 API 키가 설정되지 않았습니다. .env 파일에 REACT_APP_WEATHER_API_KEY를 설정해주세요.');
       console.warn('예시: REACT_APP_WEATHER_API_KEY=실제_API_키');
       return getDefaultWeatherData();
     }
 
-    console.log('기상청 API 키 확인됨, 실제 API 호출 시작...');
-
     // 현재 위치 가져오기
     const location = await getCurrentLocation();
     const grid = convertToGrid(location.latitude, location.longitude);
-    
-    // 변환된 격자 좌표 확인
-    console.log('변환된 격자 좌표:', { nx: grid.x, ny: grid.y, lat: location.latitude, lon: location.longitude });
     
     // 기상청 단기예보 API 호출
     const now = new Date();
@@ -260,7 +247,6 @@ export const getWeatherData = async (): Promise<WeatherData> => {
       }
       
       const text = await res.text();
-      console.log('API 응답:', text.substring(0, 200)); // 디버깅용
       
       data = JSON.parse(text);
       if (data?.response?.header?.resultCode === '00') {
@@ -294,7 +280,6 @@ export const getWeatherData = async (): Promise<WeatherData> => {
         }
         
         const text2 = await res2.text();
-        console.log('예보 API 응답:', text2.substring(0, 200)); // 디버깅용
         
         const json2 = JSON.parse(text2);
         if (json2?.response?.header?.resultCode === '00') {

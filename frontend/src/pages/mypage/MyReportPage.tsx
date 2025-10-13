@@ -196,11 +196,6 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
     ? imageUrl.split('|||').map(url => url.trim())
     : [imageUrl, null];
 
-  // 디버깅용 로그
-  console.log('🔍 MyReportPage - analysisResult:', analysisResult);
-  console.log('🔍 MyReportPage - analysisType:', analysisType);
-  console.log('🔍 MyReportPage - grade:', analysisResult?.grade);
-
   // 분석 타입을 한글로 변환하는 함수
   const formatAnalysisType = (type: string | undefined): string => {
     if (!type) return '종합 진단';
@@ -221,7 +216,6 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
 
   // daily 타입인지 확인
   const isDailyAnalysis = analysisType === 'daily';
-  console.log('🔍 MyReportPage - isDailyAnalysis:', isDailyAnalysis);
 
   // 분석 결과가 없으면 마이페이지로 돌아가기
   if (!analysisResult) {

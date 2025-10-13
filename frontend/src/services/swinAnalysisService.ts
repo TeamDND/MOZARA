@@ -65,12 +65,6 @@ export const analyzeHairWithSwin = async (
   surveyData?: SurveyData
 ): Promise<SwinAnalysisResponse> => {
   try {
-    console.log('🔄 Swin Transformer 모발 분석 요청 시작');
-    console.log('📁 Top View 파일:', topImageFile.name, topImageFile.size, 'bytes');
-    console.log('📁 Side View 파일:', sideImageFile.name, sideImageFile.size, 'bytes');
-    console.log('👤 사용자 ID:', userId);
-    console.log('📋 설문 데이터:', surveyData);
-
     // FormData 생성
     const formData = new FormData();
     formData.append('top_image', topImageFile);
@@ -107,13 +101,11 @@ export const analyzeHairWithSwin = async (
             const percentCompleted = Math.round(
               (progressEvent.loaded * 100) / progressEvent.total
             );
-            console.log(`📤 업로드 진행률: ${percentCompleted}%`);
           }
         },
       }
     );
 
-    console.log('✅ Swin 분석 응답 성공:', response.data);
     return response.data;
 
   } catch (error) {

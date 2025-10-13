@@ -193,29 +193,18 @@ const MainPage: React.FC = () => {
     // DB에서 최초 분석 완료 상태 확인
     const checkInitialAnalysis = async () => {
       if (!userId) {
-        console.log('사용자 ID가 없습니다.');
         return;
       }
 
       try {
-        console.log('=== 탈모 분석 완료 여부 확인 시작 ===');
-        console.log('userId:', userId);
-        console.log('API URL:', `/has-analysis/${userId}/hairloss`);
-        
         const response = await apiClient.get(`/has-analysis/${userId}/hairloss`);
-        console.log('API 응답 전체:', response);
-        console.log('API 응답 데이터:', response.data);
         
         const hasAnalysis = response.data.hasAnalysis;
-        console.log('탈모 분석 완료 여부:', hasAnalysis);
-        console.log('타입:', typeof hasAnalysis);
         
         setUserProgress(prev => ({
           ...prev,
           hasCompletedInitialAnalysis: hasAnalysis
         }));
-        
-        console.log('=== 상태 업데이트 완료 ===');
       } catch (error: any) {
         console.error('=== 분석 결과 확인 실패 ===');
         console.error('에러 전체:', error);

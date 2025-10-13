@@ -115,9 +115,7 @@ export default function MyPage() {
     }
 
     try {
-      console.log('API 호출: 사용자 추가 정보 재조회', `/userinfo/${user.username}`);
       const response = await apiClient.get(`/userinfo/${user.username}`)
-      console.log('사용자 추가 정보 재조회 API 응답:', response.data);
 
       setUserAdditionalInfo({
         gender: response.data.gender || '',
@@ -137,26 +135,19 @@ export default function MyPage() {
 
   // 분석 결과 데이터 조회 함수 (Incoming의 useCallback 구조 사용)
   const fetchAnalysisData = useCallback(async () => {
-    console.log('분석 결과 데이터 조회 시작:', { userId: user.userId, token: token ? '있음' : '없음' });
-
     if (!user.userId || !token) {
-      console.log('사용자 ID 또는 토큰이 없음:', { userId: user.userId, token: token });
       setLoading(false)
       return
     }
 
     try {
       // 전체 분석 결과 개수 조회
-      console.log('API 호출: 분석 결과 개수 조회', `/analysis-count/${user.userId}`);
       const countResponse = await apiClient.get(`/analysis-count/${user.userId}`)
-      console.log('분석 결과 개수 API 응답:', countResponse.data);
       const countData = countResponse.data
       setTotalAnalysis(countData.count || 0)
 
       // 전체 분석 결과 리스트 조회
-      console.log('API 호출: 분석 결과 리스트 조회', `/analysis-results/${user.userId}?sort=${sortOrder}`);
       const resultsResponse = await apiClient.get(`/analysis-results/${user.userId}?sort=${sortOrder}`)
-      console.log('분석 결과 리스트 API 응답:', resultsResponse.data);
 
       // 날짜 포맷팅 및 데이터 변환
       const formattedResults = resultsResponse.data.map((result: any, index: number) => {
@@ -217,7 +208,6 @@ export default function MyPage() {
         }))
         setHairlossResults(hairlossFormatted)
       } catch (error) {
-        console.log('탈모분석 결과 조회 실패:', error)
         setHairlossResults([])
       }
 
@@ -242,7 +232,6 @@ export default function MyPage() {
         }))
         setDailyResults(dailyFormatted)
       } catch (error) {
-        console.log('두피분석 결과 조회 실패:', error)
         setDailyResults([])
       }
 
@@ -257,13 +246,11 @@ export default function MyPage() {
 
       // 토큰 만료(456) 또는 인증 실패(401) 시
       if (error.response?.status === 456 || error.response?.status === 401) {
-        console.log('토큰 만료 또는 인증 실패 - 토큰 갱신 시도됨');
         // 토큰 갱신은 apiClient에서 자동으로 처리됨
       }
 
       // 심각한 인증 오류 시 Redux 상태 정리
       if (error.response?.status === 401 && error.response?.data?.includes('invalid')) {
-        console.log('유효하지 않은 토큰 - 상태 정리');
         dispatch(clearToken());
         dispatch(clearUser());
       }
@@ -290,9 +277,7 @@ export default function MyPage() {
       }
 
       try {
-        console.log('API 호출: 사용자 추가 정보 조회', `/userinfo/${user.username}`);
         const response = await apiClient.get(`/userinfo/${user.username}`)
-        console.log('사용자 추가 정보 API 응답:', response.data);
         
         setUserAdditionalInfo({
           gender: response.data.gender || '',
