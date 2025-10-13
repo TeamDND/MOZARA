@@ -40,20 +40,6 @@ jobs:
         run: |
           echo "🚀 Runpod Pod에 Python API 배포 중..."
           
-          # Runpod Pod API를 사용한 배포
-          curl -X POST "https://api.runpod.io/v2/${{ secrets.RUNPOD_POD_ID }}/restart" \
-            -H "Authorization: Bearer ${{ secrets.RUNPOD_API_KEY }}" \
-            -H "Content-Type: application/json"
-          
-          echo "✅ Runpod Pod 재시작 완료!"
-          
-          # Pod이 완전히 시작될 때까지 대기
-          echo "⏳ Pod 시작 대기 중..."
-          sleep 30
-          
-          # SSH를 통한 Python 배포
-          echo "🐍 Python 서버 배포 중..."
-          
           # SSH 키 설정
           mkdir -p ~/.ssh
           echo "${{ secrets.RUNPOD_SSH_KEY }}" > ~/.ssh/id_rsa
@@ -61,7 +47,7 @@ jobs:
           ssh-keyscan -H ssh.runpod.io >> ~/.ssh/known_hosts
           
           # Docker 컨테이너 실행
-          ssh -o StrictHostKeyChecking=no ${{ secrets.RUNPOD_POD_ID }}-6441140b@ssh.runpod.io << 'EOF'
+          ssh -T -o StrictHostKeyChecking=no ${{ secrets.RUNPOD_POD_ID }}-6441140b@ssh.runpod.io << 'EOF'
             echo "🐳 기존 Docker 컨테이너 정리 중..."
             docker stop mozara-python || true
             docker rm mozara-python || true
