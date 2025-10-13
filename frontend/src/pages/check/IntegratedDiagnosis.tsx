@@ -129,6 +129,8 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
     setAnalysisProgress(0);
     setAnalysisSteps([]);
 
+    let timerInterval: NodeJS.Timeout | null = null;
+
     try {
       const isMale = baspAnswers.gender === 'male';
 
@@ -149,19 +151,25 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         '개인 맞춤 계획 수립 완료'
       ];
 
-      // 단계별 시간 (밀리초)
-      const stepDelays = [800, 800, 2000, 800, 800, 800];
-      const totalTime = stepDelays.reduce((a, b) => a + b, 0);
-      setEstimatedTimeRemaining(Math.ceil(totalTime / 1000));
+      // 단계별 시간 (밀리초) - 남성/여성 구분
+      // 남성: 총 21-22초, 여성: 총 12-13초
+      const stepDelays = isMale
+        ? [1000, 1000, 18000, 1000, 1000, 1000]  // 남성: 총 23초 (실제 분석 18초)
+        : [1000, 1000, 9000, 1000, 1000, 1000];   // 여성: 총 14초 (실제 분석 9초)
+
+      // 경과 시간 측정 시작 (0초부터 카운트업)
+      setEstimatedTimeRemaining(0);
+
+      let elapsedSeconds = 0;
+      timerInterval = setInterval(() => {
+        elapsedSeconds++;
+        setEstimatedTimeRemaining(elapsedSeconds);
+      }, 1000);
 
       // 단계별 진행 시뮬레이션
       for (let i = 0; i < steps.length; i++) {
         setAnalysisSteps(prev => [...prev, steps[i]]);
         setAnalysisProgress((i + 1) / steps.length * 100);
-
-        // 남은 시간 업데이트
-        const remainingTime = stepDelays.slice(i + 1).reduce((a, b) => a + b, 0);
-        setEstimatedTimeRemaining(Math.ceil(remainingTime / 1000));
 
         if (i === 2) {
           // 실제 API 호출은 3번째 단계에서
@@ -229,6 +237,10 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
       );
     } finally {
       setIsAnalyzing(false);
+      // 타이머 정리
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
     }
   };
 
