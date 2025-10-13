@@ -420,7 +420,7 @@ const MainPage: React.FC = () => {
               {/* 헤어체인지 이미지 영역 */}
               <div className="relative bg-gray-100 rounded-lg h-48 overflow-hidden">
                 <img
-                  src="/assets/images/main/hairchange.png"
+                  src="/assets/images/main/hairchange.PNG"
                   alt="헤어체인지 Before & After"
                   className="w-full h-full object-cover"
                   onError={(e) => {
