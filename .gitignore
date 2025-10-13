@@ -60,7 +60,7 @@ keys/
 # Hair damage data (if contains sensitive info)
 hair_damage/
 *.jpg
-*.png
+
 *.jpeg
 
 # Python specific
