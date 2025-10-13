@@ -54,8 +54,6 @@ const HairQuiz: React.FC = () => {
   const generateQuizWithGemini = async (): Promise<QuizQuestion[]> => {
     try {
       const response = await pythonClient.post('/hair-quiz/generate');
-      console.log('🔥 API 응답 전체:', response.data);
-      console.log('🔥 첫 번째 퀴즈:', response.data.items[0]);
       return response.data.items as QuizQuestion[];
     } catch (error: any) {
       console.error('퀴즈 생성 API 호출 실패:', error);
@@ -126,7 +124,6 @@ const HairQuiz: React.FC = () => {
   // 퀴즈 답변 제출 함수
   const submitQuizAnswers = async (answers: ('O' | 'X')[]) => {
     if (!userId) {
-      console.log('로그인하지 않은 사용자 - 퀴즈 결과 제출하지 않음');
       return;
     }
 
@@ -141,13 +138,10 @@ const HairQuiz: React.FC = () => {
           userAnswer: answer
         }))
       };
-
-      console.log('퀴즈 답변 제출:', submission);
       
       const response = await apiClient.post('/ai/hair-quiz/submit', submission);
       const result: QuizResult = response.data;
       
-      console.log('퀴즈 결과:', result);
       setQuizResult(result);
       
       // 포인트 지급 알림

@@ -326,9 +326,9 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
     : recommendations.hospitals.filter(hospital => hospital.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-gray-50 -mt-[52px]">
+    <div className="min-h-screen bg-gray-50">
       {/* Mobile-First 컨테이너 */}
-      <div className="max-w-md mx-auto min-h-screen bg-white flex flex-col">
+      <div className="max-w-md mx-auto min-h-screen bg-white flex flex-col pb-20">
         
         {/* Mobile-First 데일리 케어 */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-[60]">
@@ -342,7 +342,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
           </div>
         </div>
         {/* 메인 컨텐츠 (Mobile-First) */}
-        <div className="flex-1 px-4 pb-4 overflow-y-auto space-y-4">
+        <div className="flex-1 px-4 pb-6 overflow-y-auto space-y-4">
           {/* 진단 결과 요약 (Mobile-First) */}
               <div className="bg-gradient-to-r from-gray-50 to-green-50 p-4 rounded-xl">
             <div className="flex items-center gap-3 mb-4">

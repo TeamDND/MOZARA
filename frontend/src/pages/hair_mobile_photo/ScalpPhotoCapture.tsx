@@ -99,7 +99,6 @@ const ScalpPhotoCapture: React.FC<ScalpPhotoCaptureProps> = ({
       return;
     }
 
-    console.log('📸 파일 선택됨:', file.name, 'showPreview:', showPreview);
     setSelectedFile(file);
     setAnalysisResult(null); // 이전 결과 초기화
 
@@ -108,13 +107,10 @@ const ScalpPhotoCapture: React.FC<ScalpPhotoCaptureProps> = ({
     reader.onload = (event) => {
       const previewDataUrl = event.target?.result as string;
       setPreviewUrl(previewDataUrl);
-      console.log('🖼️ 미리보기 URL 생성 완료, showPreview:', showPreview);
 
       if (showPreview) {
-        console.log('✅ 모달 표시');
         setShowModal(true);
       } else {
-        console.log('⏭️ 미리보기 건너뛰고 바로 업로드');
         // 미리보기 없이 바로 처리
         handleProcess(file);
       }
@@ -125,7 +121,6 @@ const ScalpPhotoCapture: React.FC<ScalpPhotoCaptureProps> = ({
   // AI 분석 실행
   const analyzeScalp = async (file: File, imageUrl: string): Promise<AnalysisResult | null> => {
     try {
-      console.log('🧠 AI 분석 시작...');
       const formData = new FormData();
       formData.append('image', file);
       formData.append('top_k', '10');
@@ -175,8 +170,6 @@ const ScalpPhotoCapture: React.FC<ScalpPhotoCaptureProps> = ({
         rednessLabel
       };
 
-      console.log('✅ AI 분석 완료:', analyzedResult);
-
       // 결과 저장
       if (userId) {
         try {
@@ -187,7 +180,6 @@ const ScalpPhotoCapture: React.FC<ScalpPhotoCaptureProps> = ({
             image_url: imageUrl || ''
           };
           await apiClient.post('/ai/hair-loss-daily/save-result', savePayload);
-          console.log('💾 분석 결과 저장 완료');
         } catch (saveError) {
           console.error('❌ 분석 결과 저장 실패:', saveError);
         }
@@ -222,7 +214,6 @@ const ScalpPhotoCapture: React.FC<ScalpPhotoCaptureProps> = ({
 
         if (uploadResponse.data.success) {
           imageUrl = uploadResponse.data.imageUrl;
-          console.log('✅ S3 업로드 성공:', imageUrl);
         }
       }
 
@@ -235,14 +226,11 @@ const ScalpPhotoCapture: React.FC<ScalpPhotoCaptureProps> = ({
         setIsAnalyzing(false);
 
         if (result) {
-          console.log('✅ 분석 결과 설정:', result);
           setAnalysisResult(result);
-          console.log('✅ 모달 상태 유지 (결과 표시)');
 
           // 콜백 데이터를 임시 저장 (사용자가 "확인" 버튼 클릭 시 실행)
           setPendingCallback({ imageUrl, analysisResult: result });
         } else {
-          console.log('❌ 분석 결과 없음 - 모달 닫기');
           handleCloseModal();
         }
       } else {
@@ -265,7 +253,6 @@ const ScalpPhotoCapture: React.FC<ScalpPhotoCaptureProps> = ({
   const handleComplete = () => {
     // 분석 완료 콜백 실행 (임시 저장된 데이터 사용)
     if (pendingCallback && onAnalysisComplete) {
-      console.log('🎉 분석 완료 콜백 실행:', pendingCallback);
       onAnalysisComplete(pendingCallback.imageUrl, pendingCallback.analysisResult);
     }
 

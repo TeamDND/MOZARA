@@ -289,7 +289,6 @@ const SignUp: React.FC = () => {
         nickname: formData.nickname
       });
       
-      console.log('회원가입 성공:', response.data);
       alert('회원가입이 완료되었습니다!');
       navigate('/login');
     } catch (error: any) {

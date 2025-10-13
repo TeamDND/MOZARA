@@ -80,16 +80,11 @@ const HairDiagnosis: React.FC = () => {
     // 로그인한 사용자의 user_id 추가
     if (userId) {
       formData.append('user_id', userId.toString());
-      console.log('user_id 추가:', userId);
-    } else {
-      console.log('로그인하지 않은 사용자 - user_id 없음');
     }
-    console.log('API 호출 시작: /ai/swin-check/analyze');
 
     const { data: result } = await apiClient.post('/ai/swin-check/analyze', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-    console.log('API 응답 성공:', result);
 
     // Spring → Python 표준 응답 {analysis: {stage, title, description, advice}, save_result: {...}}
     const analysisData = result.analysis || result; // 하위 호환성을 위해 fallback
