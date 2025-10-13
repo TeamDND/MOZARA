@@ -177,6 +177,15 @@ const DailyCare: React.FC = () => {
   const [comparisonData, setComparisonData] = useState<any>(null);
   const [isComparingImages, setIsComparingImages] = useState(false);
   const [comparisonError, setComparisonError] = useState<string | null>(null);
+  const [comparisonPeriod, setComparisonPeriod] = useState<'latest' | '3months' | '6months'>('latest');
+
+  // 밀도 변화 시각화 상태
+  const [showDensityVisualization, setShowDensityVisualization] = useState(false);
+  const [densityVisualizedImages, setDensityVisualizedImages] = useState<{
+    previous: string | null;
+    current: string | null;
+  }>({ previous: null, current: null });
+  const [isLoadingVisualization, setIsLoadingVisualization] = useState(false);
 
   // 재분석 상태
   const [isReanalyzing, setIsReanalyzing] = useState(false);
@@ -241,7 +250,76 @@ const DailyCare: React.FC = () => {
     }
   }, [dispatch, userId]);
 
-  // 최근 2개 Daily 이미지 불러오기
+  // 기간별 Daily 이미지 불러오기
+  const loadDailyImagesByPeriod = useCallback(async (period: 'latest' | '3months' | '6months') => {
+    if (!userId) return;
+
+    try {
+      console.log('🔄 Daily 이미지 불러오는 중... period:', period);
+
+      // 모든 Daily 데이터 가져오기
+      const allDailyResponse = await apiClient.get(`/analysis-results/${userId}/type/daily`);
+
+      if (allDailyResponse.data && allDailyResponse.data.length > 0) {
+        // 날짜 내림차순 정렬 (최신순)
+        const sortedData = allDailyResponse.data.sort((a: any, b: any) =>
+          new Date(b.inspectionDate).getTime() - new Date(a.inspectionDate).getTime()
+        );
+
+        const currentData = sortedData[0];
+        const currentDate = new Date(currentData.inspectionDate);
+
+        let previousData = null;
+
+        if (period === 'latest') {
+          // 최신 2건
+          previousData = sortedData[1] || null;
+        } else if (period === '3months') {
+          // 3개월 이내에서 가장 오래된 데이터
+          const threeMonthsAgo = new Date(currentDate);
+          threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+          const filtered = sortedData
+            .filter((item: any) => {
+              const itemDate = new Date(item.inspectionDate);
+              return itemDate >= threeMonthsAgo && item.id !== currentData.id;
+            });
+
+          // 필터링된 배열의 마지막 요소 (최신순 정렬이므로 마지막이 가장 오래된 것)
+          previousData = filtered.length > 0 ? filtered[filtered.length - 1] : null;
+        } else if (period === '6months') {
+          // 6개월 이내에서 가장 오래된 데이터
+          const sixMonthsAgo = new Date(currentDate);
+          sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+          const filtered = sortedData
+            .filter((item: any) => {
+              const itemDate = new Date(item.inspectionDate);
+              return itemDate >= sixMonthsAgo && item.id !== currentData.id;
+            });
+
+          // 필터링된 배열의 마지막 요소 (최신순 정렬이므로 마지막이 가장 오래된 것)
+          previousData = filtered.length > 0 ? filtered[filtered.length - 1] : null;
+        }
+
+        setLatestDailyImages({
+          current: currentData?.imageUrl || null,
+          previous: previousData?.imageUrl || null
+        });
+
+        console.log('✅ Daily 이미지 로드 완료');
+        console.log('📸 현재:', currentData?.inspectionDate, currentData?.imageUrl);
+        console.log('📸 이전:', previousData?.inspectionDate || 'none', previousData?.imageUrl || 'none');
+      } else {
+        setLatestDailyImages({ current: null, previous: null });
+      }
+    } catch (err) {
+      console.error('❌ Daily 이미지 로드 실패:', err);
+      setLatestDailyImages({ current: null, previous: null });
+    }
+  }, [userId]);
+
+  // 최근 2개 Daily 이미지 불러오기 (기존 방식 - 빠른 로드)
   const loadLatestDailyImages = useCallback(async () => {
     if (!userId) return;
 
@@ -324,8 +402,8 @@ const DailyCare: React.FC = () => {
     setComparisonData(null);
 
     try {
-      console.log('🔄 Daily 시계열 비교 시작...');
-      const response = await apiClient.get(`/timeseries/daily-comparison/${userId}`);
+      console.log('🔄 Daily 시계열 비교 시작... period:', comparisonPeriod);
+      const response = await apiClient.get(`/timeseries/daily-comparison/${userId}?period=${comparisonPeriod}`);
 
       console.log('📥 비교 결과:', response.data);
 
@@ -341,6 +419,55 @@ const DailyCare: React.FC = () => {
       setComparisonError(err.response?.data?.message || '비교 중 오류가 발생했습니다.');
     } finally {
       setIsComparingImages(false);
+    }
+  };
+
+  // comparisonData가 변경되면 밀도 시각화 리셋
+  useEffect(() => {
+    setDensityVisualizedImages({ previous: null, current: null });
+    setShowDensityVisualization(false);
+  }, [comparisonData]);
+
+  // 밀도 변화 시각화 토글
+  const toggleDensityVisualization = async () => {
+    if (!comparisonData) return;
+
+    // 이미 시각화된 이미지가 있으면 토글만
+    if (densityVisualizedImages.previous) {
+      setShowDensityVisualization(!showDensityVisualization);
+      return;
+    }
+
+    // 처음 시각화를 요청하는 경우
+    setIsLoadingVisualization(true);
+    try {
+      console.log('🔄 밀도 변화 시각화 요청 중...');
+
+      // 이전 이미지에만 밀도 변화 시각화 (이전 → 오늘 비교해서 변화된 영역 표시)
+      const previousResponse = await apiClient.post(
+        '/timeseries/visualize-change',
+        {
+          current_image_url: comparisonData.previous_image_url,
+          past_image_urls: [comparisonData.current_image_url]
+        },
+        { responseType: 'blob' }
+      );
+
+      // Blob을 URL로 변환
+      const previousBlobUrl = URL.createObjectURL(previousResponse.data);
+
+      setDensityVisualizedImages({
+        previous: previousBlobUrl,
+        current: null
+      });
+
+      setShowDensityVisualization(true);
+      console.log('✅ 밀도 변화 시각화 완료');
+    } catch (err: any) {
+      console.error('❌ 밀도 변화 시각화 실패:', err);
+      alert('밀도 변화 시각화에 실패했습니다.');
+    } finally {
+      setIsLoadingVisualization(false);
     }
   };
 
@@ -818,6 +945,12 @@ const DailyCare: React.FC = () => {
     }
   }, [environmentInfo.humidity, loadHumidityBasedProducts]);
 
+  // 비교 기간 변경 시 이미지 리렌더링 (최신 제외)
+  React.useEffect(() => {
+    if (userId && comparisonPeriod !== 'latest') {
+      loadDailyImagesByPeriod(comparisonPeriod);
+    }
+  }, [comparisonPeriod, userId, loadDailyImagesByPeriod]);
 
   // 케어 스트릭 정보 로드
   const loadStreakInfo = async () => {
@@ -1442,6 +1575,36 @@ const DailyCare: React.FC = () => {
                 <Camera className="h-5 w-5" style={{ color: '#1f0101' }} />
                 두피 관리 변화 추적
               </CardTitle>
+              {/* 비교 기간 선택 버튼 */}
+              <div className="flex gap-1">
+                <Button
+                  variant={comparisonPeriod === 'latest' ? 'default' : 'outline'}
+                  size="sm"
+                  className="text-[10px] h-6 px-2"
+                  onClick={() => {
+                    setComparisonPeriod('latest');
+                    loadLatestDailyImages(); // 기존 API로 최신 2건 로드
+                  }}
+                >
+                  최신
+                </Button>
+                <Button
+                  variant={comparisonPeriod === '3months' ? 'default' : 'outline'}
+                  size="sm"
+                  className="text-[10px] h-6 px-2"
+                  onClick={() => setComparisonPeriod('3months')}
+                >
+                  3개월
+                </Button>
+                <Button
+                  variant={comparisonPeriod === '6months' ? 'default' : 'outline'}
+                  size="sm"
+                  className="text-[10px] h-6 px-2"
+                  onClick={() => setComparisonPeriod('6months')}
+                >
+                  6개월
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -1476,7 +1639,7 @@ const DailyCare: React.FC = () => {
                 <p className="text-xs" style={{ color: '#1f0101' }}>최신 레포트</p>
               </div>
             </div>
-            
+
             <Button
               variant="outline"
               className="w-full"
@@ -1712,7 +1875,20 @@ const DailyCare: React.FC = () => {
           <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             {/* 헤더 */}
             <div className="sticky top-0 bg-white border-b p-4 flex items-center justify-between rounded-t-2xl">
-              <h2 className="text-lg font-bold text-[#1f0101]">변화 분석 결과</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold text-[#1f0101]">변화 분석 결과</h2>
+                <button
+                  onClick={toggleDensityVisualization}
+                  disabled={isLoadingVisualization}
+                  className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                    showDensityVisualization
+                      ? 'bg-green-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  {isLoadingVisualization ? '로딩 중...' : showDensityVisualization ? '밀도 표시 ON' : '밀도 표시 OFF'}
+                </button>
+              </div>
               <button
                 onClick={() => setIsComparisonModalOpen(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -1744,7 +1920,11 @@ const DailyCare: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <img
-                    src={comparisonData.previous_image_url}
+                    src={
+                      showDensityVisualization && densityVisualizedImages.previous
+                        ? densityVisualizedImages.previous
+                        : comparisonData.previous_image_url
+                    }
                     alt="이전 사진"
                     className="w-full aspect-square object-cover rounded-lg border-2 border-gray-300"
                   />

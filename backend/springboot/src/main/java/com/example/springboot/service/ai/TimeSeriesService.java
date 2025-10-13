@@ -52,6 +52,58 @@ public class TimeSeriesService {
     }
 
     /**
+     * 밀도 변화 시각화 (Python API 호출)
+     *
+     * @param requestBody current_image_url, past_image_urls
+     * @return 시각화된 이미지 바이트 배열
+     */
+    public byte[] visualizeChange(Map<String, Object> requestBody) {
+        try {
+            String pythonApiUrl = pythonBaseUrl + "/timeseries/visualize-change";
+            log.info("[TimeSeriesService] Python 밀도 변화 시각화 API 호출: {}", pythonApiUrl);
+
+            byte[] imageBytes = restTemplate.postForObject(
+                    pythonApiUrl,
+                    requestBody,
+                    byte[].class
+            );
+
+            log.info("[TimeSeriesService] 밀도 변화 시각화 성공");
+            return imageBytes;
+
+        } catch (Exception e) {
+            log.error("[TimeSeriesService] 밀도 변화 시각화 실패: {}", e.getMessage(), e);
+            throw new RuntimeException("밀도 변화 시각화 중 오류가 발생했습니다: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 밀도 시각화 (Python API 호출)
+     *
+     * @param requestBody image_url, threshold
+     * @return 시각화된 이미지 바이트 배열
+     */
+    public byte[] visualizeDensity(Map<String, Object> requestBody) {
+        try {
+            String pythonApiUrl = pythonBaseUrl + "/timeseries/visualize-density";
+            log.info("[TimeSeriesService] Python 밀도 시각화 API 호출: {}", pythonApiUrl);
+
+            byte[] imageBytes = restTemplate.postForObject(
+                    pythonApiUrl,
+                    requestBody,
+                    byte[].class
+            );
+
+            log.info("[TimeSeriesService] 밀도 시각화 성공");
+            return imageBytes;
+
+        } catch (Exception e) {
+            log.error("[TimeSeriesService] 밀도 시각화 실패: {}", e.getMessage(), e);
+            throw new RuntimeException("밀도 시각화 중 오류가 발생했습니다: " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * Python API Health Check
      *
      * @return 상태 정보

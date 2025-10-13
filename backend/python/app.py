@@ -28,7 +28,7 @@ try:
     # 11번가 API 키 확인
     eleven_st_key = os.getenv("ELEVEN_ST_API_KEY")
     if eleven_st_key:
-        print(f"✅ ELEVEN_ST_API_KEY 로드됨: {eleven_st_key[:4]}****")
+        print("✅ ELEVEN_ST_API_KEY 로드됨")
     else:
         print("⚠️  ELEVEN_ST_API_KEY 로드 실패 - .env 파일을 확인하세요")
 except Exception as e:
