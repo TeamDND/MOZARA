@@ -46,3 +46,35 @@ jobs:
             -H "Content-Type: application/json"
           
           echo "✅ Runpod Pod 재시작 완료!"
+          
+          # Pod이 완전히 시작될 때까지 대기
+          echo "⏳ Pod 시작 대기 중..."
+          sleep 30
+          
+          # SSH를 통한 프로젝트 배포
+          echo "📦 프로젝트 파일 배포 중..."
+          
+          # SSH 키 설정 (임시)
+          mkdir -p ~/.ssh
+          echo "${{ secrets.RUNPOD_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ssh.runpod.io >> ~/.ssh/known_hosts
+          
+          # 프로젝트 파일 배포 및 Python 서버 시작
+          ssh -o StrictHostKeyChecking=no ${{ secrets.RUNPOD_POD_ID }}-6441140b@ssh.runpod.io << 'EOF'
+            echo "📁 프로젝트 파일 클론 중..."
+            cd /workspace
+            rm -rf .cache
+            git clone https://github.com/TeamDND/MOZARA.git .
+            
+            echo "🐍 Python 의존성 설치 중..."
+            cd backend/python
+            pip install -r requirements.txt
+            
+            echo "🚀 Python 서버 시작 중..."
+            nohup python app.py > app.log 2>&1 &
+            
+            echo "✅ Python 서버 배포 완료!"
+          EOF
+          
+          echo "🎉 Python API 배포 완료!"
