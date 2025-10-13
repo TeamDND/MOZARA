@@ -2,27 +2,37 @@
 """
 MOZARA Python Backend 통합 애플리케이션
 """
+# Windows 환경에서 UTF-8 인코딩 강제 설정 + 버퍼링 비활성화
+import sys
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pydantic import BaseModel
-from typing import Optional, List
-import json
-from typing import Annotated
+from typing import Optional, List, Annotated
 import threading
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import urllib.parse
 import hashlib
-import json
-from datetime import datetime, timedelta
 
 # .env 파일 로드 (Docker 환경에서는 환경변수 직접 사용)
 try:
     load_dotenv("../../.env")
-    # load_dotenv(".env")
-except:
+    print(f"✅ .env 파일 로드 시도: ../../.env")
+
+    # 11번가 API 키 확인
+    eleven_st_key = os.getenv("ELEVEN_ST_API_KEY")
+    if eleven_st_key:
+        print("✅ ELEVEN_ST_API_KEY 로드됨")
+    else:
+        print("⚠️  ELEVEN_ST_API_KEY 로드 실패 - .env 파일을 확인하세요")
+except Exception as e:
+    print(f"⚠️  .env 로드 중 오류: {e}")
     pass  # Docker 환경에서는 환경변수를 직접 사용
 
 # 이미지 캐시 저장소 (메모리 기반)
@@ -100,9 +110,23 @@ def generate_default_image_url(category: str, name: str) -> str:
     
     if '문신' in category_lower or '문신' in name_lower or 'smp' in name_lower:
         selected_category = '두피문신'
-    elif '가발' in category_lower or '가발' in name_lower or '증모술' in name_lower:
+    elif ('가발' in category_lower or '가발' in name_lower or '증모술' in name_lower or 
+          '헤어피스' in name_lower or '헤어시스템' in name_lower or '헤어라인' in name_lower):
         selected_category = '가발전문점'
-    elif '미용' in category_lower or '미용' in name_lower or '헤어' in name_lower or '살롱' in name_lower:
+    elif (('미용' in category_lower or '미용' in name_lower or '살롱' in name_lower or
+           '헤어' in name_lower or '두피' in name_lower or '모발' in name_lower or
+           '헤어샵' in name_lower or '미용샵' in name_lower or '미용센터' in name_lower or
+           '미용스튜디오' in name_lower or '헤어케어' in name_lower or '두피케어' in name_lower or
+           '모발케어' in name_lower or '모발관리' in name_lower or '두피관리' in name_lower or
+           '탈모케어' in name_lower or '탈모관리' in name_lower or '헤어스타일링' in name_lower or
+           '헤어디자인' in name_lower or '두피스파' in name_lower or '헤드스파' in name_lower or
+           '두피마사지' in name_lower or '모발진단' in name_lower or '두피진단' in name_lower or
+           '모발분석' in name_lower or '두피분석' in name_lower or '모발치료' in name_lower or
+           '두피치료' in name_lower or '모발상담' in name_lower or '두피상담' in name_lower or
+           '맨즈헤어' in name_lower or '남성미용실' in name_lower or '여성미용실' in name_lower or
+           '탈모전용' in name_lower) and not (
+          '가발' in name_lower or '증모술' in name_lower or '헤어피스' in name_lower or 
+          '헤어시스템' in name_lower or '헤어라인' in name_lower)):
         selected_category = '탈모미용실'
     else:
         selected_category = '탈모병원'
@@ -144,9 +168,23 @@ def get_unsplash_collection_images(category: str, name: str) -> str:
     
     if '문신' in category_lower or '문신' in name_lower or 'smp' in name_lower:
         selected_category = '두피문신'
-    elif '가발' in category_lower or '가발' in name_lower or '증모술' in name_lower:
+    elif ('가발' in category_lower or '가발' in name_lower or '증모술' in name_lower or 
+          '헤어피스' in name_lower or '헤어시스템' in name_lower or '헤어라인' in name_lower):
         selected_category = '가발전문점'
-    elif '미용' in category_lower or '미용' in name_lower or '헤어' in name_lower or '살롱' in name_lower:
+    elif (('미용' in category_lower or '미용' in name_lower or '살롱' in name_lower or
+           '헤어' in name_lower or '두피' in name_lower or '모발' in name_lower or
+           '헤어샵' in name_lower or '미용샵' in name_lower or '미용센터' in name_lower or
+           '미용스튜디오' in name_lower or '헤어케어' in name_lower or '두피케어' in name_lower or
+           '모발케어' in name_lower or '모발관리' in name_lower or '두피관리' in name_lower or
+           '탈모케어' in name_lower or '탈모관리' in name_lower or '헤어스타일링' in name_lower or
+           '헤어디자인' in name_lower or '두피스파' in name_lower or '헤드스파' in name_lower or
+           '두피마사지' in name_lower or '모발진단' in name_lower or '두피진단' in name_lower or
+           '모발분석' in name_lower or '두피분석' in name_lower or '모발치료' in name_lower or
+           '두피치료' in name_lower or '모발상담' in name_lower or '두피상담' in name_lower or
+           '맨즈헤어' in name_lower or '남성미용실' in name_lower or '여성미용실' in name_lower or
+           '탈모전용' in name_lower) and not (
+          '가발' in name_lower or '증모술' in name_lower or '헤어피스' in name_lower or 
+          '헤어시스템' in name_lower or '헤어라인' in name_lower)):
         selected_category = '탈모미용실'
     else:
         selected_category = '탈모병원'
@@ -178,9 +216,23 @@ def get_unsplash_user_images(category: str, name: str) -> str:
     
     if '문신' in category_lower or '문신' in name_lower or 'smp' in name_lower:
         selected_category = '두피문신'
-    elif '가발' in category_lower or '가발' in name_lower or '증모술' in name_lower:
+    elif ('가발' in category_lower or '가발' in name_lower or '증모술' in name_lower or 
+          '헤어피스' in name_lower or '헤어시스템' in name_lower or '헤어라인' in name_lower):
         selected_category = '가발전문점'
-    elif '미용' in category_lower or '미용' in name_lower or '헤어' in name_lower or '살롱' in name_lower:
+    elif (('미용' in category_lower or '미용' in name_lower or '살롱' in name_lower or
+           '헤어' in name_lower or '두피' in name_lower or '모발' in name_lower or
+           '헤어샵' in name_lower or '미용샵' in name_lower or '미용센터' in name_lower or
+           '미용스튜디오' in name_lower or '헤어케어' in name_lower or '두피케어' in name_lower or
+           '모발케어' in name_lower or '모발관리' in name_lower or '두피관리' in name_lower or
+           '탈모케어' in name_lower or '탈모관리' in name_lower or '헤어스타일링' in name_lower or
+           '헤어디자인' in name_lower or '두피스파' in name_lower or '헤드스파' in name_lower or
+           '두피마사지' in name_lower or '모발진단' in name_lower or '두피진단' in name_lower or
+           '모발분석' in name_lower or '두피분석' in name_lower or '모발치료' in name_lower or
+           '두피치료' in name_lower or '모발상담' in name_lower or '두피상담' in name_lower or
+           '맨즈헤어' in name_lower or '남성미용실' in name_lower or '여성미용실' in name_lower or
+           '탈모전용' in name_lower) and not (
+          '가발' in name_lower or '증모술' in name_lower or '헤어피스' in name_lower or 
+          '헤어시스템' in name_lower or '헤어라인' in name_lower)):
         selected_category = '탈모미용실'
     else:
         selected_category = '탈모병원'
@@ -756,12 +808,63 @@ def normalize_image_url(url: str, domain: str) -> str:
 
 # MOZARA Hair Change 모듈
 try:
-    from services.hair_change.hair_change import generate_wig_style_service, get_wig_styles_service
+    from services.hair_change.hair_change import generate_wig_style_service
     HAIR_CHANGE_AVAILABLE = True
     print("Hair Change 모듈 로드 성공")
 except ImportError as e:
     print(f"Hair Change 모듈 로드 실패: {e}")
     HAIR_CHANGE_AVAILABLE = False
+
+# ============================================
+# BiSeNet 싱글턴 인스턴스 생성 (VRAM 절약)
+# ⚠️ Hair Loss Daily import 이전에 로드해야 함!
+# ============================================
+try:
+    import torch
+    from services.swin_hair_classification.models.face_parsing.model import BiSeNet
+
+    print("🔄 BiSeNet 모델 로딩 시작...")
+
+    # 디바이스 설정
+    bisenet_device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"   디바이스: {bisenet_device}")
+
+    # BiSeNet 모델 생성
+    bisenet_model = BiSeNet(n_classes=19)
+    print("   BiSeNet 모델 인스턴스 생성 완료")
+
+    # 모델 가중치 경로
+    bisenet_model_path = os.path.join(
+        os.path.dirname(__file__),
+        'services',
+        'swin_hair_classification',
+        'models',
+        'face_parsing',
+        'res',
+        'cp',
+        '79999_iter.pth'
+    )
+    print(f"   모델 경로: {bisenet_model_path}")
+
+    if not os.path.exists(bisenet_model_path):
+        raise FileNotFoundError(f"BiSeNet 모델 파일을 찾을 수 없습니다: {bisenet_model_path}")
+
+    # 모델 가중치 로드
+    print("   가중치 로딩 중...")
+    bisenet_model.load_state_dict(torch.load(bisenet_model_path, map_location=bisenet_device))
+    bisenet_model.to(bisenet_device)
+    bisenet_model.eval()
+
+    print(f"✅ BiSeNet 싱글턴 인스턴스 생성 완료 (device: {bisenet_device})")
+    BISENET_AVAILABLE = True
+
+except Exception as e:
+    import traceback
+    print(f"❌ BiSeNet 싱글턴 생성 실패: {e}")
+    traceback.print_exc()
+    bisenet_model = None
+    bisenet_device = None
+    BISENET_AVAILABLE = False
 
 # Hair Loss Daily 모듈 - services 폴더 내에 있다고 가정하고 경로 수정
 try:
@@ -774,7 +877,8 @@ except ImportError as e:
     HAIR_ANALYSIS_AVAILABLE = False
     hair_analysis_app = None
 
-
+# Hair Classification RAG 모듈 (여성 탈모 분석)
+HAIR_RAG_AVAILABLE = True  # router만 있으면 사용 가능
 
 # Pydantic 모델 정의
 class HairstyleResponse(BaseModel):
@@ -821,6 +925,19 @@ else:
     index = None
     print("Hair Loss Daily 라우터 마운트 건너뜀")
 
+# Hair Classification RAG 라우터 include (조건부)
+if HAIR_RAG_AVAILABLE:
+    try:
+        from services.hair_classification_rag.api.router import router as hair_rag_router
+        app.include_router(hair_rag_router, prefix="/api")
+        print("Hair Classification RAG 라우터 include 완료 (/api/hair-classification-rag)")
+    except Exception as e:
+        print(f"Hair Classification RAG 라우터 include 실패: {e}")
+        import traceback
+        traceback.print_exc()
+else:
+    print("Hair Classification RAG 라우터 include 건너뜀 (모듈 로드 실패)")
+
 # OpenAI setup
 openai_api_key = os.getenv("OPENAI_API_KEY")
 if openai_api_key:
@@ -855,6 +972,51 @@ try:
 except ImportError as e:
     print(f"Hair Encyclopedia Paper API 라우터 마운트 실패: {e}")
 
+# Hair Encyclopedia PubMed 자동 수집 스케줄러 시작
+try:
+    from services.hair_encyclopedia.hair_papers.pubmed_scheduler_service import PubMedSchedulerService
+    pubmed_scheduler = PubMedSchedulerService()
+    pubmed_scheduler.start_scheduler()
+    print("Hair Encyclopedia PubMed 자동 수집 스케줄러 시작 완료 (매주 월요일 09:00)")
+except ImportError as e:
+    print(f"PubMed 스케줄러 시작 실패 (모듈 없음): {e}")
+except Exception as e:
+    print(f"PubMed 스케줄러 시작 실패: {e}")
+
+# Time-Series Analysis 라우터 마운트
+try:
+    from services.time_series.api.router import router as timeseries_router
+    from services.time_series.services import analysis_service as timeseries_analysis_service
+
+    # BiSeNet 싱글턴 주입
+    if BISENET_AVAILABLE and bisenet_model is not None:
+        timeseries_analysis_service.set_bisenet_singleton(bisenet_model)
+
+    app.include_router(timeseries_router)
+    print("Time-Series Analysis API 라우터 마운트 완료")
+except ImportError as e:
+    print(f"Time-Series Analysis API 라우터 마운트 실패: {e}")
+
+# Weather API 라우터
+try:
+    from services.hair_daily_care_weather import router as weather_router
+    app.include_router(weather_router)
+    print("Weather API 라우터 마운트 완료")
+except ImportError as e:
+    print(f"Weather API 라우터 마운트 실패: {e}")
+
+# Gemini Hair Check 모듈 (제거됨 - Swin 및 RAG 분석으로 대체)
+GEMINI_HAIR_CHECK_AVAILABLE = False
+
+# Swin Hair Classification 모듈
+try:
+    from services.swin_hair_classification.hair_swin_check import analyze_hair_with_swin
+    SWIN_HAIR_CHECK_AVAILABLE = True
+    print("Swin Hair Check 모듈 로드 성공")
+except ImportError as e:
+    print(f"Swin Hair Check 모듈 로드 실패: {e}")
+    SWIN_HAIR_CHECK_AVAILABLE = False
+
 # Gemini Hair Analysis Models
 class HairAnalysisRequest(BaseModel):
     image_base64: str
@@ -871,23 +1033,25 @@ class QuizQuestion(BaseModel):
     answer: str
     explanation: str
 
+class PaperDetail(BaseModel):
+    id: str
+    title: str
+    source: str
+    full_summary: str
+
+class PaperAnalysis(BaseModel):
+    id: str
+    title: str
+    source: str
+    main_topics: List[str]
+    key_conclusions: str
+    section_summaries: List[dict]
+
 class QuizGenerateResponse(BaseModel):
     items: List[QuizQuestion]
 
-from services.hair_loss_products import (
-    build_stage_response,
-    search_11st_products,
-)
-
-# Gemini 탈모 사진 분석 (퀴즈 모듈과 동일한 분석 로직 분리본)
-try:
-    from services.hair_gemini_check import analyze_hair_with_gemini
-    GEMINI_HAIR_CHECK_AVAILABLE = True
-except Exception as _e:
-    GEMINI_HAIR_CHECK_AVAILABLE = False
-
-# API 엔드포인트 정의
 @app.get("/")
+
 def read_root():
     """루트 경로 - 서버 상태 확인"""
     return {
@@ -896,89 +1060,11 @@ def read_root():
         "modules": {
             "hair_loss_daily": "/hair-loss-daily" if HAIR_ANALYSIS_AVAILABLE else "unavailable",
             "hair_change": "/generate_hairstyle" if HAIR_CHANGE_AVAILABLE else "unavailable",
-            "hair_encyclopedia": "/paper" if openai_api_key else "unavailable",
-            "gemini_hair_analysis": "/hair-analysis" if google_api_key else "unavailable"
+            "hair_gemini_check": "unavailable (제거됨)",
+            "hair_swin_check": "/hair_swin_check" if SWIN_HAIR_CHECK_AVAILABLE else "unavailable",
+            "hair_rag_v2": "/api/hair-classification-rag/analyze-upload" if HAIR_RAG_AVAILABLE else "unavailable"
         }
     }
-
-@app.get("/test/naver-image/{place_name}")
-async def test_naver_image(place_name: str, address: str = None):
-    """네이버 API를 사용한 이미지 수집 테스트"""
-    try:
-        # 네이버 지역검색 API 테스트
-        naver_client_id = os.getenv("NAVER_CLIENT_ID")
-        naver_client_secret = os.getenv("NAVER_CLIENT_SECRET")
-        
-        if not naver_client_id or not naver_client_secret:
-            return {
-                "error": "네이버 API 키가 설정되지 않았습니다.",
-                "naver_client_id": bool(naver_client_id),
-                "naver_client_secret": bool(naver_client_secret)
-            }
-        
-        # 네이버 지역검색 API 호출
-        import requests
-        
-        search_query = f"{place_name} {address or ''}"
-        naver_api_url = "https://openapi.naver.com/v1/search/local.json"
-        
-        headers = {
-            'X-Naver-Client-Id': naver_client_id,
-            'X-Naver-Client-Secret': naver_client_secret,
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-        
-        params = {
-            'query': search_query,
-            'display': 5,
-            'start': 1,
-            'sort': 'comment'
-        }
-        
-        response = requests.get(naver_api_url, params=params, headers=headers, timeout=10)
-        
-        if response.status_code == 200:
-            data = response.json()
-            
-            results = []
-            if 'items' in data:
-                for item in data['items']:
-                    if is_medical_place(item.get('category', ''), item.get('title', '')):
-                        # 이미지 URL 추출 시도
-                        image_url = await get_naver_place_detail_image(item)
-                        
-                        results.append({
-                            "title": item.get('title', '').replace('<b>', '').replace('</b>', ''),
-                            "address": item.get('address', ''),
-                            "category": item.get('category', ''),
-                            "imageUrl": image_url,
-                            "is_medical": True
-                        })
-                    else:
-                        results.append({
-                            "title": item.get('title', '').replace('<b>', '').replace('</b>', ''),
-                            "address": item.get('address', ''),
-                            "category": item.get('category', ''),
-                            "imageUrl": None,
-                            "is_medical": False
-                        })
-            
-            return {
-                "query": search_query,
-                "total_results": len(results),
-                "medical_results": len([r for r in results if r['is_medical']]),
-                "results": results
-            }
-        else:
-            return {
-                "error": f"네이버 API 호출 실패: {response.status_code}",
-                "response": response.text
-            }
-            
-    except Exception as e:
-        return {
-            "error": f"테스트 중 오류 발생: {str(e)}"
-        }
 
 @app.get("/health")
 
@@ -986,42 +1072,153 @@ def health_check():
     """헬스 체크 엔드포인트"""
     return {"status": "healthy", "service": "python-backend-integrated"}
 
-# --- Gemini 탈모 사진 분석 전용 엔드포인트 ---
-@app.post("/hair_gemini_check")
-async def api_hair_gemini_check(file: Annotated[UploadFile, File(...)]):
+# --- Gemini 탈모 사진 분석 엔드포인트 (제거됨) ---
+# Swin Transformer 및 RAG 기반 분석으로 대체
+# 참조: /hair_swin_check, /api/hair-classification-rag/analyze-upload
+
+# --- 이미지 유효성 검증 전용 엔드포인트 ---
+@app.post("/validate-image")
+async def validate_image_endpoint(
+    image: Annotated[UploadFile, File(...)],
+    image_type: str = Form(...),  # 'top' 또는 'side'
+):
     """
-    multipart/form-data로 전송된 이미지를 Gemini로 분석하여 표준 결과를 반환
+    이미지 업로드 즉시 유효성 검사
+
+    Args:
+        image: 업로드된 이미지 파일
+        image_type: 'top' 또는 'side'
+
+    Returns:
+        {
+            "is_valid": bool,
+            "message": str
+        }
     """
-    if not GEMINI_HAIR_CHECK_AVAILABLE:
-        raise HTTPException(status_code=503, detail="Gemini 분석 모듈이 활성화되지 않았습니다.")
+    if not BISENET_AVAILABLE or bisenet_model is None:
+        # BiSeNet이 없으면 검증 스킵
+        return {
+            "is_valid": True,
+            "message": "이미지 검증을 건너뜁니다 (BiSeNet 비활성화)"
+        }
 
     try:
-        image_bytes = await file.read()
-        print(f"--- [DEBUG] File received. Size: {len(image_bytes)} bytes ---")
+        from services.image_validation import validate_hair_loss_image
 
-        # bytes 데이터를 직접 전달
-        result = analyze_hair_with_gemini(image_bytes)
+        image_bytes = await image.read()
+
+        is_valid, msg = validate_hair_loss_image(
+            image_bytes,
+            expected_type=image_type,
+            bisenet_model=bisenet_model,
+            device=bisenet_device
+        )
+
+        return {
+            "is_valid": is_valid,
+            "message": msg
+        }
+
+    except Exception as e:
+        print(f"[이미지 검증 오류] {str(e)}")
+        # 에러 발생 시에도 통과시킴 (사용자 경험)
+        return {
+            "is_valid": True,
+            "message": f"이미지 검증 중 오류 발생: {str(e)}"
+        }
+
+# --- Swin 탈모 사진 분석 전용 엔드포인트 ---
+@app.post("/hair_swin_check")
+async def api_hair_swin_check(
+    top_image: Annotated[UploadFile, File(...)],
+    side_image: Optional[UploadFile] = File(None),
+    gender: Optional[str] = Form(None),
+    age: Optional[str] = Form(None),
+    familyHistory: Optional[str] = Form(None),
+    recentHairLoss: Optional[str] = Form(None),
+    stress: Optional[str] = Form(None)
+):
+    """
+    multipart/form-data로 전송된 Top/Side 이미지를 Swin으로 분석하여 표준 결과를 반환
+    Side 이미지는 optional (여성의 경우 없을 수 있음)
+    설문 데이터도 함께 받아서 동적 가중치 계산에 사용
+
+    ✅ 이미지 검증 추가: BiSeNet 귀 감지로 Top/Side 이미지 타입 검증
+    """
+    if not SWIN_HAIR_CHECK_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Swin 분석 모듈이 활성화되지 않았습니다.")
+
+    try:
+        # 이미지 검증 모듈 import
+        from services.image_validation import validate_hair_loss_image
+
+        top_image_bytes = await top_image.read()
+
+        # ✅ TOP 이미지 검증 (BiSeNet 귀 감지)
+        if BISENET_AVAILABLE and bisenet_model is not None:
+            is_valid, msg = validate_hair_loss_image(
+                top_image_bytes,
+                expected_type='top',
+                bisenet_model=bisenet_model,
+                device=bisenet_device
+            )
+            if not is_valid:
+                print(f"[이미지 검증 실패] Top 이미지: {msg}")
+                raise HTTPException(status_code=400, detail=msg)
+            else:
+                print(f"[이미지 검증 성공] Top 이미지: {msg}")
+
+        side_image_bytes = None
+
+        if side_image:
+            side_image_bytes = await side_image.read()
+            print(f"--- [DEBUG] Files received. Top: {len(top_image_bytes)} bytes, Side: {len(side_image_bytes)} bytes ---")
+
+            # ✅ SIDE 이미지 검증 (BiSeNet 귀 감지)
+            if BISENET_AVAILABLE and bisenet_model is not None:
+                is_valid, msg = validate_hair_loss_image(
+                    side_image_bytes,
+                    expected_type='side',
+                    bisenet_model=bisenet_model,
+                    device=bisenet_device
+                )
+                if not is_valid:
+                    print(f"[이미지 검증 실패] Side 이미지: {msg}")
+                    raise HTTPException(status_code=400, detail=msg)
+                else:
+                    print(f"[이미지 검증 성공] Side 이미지: {msg}")
+        else:
+            print(f"--- [DEBUG] Files received. Top: {len(top_image_bytes)} bytes, Side: None (여성) ---")
+
+        # 설문 데이터 구성
+        survey_data = None
+        if gender or age or familyHistory:  # gender도 체크
+            survey_data = {
+                'gender': gender,
+                'age': int(age) if age else None,  # age를 정수로 변환
+                'familyHistory': familyHistory,
+                'recentHairLoss': recentHairLoss == 'true' if recentHairLoss else None,  # boolean 변환
+                'stress': stress
+            }
+            print(f"--- [DEBUG] Survey data received: {survey_data} ---")
+
+        # bytes 데이터와 설문 데이터를 함께 전달
+        result = analyze_hair_with_swin(top_image_bytes, side_image_bytes, survey_data)
 
         return result
+    except HTTPException:
+        # HTTPException은 그대로 재발생 (검증 실패 메시지 전달)
+        raise
     except Exception as e:
-        print(f"--- [DEBUG] Main Error: {str(e)} ---")
+        print(f"--- [DEBUG] Swin Error: {str(e)} ---")
         raise HTTPException(status_code=500, detail=str(e))
-
-# 프리플라이트 요청 처리 (특정 브라우저/프록시 환경 대응)
-# @app.options("/api/hair_gemini_check")
-# def options_hair_gemini_check():
-#     return {"ok": True}
-
-# @app.get("/api/hair_gemini_check/ping")
-# def get_hair_gemini_check_ping():
-#     return {"status": "ok"}
 
 # --- 네이버 지역 검색 API 프록시 ---
 @app.get("/api/naver/local/search")
 async def search_naver_local(query: str):
     """네이버 지역 검색 API 프록시"""
-    naver_client_id = os.getenv("NAVER_CLIENT_ID") or os.getenv("REACT_APP_NAVER_CLIENT_ID")
-    naver_client_secret = os.getenv("NAVER_CLIENT_SECRET") or os.getenv("REACT_APP_NAVER_CLIENT_SECRET")
+    naver_client_id = os.getenv("NAVER_CLIENT_ID")
+    naver_client_secret = os.getenv("NAVER_CLIENT_SECRET")
 
     if not naver_client_id or not naver_client_secret:
         raise HTTPException(status_code=503, detail="네이버 API 키가 설정되지 않았습니다.")
@@ -1031,15 +1228,18 @@ async def search_naver_local(query: str):
         # 카테고리별로 다른 검색어 전략 사용
         if "미용실" in query or "헤어살롱" in query or "탈모전용" in query:
             # 탈모미용실 검색 시 더 광범위한 미용실 검색
-            search_query = "미용실 헤어살롱"
+            search_query = "탈모 미용실 헤어살롱"
         elif "가발" in query or "증모술" in query:
             search_query = f"{query}"
         elif "문신" in query or "smp" in query.lower():
-            search_query = f"{query} 문신"
+            search_query = f"두피문신 SMP"
+        elif "약국" in query:
+            # 탈모약국 검색
+            search_query = "약국"
         else:
-            # 탈모병원 검색 시 더 광범위한 의료기관 검색
-            if "탈모병원" in query or "탈모" in query or "병원" in query:
-                search_query = "병원 의원 클리닉 피부과"
+            # 탈모병원 검색 시 탈모 관련 의료기관 검색
+            if "탈모" in query or "병원" in query or "의원" in query:
+                search_query = "탈모 병원 의원 클리닉 피부과 모발"
             else:
                 search_query = f"{query} 병원"
 
@@ -1059,9 +1259,31 @@ async def search_naver_local(query: str):
         response.raise_for_status()
 
         data = response.json()
-        
+
+        # 동물병원, 애견, 수의과 등 관련 없는 결과 필터링
+        def is_valid_hair_loss_place(item):
+            """탈모 관련 병원/미용실인지 확인"""
+            title = item.get('title', '').lower().replace('<b>', '').replace('</b>', '')
+            category = item.get('category', '').lower()
+
+            # 제외할 키워드 (동물병원, 애견, 반려동물 등)
+            exclude_keywords = [
+                '동물병원', '동물의료', '수의', '애견', '반려동물', '펫', 'pet',
+                '동물클리닉', '수의과', '동물진료', '동물외과', '동물내과',
+                '강아지', '고양이', '멍멍', '야옹', '동물종합병원'
+            ]
+
+            # 제외 키워드가 포함되어 있으면 False
+            for keyword in exclude_keywords:
+                if keyword in title or keyword in category:
+                    return False
+
+            return True
+
         # 각 항목에 이미지 URL 추가 (네이버 API 우선 활용)
         if 'items' in data:
+            # 관련 없는 결과 필터링
+            data['items'] = [item for item in data['items'] if is_valid_hair_loss_place(item)]
             for item in data['items']:
                 # 네이버 지역검색 결과에서 이미지 정보 추출 시도 (동기 버전)
                 try:
@@ -1099,7 +1321,7 @@ async def search_naver_local(query: str):
 @app.get("/api/kakao/geo/coord2address")
 async def get_address_from_coordinates(x: float, y: float):
     """카카오 좌표-주소 변환 API 프록시"""
-    kakao_api_key = os.getenv("KAKAO_REST_API_KEY") or os.getenv("REACT_APP_KAKAO_REST_API_KEY")
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY")
 
     if not kakao_api_key:
         raise HTTPException(status_code=503, detail="카카오 API 키가 설정되지 않았습니다.")
@@ -1129,7 +1351,7 @@ async def get_address_from_coordinates(x: float, y: float):
 # 대안: 좌표-행정구역 코드 변환 프록시
 @app.get("/api/kakao/local/geo/coord2regioncode")
 async def get_region_from_coordinates(x: float, y: float):
-    kakao_api_key = os.getenv("KAKAO_REST_API_KEY") or os.getenv("REACT_APP_KAKAO_REST_API_KEY")
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY")
     if not kakao_api_key:
         raise HTTPException(status_code=503, detail="카카오 API 키가 설정되지 않았습니다.")
     try:
@@ -1153,7 +1375,7 @@ async def search_kakao_local(
     radius: Optional[int] = 5000
 ):
     """카카오 지역 검색 API 프록시"""
-    kakao_api_key = os.getenv("KAKAO_REST_API_KEY") or os.getenv("REACT_APP_KAKAO_REST_API_KEY")
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY")
 
     if not kakao_api_key:
         raise HTTPException(status_code=503, detail="카카오 API 키가 설정되지 않았습니다.")
@@ -1163,15 +1385,18 @@ async def search_kakao_local(
         # 카테고리별로 다른 검색어 전략 사용
         if "미용실" in query or "헤어살롱" in query or "탈모전용" in query:
             # 탈모미용실 검색 시 더 광범위한 미용실 검색
-            search_query = "미용실 헤어살롱"
+            search_query = "탈모 미용실 헤어살롱"
         elif "가발" in query or "증모술" in query:
             search_query = f"{query}"
         elif "문신" in query or "smp" in query.lower():
-            search_query = f"{query} 문신"
+            search_query = f"두피문신 SMP"
+        elif "약국" in query:
+            # 탈모약국 검색
+            search_query = "약국"
         else:
-            # 탈모병원 검색 시 더 광범위한 의료기관 검색
-            if "탈모병원" in query or "탈모" in query or "병원" in query:
-                search_query = "병원 의원 클리닉 피부과"
+            # 탈모병원 검색 시 탈모 관련 의료기관 검색
+            if "탈모" in query or "병원" in query or "의원" in query:
+                search_query = "탈모 병원 의원 클리닉 피부과 모발"
             else:
                 search_query = f"{query} 병원"
 
@@ -1194,9 +1419,31 @@ async def search_kakao_local(
         response.raise_for_status()
 
         data = response.json()
-        
+
+        # 동물병원, 애견, 수의과 등 관련 없는 결과 필터링
+        def is_valid_hair_loss_place(place):
+            """탈모 관련 병원/미용실인지 확인"""
+            place_name = place.get('place_name', '').lower()
+            category_name = place.get('category_name', '').lower()
+
+            # 제외할 키워드 (동물병원, 애견, 반려동물 등)
+            exclude_keywords = [
+                '동물병원', '동물의료', '수의', '애견', '반려동물', '펫', 'pet',
+                '동물클리닉', '수의과', '동물진료', '동물외과', '동물내과',
+                '강아지', '고양이', '멍멍', '야옹', '동물종합병원'
+            ]
+
+            # 제외 키워드가 포함되어 있으면 False
+            for keyword in exclude_keywords:
+                if keyword in place_name or keyword in category_name:
+                    return False
+
+            return True
+
         # 각 항목에 이미지 URL 추가 (카카오 API 우선 활용)
         if 'documents' in data:
+            # 관련 없는 결과 필터링
+            data['documents'] = [doc for doc in data['documents'] if is_valid_hair_loss_place(doc)]
             for doc in data['documents']:
                 # 카카오 장소 상세 정보에서 이미지 추출 시도
                 try:
@@ -1249,6 +1496,17 @@ async def search_youtube_videos(q: str, order: str = "viewCount", max_results: i
     youtube_api_key = os.getenv("YOUTUBE_API_KEY")
     print(f"🔑 YouTube API 키 상태: {'설정됨' if youtube_api_key and youtube_api_key != 'your_youtube_api_key_here' else '설정되지 않음'}")
     
+    # API 키가 없거나 기본값인 경우 대체 응답 반환
+    if not youtube_api_key or youtube_api_key == 'your_youtube_api_key_here':
+        print("⚠️ YouTube API 키가 설정되지 않음 - 대체 응답 반환")
+        return {
+            "kind": "youtube#searchListResponse",
+            "etag": "no-api-key",
+            "items": [],
+            "pageInfo": {"totalResults": 0, "resultsPerPage": 0},
+            "message": "YouTube API 키가 설정되지 않았습니다. 관리자에게 문의하세요."
+        }
+    
     try:
         api_url = f"https://www.googleapis.com/youtube/v3/search"
         params = {
@@ -1274,7 +1532,28 @@ async def search_youtube_videos(q: str, order: str = "viewCount", max_results: i
         
     except requests.exceptions.RequestException as e:
         print(f"❌ YouTube API 호출 실패: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"YouTube API 호출 실패: {str(e)}")
+        
+        # 403 오류인 경우 구체적인 메시지 제공
+        if hasattr(e, 'response') and e.response is not None:
+            status_code = e.response.status_code
+            if status_code == 403:
+                # 403 오류의 경우 빈 결과를 반환하여 서비스 중단 방지
+                print("⚠️ YouTube API 403 오류 - 빈 결과 반환")
+                return {
+                    "kind": "youtube#searchListResponse",
+                    "etag": "api-error-403",
+                    "items": [],
+                    "pageInfo": {"totalResults": 0, "resultsPerPage": 0},
+                    "message": "YouTube API 접근이 제한되었습니다. 잠시 후 다시 시도해주세요."
+                }
+            elif status_code == 400:
+                error_detail = "YouTube API 요청 파라미터가 잘못되었습니다."
+            else:
+                error_detail = f"YouTube API 오류 (상태코드: {status_code})"
+        else:
+            error_detail = "YouTube API 연결에 실패했습니다."
+            
+        raise HTTPException(status_code=500, detail=error_detail)
     except Exception as e:
         print(f"❌ 예상치 못한 오류: {str(e)}")
         raise HTTPException(status_code=500, detail=f"예상치 못한 오류: {str(e)}")
@@ -1296,14 +1575,8 @@ if HAIR_CHANGE_AVAILABLE:
         result = await generate_wig_style_service(image_data, hairstyle, custom_prompt)
         return HairstyleResponse(**result)
 
-    @app.get('/hairstyles')
-    async def get_hairstyles():
-        """사용 가능한 가발 스타일 목록 반환"""
-        return get_wig_styles_service()
-
-
-
-
+# Hair Loss Products Service Import
+from services.hair_loss_products import build_stage_response, search_11st_products
 
 @app.get("/products")
 async def get_hair_loss_products(
@@ -1352,7 +1625,7 @@ async def get_11st_products(
     try:
         print(f"11번가 제품 검색 요청: keyword={keyword}, page={page}, pageSize={pageSize}")
         
-        # 서비스 계층에서 11번가 제품 검색
+        # 서비스 계층에서 11번가 제품 검색 (이미 위에서 import됨)
         result = search_11st_products(keyword, page, pageSize)
         
         print(f"성공: 11번가에서 {len(result['products'])}개 제품 조회")
@@ -1367,6 +1640,35 @@ async def get_11st_products(
             detail="제품 검색 중 오류가 발생했습니다."
         )
 
+@app.get("/products/search")
+async def search_products_by_keyword(
+    keyword: str = Query(..., description="검색 키워드")
+):
+    """제품 검색 API - 11번가 검색 결과 반환"""
+    try:
+        print(f"제품 검색 요청: keyword={keyword}")
+        
+        # 11번가에서 제품 검색 (기본 20개)
+        result = search_11st_products(keyword, page=1, pageSize=20)
+        
+        # HairProductSearchResponse 형식으로 반환
+        response = {
+            "products": result['products'],
+            "totalCount": result['totalCount']
+        }
+        
+        print(f"성공: {keyword} 검색 결과 {len(response['products'])}개 반환")
+        return response
+        
+    except Exception as e:
+        print(f"제품 검색 중 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"제품 검색 중 오류가 발생했습니다: {str(e)}"
+        )
+
 @app.post("/refresh")
 async def refresh_token():
     """토큰 갱신 API (임시 구현)"""
@@ -1378,40 +1680,15 @@ async def refresh_token():
             "status": "success"
         }
     except Exception as e:
-        print(f"토큰 갱신 중 오류: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="토큰 갱신 중 오류가 발생했습니다."
-        )
+        raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/config")
-async def get_config():
-    """프론트엔드에서 필요한 환경변수 설정 조회"""
-    try:
-        youtube_api_key = os.getenv("YOUTUBE_API_KEY")
-        eleven_st_api_key = os.getenv("ELEVEN_ST_API_KEY")
-        api_base_url = os.getenv("API_BASE_URL", "http://localhost:8000/api")
-
-        return {
-            "apiBaseUrl": api_base_url,
-            "youtubeApiKey": youtube_api_key if youtube_api_key else None,
-            "hasYouTubeKey": bool(youtube_api_key),
-            "elevenStApiKey": eleven_st_api_key if eleven_st_api_key else None,
-            "hasElevenStKey": bool(eleven_st_api_key),
-        }
-    except Exception as e:
-        print(f"설정 조회 중 오류: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="설정 조회 중 오류가 발생했습니다."
-        )
-
+# 논문 관련 엔드포인트는 services/hair_encyclopedia/paper_api.py에서 처리됨
 @app.get("/api/location/status")
 async def get_location_status():
     """위치 서비스 상태 확인 API"""
-    naver_client_id = os.getenv("NAVER_CLIENT_ID") or os.getenv("REACT_APP_NAVER_CLIENT_ID")
-    naver_client_secret = os.getenv("NAVER_CLIENT_SECRET") or os.getenv("REACT_APP_NAVER_CLIENT_SECRET")
-    kakao_api_key = os.getenv("KAKAO_REST_API_KEY") or os.getenv("REACT_APP_KAKAO_REST_API_KEY")
+    naver_client_id = os.getenv("NAVER_CLIENT_ID")
+    naver_client_secret = os.getenv("NAVER_CLIENT_SECRET")
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY")
 
     return {
         "status": "ok",
@@ -1421,32 +1698,6 @@ async def get_location_status():
     }
 
 
-# --- Gemini Hair Analysis API ---
-@app.post("/hair-analysis", response_model=HairAnalysisResponse)
-async def analyze_hair_with_gemini_endpoint(request: HairAnalysisRequest):
-    """Gemini API를 사용한 두피/탈모 분석 (서비스로 위임)"""
-    try:
-        # base64 문자열을 bytes로 변환하여 hair_gemini_check 함수 사용
-        import base64
-        image_bytes = base64.b64decode(request.image_base64)
-        result = analyze_hair_with_gemini(image_bytes)
-        return HairAnalysisResponse(**result)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except RuntimeError as e:
-        raise HTTPException(status_code=503, detail=str(e))
-    except Exception as e:
-        print(f"Gemini 분석 중 오류: {e}")
-        raise HTTPException(status_code=500, detail=f"분석 중 오류가 발생했습니다: {str(e)}")
-
-@app.get("/hair-analysis/health")
-async def hair_analysis_health_check():
-    """두피 분석 서비스 헬스체크"""
-    return {
-        "status": "healthy" if genai else "unavailable",
-        "service": "gemini-hair-analysis",
-        "timestamp": datetime.now().isoformat()
-    }
 
 # --- Gemini Hair Quiz API ---
 @app.post("/hair-quiz/generate", response_model=QuizGenerateResponse)
@@ -1472,10 +1723,292 @@ async def hair_quiz_health_check():
         "timestamp": datetime.now().isoformat()
     }
 
+# --- Chat API (챗봇) ---
+class ChatRequest(BaseModel):
+    message: str
+    conversation_id: str
+
+class ChatResponse(BaseModel):
+    response: str
+    sources: List[str]
+    conversation_id: str
+    timestamp: str
+
+@app.post("/chat", response_model=ChatResponse)
+async def chat_with_gemini(request: ChatRequest):
+    """Gemini API를 사용한 탈모 관련 챗봇"""
+    if not genai:
+        raise HTTPException(status_code=503, detail="Gemini API가 설정되지 않았습니다.")
+
+    try:
+        # Gemini 모델 설정
+        model = genai.GenerativeModel('gemini-2.5-flash-lite')
+
+        # 탈모 전문 프롬프트 설정
+        system_prompt = """
+당신은 탈모 전문 상담사입니다. 탈모와 관련된 질문에 전문적이고 도움이 되는 답변을 제공해주세요.
+
+다음 규칙을 따라주세요:
+1. 탈모 관련 질문에 대해서만 답변해주세요
+2. 의학적 조언은 전문의 상담을 권하고, 일반적인 정보만 제공해주세요
+3. 친근하고 이해하기 쉬운 한국어로 답변해주세요
+4. 답변은 200자 이내로 간결하게 해주세요
+5. 탈모와 관련없는 질문에는 "탈모와 관련된 질문만 답변드릴 수 있습니다"라고 답변해주세요
+
+사용자 질문: {message}
+"""
+
+        # Gemini API 호출
+        prompt = system_prompt.format(message=request.message)
+        response = model.generate_content(prompt)
+
+        # 응답 처리
+        bot_response = response.text if response.text else "죄송합니다. 답변을 생성할 수 없습니다."
+
+        return ChatResponse(
+            response=bot_response,
+            sources=["Gemini AI"],
+            conversation_id=request.conversation_id,
+            timestamp=datetime.now().isoformat()
+        )
+
+    except Exception as e:
+        print(f"챗봇 API 오류: {e}")
+        raise HTTPException(status_code=500, detail=f"챗봇 응답 생성 중 오류가 발생했습니다: {str(e)}")
+
+@app.get("/chat/health")
+async def chat_health_check():
+    """챗봇 서비스 헬스체크"""
+    return {
+        "status": "healthy" if genai else "unavailable",
+        "service": "gemini-chat",
+        "timestamp": datetime.now().isoformat()
+    }
+
+# --- RAG 기반 챗봇 API (사용자별 메모리 관리) ---
+try:
+    from services.rag_chatbot.rag_service_final import get_final_rag_chatbot
+    RAG_CHATBOT_AVAILABLE = True
+    print("✅ RAG 챗봇 모듈 로드 성공 (사용자별 메모리 관리 + LangChain)")
+except ImportError as e:
+    print(f"❌ RAG 챗봇 모듈 로드 실패: {e}")
+    RAG_CHATBOT_AVAILABLE = False
+
+@app.post("/rag-chat", response_model=ChatResponse)
+async def rag_chat_endpoint(request: ChatRequest):
+    """RAG 기반 탈모 전문 챗봇"""
+    if not RAG_CHATBOT_AVAILABLE:
+        raise HTTPException(status_code=503, detail="RAG 챗봇 서비스가 비활성화되어 있습니다.")
+
+    try:
+        # RAG 챗봇 인스턴스 가져오기 (사용자별 메모리 관리)
+        chatbot = get_final_rag_chatbot()
+
+        # 채팅 처리 (conversation_id로 사용자별 대화 기억)
+        result = chatbot.chat(request.message, request.conversation_id)
+
+        return ChatResponse(
+            response=result['response'],
+            sources=result['sources'],
+            conversation_id=result['conversation_id'],
+            timestamp=result['timestamp']
+        )
+
+    except Exception as e:
+        print(f"RAG 챗봇 오류: {e}")
+        raise HTTPException(status_code=500, detail=f"RAG 챗봇 처리 중 오류가 발생했습니다: {str(e)}")
+
+@app.get("/rag-chat/health")
+async def rag_chat_health_check():
+    """RAG 챗봇 헬스체크"""
+    if not RAG_CHATBOT_AVAILABLE:
+        return {
+            "status": "unavailable",
+            "service": "rag-chatbot",
+            "error": "RAG 챗봇 모듈이 로드되지 않았습니다.",
+            "timestamp": datetime.now().isoformat()
+        }
+
+    try:
+        chatbot = get_final_rag_chatbot()
+        health_status = chatbot.get_health_status()
+        health_status["timestamp"] = datetime.now().isoformat()
+        return health_status
+    except Exception as e:
+        return {
+            "status": "error",
+            "service": "rag-chatbot",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
+@app.post("/rag-chat/clear")
+async def clear_conversation(request: dict):
+    """대화 기록 삭제"""
+    if not RAG_CHATBOT_AVAILABLE:
+        raise HTTPException(status_code=503, detail="RAG 챗봇 서비스가 비활성화되어 있습니다.")
+
+    try:
+        conversation_id = request.get("conversation_id", "")
+        if not conversation_id:
+            raise HTTPException(status_code=400, detail="conversation_id가 필요합니다.")
+
+        chatbot = get_final_rag_chatbot()
+        chatbot.clear_conversation(conversation_id)
+
+        return {
+            "success": True,
+            "message": f"대화 기록 삭제 완료: {conversation_id}",
+            "timestamp": datetime.now().isoformat()
+        }
+
+    except Exception as e:
+        print(f"대화 기록 삭제 오류: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+# --- Location Services API ---
+@app.get("/location/naver/search")
+async def search_naver_local(query: str):
+    """네이버 로컬 검색 API 프록시"""
+    try:
+        naver_client_id = os.getenv("NAVER_CLIENT_ID")
+        naver_client_secret = os.getenv("NAVER_CLIENT_SECRET")
+
+        if not naver_client_id or not naver_client_secret:
+            return {
+                "error": "네이버 API 키가 설정되지 않았습니다.",
+                "items": []
+            }
+
+        import requests
+
+        url = "https://openapi.naver.com/v1/search/local.json"
+        headers = {
+            'X-Naver-Client-Id': naver_client_id,
+            'X-Naver-Client-Secret': naver_client_secret,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+
+        params = {
+            'query': query,
+            'display': 20,
+            'sort': 'comment'
+        }
+
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+
+        if response.status_code == 200:
+            data = response.json()
+            return data
+        else:
+            return {
+                "error": f"네이버 API 호출 실패: {response.status_code}",
+                "items": []
+            }
+
+    except Exception as e:
+        print(f"네이버 로컬 검색 오류: {e}")
+        return {
+            "error": f"네이버 API 호출 중 오류가 발생했습니다: {str(e)}",
+            "items": []
+        }
+
+@app.get("/location/kakao/search")
+async def search_kakao_local(
+    query: str,
+    x: Optional[float] = None,
+    y: Optional[float] = None,
+    radius: Optional[int] = 5000
+):
+    """카카오 로컬 검색 API 프록시"""
+    try:
+        kakao_api_key = os.getenv("KAKAO_REST_API_KEY")
+
+        if not kakao_api_key:
+            return {
+                "error": "카카오 API 키가 설정되지 않았습니다.",
+                "documents": []
+            }
+
+        import requests
+
+        url = "https://dapi.kakao.com/v2/local/search/keyword.json"
+        headers = {
+            'Authorization': f'KakaoAK {kakao_api_key}',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+
+        params = {
+            'query': query,
+            'size': 15
+        }
+
+        # 좌표 기반 검색이 요청된 경우
+        if x is not None and y is not None:
+            params['x'] = x
+            params['y'] = y
+            params['radius'] = radius
+
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+
+        if response.status_code == 200:
+            data = response.json()
+            return data
+        else:
+            return {
+                "error": f"카카오 API 호출 실패: {response.status_code}",
+                "documents": []
+            }
+
+    except Exception as e:
+        print(f"카카오 로컬 검색 오류: {e}")
+        return {
+            "error": f"카카오 API 호출 중 오류가 발생했습니다: {str(e)}",
+            "documents": []
+        }
+
+@app.get("/location/status")
+async def location_service_status():
+    """위치 서비스 상태 확인"""
+    naver_client_id = os.getenv("NAVER_CLIENT_ID")
+    naver_client_secret = os.getenv("NAVER_CLIENT_SECRET")
+    kakao_api_key = os.getenv("KAKAO_REST_API_KEY")
+
+    return {
+        "status": "ok",
+        "message": "Python 위치 서비스가 정상적으로 동작 중입니다.",
+        "naverApiConfigured": bool(naver_client_id and naver_client_secret),
+        "kakaoApiConfigured": bool(kakao_api_key),
+        "timestamp": datetime.now().isoformat()
+    }
 
 
-
-
+@app.post("/generate-related-questions")
+async def generate_related_questions_api(request: dict):
+    """
+    AI 응답을 기반으로 연관 질문들을 생성합니다.
+    """
+    try:
+        from services.rag_chatbot.related_questions_service import generate_related_questions
+        
+        response_text = request.get("response", "")
+        questions = generate_related_questions(response_text)
+        
+        return {
+            "questions": questions,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        print(f"연관 질문 생성 오류: {e}")
+        return {
+            "questions": [
+                "이 치료법의 부작용은?",
+                "다른 치료법도 있나요?",
+                "효과가 언제 나타나나요?",
+                "주의사항이 있나요?"
+            ],
+            "timestamp": datetime.now().isoformat()
+        }
 
 
 if __name__ == "__main__":

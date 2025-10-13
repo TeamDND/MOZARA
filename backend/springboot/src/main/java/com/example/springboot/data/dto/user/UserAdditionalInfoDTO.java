@@ -24,9 +24,9 @@ public class UserAdditionalInfoDTO {
     private Integer age;
     
     /**
-     * 가족력 (true: 있음, false: 없음, null: 미입력)
+     * 가족력 ('none': 없음, 'father': 아버지, 'mother': 어머니, 'both': 부모 모두, null: 미입력)
      */
-    private Boolean familyHistory;
+    private String familyHistory;
     
     /**
      * 탈모 여부 (true: 있음, false: 없음, null: 미입력)

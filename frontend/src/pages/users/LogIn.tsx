@@ -52,8 +52,6 @@ const LogIn: React.FC = () => {
         password: formData.password
       });
 
-      console.log('로그인 성공:', loginRes.data);
-
       // JWT 토큰 저장
       const token = loginRes.headers['authorization'];
       if (token) {
@@ -63,14 +61,14 @@ const LogIn: React.FC = () => {
 
       // 사용자 정보 가져오기
       const userResponse = await apiClient.get(`/userinfo/${formData.username}`);
-      console.log('사용자 정보:', userResponse.data);
 
       dispatch(setUser(userResponse.data));
-      navigate('/daily-care'); // 대시보드로 이동
+      navigate('/main-page'); // 대시보드로 이동
     } catch (error: any) {
       console.error('로그인 오류:', error);
       const errorMessage = error.response?.data?.error || '로그인 중 오류가 발생했습니다.';
       setError(errorMessage);
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -78,14 +76,9 @@ const LogIn: React.FC = () => {
   
   // 소셜 로그인 핸들러
   const handleSocialLogin = (provider: string) => {
-    if (provider === 'google') {
-      // Google OAuth2 로그인
-      window.location.href = 'https://hairfit.duckdns.org/oauth2/authorization/google';
-    } else if (provider === 'kakao') {
-      // TODO: 카카오 로그인 API 구현
-      console.log('카카오 로그인 시도');
-      navigate('/daily-care');
-    }
+    // TODO: 소셜 로그인 API 구현
+    // 데일리케어로 이동
+    navigate('/main-page');
   };
 
   // 게스트 로그인 핸들러
@@ -97,7 +90,7 @@ const LogIn: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile-First 컨테이너 */}
-      <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col items-center">
+      <div className="max-w-md mx-auto min-h-screen bg-white flex flex-col items-center">
         {/* 모바일 헤더 */}
         <h1 className="text-xl font-semibold text-center py-6">
           로그인
@@ -146,7 +139,7 @@ const LogIn: React.FC = () => {
 
             <Button
               type="submit"
-              className="w-full h-12 bg-[#222222] hover:bg-[#333333] text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
+              className="w-full h-12 bg-[#1f0101] hover:bg-[#333333] text-white text-base font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
               disabled={isLoading}
             >
               {isLoading ? '로그인 중...' : '로그인하고 진단 시작'}
@@ -177,7 +170,7 @@ const LogIn: React.FC = () => {
               <span className="text-gray-700 font-medium">Google로 계속하기</span>
             </Button>
 
-            <Button
+            {/* <Button
               variant="outline"
               className="w-full h-12 bg-[#FEE500] hover:bg-[#FDD800] border-[#FEE500] rounded-xl active:scale-[0.98] transition-all"
               onClick={() => handleSocialLogin('kakao')}
@@ -186,7 +179,7 @@ const LogIn: React.FC = () => {
                 K
               </span>
               <span className="text-gray-900 font-medium">카카오로 계속하기</span>
-            </Button>
+            </Button> */}
           </div>
 
           {/* 회원가입 링크 */}

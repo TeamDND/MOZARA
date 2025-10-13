@@ -59,13 +59,22 @@ public class SecurityConfig {
                 .logout(logout -> logout.disable())
 
                 .authorizeHttpRequests(auth -> auth
+                        // 권한이 필요한 경로 먼저 설정 (순서 중요!)
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/user/**").hasAnyRole("USER","ADMIN")
+                        // 인증 없이 접근 가능한 경로
                         .requestMatchers(
                                 "/",
                                 "/error", // 에러 페이지 허용
                                 "/uploads/**", // 이미지 경로 허용
                                 "/api/join",
+                                "/api/signup",
                                 "/api/login",
                                 "/api/reissue",
+                                "/api/check-username/**",
+                                "/api/check-nickname/**",
+                                "/api/email-auth/**", // 이메일 인증 API 허용
+                                "/api/userinfo/**", // 로그인 후 사용자 정보 조회용
                                 "/api/naver",
                                 "/api/kakao",
                                 "/api/google",
@@ -80,10 +89,8 @@ public class SecurityConfig {
                                 "/api/naver/local/**", // 네이버 로컬 검색 API 허용
                                 "/api/kakao/local/**", // 카카오 로컬 검색 API 허용
                                 "/api/config", // 설정 API 허용
-                                "/api/**"
+                                "/api/ai/**" // AI 관련 API 허용
                         ).permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/user/**").hasAnyRole("USER","ADMIN")
                         .anyRequest().authenticated()
                 )
 

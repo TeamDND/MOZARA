@@ -6,6 +6,7 @@ import tokenReducer from './tokenSlice';
 import userReducer from './userSlice';
 import hairProductReducer from './hairProductSlice';
 import seedlingReducer from './seedlingSlice';
+import missionCounterReducer from './missionCounterSlice';
 
 // TypeScript: 루트 리듀서 타입 정의
 const rootReducer = combineReducers({
@@ -13,13 +14,14 @@ const rootReducer = combineReducers({
   user: userReducer,
   hairProduct: hairProductReducer,
   seedling: seedlingReducer,
+  missionCounter: missionCounterReducer,
 });
 
 // TypeScript: Redux Persist 설정
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['token', 'user', 'hairProduct', 'seedling'], // 저장할 상태들
+  whitelist: ['token', 'user', 'hairProduct', 'seedling', 'missionCounter'], // 저장할 상태들
 };
 
 // TypeScript: 지속화된 리듀서 생성

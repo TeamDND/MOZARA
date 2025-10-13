@@ -1,0 +1,3 @@
+여기에는 파인튜닝 모델이 들어감
+best_swin_hair_classifier_side.pth
+best_swin_hair_classifier_top.pth

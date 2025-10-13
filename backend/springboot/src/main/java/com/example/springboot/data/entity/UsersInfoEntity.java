@@ -28,8 +28,9 @@ public class UsersInfoEntity {
     @Column(name = "age")
     private Integer age;
 
-    @Column(name = "family_history")
-    private Boolean familyHistory;
+    @Size(max = 20)
+    @Column(name = "family_history", length = 20)
+    private String familyHistory;  // 'none', 'father', 'mother', 'both'
 
     @Column(name = "is_loss")
     private Boolean isLoss;

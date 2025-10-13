@@ -39,17 +39,6 @@ public class HairChangeController {
         }
     }
 
-    @GetMapping("/hairstyles")
-    public ResponseEntity<Map<String, String>> getHairstyles() {
-        try {
-            Map<String, String> hairstyles = hairChangeService.getHairstyles();
-            return ResponseEntity.ok(hairstyles);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "헤어스타일 목록을 가져오는데 실패했습니다: " + e.getMessage()));
-        }
-    }
-
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> healthCheck() {
         return ResponseEntity.ok(Map.of(

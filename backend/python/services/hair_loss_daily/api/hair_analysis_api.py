@@ -134,13 +134,13 @@ async def analyze_hair_image(
         response.model_info["preprocessing"] = image_preprocessing_service.get_preprocessing_info()
         response.model_info["preprocessing_used"] = use_preprocessing
         
-        print(f"✅ 분석 완료: {len(response.similar_cases)}개 유사 케이스 발견")
+        print(f"[OK] 분석 완료: {len(response.similar_cases)}개 유사 케이스 발견")
         return response
         
     except HTTPException:
         raise
     except Exception as e:
-        print(f"❌ 분석 오류: {str(e)}")
+        print(f"[ERROR] 분석 오류: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"분석 중 오류가 발생했습니다: {str(e)}"
@@ -199,7 +199,7 @@ async def search_by_category(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"❌ 카테고리별 검색 오류: {str(e)}")
+        print(f"[ERROR] 카테고리별 검색 오류: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"검색 중 오류가 발생했습니다: {str(e)}"
@@ -272,7 +272,7 @@ async def test_similarity_consistency(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"❌ 일관성 테스트 오류: {str(e)}")
+        print(f"[ERROR] 일관성 테스트 오류: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"테스트 중 오류가 발생했습니다: {str(e)}"
@@ -311,7 +311,7 @@ async def test_without_preprocessing(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"❌ 전처리 없이 분석 오류: {str(e)}")
+        print(f"[ERROR] 전처리 없이 분석 오류: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"분석 중 오류가 발생했습니다: {str(e)}"
@@ -367,7 +367,7 @@ async def test_weighted_ensemble(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"❌ 가중치 조정 앙상블 분석 오류: {str(e)}")
+        print(f"[ERROR] 가중치 조정 앙상블 분석 오류: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"분석 중 오류가 발생했습니다: {str(e)}"
