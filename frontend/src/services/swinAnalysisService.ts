@@ -1,4 +1,5 @@
 import axios from 'axios';
+import apiClient from './apiClient';
 
 // API 기본 설정
 const SPRING_BOOT_BASE_URL = process.env.REACT_APP_API_BASE_URL || '';
@@ -87,9 +88,9 @@ export const analyzeHairWithSwin = async (
       formData.append('stress', surveyData.stress);
     }
 
-    // API 호출
-    const response = await axios.post<SwinAnalysisResponse>(
-      `${SPRING_BOOT_BASE_URL}/api/ai/swin-check/analyze`,
+    // API 호출 (SpringBoot를 통해 요청)
+    const response = await apiClient.post<SwinAnalysisResponse>(
+      '/ai/swin-check/analyze',
       formData,
       {
         headers: {

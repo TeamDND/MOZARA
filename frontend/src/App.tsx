@@ -41,6 +41,9 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUserDetail from './pages/admin/AdminUserDetail';
 import AdminReportView from './pages/admin/AdminReportView';
 
+// 테스트 페이지 (개발자 전용)
+import HairAnalysisTest from './pages/test/HairAnalysisTest';
+
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
   console.log('App 컴포넌트 렌더링 - 현재 경로:', window.location.pathname);
@@ -95,6 +98,9 @@ const App: React.FC = () => {
           <Route path="admin" element={<AdminDashboard />} />
           <Route path="admin/user/:username" element={<AdminUserDetail />} />
           <Route path="admin/report/:reportId" element={<AdminReportView />} />
+
+          {/* 테스트 페이지 (개발자 전용) */}
+          <Route path="test/hair-analysis" element={<HairAnalysisTest />} />
         </Route>
       </Routes>
     </ErrorBoundary>

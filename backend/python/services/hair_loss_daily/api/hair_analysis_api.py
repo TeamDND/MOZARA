@@ -3,7 +3,6 @@
 """
 from fastapi import FastAPI, File, UploadFile, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Annotated
 import asyncio
 from datetime import datetime
 
@@ -77,7 +76,7 @@ async def health_check():
 
 @app.post("/analyze", response_model=HairAnalysisResponse)
 async def analyze_hair_image(
-    file: Annotated[UploadFile, File(...)],
+    file: UploadFile = File(...),
     top_k: int = Query(default=10, ge=1, le=20, description="검색할 유사 케이스 수"),
     use_preprocessing: bool = Query(default=True, description="이미지 전처리 사용 여부 (빛 반사 처리 포함)")
 ):
@@ -148,7 +147,7 @@ async def analyze_hair_image(
 
 @app.post("/search/category", response_model=CategorySearchResponse)
 async def search_by_category(
-    file: Annotated[UploadFile, File(...)],
+    file: UploadFile = File(...),
     category: HairCategory = Query(..., description="검색할 카테고리"),
     top_k: int = Query(default=5, ge=1, le=10, description="검색할 케이스 수")
 ):
@@ -241,7 +240,7 @@ async def get_model_info():
 
 @app.post("/test/consistency")
 async def test_similarity_consistency(
-    file: Annotated[UploadFile, File(...)],
+    file: UploadFile = File(...),
     test_rounds: int = Query(default=3, ge=2, le=10, description="테스트 반복 횟수")
 ):
     """유사도 일관성 테스트 (디버깅용)"""
@@ -280,7 +279,7 @@ async def test_similarity_consistency(
 
 @app.post("/test/no-preprocessing")
 async def test_without_preprocessing(
-    file: Annotated[UploadFile, File(...)],
+    file: UploadFile = File(...),
     top_k: int = Query(default=10, ge=1, le=20, description="검색할 유사 케이스 수")
 ):
     """전처리 없이 분석 테스트 (디버깅용)"""
@@ -319,7 +318,7 @@ async def test_without_preprocessing(
 
 @app.post("/test/weighted-ensemble")
 async def test_weighted_ensemble(
-    file: Annotated[UploadFile, File(...)],
+    file: UploadFile = File(...),
     vit_b32_weight: float = Query(default=0.6, ge=0.0, le=1.0, description="ViT-B-32 모델 가중치"),
     vit_b16_weight: float = Query(default=0.2, ge=0.0, le=1.0, description="ViT-B-16 모델 가중치"),
     rn50_weight: float = Query(default=0.2, ge=0.0, le=1.0, description="RN50 모델 가중치"),

@@ -815,56 +815,6 @@ except ImportError as e:
     print(f"Hair Change 모듈 로드 실패: {e}")
     HAIR_CHANGE_AVAILABLE = False
 
-# ============================================
-# BiSeNet 싱글턴 인스턴스 생성 (VRAM 절약)
-# ⚠️ Hair Loss Daily import 이전에 로드해야 함!
-# ============================================
-try:
-    import torch
-    from services.swin_hair_classification.models.face_parsing.model import BiSeNet
-
-    print("🔄 BiSeNet 모델 로딩 시작...")
-
-    # 디바이스 설정
-    bisenet_device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f"   디바이스: {bisenet_device}")
-
-    # BiSeNet 모델 생성
-    bisenet_model = BiSeNet(n_classes=19)
-    print("   BiSeNet 모델 인스턴스 생성 완료")
-
-    # 모델 가중치 경로
-    bisenet_model_path = os.path.join(
-        os.path.dirname(__file__),
-        'services',
-        'swin_hair_classification',
-        'models',
-        'face_parsing',
-        'res',
-        'cp',
-        '79999_iter.pth'
-    )
-    print(f"   모델 경로: {bisenet_model_path}")
-
-    if not os.path.exists(bisenet_model_path):
-        raise FileNotFoundError(f"BiSeNet 모델 파일을 찾을 수 없습니다: {bisenet_model_path}")
-
-    # 모델 가중치 로드
-    print("   가중치 로딩 중...")
-    bisenet_model.load_state_dict(torch.load(bisenet_model_path, map_location=bisenet_device))
-    bisenet_model.to(bisenet_device)
-    bisenet_model.eval()
-
-    print(f"✅ BiSeNet 싱글턴 인스턴스 생성 완료 (device: {bisenet_device})")
-    BISENET_AVAILABLE = True
-
-except Exception as e:
-    import traceback
-    print(f"❌ BiSeNet 싱글턴 생성 실패: {e}")
-    traceback.print_exc()
-    bisenet_model = None
-    bisenet_device = None
-    BISENET_AVAILABLE = False
 
 # Hair Loss Daily 모듈 - services 폴더 내에 있다고 가정하고 경로 수정
 try:
@@ -986,11 +936,6 @@ except Exception as e:
 # Time-Series Analysis 라우터 마운트
 try:
     from services.time_series.api.router import router as timeseries_router
-    from services.time_series.services import analysis_service as timeseries_analysis_service
-
-    # BiSeNet 싱글턴 주입
-    if BISENET_AVAILABLE and bisenet_model is not None:
-        timeseries_analysis_service.set_bisenet_singleton(bisenet_model)
 
     app.include_router(timeseries_router)
     print("Time-Series Analysis API 라우터 마운트 완료")
@@ -1076,56 +1021,6 @@ def health_check():
 # Swin Transformer 및 RAG 기반 분석으로 대체
 # 참조: /hair_swin_check, /api/hair-classification-rag/analyze-upload
 
-# --- 이미지 유효성 검증 전용 엔드포인트 ---
-@app.post("/validate-image")
-async def validate_image_endpoint(
-    image: Annotated[UploadFile, File(...)],
-    image_type: str = Form(...),  # 'top' 또는 'side'
-):
-    """
-    이미지 업로드 즉시 유효성 검사
-
-    Args:
-        image: 업로드된 이미지 파일
-        image_type: 'top' 또는 'side'
-
-    Returns:
-        {
-            "is_valid": bool,
-            "message": str
-        }
-    """
-    if not BISENET_AVAILABLE or bisenet_model is None:
-        # BiSeNet이 없으면 검증 스킵
-        return {
-            "is_valid": True,
-            "message": "이미지 검증을 건너뜁니다 (BiSeNet 비활성화)"
-        }
-
-    try:
-        from services.image_validation import validate_hair_loss_image
-
-        image_bytes = await image.read()
-
-        is_valid, msg = validate_hair_loss_image(
-            image_bytes,
-            expected_type=image_type,
-            bisenet_model=bisenet_model,
-            device=bisenet_device
-        )
-
-        return {
-            "is_valid": is_valid,
-            "message": msg
-        }
-
-    except Exception as e:
-        print(f"[이미지 검증 오류] {str(e)}")
-        # 에러 발생 시에도 통과시킴 (사용자 경험)
-        return {
-            "is_valid": True,
-            "message": f"이미지 검증 중 오류 발생: {str(e)}"
-        }
 
 # --- Swin 탈모 사진 분석 전용 엔드포인트 ---
 @app.post("/hair_swin_check")
@@ -1149,44 +1044,12 @@ async def api_hair_swin_check(
         raise HTTPException(status_code=503, detail="Swin 분석 모듈이 활성화되지 않았습니다.")
 
     try:
-        # 이미지 검증 모듈 import
-        from services.image_validation import validate_hair_loss_image
-
         top_image_bytes = await top_image.read()
-
-        # ✅ TOP 이미지 검증 (BiSeNet 귀 감지)
-        if BISENET_AVAILABLE and bisenet_model is not None:
-            is_valid, msg = validate_hair_loss_image(
-                top_image_bytes,
-                expected_type='top',
-                bisenet_model=bisenet_model,
-                device=bisenet_device
-            )
-            if not is_valid:
-                print(f"[이미지 검증 실패] Top 이미지: {msg}")
-                raise HTTPException(status_code=400, detail=msg)
-            else:
-                print(f"[이미지 검증 성공] Top 이미지: {msg}")
-
         side_image_bytes = None
 
         if side_image:
             side_image_bytes = await side_image.read()
             print(f"--- [DEBUG] Files received. Top: {len(top_image_bytes)} bytes, Side: {len(side_image_bytes)} bytes ---")
-
-            # ✅ SIDE 이미지 검증 (BiSeNet 귀 감지)
-            if BISENET_AVAILABLE and bisenet_model is not None:
-                is_valid, msg = validate_hair_loss_image(
-                    side_image_bytes,
-                    expected_type='side',
-                    bisenet_model=bisenet_model,
-                    device=bisenet_device
-                )
-                if not is_valid:
-                    print(f"[이미지 검증 실패] Side 이미지: {msg}")
-                    raise HTTPException(status_code=400, detail=msg)
-                else:
-                    print(f"[이미지 검증 성공] Side 이미지: {msg}")
         else:
             print(f"--- [DEBUG] Files received. Top: {len(top_image_bytes)} bytes, Side: None (여성) ---")
 
