@@ -47,29 +47,7 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
         return;
       }
 
-      // ✅ 이미지 타입 검증 (BiSeNet 귀 감지)
-      try {
-        setIsUploadingTop(true);
-        const formData = new FormData();
-        formData.append('image', file);
-        formData.append('image_type', 'top');
-
-        const validateResponse = await fetch('http://localhost:8000/validate-image', {
-          method: 'POST',
-          body: formData,
-        });
-
-        const validateResult = await validateResponse.json();
-
-        if (!validateResult.is_valid) {
-          alert(validateResult.message);
-          setIsUploadingTop(false);
-          return;
-        }
-      } catch (error) {
-        console.error('[이미지 검증 오류] Top 이미지:', error);
-        // 검증 실패해도 업로드는 진행 (사용자 경험)
-      }
+      setIsUploadingTop(true);
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -115,29 +93,7 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
         return;
       }
 
-      // ✅ 이미지 타입 검증 (BiSeNet 귀 감지)
-      try {
-        setIsUploadingSide(true);
-        const formData = new FormData();
-        formData.append('image', file);
-        formData.append('image_type', 'side');
-
-        const validateResponse = await fetch('http://localhost:8000/validate-image', {
-          method: 'POST',
-          body: formData,
-        });
-
-        const validateResult = await validateResponse.json();
-
-        if (!validateResult.is_valid) {
-          alert(validateResult.message);
-          setIsUploadingSide(false);
-          return;
-        }
-      } catch (error) {
-        console.error('[이미지 검증 오류] Side 이미지:', error);
-        // 검증 실패해도 업로드는 진행 (사용자 경험)
-      }
+      setIsUploadingSide(true);
 
       const reader = new FileReader();
       reader.onload = (e) => {
