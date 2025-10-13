@@ -100,8 +100,9 @@ apiClient.interceptors.response.use(
                 } catch (storeError) {
                     console.error('Redux 상태 정리 실패:', storeError);
                 }
-                // 로그인 페이지로 리다이렉트
-                window.location.href = '/login';
+                // 로그인 페이지로 리다이렉트 (백엔드 서버 다운 시 제외)
+                console.log('토큰 갱신 실패 - 로그인 페이지로 이동');
+                // window.location.href = '/login'; // 임시 비활성화
                 return Promise.reject(refreshError);
             }
         }
