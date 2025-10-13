@@ -31,6 +31,11 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
   const user = useSelector((state: any) => state.user);
   const token = useSelector((state: any) => state.token.jwtToken);
   const [currentStep, setCurrentStep] = useState(1);
+  
+  // 디버깅: currentStep 변화 추적
+  useEffect(() => {
+    console.log('🔍 현재 Step:', currentStep);
+  }, [currentStep]);
   const [baspAnswers, setBaspAnswers] = useState({
     gender: '',
     age: '',
@@ -429,39 +434,41 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Mobile-First 컨테이너 */}
-      <div className="max-w-md mx-auto min-h-screen bg-white flex flex-col">
-        
-        {/* 헤더 (Mobile-First) */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-4">
-          <div className="flex items-center justify-center">           
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600">
-                {currentStep} / {totalSteps}
-              </span>
-              <Progress value={(currentStep / totalSteps) * 100} className="w-60 h-2" />
+      {/* 통합 컨테이너 - 스크롤 방식 */}
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-md mx-auto bg-white min-h-screen pb-20">
+          
+          {/* 헤더 */}
+          <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
+            <div className="flex items-center justify-center">           
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-600">
+                  {currentStep} / {totalSteps}
+                </span>
+                <Progress value={(currentStep / totalSteps) * 100} className="w-60 h-2" />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* 메인 컨텐츠 (Mobile-First) */}
-        <div className="flex-1 p-4 overflow-y-auto">
-          <div className="bg-white rounded-xl shadow-md p-6">
-            {renderStep()}
-          </div>
-
-          {/* 네비게이션 버튼 (Mobile-First) */}
-          {currentStep < 4 && (
-            <div className="flex justify-between gap-3 mt-6">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-                disabled={currentStep === 1}
-                className="flex-1 h-12 rounded-xl"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                이전
-              </Button>
+          {/* 메인 컨텐츠 */}
+          <div className="p-4 pb-6">
+            <div className="bg-white rounded-xl shadow-md p-6">
+              {renderStep()}
+            </div>
+            
+            {/* 네비게이션 버튼 - 인라인으로 배치 */}
+            {currentStep < 4 && (
+              <div className="mt-6 pb-8">
+                <div className={`flex gap-3 ${currentStep === 1 ? 'justify-end' : 'justify-between'}`}>
+              {currentStep > 1 && (
+                <Button
+                  onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+                  className="flex-1 h-12 rounded-xl border-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  이전
+                </Button>
+              )}
               {currentStep === 2 && uploadedPhoto && (baspAnswers.gender === 'female' || uploadedSidePhoto) && (
                 <Button
                   onClick={() => {
@@ -486,28 +493,47 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
                 </Button>
               )}
               
-              {currentStep === 1 && (
-                <Button
-                  onClick={() => setCurrentStep(2)}
-                  disabled={
-                    !baspAnswers.gender ||
-                    !baspAnswers.age ||
-                    !baspAnswers.familyHistory ||
-                    !baspAnswers.recentHairLoss ||
-                    !baspAnswers.stress ||
-                    parseInt(baspAnswers.age) < 0 ||
-                    parseInt(baspAnswers.age) > 100 ||
-                    isNaN(parseInt(baspAnswers.age))
-                  }
-                  className="flex-1 h-12 rounded-xl text-white active:scale-[0.98] disabled:opacity-50"
-                  style={{ backgroundColor: "#1f0101" }}
-                >
-                  다음
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              )}
-            </div>
-          )}
+              {(() => {
+                console.log('🔍 Step 1 버튼 조건 체크:', { currentStep, isStep1: currentStep === 1 });
+                return currentStep === 1;
+              })() && (() => {
+                const isButtonDisabled = !baspAnswers.gender ||
+                  !baspAnswers.age ||
+                  !baspAnswers.familyHistory ||
+                  !baspAnswers.recentHairLoss ||
+                  !baspAnswers.stress ||
+                  parseInt(baspAnswers.age) < 0 ||
+                  parseInt(baspAnswers.age) > 100 ||
+                  isNaN(parseInt(baspAnswers.age));
+                
+                console.log('🔘 다음 버튼 렌더링:', {
+                  disabled: isButtonDisabled,
+                  gender: baspAnswers.gender,
+                  age: baspAnswers.age,
+                  familyHistory: baspAnswers.familyHistory,
+                  recentHairLoss: baspAnswers.recentHairLoss,
+                  stress: baspAnswers.stress
+                });
+                
+                return (
+                  <Button
+                    onClick={() => {
+                      console.log('✅ 다음 버튼 클릭됨');
+                      setCurrentStep(2);
+                    }}
+                    disabled={isButtonDisabled}
+                    className="flex-1 h-12 rounded-xl text-white active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: "#1f0101" }}
+                  >
+                    다음
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                );
+              })()}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
