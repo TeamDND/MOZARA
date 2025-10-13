@@ -511,7 +511,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-24">
       <h3 className="text-lg font-bold text-gray-900 px-1">회원정보 수정</h3>
 
       {/* 탭 헤더 */}
