@@ -144,6 +144,7 @@ const AnalysisResultStep: React.FC<AnalysisResultStepProps> = ({ analysisResult,
                   <li>• NCBI (2024): 유전적 기여도 80%</li>
                   <li>• PLOS One (2024): 부계 62.8%, 모계 8.6%</li>
                   <li>• Hamilton-Norwood Scale: 임상 진단 기준</li>
+                  <li>• Sinclair Scale: 임상 진단 기준</li>
                 </ul>
               </div>
 
