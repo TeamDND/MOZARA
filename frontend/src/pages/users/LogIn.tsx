@@ -76,9 +76,13 @@ const LogIn: React.FC = () => {
   
   // 소셜 로그인 핸들러
   const handleSocialLogin = (provider: string) => {
-    // TODO: 소셜 로그인 API 구현
-    // 데일리케어로 이동
-    navigate('/main-page');
+    if (provider === 'google') {
+      // Google OAuth2 로그인으로 이동
+      navigate('/oauth2/authorization/google');
+    } else if (provider === 'kakao') {
+      // TODO: 카카오 로그인 구현
+      navigate('/main-page');
+    }
   };
 
   // 게스트 로그인 핸들러
