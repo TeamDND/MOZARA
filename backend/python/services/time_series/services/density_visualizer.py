@@ -149,13 +149,20 @@ class DensityVisualizer:
             # 과거 평균 밀도 계산
             grid_size = len(current_map)
             avg_past_map = np.zeros((grid_size, grid_size))
+            valid_past_count = 0
 
             for past_density in past_densities:
                 past_map = past_density.get('distribution_map', [])
                 if past_map:
                     avg_past_map += np.array(past_map)
+                    valid_past_count += 1
 
-            avg_past_map /= len(past_densities)
+            # 유효한 과거 데이터가 없으면 현재 저밀도만 표시
+            if valid_past_count == 0:
+                logger.warning("유효한 과거 데이터가 없어 현재 저밀도만 표시")
+                return self.visualize_low_density_regions(current_image_bytes, current_density)
+
+            avg_past_map /= valid_past_count
 
             cell_h = original_h // grid_size
             cell_w = original_w // grid_size
