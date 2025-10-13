@@ -58,3 +58,15 @@ class TimeSeriesResponse(BaseModel):
     comparison: Optional[Dict[str, Any]] = None
     summary: Optional[Dict[str, Any]] = None
     message: Optional[str] = None
+
+
+class VisualizationRequest(BaseModel):
+    """밀도 시각화 요청"""
+    image_url: str = Field(..., description="원본 이미지 URL")
+    threshold: Optional[float] = Field(30.0, description="저밀도 임계값 (기본 30%)")
+
+
+class VisualizationChangeRequest(BaseModel):
+    """밀도 변화 시각화 요청"""
+    current_image_url: str = Field(..., description="현재 이미지 URL")
+    past_image_urls: List[str] = Field(..., description="과거 이미지 URL 리스트")

@@ -161,14 +161,17 @@ public class TimeSeriesController {
 
     /**
      * 최근 2개 Daily 분석 결과 비교 (DailyCare 전용)
-     * GET /api/timeseries/daily-comparison/{userId}
+     * GET /api/timeseries/daily-comparison/{userId}?period=latest|3months|6months
      *
      * @param userId 사용자 ID
+     * @param period 비교 기간 (latest: 최신 2건, 3months: 3개월, 6months: 6개월)
      * @return 최근 vs 이전 Daily 비교 결과
      */
     @GetMapping("/daily-comparison/{userId}")
-    public ResponseEntity<Map<String, Object>> getDailyComparison(@PathVariable Integer userId) {
-        log.info("[TimeSeriesController] Daily 비교 조회 - userId: {}", userId);
+    public ResponseEntity<Map<String, Object>> getDailyComparison(
+            @PathVariable Integer userId,
+            @RequestParam(required = false, defaultValue = "latest") String period) {
+        log.info("[TimeSeriesController] Daily 비교 조회 - userId: {}, period: {}", userId, period);
 
         try {
             // analysis_type = 'daily'인 레코드만 조회, 최신순 정렬
@@ -178,33 +181,58 @@ public class TimeSeriesController {
                     .sorted((a, b) -> b.getInspectionDate().compareTo(a.getInspectionDate()))
                     .collect(Collectors.toList());
 
-            // 서로 다른 날짜의 최신 2개만 선택
-            List<AnalysisResultEntity> dailyResults = new ArrayList<>();
-            LocalDate lastDate = null;
-
-            for (AnalysisResultEntity entity : allDailyResults) {
-                if (lastDate == null || !entity.getInspectionDate().equals(lastDate)) {
-                    dailyResults.add(entity);
-                    lastDate = entity.getInspectionDate();
-
-                    if (dailyResults.size() == 2) {
-                        break; // 서로 다른 날짜 2개 수집 완료
-                    }
-                }
-            }
-
-            log.info("[TimeSeriesController] 서로 다른 날짜의 Daily 레코드 개수: {}", dailyResults.size());
-
-            if (dailyResults.size() < 2) {
+            if (allDailyResults.isEmpty()) {
                 return ResponseEntity.ok(Map.of(
                         "success", false,
-                        "message", "비교할 Daily 데이터가 부족합니다. 서로 다른 날짜의 Daily 분석이 최소 2개 필요합니다.",
+                        "message", "Daily 데이터가 없습니다.",
                         "hasComparison", false
                 ));
             }
 
-            AnalysisResultEntity current = dailyResults.get(0);
-            AnalysisResultEntity previous = dailyResults.get(1);
+            // 최신 데이터 (중복 날짜 제거)
+            AnalysisResultEntity current = allDailyResults.get(0);
+            LocalDate currentDate = current.getInspectionDate();
+
+            // period에 따라 비교 대상 찾기
+            AnalysisResultEntity previous = null;
+
+            if ("3months".equals(period)) {
+                LocalDate threeMonthsAgo = currentDate.minusMonths(3);
+                log.info("[TimeSeriesController] 3개월 기준 - currentDate: {}, threeMonthsAgo: {}", currentDate, threeMonthsAgo);
+
+                previous = allDailyResults.stream()
+                        .filter(e -> !e.getInspectionDate().equals(currentDate))
+                        .filter(e -> !e.getInspectionDate().isBefore(threeMonthsAgo))
+                        .reduce((first, second) -> second) // 해당 기간 내 가장 오래된 것
+                        .orElse(null);
+
+            } else if ("6months".equals(period)) {
+                LocalDate sixMonthsAgo = currentDate.minusMonths(6);
+                log.info("[TimeSeriesController] 6개월 기준 - currentDate: {}, sixMonthsAgo: {}", currentDate, sixMonthsAgo);
+
+                previous = allDailyResults.stream()
+                        .filter(e -> !e.getInspectionDate().equals(currentDate))
+                        .filter(e -> !e.getInspectionDate().isBefore(sixMonthsAgo))
+                        .reduce((first, second) -> second) // 해당 기간 내 가장 오래된 것
+                        .orElse(null);
+
+            } else { // "latest" - 기존 로직 (최신 2건)
+                // 서로 다른 날짜의 바로 다음 데이터 찾기
+                previous = allDailyResults.stream()
+                        .filter(e -> !e.getInspectionDate().equals(currentDate))
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            if (previous == null) {
+                String periodMsg = "latest".equals(period) ? "최신 2건" :
+                                  "3months".equals(period) ? "3개월 이내" : "6개월 이내";
+                return ResponseEntity.ok(Map.of(
+                        "success", false,
+                        "message", periodMsg + " 비교할 Daily 데이터가 부족합니다.",
+                        "hasComparison", false
+                ));
+            }
 
             log.info("[TimeSeriesController] 비교 날짜 - 현재: {}, 이전: {}",
                     current.getInspectionDate(), previous.getInspectionDate());
@@ -277,6 +305,54 @@ public class TimeSeriesController {
                     "success", false,
                     "error", e.getMessage()
             ));
+        }
+    }
+
+    /**
+     * 밀도 변화 시각화
+     * POST /api/timeseries/visualize-change
+     *
+     * @param requestBody current_image_url, past_image_urls
+     * @return 시각화된 이미지 (JPEG)
+     */
+    @PostMapping("/visualize-change")
+    public ResponseEntity<byte[]> visualizeChange(@RequestBody Map<String, Object> requestBody) {
+        log.info("[TimeSeriesController] 밀도 변화 시각화 요청");
+
+        try {
+            byte[] imageBytes = timeSeriesService.visualizeChange(requestBody);
+
+            return ResponseEntity.ok()
+                    .header("Content-Type", "image/jpeg")
+                    .body(imageBytes);
+
+        } catch (Exception e) {
+            log.error("[TimeSeriesController] 밀도 변화 시각화 실패: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    /**
+     * 밀도 시각화
+     * POST /api/timeseries/visualize-density
+     *
+     * @param requestBody image_url, threshold
+     * @return 시각화된 이미지 (JPEG)
+     */
+    @PostMapping("/visualize-density")
+    public ResponseEntity<byte[]> visualizeDensity(@RequestBody Map<String, Object> requestBody) {
+        log.info("[TimeSeriesController] 밀도 시각화 요청");
+
+        try {
+            byte[] imageBytes = timeSeriesService.visualizeDensity(requestBody);
+
+            return ResponseEntity.ok()
+                    .header("Content-Type", "image/jpeg")
+                    .body(imageBytes);
+
+        } catch (Exception e) {
+            log.error("[TimeSeriesController] 밀도 시각화 실패: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(null);
         }
     }
 
