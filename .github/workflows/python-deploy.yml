@@ -9,7 +9,6 @@ on:
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
-    # 조건: 수동 실행되거나, backend/python/ 경로 파일이 수정/추가되거나, 커밋 메시지에 'python'이 포함될 때만 실행
     if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.modified, 'backend/python/') || contains(github.event.head_commit.added, 'backend/python/') || contains(github.event.head_commit.message, 'python')
     
     steps:
@@ -28,15 +27,8 @@ jobs:
       - name: Build and push Python API
         run: |
           echo "🔨 Python API 이미지 빌드 중..."
-          # 커밋 SHA를 태그로 사용하여 명확한 버전 관리
-          COMMIT_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)
-          IMAGE_TAG_LATEST=${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest
-          IMAGE_TAG_VERSION=${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:${COMMIT_SHA_SHORT}
-          
-          # 두 가지 태그로 빌드 및 푸시
-          docker build -t $IMAGE_TAG_LATEST -t $IMAGE_TAG_VERSION ./backend/python
-          docker push $IMAGE_TAG_LATEST
-          docker push $IMAGE_TAG_VERSION
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest ./backend/python
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest
           echo "✅ Python API 이미지 빌드 및 푸시 완료"
   
   deploy:
@@ -50,26 +42,27 @@ jobs:
           
           # SSH 키 설정
           mkdir -p ~/.ssh
-          # RUNPOD_SSH_KEY 시크릿을 사용하여 프라이빗 키 파일 생성
           echo "${{ secrets.RUNPOD_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          # Runpod SSH 호스트 키를 known_hosts에 추가하여 연결 시 경고 방지
           ssh-keyscan -H ssh.runpod.io >> ~/.ssh/known_hosts
           
-          # Docker 컨테이너 실행 명령 (가장 최신 'latest' 태그 사용)
-          IMAGE_TAG=${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest
+          # SSH 연결 테스트
+          echo "🔍 SSH 연결 테스트 중..."
+          ssh -T -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${{ secrets.RUNPOD_POD_ID }}-6441140b@ssh.runpod.io "echo 'SSH 연결 성공!'" || {
+            echo "❌ SSH 연결 실패"
+            exit 1
+          }
+          echo "✅ SSH 연결 성공!"
           
-          # ssh -T: PTY 할당 요청 안 함 (Error: Your SSH client doesn't support PTY 방지)
-          # -o StrictHostKeyChecking=no: 알려진 호스트 확인을 건너뛰어 CI/CD 환경에서 오류 방지
+          # Docker 컨테이너 실행
           ssh -T -o StrictHostKeyChecking=no ${{ secrets.RUNPOD_POD_ID }}-6441140b@ssh.runpod.io '
             echo "🐳 기존 Docker 컨테이너 정리 중..." && 
             docker stop mozara-python || true && 
             docker rm mozara-python || true && 
             echo "📥 Docker 이미지 pull 중..." && 
-            docker pull '$IMAGE_TAG' && 
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest && 
             echo "🚀 Docker 컨테이너 실행 중..." && 
-            # -d: 백그라운드 실행, --name: 컨테이너 이름 지정, -p: 포트 포워딩
-            docker run -d --name mozara-python -p 8000:8000 '$IMAGE_TAG' && 
+            docker run -d --name mozara-python -p 8000:8000 ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest && 
             echo "✅ Python 서버 배포 완료!"
           '
           
