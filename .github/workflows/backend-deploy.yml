@@ -85,4 +85,9 @@ jobs:
             -e DOMAIN_NAME=hairfit.duckdns.org \
             -e KAKAO_CLIENT_ID=${{secrets.KAKAO_CLIENT_ID}} \
             -e KAKAO_CLIENT_SECRET=${{secrets.KAKAO_CLIENT_SECRET}} \
+            -e AWS_ACCESS_KEY=${{secrets.AWS_ACCESS_KEY}} \
+            -e AWS_SECRET_KEY=${{secrets.AWS_SECRET_KEY}} \
+            -e AWS_REGION=${{secrets.AWS_REGION}} \
+            -e EMAIL_USERNAME=${{secrets.EMAIL_USERNAME}} \
+            -e EMAIL_PASSWORD=${{secrets.EMAIL_PASSWORD}} \
                 ${{secrets.DOCKERHUB_USERNAME}}/mozara-springboot

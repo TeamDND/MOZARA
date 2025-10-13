@@ -88,7 +88,15 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
         Map<String, Object> responseData = new HashMap<>();
-        responseData.put("error", "로그인 실패");
+
+        String errorMessage;
+        if (failed.getClass().getSimpleName().equals("BadCredentialsException")) {
+            errorMessage = "아이디 또는 비밀번호가 일치하지 않습니다";
+        } else {
+            errorMessage = failed.getMessage() != null ? failed.getMessage() : "로그인 실패";
+        }
+
+        responseData.put("error", errorMessage);
 
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonmessage = objectMapper.writeValueAsString(responseData);

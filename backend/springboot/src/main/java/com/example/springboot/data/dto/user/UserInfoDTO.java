@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,9 +19,11 @@ public class UserInfoDTO {
     private String nickname;
     private String gender;
     private Integer age;
-    private Boolean familyHistory;
+    private String role;
+    private String familyHistory;  // 'none', 'father', 'mother', 'both'
     private Boolean isLoss;
     private String stress;
     private SeedlingStatusDTO seedlingStatus;
+    private Instant createdAt;
 
 }

@@ -25,17 +25,17 @@ class AIAnalysisService:
             
             api_key = gemini_api_key or google_api_key
             if not api_key:
-                print("⚠️ GEMINI_API_KEY 또는 GOOGLE_API_KEY가 설정되지 않았습니다.")
+                print("[WARN] GEMINI_API_KEY 또는 GOOGLE_API_KEY가 설정되지 않았습니다.")
                 return
             
             # Gemini 설정
             genai.configure(api_key=api_key)
-            self.model = genai.GenerativeModel('gemini-1.5-flash')
+            self.model = genai.GenerativeModel('gemini-2.5-flash')
             
-            print("✅ Gemini AI 모델 초기화 완료")
+            print("[OK] Gemini AI 모델 초기화 완료")
             
         except Exception as e:
-            print(f"❌ Gemini 모델 초기화 실패: {str(e)}")
+            print(f"[ERROR] Gemini 모델 초기화 실패: {str(e)}")
             self.model = None
     
     def generate_advanced_analysis(self, rag_result: Dict[str, Any]) -> Dict[str, Any]:
@@ -61,11 +61,11 @@ class AIAnalysisService:
                 "success": True,
                 "ai_analysis": ai_analysis,
                 "rag_analysis": analysis,
-                "model_used": "gemini-1.5-flash"
+                "model_used": "gemini-2.5-flash"
             }
             
         except Exception as e:
-            print(f"⚠️ AI 분석 오류: {str(e)}")
+            print(f"[WARN] AI 분석 오류: {str(e)}")
             return {
                 "success": False,
                 "error": str(e),
@@ -89,13 +89,13 @@ class AIAnalysisService:
 {self._format_similar_cases(similar_cases[:3])}
 
 ## 요청사항:
-1. 종합적인 두피 상태 진단 (탈모 제외)
-2. 주요 문제점과 원인 분석 (탈모 제외)
+1. 종합적인 두피 상태 진단 (탈모, 비듬 제외)
+2. 주요 문제점과 원인 분석 (탈모, 비듬 제외)
 3. 개인화된 관리 방법 제안
 4. 주의사항 및 의료진 상담 필요성 판단
 5. 예방 방법 제안
 
-**중요: 탈모 관련 진단이나 조언은 제공하지 마세요.**
+**중요: 탈모 및 비듬 관련 진단이나 조언은 제공하지 마세요. (비듬은 빛반사 오인 문제로 제외)**
 
 다음 JSON 형식으로 응답해주세요:
 {{
@@ -180,7 +180,7 @@ class AIAnalysisService:
             return json.loads(json_text)
             
         except Exception as e:
-            print(f"⚠️ AI 응답 파싱 오류: {str(e)}")
+            print(f"[WARN] AI 응답 파싱 오류: {str(e)}")
             return {
                 "diagnosis": response_text,
                 "main_issues": [],
@@ -231,7 +231,7 @@ class AIAnalysisService:
         """AI 서비스 상태 확인"""
         return {
             "status": "healthy" if self.model else "unavailable",
-            "model": "gemini-1.5-flash" if self.model else None,
+            "model": "gemini-2.5-flash" if self.model else None,
             "api_key_configured": bool(os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"))
         }
 

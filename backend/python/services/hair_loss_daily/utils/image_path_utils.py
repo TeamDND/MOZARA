@@ -39,7 +39,7 @@ def get_image_path_from_metadata(metadata: dict) -> Optional[str]:
         return None
         
     except Exception as e:
-        print(f"⚠️ 이미지 경로 구성 오류: {str(e)}")
+        print(f"[WARN] 이미지 경로 구성 오류: {str(e)}")
         return None
 
 def validate_image_path(image_path: str) -> bool:

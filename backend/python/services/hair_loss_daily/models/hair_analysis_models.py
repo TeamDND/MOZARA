@@ -42,6 +42,7 @@ class RAGAnalysis(BaseModel):
     severity_distribution: Dict[str, int]
     diagnosis_scores: Dict[str, float]
     recommendations: List[str]
+    scalp_score: int = Field(default=100, ge=0, le=100, description="두피 건강 점수 (0-100)")
 
 class AIAnalysis(BaseModel):
     """AI 분석 결과"""

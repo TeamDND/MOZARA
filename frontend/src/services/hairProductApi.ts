@@ -1,7 +1,6 @@
 import apiClient from './apiClient';
-import { configApi } from './configApi';
 
-// TypeScript: 탈모 제품 정보 인터페이스
+// TypeScript: 탈모 제품 정보 인터페이스 (수정 없음)
 export interface HairProduct {
   productId: string;
   productName: string;
@@ -22,12 +21,12 @@ export interface HairProduct {
   suitableStages: number[];
 }
 
-// TypeScript: API 요청 인터페이스
+// TypeScript: API 요청 인터페이스 (수정 없음)
 export interface HairProductRequest {
   stage: number;
 }
 
-// TypeScript: API 응답 인터페이스 (기존 패턴과 일치)
+// TypeScript: 단계별 API 응답 인터페이스 (수정 없음)
 export interface HairProductResponse {
   products: HairProduct[];
   totalCount: number;
@@ -37,7 +36,13 @@ export interface HairProductResponse {
   disclaimer: string;
 }
 
-// TypeScript: 헬스체크 응답 인터페이스 (기존 패턴과 일치)
+// TypeScript: 키워드 검색 API 응답 인터페이스 (⭐추가됨)
+export interface HairProductSearchResponse {
+    products: HairProduct[];
+    totalCount: number;
+}
+
+// TypeScript: 헬스체크 응답 인터페이스 (수정 없음)
 export interface HairProductHealthResponse {
   status: string;
   service: string;
@@ -45,18 +50,11 @@ export interface HairProductHealthResponse {
 }
 
 /**
- * 탈모 단계별 제품 추천 API 클라이언트
- * 
- * 기존 프로젝트의 API 호출 패턴을 따라 구현:
- * - apiClient 사용 (JWT 토큰 자동 추가)
- * - 일관된 에러 처리
- * - TypeScript 타입 안전성
+ * 탈모 단계별 제품 추천 API 클라이언트 및 검색 확장
  */
 export const hairProductApi = {
   /**
-   * 탈모 단계별 제품 목록 조회
-   * @param stage 탈모 단계 (0-3)
-   * @returns 제품 목록과 단계별 정보
+   * 탈모 단계별 제품 목록 조회 (수정 없음)
    */
   async getProductsByStage(stage: number): Promise<HairProductResponse> {
     if (stage < 0 || stage > 3) {
@@ -64,15 +62,12 @@ export const hairProductApi = {
     }
 
     try {
-      console.log(`탈모 ${stage}단계 제품 조회 시작`);
-      
       // 스프링을 통해 Python API 호출
       const response = await apiClient.get<HairProductResponse>('/ai/products', {
         params: { stage },
         timeout: 10000, // 10초 타임아웃
       });
 
-      console.log(`탈모 ${stage}단계 제품 ${response.data.products.length}개 조회 완료`);
       return response.data;
     } catch (error: any) {
       console.error(`탈모 ${stage}단계 제품 조회 중 오류:`, error);
@@ -97,8 +92,36 @@ export const hairProductApi = {
   },
 
   /**
-   * 서비스 헬스체크
-   * @returns 서비스 상태 정보
+   * 키워드로 제품 검색 (⭐추가된 메서드: 11번가 검색을 백엔드에서 수행할 엔드포인트)
+   * @param keyword 검색 키워드
+   * @returns 검색된 제품 목록
+   */
+  async searchProductsByKeyword(keyword: string): Promise<HairProductSearchResponse> {
+    if (!keyword || keyword.trim() === '') {
+      throw new Error('검색 키워드를 입력해주세요.');
+    }
+
+    try {
+      // 백엔드의 새로운 검색 엔드포인트로 요청
+      // 백엔드는 이 요청을 받아 11번가 API를 호출해야 합니다.
+      const response = await apiClient.get<HairProductSearchResponse>('/ai/products/search', { 
+        params: { keyword },
+        timeout: 15000, // 검색은 더 오래 걸릴 수 있으므로 타임아웃 증가
+      });
+
+      return response.data;
+    } catch (error: any) {
+      console.error(`키워드 검색 중 오류:`, error);
+      
+      let errorMessage = '제품 검색 중 오류가 발생했습니다.';
+      // ... (기타 에러 처리 로직)
+      
+      throw new Error(errorMessage);
+    }
+  },
+
+  /**
+   * 서비스 헬스체크 (수정 없음)
    */
   async healthCheck(): Promise<HairProductHealthResponse> {
     try {
@@ -113,9 +136,7 @@ export const hairProductApi = {
   },
 
   /**
-   * 특정 제품 상세 정보 조회 (향후 확장용)
-   * @param productId 제품 ID
-   * @returns 제품 상세 정보
+   * 특정 제품 상세 정보 조회 (향후 확장용, 수정 없음)
    */
   async getProductDetail(productId: string): Promise<HairProduct> {
     try {

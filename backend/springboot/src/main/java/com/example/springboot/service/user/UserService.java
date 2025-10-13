@@ -5,6 +5,7 @@ import com.example.springboot.data.dao.UsersInfoDAO;
 import com.example.springboot.data.dto.user.SignUpDTO;
 import com.example.springboot.data.dto.user.UserInfoDTO;
 import com.example.springboot.data.dto.user.UserAdditionalInfoDTO;
+import com.example.springboot.data.dto.user.UserBasicInfoDTO;
 import com.example.springboot.data.dto.seedling.SeedlingStatusDTO;
 import com.example.springboot.data.entity.UserEntity;
 import com.example.springboot.data.entity.UsersInfoEntity;
@@ -87,22 +88,65 @@ public class UserService {
 
         // UsersInfoEntity에서 추가 정보 조회
         UsersInfoEntity usersInfoEntity = usersInfoDAO.findByUserId(userEntity.getId());
-        
+
         // SeedlingService를 통해 새싹 정보 조회
         SeedlingStatusDTO seedlingStatusDTO = seedlingService.getSeedlingByUserId(userEntity.getId());
-        
+
+        // 가족력 값 정규화 (DB에 숫자로 저장된 경우 문자열로 변환)
+        String familyHistory = null;
+        if (usersInfoEntity != null && usersInfoEntity.getFamilyHistory() != null) {
+            familyHistory = normalizeFamilyHistory(usersInfoEntity.getFamilyHistory());
+        }
+
         return UserInfoDTO.builder()
                 .userId(userEntity.getId())
                 .username(userEntity.getUsername())
                 .email(userEntity.getEmail())
                 .nickname(userEntity.getNickname())
+                .role(userEntity.getRole())
                 .gender(usersInfoEntity != null ? usersInfoEntity.getGender() : null)
                 .age(usersInfoEntity != null ? usersInfoEntity.getAge() : null)
-                .familyHistory(usersInfoEntity != null ? usersInfoEntity.getFamilyHistory() : null)
+                .familyHistory(familyHistory)
                 .isLoss(usersInfoEntity != null ? usersInfoEntity.getIsLoss() : null)
                 .stress(usersInfoEntity != null ? usersInfoEntity.getStress() : null)
                 .seedlingStatus(seedlingStatusDTO)
+                .createdAt(userEntity.getCreatedat())
                 .build();
+    }
+
+    /**
+     * 사용자 기본 정보 업데이트 (이메일, 닉네임)
+     */
+    public UserInfoDTO updateBasicUserInfo(String username, UserBasicInfoDTO userBasicInfoDTO) {
+        // 사용자 조회
+        UserEntity userEntity = userDAO.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 이메일 업데이트
+        if (userBasicInfoDTO.getEmail() != null && !userBasicInfoDTO.getEmail().trim().isEmpty()) {
+            // 이메일 형식 검증
+            if (!userBasicInfoDTO.getEmail().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+                throw new RuntimeException("이메일 형식이 올바르지 않습니다.");
+            }
+            userEntity.setEmail(userBasicInfoDTO.getEmail());
+        }
+
+        // 닉네임 업데이트
+        if (userBasicInfoDTO.getNickname() != null && !userBasicInfoDTO.getNickname().trim().isEmpty()) {
+            // 닉네임 중복 체크 (자기 자신 제외)
+            userDAO.findByNickname(userBasicInfoDTO.getNickname()).ifPresent(existingUser -> {
+                if (!existingUser.getId().equals(userEntity.getId())) {
+                    throw new RuntimeException("이미 사용 중인 닉네임입니다.");
+                }
+            });
+            userEntity.setNickname(userBasicInfoDTO.getNickname());
+        }
+
+        // 업데이트된 사용자 정보 저장
+        UserEntity updatedUser = userDAO.updateUser(userEntity);
+
+        // 전체 사용자 정보 반환
+        return getUserInfo(username);
     }
 
     /**
@@ -127,7 +171,9 @@ public class UserService {
             usersInfoEntity.setAge(userAdditionalInfoDTO.getAge());
         }
         if (userAdditionalInfoDTO.getFamilyHistory() != null) {
-            usersInfoEntity.setFamilyHistory(userAdditionalInfoDTO.getFamilyHistory());
+            // 가족력 값 검증 및 정규화
+            String familyHistory = normalizeFamilyHistory(userAdditionalInfoDTO.getFamilyHistory());
+            usersInfoEntity.setFamilyHistory(familyHistory);
         }
         if (userAdditionalInfoDTO.getIsLoss() != null) {
             usersInfoEntity.setIsLoss(userAdditionalInfoDTO.getIsLoss());
@@ -155,6 +201,68 @@ public class UserService {
                 .stress(updatedUserInfo.getStress())
                 .seedlingStatus(seedlingStatusDTO)
                 .build();
+    }
+
+    /**
+     * 비밀번호 확인 (비밀번호 변경 전 현재 비밀번호 확인)
+     */
+    public boolean verifyPassword(String username, String password) {
+        UserEntity userEntity = userDAO.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 입력한 비밀번호와 저장된 암호화된 비밀번호 비교
+        return passwordEncoder.matches(password, userEntity.getPassword());
+    }
+
+    /**
+     * 비밀번호 변경
+     */
+    public void resetPassword(String username, String password) {
+        userDAO.resetPassword(username, password);
+    }
+
+    /**
+     * 회원 탈퇴
+     */
+    public String deleteMember(String username) {
+        UserEntity userEntity = userDAO.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        userDAO.deleteMember(userEntity);
+
+        return "회원 탈퇴가 완료되었습니다.";
+    }
+
+    /**
+     * 가족력 값 정규화 (기존 숫자 형식을 문자열 형식으로 변환)
+     * @param familyHistory 입력된 가족력 값
+     * @return 정규화된 가족력 값 ('none', 'father', 'mother', 'both')
+     */
+    private String normalizeFamilyHistory(String familyHistory) {
+        if (familyHistory == null) {
+            return "none";
+        }
+
+        // 이미 올바른 형식이면 그대로 반환
+        if (familyHistory.equals("none") || familyHistory.equals("father") ||
+            familyHistory.equals("mother") || familyHistory.equals("both")) {
+            return familyHistory;
+        }
+
+        // 기존 숫자 형식을 문자열 형식으로 변환
+        switch (familyHistory) {
+            case "0":
+                return "none";
+            case "1":
+                return "father";
+            case "2":
+                return "mother";
+            case "3":
+                return "both";
+            default:
+                // 잘못된 값이 들어오면 기본값 반환
+                return "none";
+        }
     }
 
     /**

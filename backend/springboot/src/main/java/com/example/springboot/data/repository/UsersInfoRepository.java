@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UsersInfoRepository extends JpaRepository<UsersInfoEntity, Integer> {
     UsersInfoEntity findByUserEntityIdForeign_Id(Integer userId);
+
+    void deleteAllByUserEntityIdForeign(com.example.springboot.data.entity.UserEntity userEntity);
 }

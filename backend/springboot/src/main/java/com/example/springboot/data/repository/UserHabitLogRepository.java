@@ -4,6 +4,8 @@ import com.example.springboot.data.entity.UserHabitLogEntity;
 import com.example.springboot.data.entity.UserEntity;
 import com.example.springboot.data.entity.DailyHabitEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -28,4 +30,17 @@ public interface UserHabitLogRepository extends JpaRepository<UserHabitLogEntity
      * 사용자의 모든 완료 로그 조회
      */
     List<UserHabitLogEntity> findByUserEntityIdForeignOrderByCompletionDateDesc(UserEntity user);
+
+    /**
+     * 이번 달 사용자의 완료 로그 조회 (날짜 순으로 정렬)
+     */
+    @Query(value = "SELECT * FROM user_habit_log " +
+                   "WHERE user_id_foreign = :userId " +
+                   "AND YEAR(completion_date) = YEAR(:currentDate) " +
+                   "AND MONTH(completion_date) = MONTH(:currentDate) " +
+                   "ORDER BY completion_date ASC",
+           nativeQuery = true)
+    List<UserHabitLogEntity> findCurrentMonthLogs(@Param("userId") Integer userId, @Param("currentDate") LocalDate currentDate);
+
+    void deleteAllByUserEntityIdForeign(UserEntity userEntity);
 }
