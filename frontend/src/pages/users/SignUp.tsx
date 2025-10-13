@@ -304,7 +304,7 @@ const SignUp: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile-First 컨테이너 */}
-      <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col items-center">
+      <div className="max-w-md mx-auto min-h-screen bg-white flex flex-col items-center">
         {/* 모바일 헤더 */}
         <div className="flex items-center justify-center w-full p-4 border-b border-gray-100">
           <h1 className="text-lg font-semibold">회원가입</h1>

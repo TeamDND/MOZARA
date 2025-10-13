@@ -994,12 +994,12 @@ const DailyCare: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-md mx-auto bg-white min-h-screen pb-20">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-md mx-auto bg-white min-h-screen pb-32">
 
         {/* Main Title Section */}
-        <div className="px-4 py-8 text-center">
-          <h1 className="text-2xl font-bold text-[#1f0101] mb-2">데일리케어</h1>
+        <div className="px-4 py-6 text-center">
+          <h2 className="text-lg font-bold text-[#1f0101] mb-2">데일리케어</h2>
           <p className="text-gray-600 text-sm">개인 맞춤형 두피 케어와 건강 추적을 시작해보세요</p>
         </div>
 
@@ -1680,7 +1680,7 @@ const DailyCare: React.FC = () => {
                         ? '균형잡힌 두피 관리'
                         : '과다 피지 조절에 효과적'}
                     </p>
-                    <Badge variant="secondary" className="mt-1" style={{ backgroundColor: '#1f0101', color: 'white', opacity: 0.1 }}>
+                    <Badge variant="secondary" className="mt-1" style={{ backgroundColor: '#1f0101', color: 'white'}}>
                       {recommendedProducts[0].productPrice.toLocaleString()}원
                     </Badge>
                   </div>
@@ -1845,7 +1845,7 @@ const DailyCare: React.FC = () => {
         )}
 
         {/* Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-2 pb-5 z-50">
+        <div className="fixed bottom-0 left-0 right-0 bg-white flex justify-around items-center py-2 pb-5 z-50">
           <Button variant="ghost" className="flex flex-col items-center p-2 h-auto">
             <Heart className="h-5 w-5 mb-1" style={{ color: '#1f0101' }} />
             <span className="text-xs" style={{ color: '#1f0101' }}>홈</span>

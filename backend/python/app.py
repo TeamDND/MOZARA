@@ -1076,6 +1076,57 @@ def health_check():
 # Swin Transformer 및 RAG 기반 분석으로 대체
 # 참조: /hair_swin_check, /api/hair-classification-rag/analyze-upload
 
+# --- 이미지 유효성 검증 전용 엔드포인트 ---
+@app.post("/validate-image")
+async def validate_image_endpoint(
+    image: Annotated[UploadFile, File(...)],
+    image_type: str = Form(...),  # 'top' 또는 'side'
+):
+    """
+    이미지 업로드 즉시 유효성 검사
+
+    Args:
+        image: 업로드된 이미지 파일
+        image_type: 'top' 또는 'side'
+
+    Returns:
+        {
+            "is_valid": bool,
+            "message": str
+        }
+    """
+    if not BISENET_AVAILABLE or bisenet_model is None:
+        # BiSeNet이 없으면 검증 스킵
+        return {
+            "is_valid": True,
+            "message": "이미지 검증을 건너뜁니다 (BiSeNet 비활성화)"
+        }
+
+    try:
+        from services.image_validation import validate_hair_loss_image
+
+        image_bytes = await image.read()
+
+        is_valid, msg = validate_hair_loss_image(
+            image_bytes,
+            expected_type=image_type,
+            bisenet_model=bisenet_model,
+            device=bisenet_device
+        )
+
+        return {
+            "is_valid": is_valid,
+            "message": msg
+        }
+
+    except Exception as e:
+        print(f"[이미지 검증 오류] {str(e)}")
+        # 에러 발생 시에도 통과시킴 (사용자 경험)
+        return {
+            "is_valid": True,
+            "message": f"이미지 검증 중 오류 발생: {str(e)}"
+        }
+
 # --- Swin 탈모 사진 분석 전용 엔드포인트 ---
 @app.post("/hair_swin_check")
 async def api_hair_swin_check(
@@ -1091,17 +1142,51 @@ async def api_hair_swin_check(
     multipart/form-data로 전송된 Top/Side 이미지를 Swin으로 분석하여 표준 결과를 반환
     Side 이미지는 optional (여성의 경우 없을 수 있음)
     설문 데이터도 함께 받아서 동적 가중치 계산에 사용
+
+    ✅ 이미지 검증 추가: BiSeNet 귀 감지로 Top/Side 이미지 타입 검증
     """
     if not SWIN_HAIR_CHECK_AVAILABLE:
         raise HTTPException(status_code=503, detail="Swin 분석 모듈이 활성화되지 않았습니다.")
 
     try:
+        # 이미지 검증 모듈 import
+        from services.image_validation import validate_hair_loss_image
+
         top_image_bytes = await top_image.read()
+
+        # ✅ TOP 이미지 검증 (BiSeNet 귀 감지)
+        if BISENET_AVAILABLE and bisenet_model is not None:
+            is_valid, msg = validate_hair_loss_image(
+                top_image_bytes,
+                expected_type='top',
+                bisenet_model=bisenet_model,
+                device=bisenet_device
+            )
+            if not is_valid:
+                print(f"[이미지 검증 실패] Top 이미지: {msg}")
+                raise HTTPException(status_code=400, detail=msg)
+            else:
+                print(f"[이미지 검증 성공] Top 이미지: {msg}")
+
         side_image_bytes = None
 
         if side_image:
             side_image_bytes = await side_image.read()
             print(f"--- [DEBUG] Files received. Top: {len(top_image_bytes)} bytes, Side: {len(side_image_bytes)} bytes ---")
+
+            # ✅ SIDE 이미지 검증 (BiSeNet 귀 감지)
+            if BISENET_AVAILABLE and bisenet_model is not None:
+                is_valid, msg = validate_hair_loss_image(
+                    side_image_bytes,
+                    expected_type='side',
+                    bisenet_model=bisenet_model,
+                    device=bisenet_device
+                )
+                if not is_valid:
+                    print(f"[이미지 검증 실패] Side 이미지: {msg}")
+                    raise HTTPException(status_code=400, detail=msg)
+                else:
+                    print(f"[이미지 검증 성공] Side 이미지: {msg}")
         else:
             print(f"--- [DEBUG] Files received. Top: {len(top_image_bytes)} bytes, Side: None (여성) ---")
 
@@ -1121,6 +1206,9 @@ async def api_hair_swin_check(
         result = analyze_hair_with_swin(top_image_bytes, side_image_bytes, survey_data)
 
         return result
+    except HTTPException:
+        # HTTPException은 그대로 재발생 (검증 실패 메시지 전달)
+        raise
     except Exception as e:
         print(f"--- [DEBUG] Swin Error: {str(e)} ---")
         raise HTTPException(status_code=500, detail=str(e))

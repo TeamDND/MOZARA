@@ -49,6 +49,31 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
         return;
       }
 
+      // ✅ 이미지 타입 검증 (BiSeNet 귀 감지)
+      try {
+        setIsUploadingTop(true);
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('image_type', 'top');
+
+        const validateResponse = await fetch('http://localhost:8000/validate-image', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const validateResult = await validateResponse.json();
+        console.log('[이미지 검증] Top 이미지:', validateResult);
+
+        if (!validateResult.is_valid) {
+          alert(validateResult.message);
+          setIsUploadingTop(false);
+          return;
+        }
+      } catch (error) {
+        console.error('[이미지 검증 오류] Top 이미지:', error);
+        // 검증 실패해도 업로드는 진행 (사용자 경험)
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setUploadedPhoto(e.target?.result as string);
@@ -59,7 +84,6 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
       // S3 업로드
       if (user?.username && setUploadedPhotoUrl) {
         try {
-          setIsUploadingTop(true);
           const formData = new FormData();
           formData.append('image', file);
           formData.append('username', user.username);
@@ -79,6 +103,8 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
         } finally {
           setIsUploadingTop(false);
         }
+      } else {
+        setIsUploadingTop(false);
       }
     }
   };
@@ -93,6 +119,31 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
         return;
       }
 
+      // ✅ 이미지 타입 검증 (BiSeNet 귀 감지)
+      try {
+        setIsUploadingSide(true);
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('image_type', 'side');
+
+        const validateResponse = await fetch('http://localhost:8000/validate-image', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const validateResult = await validateResponse.json();
+        console.log('[이미지 검증] Side 이미지:', validateResult);
+
+        if (!validateResult.is_valid) {
+          alert(validateResult.message);
+          setIsUploadingSide(false);
+          return;
+        }
+      } catch (error) {
+        console.error('[이미지 검증 오류] Side 이미지:', error);
+        // 검증 실패해도 업로드는 진행 (사용자 경험)
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setUploadedSidePhoto(e.target?.result as string);
@@ -103,7 +154,6 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
       // S3 업로드
       if (user?.username && setUploadedSidePhotoUrl) {
         try {
-          setIsUploadingSide(true);
           const formData = new FormData();
           formData.append('image', file);
           formData.append('username', user.username);
@@ -123,6 +173,8 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
         } finally {
           setIsUploadingSide(false);
         }
+      } else {
+        setIsUploadingSide(false);
       }
     }
   };
