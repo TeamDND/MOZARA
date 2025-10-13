@@ -43,9 +43,6 @@ class LocationService {
     let base = envBase || 'http://localhost:8080/api';  // SpringBoot 호환
 
     this.apiBaseUrl = base;
-
-    console.log('LocationService 초기화:');
-    console.log('Legacy API Base URL:', this.apiBaseUrl);
   }
   // 주소/키워드로 좌표 보정 (Python 카카오 검색 이용)
   private async fetchCoordsByKeyword(keyword: string, center?: Location, radius: number = 5000): Promise<{ lat: number; lng: number } | null> {
@@ -155,7 +152,6 @@ class LocationService {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
           };
-          console.log('현재 위치:', location);
           resolve(location);
         },
         (error) => {
@@ -974,7 +970,6 @@ class LocationService {
       if (!searchLocation) {
         try {
           searchLocation = await this.getCurrentLocation();
-          console.log('자동으로 현재 위치를 가져와서 검색합니다:', searchLocation);
         } catch (error) {
           console.warn('현재 위치를 가져올 수 없어 위치 정보 없이 검색합니다:', error);
         }
@@ -1005,7 +1000,6 @@ class LocationService {
         return this.getFilteredSampleData({ ...finalParams, query: (canonicalCategory ?? finalParams.query) as string });
       }
 
-      console.log('API 검색 시작 - 검색어:', enhancedQuery);
       const [naverResults, kakaoResults] = await Promise.allSettled([
         this.searchHospitalsWithNaver(finalParams),
         this.searchHospitalsWithKakao(finalParams),
@@ -1014,25 +1008,20 @@ class LocationService {
       const hospitals: Hospital[] = [];
 
       if (naverResults.status === 'fulfilled') {
-        console.log('네이버 API 결과:', naverResults.value.length, '개');
         hospitals.push(...naverResults.value);
       } else {
         console.warn('네이버 API 실패:', naverResults.reason);
       }
 
       if (kakaoResults.status === 'fulfilled') {
-        console.log('카카오 API 결과:', kakaoResults.value.length, '개');
         hospitals.push(...kakaoResults.value);
       } else {
         console.warn('카카오 API 실패:', kakaoResults.reason);
       }
 
-      console.log('전체 API 결과:', hospitals.length, '개');
-
       // API 결과가 없으면 샘플 데이터 반환
       if (hospitals.length === 0) {
         console.warn('No API results, returning sample data');
-        console.log('샘플 데이터 반환 - 카테고리:', canonicalCategory, '검색어:', finalParams.query);
         return this.getFilteredSampleData({ ...finalParams, query: (canonicalCategory ?? finalParams.query) as string });
       }
 
@@ -1103,41 +1092,33 @@ class LocationService {
   // 검색어에 따른 샘플 데이터 필터링
   private getFilteredSampleData(params: SearchParams): Hospital[] {
     const sampleData = this.getSampleHospitals(params.location);
-    console.log('샘플 데이터 총 개수:', sampleData.length);
-    console.log('검색어:', params.query);
 
     if (params.query) {
       const query = params.query.toLowerCase();
-      console.log('소문자 변환된 검색어:', query);
       
       // 카테고리별 필터링 (정확한 매칭 + 확장 검색어)
       if (query === '탈모병원' || (query.includes('탈모') && (query.includes('병원') || query.includes('의원') || query.includes('클리닉')))) {
         const filtered = sampleData.filter(hospital => hospital.category === '탈모병원');
-        console.log('탈모병원 필터링 결과:', filtered.length);
         return filtered;
       }
       
       if (query === '탈모미용실') {
         const filtered = sampleData.filter(hospital => hospital.category === '탈모미용실');
-        console.log('탈모미용실 필터링 결과:', filtered.length);
         return filtered;
       }
       
       if (query === '가발전문점' || query.includes('가발')) {
         const filtered = sampleData.filter(hospital => hospital.category === '가발전문점');
-        console.log('가발전문점 필터링 결과:', filtered.length);
         return filtered;
       }
       
       if (query === '두피문신' || query.includes('두피문신')) {
         const filtered = sampleData.filter(hospital => hospital.category === '두피문신');
-        console.log('두피문신 필터링 결과:', filtered.length);
         return filtered;
       }
       
       if (query === '약국' || query.includes('약국')) {
         const filtered = sampleData.filter(hospital => hospital.category === '탈모약국');
-        console.log('탈모약국 필터링 결과:', filtered.length);
         return filtered;
       }
       
@@ -1149,7 +1130,6 @@ class LocationService {
         hospital.description.toLowerCase().includes(query) ||
         hospital.category.toLowerCase().includes(query)
       );
-      console.log('일반 필터링 결과:', filtered.length);
       return filtered;
     }
 

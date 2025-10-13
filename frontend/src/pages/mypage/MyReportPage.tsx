@@ -196,11 +196,6 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
     ? imageUrl.split('|||').map(url => url.trim())
     : [imageUrl, null];
 
-  // 디버깅용 로그
-  console.log('🔍 MyReportPage - analysisResult:', analysisResult);
-  console.log('🔍 MyReportPage - analysisType:', analysisType);
-  console.log('🔍 MyReportPage - grade:', analysisResult?.grade);
-
   // 분석 타입을 한글로 변환하는 함수
   const formatAnalysisType = (type: string | undefined): string => {
     if (!type) return '종합 진단';
@@ -221,7 +216,6 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
 
   // daily 타입인지 확인
   const isDailyAnalysis = analysisType === 'daily';
-  console.log('🔍 MyReportPage - isDailyAnalysis:', isDailyAnalysis);
 
   // 분석 결과가 없으면 마이페이지로 돌아가기
   if (!analysisResult) {
@@ -235,74 +229,81 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile-First 컨테이너 */}
-      <div className="max-w-md mx-auto min-h-screen bg-white flex flex-col">
+      <div className="max-w-md mx-auto min-h-screen bg-white flex flex-col pb-20">
         
+        
+        {/* 헤더 (Mobile-First) */}
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-[60]">
+          <div className="flex items-center justify-between">
+            <div className="flex-1 text-center">
+              <h1 className="text-lg font-bold text-gray-800">진단 결과 및 맞춤 추천</h1>
+              <p className="text-xs text-gray-600 mt-1">
+                AI 분석을 바탕으로 한 개인 맞춤형 솔루션
+              </p>
+            </div>            
+          </div>
+        </div>
+
         {/* 메인 컨텐츠 (Mobile-First) */}
-        <div className="flex-1 p-4 overflow-y-auto space-y-4">
+        <div className="flex-1 px-4 pb-6 overflow-y-auto space-y-4">
           {/* 진단 결과 요약 (Mobile-First) */}
           <div className="bg-gradient-to-r from-gray-50 to-green-50 p-4 rounded-xl">
             <div className="flex items-center gap-3 mb-4">
               <CheckCircle className="w-8 h-8 text-green-500" />
               <div>
-                <h2 className="text-lg font-semibold text-gray-800">분석이 완료되었습니다!</h2>
+                <h2 className="text-lg font-semibold text-gray-800">진단이 완료되었습니다!</h2>
                 <p className="text-sm text-gray-600">
-                  AI 분석 결과와 맞춤형 추천을 확인해보세요
+                  종합 분석 결과와 맞춤형 추천을 확인해보세요
                 </p>
               </div>
             </div>
             
             <div className="grid grid-cols-3 gap-3">
-              <div className="text-center p-3 bg-white rounded-lg">
+              <div className="text-center p-3 bg-white rounded-xl">
                 <div className="flex items-center justify-center gap-1 mb-1">
                   <p className="text-xs text-gray-600">🧠 AI 분석</p>
-                  {!isDailyAnalysis && (
-                    <button
-                      onClick={() => setShowStageInfo(true)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                      aria-label="단계 기준 보기"
-                    >
-                      <HelpCircle className="w-3 h-3" />
-                    </button>
-                  )}
+                  <button
+                    onClick={() => setShowStageInfo(true)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    aria-label="단계 기준 보기"
+                  >
+                    <HelpCircle className="w-3 h-3" />
+                  </button>
                 </div>
                 <p className="text-xl font-bold text-gray-800">
-                  {isDailyAnalysis ? `${currentStage}점` : `${currentStage}단계`}
+                  {currentStage}단계
                 </p>
                 <Badge
                   className={`text-xs px-2 py-1 ${
                     getStageColor(currentStage)
                   }`}
                 >
-                  {isDailyAnalysis ? "두피 관리 점수" : getStageDescription(currentStage)}
+                  {getStageDescription(currentStage)}
                 </Badge>
               </div>
-              <div className="text-center p-3 bg-white rounded-lg">
-                <p className="text-xs text-gray-600">분석일</p>
-                <p className="text-xl font-bold text-gray-800">{analysisResult.inspectionDate}</p>
-                <Badge variant="outline" className="text-xs px-2 py-1">{formatAnalysisType(analysisResult.analysisType)}</Badge>
+              <div className="text-center p-3 bg-white rounded-xl">
+                <p className="text-xs text-gray-600">모발 밀도</p>
+                <p className="text-xl font-bold text-gray-800">72%</p>
+                <Badge variant="outline" className="text-xs px-2 py-1">양호</Badge>
               </div>
-              <div className="text-center p-3 bg-white rounded-lg">
-                <p className="text-xs text-gray-600">분석 ID</p>
-                <p className="text-xl font-bold text-gray-800">#{analysisResult.id}</p>
+              <div className="text-center p-3 bg-white rounded-xl">
+                <p className="text-xs text-gray-600">두피 건강</p>
+                <p className="text-xl font-bold text-gray-800">85%</p>
+                <Badge variant="default" className="text-xs px-2 py-1">우수</Badge>
               </div>
             </div>
 
             {/* AI 분석 결과 요약 */}
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+            <div className="mt-4 p-3 bg-blue-50 rounded-xl">
               <div className="flex items-center gap-2 mb-2">
                 <Brain className="w-4 h-4 text-blue-600" />
                 <h3 className="text-sm font-semibold text-blue-800">
-                  {isDailyAnalysis
-                    ? `두피 건강 ${currentStage}점 분석 결과`
-                    : (stageRecommendations[currentStage]?.title || `${currentStage}단계 분석 결과`)
-                  }
+                  {stageRecommendations[currentStage]?.title || `${currentStage}단계 분석 결과`}
                 </h3>
               </div>
-              {!isDailyAnalysis && (
-                <p className="text-xs text-blue-700 mb-3">
-                  {stageRecommendations[currentStage]?.description}
-                </p>
-              )}
+              <p className="text-xs text-blue-700 mb-3">
+                {stageRecommendations[currentStage]?.description}
+              </p>
               {analysisResult.advice && (
                 <div className="space-y-1 pt-2 border-t border-blue-200">
                   <p className="text-xs font-semibold text-blue-800 mb-1">AI 추천 조언:</p>
@@ -315,104 +316,81 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
                 </div>
               )}
             </div>
+
+            {/* 분석 이미지 */}
+            {analysisResult.imageUrl && (
+              <div className="mt-4 p-3 bg-white rounded-lg">
+                <h3 className="text-sm font-semibold text-gray-800 mb-3">분석 이미지</h3>
+                {/* 남성 탈모 검사 (두 개 이미지) */}
+                {topImageUrl && sideImageUrl ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-xs text-gray-600 mb-2 text-center">정수리</p>
+                      <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                        <ImageWithFallback
+                          src={topImageUrl}
+                          alt="정수리 이미지"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600 mb-2 text-center">측면</p>
+                      <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                        <ImageWithFallback
+                          src={sideImageUrl}
+                          alt="측면 이미지"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* 여성 탈모 검사 또는 모발 손상 검사 (한 개 이미지) */
+                  <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                    <ImageWithFallback
+                      src={topImageUrl || analysisResult.imageUrl}
+                      alt="분석 결과 이미지"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* 분석 이미지 */}
-          {analysisResult.imageUrl && (
-            <div className="bg-white p-4 rounded-xl shadow-md">
-              <h3 className="text-base font-semibold text-gray-800 mb-3">분석 이미지</h3>
-              {/* 남성 탈모 검사 (두 개 이미지) */}
-              {topImageUrl && sideImageUrl ? (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-xs text-gray-600 mb-2 text-center">정수리</p>
-                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                      <ImageWithFallback
-                        src={topImageUrl}
-                        alt="정수리 이미지"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-600 mb-2 text-center">측면</p>
-                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                      <ImageWithFallback
-                        src={sideImageUrl}
-                        alt="측면 이미지"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                /* 여성 탈모 검사 또는 모발 손상 검사 (한 개 이미지) */
-                <div className="aspect-square rounded-lg overflow-hidden bg-gray-200">
-                  <ImageWithFallback
-                    src={topImageUrl || analysisResult.imageUrl}
-                    alt="분석 결과 이미지"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 헤더 영역 - daily 분석이 아닐 때만 표시 */}
-          {!isDailyAnalysis && (
-            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
-              <div className="flex items-center justify-between">
-                <div className="flex-1 text-center">
-                  <h1 className="text-lg font-bold text-gray-800">분석 결과 및 맞춤 추천</h1>
-                  <p className="text-xs text-gray-600 mt-1">
-                    AI 분석을 바탕으로 한 개인 맞춤형 솔루션
-                  </p>
-                </div>
-              </div>
-              <Button
-                onClick={() => {
-                    navigate('/main-page');
-                }}
-                className="ml-3 h-10 px-4 bg-[#1f0101] hover:bg-[#333333] text-white rounded-xl active:scale-[0.98]"
-              >
-                데일리 케어
-              </Button>
-            </div>
-          )}
-
-          {/* 맞춤 추천 탭 (Mobile-First) - daily 분석이 아닐 때만 표시 */}
-          {!isDailyAnalysis && (
-          <Tabs defaultValue="hospitals" className="space-y-4 flex items-center">
-            <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
+          {/* 맞춤 추천 탭 (Mobile-First) */}
+          <Tabs defaultValue="hospitals" className="space-y-4 w-full">
+            <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent w-full">
               <TabsTrigger 
                 value="hospitals" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-[#1f0101] text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 hover:bg-[#333333] transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
               >
                 탈모 맵
               </TabsTrigger>
               <TabsTrigger 
                 value="products" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
               >
                 제품 추천
               </TabsTrigger>
               <TabsTrigger 
                 value="videos" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
               >
                 영상 컨텐츠
               </TabsTrigger>
               <TabsTrigger 
                 value="lifestyle" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-[#1f0101] data-[state=active]:text-white hover:bg-gray-200 transition-colors"
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
               >
                 생활습관
               </TabsTrigger>
             </TabsList>
 
             {/* 병원 추천 (Mobile-First) */}
-            <TabsContent value="hospitals" className="space-y-4">
-              <div className="bg-white p-4 rounded-xl shadow-md">
+            <TabsContent value="hospitals" className="space-y-4 w-full">
+              <div className="bg-white p-4 rounded-xl shadow-md w-full">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-800">내 주변 탈모 맵</h3>
                   <Button 
@@ -422,7 +400,8 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
                         analysis_result: { grade: currentStage }
                       } 
                     })}
-                    className="h-8 px-3 bg-[#1f0101] hover:bg-[#333333] text-white text-xs rounded-lg"
+                    className="h-8 px-3 text-white text-xs rounded-xl"
+                    style={{ backgroundColor: "#1f0101" }}
                   >
                     더보기
                     <ArrowRight className="w-3 h-3 ml-1" />
@@ -436,8 +415,8 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
             </TabsContent>
 
             {/* 제품 추천 (Mobile-First) */}
-            <TabsContent value="products" className="space-y-4">
-              <div className="bg-white p-4 rounded-xl shadow-md">
+            <TabsContent value="products" className="space-y-4 w-full">
+              <div className="bg-white p-4 rounded-xl shadow-md w-full">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-800">맞춤형 제품 추천</h3>
                   <Button 
@@ -447,7 +426,8 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
                         analysis_result: { grade: currentStage }
                       } 
                     })}
-                    className="h-8 px-3 bg-[#1f0101] hover:bg-[#333333] text-white text-xs rounded-lg"
+                    className="h-8 px-3 text-white text-xs rounded-xl"
+                    style={{ backgroundColor: "#1f0101" }}
                   >
                     더보기
                     <ArrowRight className="w-3 h-3 ml-1" />
@@ -458,8 +438,8 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
             </TabsContent>
 
             {/* 영상 가이드 (Mobile-First) - YouTube API 연동 */}
-            <TabsContent value="videos" className="space-y-4">
-              <div className="bg-white p-4 rounded-xl shadow-md">
+            <TabsContent value="videos" className="space-y-4 w-full">
+              <div className="bg-white p-4 rounded-xl shadow-md w-full">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Brain className="w-5 h-5 text-[#1f0101]" />
@@ -472,7 +452,8 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
                   </div>
                   <Button 
                     onClick={() => navigate('/youtube-videos')}
-                    className="h-8 px-3 bg-[#1f0101] hover:bg-[#333333] text-white text-xs rounded-lg"
+                    className="h-8 px-3 text-white text-xs rounded-xl"
+                    style={{ backgroundColor: "#1f0101" }}
                   >
                     더보기
                     <ArrowRight className="w-3 h-3 ml-1" />
@@ -483,14 +464,13 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
             </TabsContent>
 
             {/* 생활습관 가이드 (Mobile-First) */}
-            <TabsContent value="lifestyle" className="space-y-4">
-              <DailyCareTab
+            <TabsContent value="lifestyle" className="space-y-4 w-full">
+              <DailyCareTab 
                 currentStage={currentStage}
                 onNavigateToDailyCare={() => navigate('/hair-dailycare')}
               />
             </TabsContent>
           </Tabs>
-          )}
         </div>
       </div>
 
@@ -615,7 +595,8 @@ function MyReportPage({ analysisResult: propAnalysisResult }: MyReportPageProps)
             <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 rounded-b-2xl">
               <Button
                 onClick={() => setShowStageInfo(false)}
-                className="w-full h-10 bg-[#1f0101] hover:bg-[#333333] text-white rounded-lg"
+                className="w-full h-10 text-white rounded-xl"
+                style={{ backgroundColor: "#1f0101" }}
               >
                 확인
               </Button>

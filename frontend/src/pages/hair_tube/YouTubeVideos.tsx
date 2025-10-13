@@ -58,7 +58,6 @@ export default function YouTubeVideos() {
       setVideos(videoList);
     } catch (err) {
       console.error('YouTube API Error:', err);
-      console.log('더미 데이터로 대체합니다.');
       
       // YouTube API 오류 시 더미 데이터 사용 (메인 컬러 #1F0101과 어울리는 색상)
       const dummyVideos: Video[] = [
@@ -133,23 +132,19 @@ export default function YouTubeVideos() {
     }
     
     try {
-      console.log('찜 토글 요청:', { username, videoId });
       const response = await apiClient.post('/userlog/youtube/like', null, {
         params: {
           username: username,
           videoId: videoId
         }
       });
-      console.log('찜 토글 응답:', response.data);
       
       setLikedVideos(prev => {
         const newSet = new Set(prev);
         if (newSet.has(videoId)) {
           newSet.delete(videoId);
-          console.log('찜 취소:', videoId);
         } else {
           newSet.add(videoId);
-          console.log('찜 추가:', videoId);
         }
         return newSet;
       });
@@ -166,9 +161,7 @@ export default function YouTubeVideos() {
     
     try {
       const response = await apiClient.get(`/userlog/youtube/likes/${username}`);
-      console.log('찜한 영상 응답:', response.data);
       const likedVideoIds = response.data ? response.data.split(',').filter((id: string) => id.trim() !== '') : [];
-      console.log('찜한 영상 ID 목록:', likedVideoIds);
       setLikedVideos(new Set(likedVideoIds));
     } catch (error) {
       console.error('찜한 영상 목록 불러오기 실패:', error);

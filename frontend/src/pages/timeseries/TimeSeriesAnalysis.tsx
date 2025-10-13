@@ -88,10 +88,7 @@ const TimeSeriesAnalysis: React.FC = () => {
     setError(null);
 
     try {
-      console.log('🔄 시계열 분석 시작...');
       const response = await apiClient.get(`/timeseries/analyze/${userId}`);
-
-      console.log('📥 분석 결과:', response.data);
 
       if (!response.data.success) {
         setError(response.data.message || '분석에 실패했습니다.');

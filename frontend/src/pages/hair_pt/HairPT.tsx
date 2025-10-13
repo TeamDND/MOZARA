@@ -145,7 +145,6 @@ const HairPT: React.FC = () => {
   // daily_habits 데이터 로드 (날짜별)
   const loadDailyHabits = async (date?: Date) => {
     if (!userId) {
-      console.log('사용자 ID가 없어서 습관 데이터를 로드할 수 없습니다.');
       return;
     }
 
@@ -278,7 +277,6 @@ const HairPT: React.FC = () => {
   // 새싹 정보 로드 (Redux 사용)
   const loadSeedlingInfo = useCallback(async () => {
     if (!userId) {
-      console.log('사용자 ID가 없습니다.');
       return;
     }
 
@@ -347,14 +345,12 @@ const HairPT: React.FC = () => {
   // 새싹 이름 변경 함수
   const handleSeedlingNameChange = async (newName: string) => {
     if (!userId) {
-      console.log('사용자 ID가 없습니다.');
       setToast({ visible: true, message: '로그인이 필요합니다.' });
       setTimeout(() => setToast({ visible: false, message: '' }), 3000);
       return;
     }
 
     try {
-      console.log('새싹 이름 변경 시도:', { userId, seedlingName: newName });
       
       // 새싹 이름 변경 API 호출
       await dispatch(updateSeedlingNickname(newName)).unwrap();
@@ -447,19 +443,16 @@ const HairPT: React.FC = () => {
     const missionInfo = missionData.find(m => m.key === missionKey);
     
     if (!missionInfo) {
-      console.log('미션 정보를 찾을 수 없습니다:', missionKey);
       return;
     }
     
     // 백엔드에서 이미 완료된 미션인지 확인
     if (missionInfo.completed) {
-      console.log('이미 완료된 미션입니다:', missionInfo.name);
       return;
     }
     
     // 로컬 상태도 이미 완료된 경우 확인
     if (missionState[missionKey]) {
-      console.log('로컬에서 이미 완료된 미션입니다:', missionInfo.name);
       return;
     }
     
@@ -477,15 +470,12 @@ const HairPT: React.FC = () => {
   // 미션 완료 로그 저장 함수 (API 연동)
   const saveMissionLog = async (habitId: number, points: number) => {
     if (!userId) {
-      console.log('사용자 ID가 없습니다.');
       return;
     }
 
     try {
       
       const response = await apiClient.post(`/habit/complete/${userId}/${habitId}`);
-      
-      console.log('미션 완료 로그 저장 성공:', response.data);
       
       // 성공 시 토스트 메시지 및 새싹 포인트 업데이트
       const newPoints = (currentPoint || seedlingPoints) + points;
@@ -567,7 +557,6 @@ const HairPT: React.FC = () => {
 
   const updateMissionCounter = async (id: 'water' | 'effector', delta: number) => {
     if (!userId) {
-      console.log('사용자 ID가 없습니다.');
       return;
     }
 
@@ -594,7 +583,6 @@ const HairPT: React.FC = () => {
     );
 
     if (!missionInfo) {
-      console.log('미션 정보를 찾을 수 없습니다.');
       return;
     }
 

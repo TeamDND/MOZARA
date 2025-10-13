@@ -12,7 +12,6 @@ import pythonClient from './pythonClient';
  */
 class LocationProvider {
   constructor() {
-    console.log('LocationProvider 초기화 (pythonClient 사용)');
   }
 
   /**
@@ -22,11 +21,9 @@ class LocationProvider {
    */
   async searchWithNaver(query: string): Promise<any> {
     try {
-      console.log('네이버 API 호출:', query);
       const response = await pythonClient.get(`/api/naver/local/search`, {
         params: { query }
       });
-      console.log('네이버 API 결과:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('네이버 검색 중 오류:', error);
@@ -56,9 +53,7 @@ class LocationProvider {
         params.radius = radius;
       }
 
-      console.log('카카오 API 호출:', params);
       const response = await pythonClient.get(`/api/kakao/local/search`, { params });
-      console.log('카카오 API 결과:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('카카오 검색 중 오류:', error);
@@ -79,7 +74,6 @@ class LocationProvider {
   }> {
     try {
       const response = await pythonClient.get(`/api/location/status`);
-      console.log('Python 위치 서비스 상태:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('Python 위치 서비스 상태 확인 실패:', error);

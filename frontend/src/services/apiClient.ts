@@ -63,7 +63,6 @@ apiClient.interceptors.response.use(
         if((error.response?.status === 401 || error.response?.status === 456) && !originalRequest._retry && !isLoginRequest && !isEmailAuthRequest){
             originalRequest._retry = true;
             try{
-                console.log('토큰 갱신 시도 중...');
                 const res = await axios.post('http://localhost:8080/api/reissue', null, {
                     withCredentials: true,
                 });
@@ -80,7 +79,6 @@ apiClient.interceptors.response.use(
                     
                     originalRequest.headers = originalRequest.headers || {};
                     originalRequest.headers['authorization'] = `Bearer ${cleanToken}`;
-                    console.log('토큰 갱신 후 재요청:', originalRequest.url);
                     return apiClient(originalRequest);
                 }else{
                     console.error('토큰 갱신 실패: 새 토큰이 없음');

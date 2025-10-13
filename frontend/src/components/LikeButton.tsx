@@ -94,8 +94,6 @@ const LikeButton: React.FC<LikeButtonProps> = ({
       if (onToggle) {
         onToggle(newIsLiked);
       }
-
-      console.log(`${type} 찜 ${newIsLiked ? '추가' : '제거'}:`, itemId);
     } catch (error) {
       console.error('찜 토글 실패:', error);
       alert('찜 처리 중 오류가 발생했습니다.');

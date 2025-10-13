@@ -52,8 +52,6 @@ const LogIn: React.FC = () => {
         password: formData.password
       });
 
-      console.log('로그인 성공:', loginRes.data);
-
       // JWT 토큰 저장
       const token = loginRes.headers['authorization'];
       if (token) {
@@ -63,7 +61,6 @@ const LogIn: React.FC = () => {
 
       // 사용자 정보 가져오기
       const userResponse = await apiClient.get(`/userinfo/${formData.username}`);
-      console.log('사용자 정보:', userResponse.data);
 
       dispatch(setUser(userResponse.data));
       navigate('/main-page'); // 대시보드로 이동
@@ -80,7 +77,6 @@ const LogIn: React.FC = () => {
   // 소셜 로그인 핸들러
   const handleSocialLogin = (provider: string) => {
     // TODO: 소셜 로그인 API 구현
-    console.log(`${provider} 로그인 시도`);
     // 데일리케어로 이동
     navigate('/main-page');
   };

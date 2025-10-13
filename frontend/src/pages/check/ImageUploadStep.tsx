@@ -37,8 +37,6 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
   const [isUploadingTop, setIsUploadingTop] = useState(false);
   const [isUploadingSide, setIsUploadingSide] = useState(false);
 
-  console.log('👤 ImageUploadStep - gender prop:', gender, 'isMale:', isMale);
-
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -62,7 +60,6 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
         });
 
         const validateResult = await validateResponse.json();
-        console.log('[이미지 검증] Top 이미지:', validateResult);
 
         if (!validateResult.is_valid) {
           alert(validateResult.message);
@@ -95,7 +92,6 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
 
           if (response.data.success) {
             setUploadedPhotoUrl(response.data.imageUrl);
-            console.log('✅ Top View S3 업로드 성공:', response.data.imageUrl);
           }
         } catch (error) {
           console.error('❌ Top View S3 업로드 실패:', error);
@@ -132,7 +128,6 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
         });
 
         const validateResult = await validateResponse.json();
-        console.log('[이미지 검증] Side 이미지:', validateResult);
 
         if (!validateResult.is_valid) {
           alert(validateResult.message);
@@ -165,7 +160,6 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
 
           if (response.data.success) {
             setUploadedSidePhotoUrl(response.data.imageUrl);
-            console.log('✅ Side View S3 업로드 성공:', response.data.imageUrl);
           }
         } catch (error) {
           console.error('❌ Side View S3 업로드 실패:', error);

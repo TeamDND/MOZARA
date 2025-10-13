@@ -126,9 +126,7 @@ const StoreFinder: React.FC = () => {
           radius: 10000, // 기본 10km로 확대
         };
 
-        console.log('검색 시작:', searchParams);
         const results = await locationService.searchHospitals(searchParams);
-        console.log('검색 결과:', results);
         
         setHospitals(results);
         

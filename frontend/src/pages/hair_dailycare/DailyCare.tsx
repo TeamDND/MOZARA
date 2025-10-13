@@ -215,15 +215,11 @@ const DailyCare: React.FC = () => {
   // 새싹 정보 로드
   const loadSeedlingInfo = useCallback(async () => {
     if (!userId) {
-      console.log('사용자 ID가 없습니다.');
       return;
     }
 
     try {
-      console.log('새싹 정보 로드 시도:', userId);
-      
       const result = await dispatch(fetchSeedlingInfo(userId)).unwrap();
-      console.log('Redux 새싹 정보:', result);
       
       if (result) {
         // 새싹 포인트 설정
@@ -255,7 +251,6 @@ const DailyCare: React.FC = () => {
     if (!userId) return;
 
     try {
-      console.log('🔄 Daily 이미지 불러오는 중... period:', period);
 
       // 모든 Daily 데이터 가져오기
       const allDailyResponse = await apiClient.get(`/analysis-results/${userId}/type/daily`);
@@ -306,10 +301,6 @@ const DailyCare: React.FC = () => {
           current: currentData?.imageUrl || null,
           previous: previousData?.imageUrl || null
         });
-
-        console.log('✅ Daily 이미지 로드 완료');
-        console.log('📸 현재:', currentData?.inspectionDate, currentData?.imageUrl);
-        console.log('📸 이전:', previousData?.inspectionDate || 'none', previousData?.imageUrl || 'none');
       } else {
         setLatestDailyImages({ current: null, previous: null });
       }
@@ -324,7 +315,6 @@ const DailyCare: React.FC = () => {
     if (!userId) return;
 
     try {
-      console.log('🔄 최근 Daily 이미지 불러오는 중...');
       const response = await apiClient.get(`/timeseries/data/${userId}`);
 
       if (response.data.success && response.data.data) {
@@ -335,9 +325,6 @@ const DailyCare: React.FC = () => {
             current: dailyData[0]?.imageUrl || null,
             previous: dailyData[1]?.imageUrl || null
           });
-          console.log('✅ Daily 이미지 로드 완료:', dailyData.length, '개');
-          console.log('📸 현재:', dailyData[0]?.imageUrl);
-          console.log('📸 이전:', dailyData[1]?.imageUrl);
         }
       }
     } catch (err) {
@@ -350,12 +337,10 @@ const DailyCare: React.FC = () => {
     if (!userId) return;
 
     try {
-      console.log('🔄 주간 분석 데이터 불러오는 중...');
       const response = await apiClient.get(`/weekly-daily-analysis/${userId}`);
 
       if (response.data && response.data.weeklyData) {
         const data = response.data.weeklyData;
-        console.log('✅ 주간 분석 데이터:', data);
 
         // 요일별 데이터 업데이트
         const updatedWeeklyData = [
@@ -382,8 +367,6 @@ const DailyCare: React.FC = () => {
 
         setWeeklyCount(count);
         setWeeklyAverage(average);
-
-        console.log('📊 주간 통계 - 평균:', average, ', 횟수:', count);
       }
     } catch (err) {
       console.error('❌ 주간 분석 데이터 로드 실패:', err);
@@ -402,10 +385,7 @@ const DailyCare: React.FC = () => {
     setComparisonData(null);
 
     try {
-      console.log('🔄 Daily 시계열 비교 시작... period:', comparisonPeriod);
       const response = await apiClient.get(`/timeseries/daily-comparison/${userId}?period=${comparisonPeriod}`);
-
-      console.log('📥 비교 결과:', response.data);
 
       if (!response.data.success) {
         setComparisonError(response.data.message || '비교 데이터가 부족합니다.');
@@ -441,7 +421,6 @@ const DailyCare: React.FC = () => {
     // 처음 시각화를 요청하는 경우
     setIsLoadingVisualization(true);
     try {
-      console.log('🔄 밀도 변화 시각화 요청 중...');
 
       // 이전 이미지에만 밀도 변화 시각화 (이전 → 오늘 비교해서 변화된 영역 표시)
       const previousResponse = await apiClient.post(
@@ -462,7 +441,6 @@ const DailyCare: React.FC = () => {
       });
 
       setShowDensityVisualization(true);
-      console.log('✅ 밀도 변화 시각화 완료');
     } catch (err: any) {
       console.error('❌ 밀도 변화 시각화 실패:', err);
       alert('밀도 변화 시각화에 실패했습니다.');
@@ -486,14 +464,6 @@ const DailyCare: React.FC = () => {
     // 백엔드에서 계산된 분석 결과 사용 (비듬/탈모는 이미 백엔드에서 제외됨)
     if (!res.analysis) return null;
     
-    console.log('[DEBUG] ===== 백엔드 응답 분석 시작 =====');
-    console.log('[DEBUG] 백엔드 응답 전체:', res);
-    console.log('[DEBUG] res.analysis:', res.analysis);
-    console.log('[DEBUG] res.analysis에 있는 모든 키:', Object.keys(res.analysis || {}));
-    console.log('[DEBUG] res.analysis.scalp_score:', res.analysis?.scalp_score);
-    console.log('[DEBUG] res.analysis.scalp_score 타입:', typeof res.analysis?.scalp_score);
-    console.log('[DEBUG] ===========================');
-    
     // 백엔드에서 비듬/탈모를 이미 제외하고 분석했으므로 그대로 사용
     return updateDashboardWithFilteredData(res.analysis);
   };
@@ -511,8 +481,6 @@ const DailyCare: React.FC = () => {
     // 백엔드에서 계산된 점수 사용미세각질 양호, 피지과다 경고, 모낭사이홍반 주의, 모낭홍반농포 양호
     const finalScore = analysis.scalp_score || 100;
     setScalpScore(finalScore);
-
-    console.log('백엔드에서 받은 두피 점수:', finalScore);
 
     // 심각도에 따른 단계 계산 (UI 표시용)
     const severityLevel = parseInt(primarySeverity.split('.')[0]) || 0;
@@ -634,11 +602,9 @@ const DailyCare: React.FC = () => {
     }
 
     try {
-      console.log('Daily 분석결과 조회 시도:', userId);
       const response = await apiClient.get(`/today-analysis/${userId}/daily`);
 
       if (response.data) {
-        console.log('Daily 분석결과 발견:', response.data);
         
         // AnalysisResultDTO 형식으로 받은 데이터 처리
         const dto = response.data;
@@ -701,7 +667,7 @@ const DailyCare: React.FC = () => {
         setProducts(prodRes.products.slice(0, 6));
       }
     } catch (error: any) {
-      console.log('Daily 분석결과 없음 또는 에러:', error.response?.data?.error || error.message);
+      // Daily 분석결과 없음
     }
   }, [userId, hairProductApi]);
 
@@ -767,7 +733,6 @@ const DailyCare: React.FC = () => {
     try {
       // 위치 정보 가져오기
       if (!navigator.geolocation) {
-        console.log('Geolocation is not supported');
         return;
       }
 
@@ -780,10 +745,7 @@ const DailyCare: React.FC = () => {
             const response = await pythonClient.get(`/api/weather?lat=${latitude}&lon=${longitude}`);
             const result = response.data;
 
-            console.log('[DailyCare] 파이썬 날씨 API 응답:', result);
-
             if (result.success && result.data) {
-              console.log('[DailyCare] recommendations:', result.data.recommendations);
 
               setEnvironmentInfo({
                 uvIndex: result.data.uvIndex || 0,
@@ -881,12 +843,10 @@ const DailyCare: React.FC = () => {
     }
 
     try {
-      console.log(`습도 ${humidity}%에 따른 제품 검색: ${keyword}`);
       const response = await elevenStApi.searchProducts(keyword, 1, 1);
       
       if (response.products.length > 0) {
         setRecommendedProducts([response.products[0]]);
-        console.log('제품 1개 로드 완료');
       }
     } catch (error) {
       console.error('11번가 제품 검색 실패:', error);
@@ -1162,7 +1122,6 @@ const DailyCare: React.FC = () => {
                   let imageUrl: string | null = null;
                   if (username) {
                     try {
-                      console.log('🔄 S3 업로드 시작...');
                       const uploadFormData = new FormData();
                       uploadFormData.append('image', selectedImage);
                       uploadFormData.append('username', username);
@@ -1173,7 +1132,6 @@ const DailyCare: React.FC = () => {
 
                       if (uploadResponse.data.success) {
                         imageUrl = uploadResponse.data.imageUrl;
-                        console.log('✅ S3 업로드 성공:', imageUrl);
                       }
                     } catch (uploadError) {
                       console.error('❌ S3 업로드 실패:', uploadError);
@@ -1190,15 +1148,11 @@ const DailyCare: React.FC = () => {
                   // 로그인한 사용자의 user_id 추가
                   if (userId) {
                     formData.append('user_id', userId.toString());
-                    console.log('Daily 분석에 user_id 추가:', userId);
-                  } else {
-                    console.log('로그인하지 않은 사용자 - user_id 없음');
                   }
 
                   // S3 URL이 있으면 추가
                   if (imageUrl) {
                     formData.append('image_url', imageUrl);
-                    console.log('📸 S3 이미지 URL 추가:', imageUrl);
                   }
 
                   const response = await apiClient.post('/ai/hair-loss-daily/analyze', formData, {
@@ -1211,17 +1165,9 @@ const DailyCare: React.FC = () => {
                           // 두피 점수 계산 및 대시보드 업데이트
                           const calculatedScore = updateDashboardFromAnalysis(result);
 
-                          console.log('🔍 Daily 저장 조건 체크:', {
-                            userId,
-                            calculatedScore,
-                            willSave: !!(userId && calculatedScore !== null)
-                          });
-
                           // scalpScore를 포함하여 백엔드로 grade 저장 요청
                           if (userId && calculatedScore !== null) {
                             try {
-                              console.log('두피 점수 저장 시도:', calculatedScore);
-
                               // save_result에 grade 추가하여 재저장 API 호출
                               const savePayload = {
                                 ...result,
@@ -1230,15 +1176,7 @@ const DailyCare: React.FC = () => {
                                 image_url: imageUrl || ''
                               };
 
-                              console.log('💾 Daily 분석 결과 저장 시작:', {
-                                userId,
-                                grade: calculatedScore,
-                                hasAnalysis: !!result.analysis,
-                                imageUrl: imageUrl || 'none'
-                              });
-
                               const saveResponse = await apiClient.post('/ai/hair-loss-daily/save-result', savePayload);
-                              console.log('✅ 두피 점수 저장 완료:', saveResponse.data);
 
                               // Daily 이미지 새로고침
                               loadLatestDailyImages();
@@ -1254,12 +1192,6 @@ const DailyCare: React.FC = () => {
                             } catch (saveError) {
                               console.error('❌ 두피 점수 저장 실패:', saveError);
                             }
-                          } else {
-                            console.warn('⚠️ Daily 분석 결과 저장 건너뜀:', {
-                              reason: !userId ? 'userId 없음' : 'calculatedScore가 null',
-                              userId,
-                              calculatedScore
-                            });
                           }
 
 

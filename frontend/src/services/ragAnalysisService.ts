@@ -44,11 +44,6 @@ export const analyzeHairWithRAG = async (
   surveyData?: SurveyData
 ): Promise<RAGAnalysisResponse> => {
   try {
-    console.log('🔄 RAG v2 여성 모발 분석 요청 시작 (Spring Boot 경유)');
-    console.log('📁 Top View 파일:', topImageFile.name, topImageFile.size, 'bytes');
-    console.log('👤 사용자 ID:', userId);
-    console.log('📋 설문 데이터:', surveyData);
-
     // FormData 생성
     const formData = new FormData();
     formData.append('top_image', topImageFile);
@@ -84,13 +79,11 @@ export const analyzeHairWithRAG = async (
             const percentCompleted = Math.round(
               (progressEvent.loaded * 100) / progressEvent.total
             );
-            console.log(`📤 업로드 진행률: ${percentCompleted}%`);
           }
         },
       }
     );
 
-    console.log('✅ RAG v2 분석 응답 성공:', response.data);
     return response.data;
 
   } catch (error) {
