@@ -13,7 +13,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -47,19 +47,15 @@ jobs:
           ssh-keyscan -H ssh.runpod.io >> ~/.ssh/known_hosts
           
           # Docker 컨테이너 실행
-          ssh -T -o StrictHostKeyChecking=no ${{ secrets.RUNPOD_POD_ID }}-6441140b@ssh.runpod.io << 'EOF'
-            echo "🐳 기존 Docker 컨테이너 정리 중..."
-            docker stop mozara-python || true
-            docker rm mozara-python || true
-            
-            echo "📥 Docker 이미지 pull 중..."
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api
-            
-            echo "🚀 Docker 컨테이너 실행 중..."
-            docker run -d --name mozara-python -p 8000:8000 \
-              ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api
-            
-            echo "✅ Python 서버 배포 완료!"
-          EOF
+          ssh -o StrictHostKeyChecking=no ${{ secrets.RUNPOD_POD_ID }}-6441140b@ssh.runpod.io "
+            echo '🐳 기존 Docker 컨테이너 정리 중...' &&
+            docker stop mozara-python || true &&
+            docker rm mozara-python || true &&
+            echo '📥 Docker 이미지 pull 중...' &&
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api &&
+            echo '🚀 Docker 컨테이너 실행 중...' &&
+            docker run -d --name mozara-python -p 8000:8000 ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api &&
+            echo '✅ Python 서버 배포 완료!'
+          "
           
           echo "🎉 Python API 배포 완료!"
