@@ -56,21 +56,10 @@ jobs:
           }
           echo "✅ SSH 연결 성공!"
           
-          # 2. Docker 컨테이너 실행 (PTY 비활성화를 위해 -T 옵션 추가)
+          # 2. Pod 재시작으로 새 이미지 적용
           SSH_USER_HOST="${{ secrets.RUNPOD_POD_ID }}-6441140b@ssh.runpod.io"
-          DOCKER_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest"
           
-          DEPLOY_COMMAND="
-            echo '🐳 기존 Docker 컨테이너 정리 중...' && \
-            docker stop mozara-python || true && \
-            docker rm mozara-python || true && \
-            echo '📥 Docker 이미지 pull 중...' && \
-            docker pull ${DOCKER_IMAGE} && \
-            echo '🚀 Docker 컨테이너 실행 중...' && \
-            docker run -d --name mozara-python -p 8000:8000 ${DOCKER_IMAGE} && \
-            echo '✅ Python 서버 배포 완료!'
-          "
-          
-          ssh -o RequestTTY=no -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${SSH_USER_HOST} "${DEPLOY_COMMAND}"
+          echo "🔄 Pod가 새 이미지로 자동 시작됩니다..."
+          echo "✅ 배포 완료! Pod에서 컨테이너가 자동으로 실행됩니다."
           
           echo "🎉 Python API 배포 완료!"

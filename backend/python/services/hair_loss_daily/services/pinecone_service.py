@@ -24,11 +24,13 @@ class PineconeService:
         try:
             api_key = os.getenv("PINECONE_API_KEY")
             if not api_key:
-                raise ValueError("PINECONE_API_KEY 환경변수가 설정되지 않았습니다.")
+                print("[WARNING] PINECONE_API_KEY 환경변수가 설정되지 않았습니다. Pinecone 기능이 비활성화됩니다.")
+                return
             
             self.index_name = os.getenv("PINECONE_INDEX_NAME2")
             if not self.index_name:
-                raise ValueError("PINECONE_INDEX_NAME2 환경변수가 설정되지 않았습니다.")
+                print("[WARNING] PINECONE_INDEX_NAME2 환경변수가 설정되지 않았습니다. Pinecone 기능이 비활성화됩니다.")
+                return
             
             # Pinecone 클라이언트 초기화
             self.pc = Pinecone(api_key=api_key)
@@ -38,8 +40,9 @@ class PineconeService:
             print(f"[OK] Pinecone 클라이언트 초기화 완료 (인덱스: {self.index_name})")
 
         except Exception as e:
-            print(f"[ERROR] Pinecone 클라이언트 초기화 실패: {str(e)}")
-            raise e
+            print(f"[WARNING] Pinecone 클라이언트 초기화 실패: {str(e)}. Pinecone 기능이 비활성화됩니다.")
+            self.pc = None
+            self.index = None
     
     def search_similar_vectors(self, 
                              query_vector: List[float], 

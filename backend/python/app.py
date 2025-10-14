@@ -19,6 +19,8 @@ from datetime import datetime, timedelta
 import os
 import urllib.parse
 import hashlib
+import subprocess
+import time
 
 # .env 파일 로드 (Docker 환경에서는 환경변수 직접 사용)
 try:
@@ -37,6 +39,64 @@ except Exception as e:
 
 # 이미지 캐시 저장소 (메모리 기반)
 image_cache = {}
+
+def check_and_download_models():
+    """모델 파일이 없으면 자동으로 다운로드"""
+    models_dir = "/app/services/swin_hair_classification/models"
+    face_parsing_dir = f"{models_dir}/face_parsing/res/cp"
+    
+    # 필요한 모델 파일들
+    required_files = [
+        f"{models_dir}/best_swin_hair_classifier_side.pth",
+        f"{models_dir}/best_swin_hair_classifier_top.pth",
+        f"{face_parsing_dir}/79999_iter.pth"
+    ]
+    
+    # 디렉토리 생성
+    os.makedirs(face_parsing_dir, exist_ok=True)
+    
+    # 모든 파일이 존재하는지 확인
+    missing_files = [f for f in required_files if not os.path.exists(f)]
+    
+    if missing_files:
+        print(f"🔍 모델 파일 누락 감지: {len(missing_files)}개 파일")
+        print("📥 Google Drive에서 모델 파일 다운로드 중...")
+        
+        try:
+            # gdown으로 모델 다운로드
+            subprocess.run([
+                "gdown", "--folder", 
+                "https://drive.google.com/drive/folders/1zBUYsLZawETCFIvkDTYDAncwooS_Jn53",
+                "-O", "/tmp/models_temp"
+            ], check=True, cwd=models_dir)
+            
+            # 파일 이동
+            import shutil
+            temp_dir = "/tmp/models_temp"
+            
+            if os.path.exists(f"{temp_dir}/best_swin_hair_classifier_side.pth"):
+                shutil.move(f"{temp_dir}/best_swin_hair_classifier_side.pth", 
+                          f"{models_dir}/best_swin_hair_classifier_side.pth")
+            
+            if os.path.exists(f"{temp_dir}/best_swin_hair_classifier_top.pth"):
+                shutil.move(f"{temp_dir}/best_swin_hair_classifier_top.pth", 
+                          f"{models_dir}/best_swin_hair_classifier_top.pth")
+            
+            if os.path.exists(f"{temp_dir}/79999_iter.pth"):
+                shutil.move(f"{temp_dir}/79999_iter.pth", 
+                          f"{face_parsing_dir}/79999_iter.pth")
+            
+            # 임시 디렉토리 정리
+            if os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir)
+            
+            print("✅ 모델 파일 다운로드 완료!")
+            
+        except Exception as e:
+            print(f"⚠️ 모델 다운로드 실패: {e}")
+            print("앱은 시작되지만 모델 관련 기능이 제한될 수 있습니다.")
+    else:
+        print("✅ 모든 모델 파일이 존재합니다.")
 
 def get_cache_key(place_name: str, address: str = None) -> str:
     """캐시 키 생성"""
@@ -841,6 +901,10 @@ class ErrorResponse(BaseModel):
 
 # 메인 앱 생성
 app = FastAPI(title="MOZARA Python Backend 통합", version="1.0.0")
+
+# 모델 파일 체크 및 다운로드
+print("🔍 모델 파일 체크 중...")
+check_and_download_models()
 
 # CORS 설정
 app.add_middleware(
