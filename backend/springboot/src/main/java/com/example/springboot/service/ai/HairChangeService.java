@@ -21,9 +21,6 @@ public class HairChangeService {
 
     public HairChangeService() {
         this.restTemplate = new RestTemplate();
-        // 타임아웃 설정 (5분)
-        this.restTemplate.getRequestFactory().setConnectTimeout(300000);
-        this.restTemplate.getRequestFactory().setReadTimeout(300000);
     }
 
     public Map<String, Object> generateHairstyle(MultipartFile image, String hairstyle, String customPrompt) throws IOException {
