@@ -209,19 +209,21 @@ export default function Main() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-md mx-auto bg-white min-h-screen pb-20">
         <div className="px-4 pt-6 pb-4">
+          {/* 케어 스트릭 표시 */}
+          <div className="flex justify-end items-center px-1">
+            {streakDays > 0 && (
+              <div
+                className="bg-orange-500 text-white px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md cursor-default"
+                title="스트릭 케어:연속 미션일 수"
+              >
+                <span className="text-sm cursor-default">🔥</span>
+                <span className="text-xs font-bold">연속 미션일: {streakDays}일</span>
+              </div>  
+            )}
+          </div>
           <div className="grid grid-cols-4 gap-3" style={{ gridTemplateRows: '140px 180px 120px 1fr 150px 100px' }}>
         {/* 타이틀 컴 이미지자린 - Top section spanning all 4 columns */}
-        <div className="col-span-4 flex items-center justify-center cursor-pointer relative px-6 py-4">
-          {/* 케어 스트릭 배지 - 우측 상단 */}
-          {streakDays > 0 && (
-            <div
-              className="absolute top-3 right-3 bg-orange-500 text-white px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md"
-              title="연속 미션일 수"
-            >
-              <span className="text-sm">🔥</span>
-              <span className="text-xs font-bold">{streakDays}일</span>
-            </div>
-          )}
+        <div className="col-span-4 flex items-center justify-center cursor-pointer relative px-6 pt-0 pb-4">
           <div className="flex items-center gap-4">
             <img
               src="/assets/images/main/clean/hair_question.png"
