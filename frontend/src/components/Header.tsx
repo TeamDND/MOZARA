@@ -28,9 +28,7 @@ export default function Header() {
   const isAdmin = user.role === 'ROLE_ADMIN';
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-50">
-      {/* 모바일 우선 컨테이너 */}
-      <div className="max-w-md mx-auto bg-white border-b border-gray-200 px-4 py-3">
+    <header className="absolute top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center">
         <button
           onClick={() => navigate(-1)}
@@ -82,7 +80,6 @@ export default function Header() {
           <div className="w-6 h-6"></div>
         )}
         </div>
-      </div>
     </header>
   );
 }
