@@ -166,7 +166,7 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose, isModalClo
     setTimeout(() => scrollToBottom(), 100);
 
     try {
-      const response = await apiClient.post('/api/ai/rag-chat', {
+      const response = await apiClient.post('/ai/rag-chat', {
         message: messageText,
         conversation_id: userConversationId,
       });

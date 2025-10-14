@@ -67,7 +67,8 @@ interface HairAnalysisResponse {
 const DailyCare: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const { createdAt, username, userId } = useSelector((state: RootState) => state.user);
+  const user = useSelector((state: RootState) => state.user);
+  const { createdAt, username, userId } = user || {};
   const { seedlingId, seedlingName, currentPoint, loading: seedlingLoading, error: seedlingError } = useSelector((state: RootState) => state.seedling);
 
 
@@ -741,7 +742,7 @@ const DailyCare: React.FC = () => {
 
           try {
             // SpringBoot 백엔드 날씨 API 호출 (apiClient 사용)
-            const response = await apiClient.get(`/api/ai/weather`, {
+            const response = await apiClient.get(`/ai/weather`, {
               params: { lat: latitude, lon: longitude }
             });
             const result = response.data;
