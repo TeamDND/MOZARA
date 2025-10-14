@@ -137,5 +137,12 @@ class PineconeService:
                 "message": f"연결 테스트 실패: {str(e)}"
             }
 
-# 전역 인스턴스
-pinecone_service = PineconeService()
+# 전역 인스턴스 (지연 초기화)
+pinecone_service = None
+
+def get_pinecone_service():
+    """Pinecone 서비스 인스턴스 가져오기 (지연 초기화)"""
+    global pinecone_service
+    if pinecone_service is None:
+        pinecone_service = PineconeService()
+    return pinecone_service

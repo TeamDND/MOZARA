@@ -22,20 +22,36 @@ import hashlib
 import subprocess
 import time
 
-# .env 파일 로드 (Docker 환경에서는 환경변수 직접 사용)
-try:
-    load_dotenv("../../.env")
-    print(f"✅ .env 파일 로드 시도: ../../.env")
+# ✅ 환경변수 로드 (시스템 환경변수 > .env 파일 우선순위)
+print("🔍 환경변수 로드 중...")
 
-    # 11번가 API 키 확인
-    eleven_st_key = os.getenv("ELEVEN_ST_API_KEY")
-    if eleven_st_key:
-        print("✅ ELEVEN_ST_API_KEY 로드됨")
-    else:
-        print("⚠️  ELEVEN_ST_API_KEY 로드 실패 - .env 파일을 확인하세요")
-except Exception as e:
-    print(f"⚠️  .env 로드 중 오류: {e}")
-    pass  # Docker 환경에서는 환경변수를 직접 사용
+# .env 파일이 있을 경우만 로드 (실패해도 무시)
+load_dotenv(dotenv_path="../../.env")
+print("✅ .env 파일 로드 시도 완료")
+
+# 주요 API 키 확인
+api_keys = {
+    "ELEVEN_ST_API_KEY": os.getenv("ELEVEN_ST_API_KEY"),
+    "PINECONE_API_KEY": os.getenv("PINECONE_API_KEY"),
+    "PINECONE_INDEX_NAME2": os.getenv("PINECONE_INDEX_NAME2"),
+    "GEMINI_API_KEY": os.getenv("GEMINI_API_KEY"),
+    "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"),
+    "YOUTUBE_API_KEY": os.getenv("YOUTUBE_API_KEY"),
+    "NAVER_CLIENT_ID": os.getenv("NAVER_CLIENT_ID"),
+    "NAVER_CLIENT_SECRET": os.getenv("NAVER_CLIENT_SECRET"),
+    "KAKAO_REST_API_KEY": os.getenv("KAKAO_REST_API_KEY"),
+    "GOOGLE_API_KEY": os.getenv("GOOGLE_API_KEY"),
+    "REACT_APP_OPENWEATHER_API_KEY": os.getenv("REACT_APP_OPENWEATHER_API_KEY")
+}
+
+# 로드된 환경변수 확인
+loaded_keys = [name for name, value in api_keys.items() if value]
+missing_keys = [name for name, value in api_keys.items() if not value]
+
+if loaded_keys:
+    print(f"✅ 환경변수 로드됨: {', '.join(loaded_keys)}")
+if missing_keys:
+    print(f"⚠️ 환경변수 누락: {', '.join(missing_keys)}")
 
 # 이미지 캐시 저장소 (메모리 기반)
 image_cache = {}

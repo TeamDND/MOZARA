@@ -3,7 +3,7 @@ RAG (Retrieval-Augmented Generation) 서비스 - CLIP 앙상블 기반
 """
 from typing import List, Dict, Optional, Any
 from .clip_ensemble_service import clip_ensemble_service
-from .pinecone_service import pinecone_service
+from .pinecone_service import get_pinecone_service
 from .image_preprocessing_service import image_preprocessing_service
 from ..utils.image_path_utils import get_image_path_from_metadata, get_available_image_paths
 import statistics
@@ -15,7 +15,14 @@ class RAGService:
     
     def __init__(self):
         self.clip_service = clip_ensemble_service
-        self.pinecone_service = pinecone_service
+        self._pinecone_service = None
+    
+    @property
+    def pinecone_service(self):
+        """Pinecone 서비스 지연 로딩"""
+        if self._pinecone_service is None:
+            self._pinecone_service = get_pinecone_service()
+        return self._pinecone_service
     
     def analyze_hair_image(self, image_bytes: bytes, top_k: int = 10, use_preprocessing: bool = True) -> Dict[str, Any]:
         """머리사진 분석 (CLIP 앙상블 RAG 방식)"""
