@@ -117,13 +117,13 @@ useEffect(() => {
               className="px-8 py-6 mt-8 text-lg font-medium"
               onClick={() => {
                 if (isLoggedIn) {
-                  navigate('/main-page')
+                  navigate('/main')
                 } else {
                   navigate('/login')
                 }
               }}
             >
-              시작해보기  
+              시작해보기
             </Button>
           </div>
         </div>
