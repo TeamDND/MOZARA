@@ -17,7 +17,11 @@ public class YouTubeService {
     @Value("${ai.python.base-url:http://localhost:8000}")
     private String pythonBaseUrl;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+    
+    public YouTubeService() {
+        this.restTemplate = new RestTemplate();
+    }
 
     /**
      * YouTube 영상 검색 API 프록시

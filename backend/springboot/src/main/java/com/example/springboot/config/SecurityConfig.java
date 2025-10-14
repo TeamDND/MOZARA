@@ -69,6 +69,7 @@ public class SecurityConfig {
                                 "/uploads/**", // 이미지 경로 허용
                                 "/api/join",
                                 "/api/signup",
+                                "/api/images/**",
                                 "/api/login",
                                 "/api/reissue",
                                 "/api/check-username/**",
