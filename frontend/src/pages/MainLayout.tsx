@@ -14,13 +14,16 @@ const MainLayout: React.FC = () => {
   return (
     // Tailwind CSS: 메인 레이아웃 컨테이너
     <div className="min-h-screen bg-gray-50">
-      {!isLandingPage && <Header />}
-      {/* Tailwind CSS: 메인 콘텐츠 영역 */}
-      <main>
-        <Outlet />
-      </main>
-      {!isLandingPage && <BottomNavigationBar />}
-      {/* <Footer /> */}
+      {/* 모바일 우선 컨테이너 */}
+      <div className="max-w-md mx-auto min-h-screen bg-white relative">
+        {!isLandingPage && <Header />}
+        {/* Tailwind CSS: 메인 콘텐츠 영역 */}
+        <main className="pb-20">
+          <Outlet />
+        </main>
+        {!isLandingPage && <BottomNavigationBar />}
+        {/* <Footer /> */}
+      </div>
     </div>
   );
 };
