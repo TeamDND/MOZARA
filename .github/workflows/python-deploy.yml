@@ -30,8 +30,6 @@ jobs:
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest ./backend/python
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest
           echo "✅ Python API 이미지 빌드 및 푸시 완료"
-  
----
 
   deploy:
     needs: build_and_push
