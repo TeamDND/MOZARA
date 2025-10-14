@@ -1,3 +1,54 @@
+"""
+============================================================================
+🏥 탈모 AI 분석 서비스 - 메인 실행 파일
+============================================================================
+
+이 파일이 하는 일:
+📸 사용자 사진 + 설문 → 🤖 AI 분석 → 💬 결과 + 조언
+
+주요 기능:
+1. Swin Transformer로 탈모 단계 판단 (0~3단계)
+2. BiSeNet으로 얼굴 영역 감지 및 블러 처리
+3. 의학 논문 기반 설문 점수 계산
+4. 동적 가중치로 Top/Side/Survey 결과 융합
+5. Gemini LLM으로 결과를 자연스러운 문장으로 변환
+
+전체 흐름:
+┌─────────────────┐
+│ 사용자 입력      │ Top 사진 + Side 사진 + 설문
+└─────────────────┘
+        ↓
+┌─────────────────┐
+│ 1. 얼굴 블러     │ 개인정보 보호
+└─────────────────┘
+        ↓
+┌─────────────────┐
+│ 2. 마스크 생성   │ BiSeNet으로 헤어 마스크
+└─────────────────┘
+        ↓
+┌─────────────────┐
+│ 3. Swin 분석     │ Top 모델 + Side 모델
+└─────────────────┘
+        ↓
+┌─────────────────┐
+│ 4. 설문 점수     │ 의학 논문 기반 점수 계산
+└─────────────────┘
+        ↓
+┌─────────────────┐
+│ 5. 결과 융합     │ 동적 가중치로 종합 판단
+└─────────────────┘
+        ↓
+┌─────────────────┐
+│ 6. LLM 포장      │ Gemini로 자연스러운 설명
+└─────────────────┘
+        ↓
+┌─────────────────┐
+│ 최종 결과 반환   │ JSON 형태로 프론트에 전달
+└─────────────────┘
+
+============================================================================
+"""
+
 import os
 import json
 import torch
@@ -16,22 +67,53 @@ import google.generativeai as genai
 # Swin 모델 import
 from services.swin_hair_classification.models.swin_hair_classifier import SwinHairClassifier
 
-# Face parsing 모델 import
+# Face parsing 모델 import (BiSeNet)
 from services.swin_hair_classification.models.face_parsing.model import BiSeNet
 
-# 환경 변수 로드
+# 환경 변수 로드 (API 키 등)
 load_dotenv("../../../.env")
 load_dotenv("../../.env")
 load_dotenv(".env")
 
 def log_message(message):
-    """로깅 함수"""
+    """
+    📝 로그 메시지 출력
+
+    무엇을 하나요?
+    - 시간과 함께 메시지를 출력하여 실행 과정 추적
+
+    예시:
+    [14:30:25] 모델 로드 완료
+    """
     timestamp = datetime.now().strftime("[%H:%M:%S]")
     print(f"{timestamp} {message}")
 
+
+# ============================================================================
+# 🤖 모델 로딩 함수들
+# ============================================================================
+
 def load_swin_model(model_path: str, device: torch.device) -> SwinHairClassifier:
-    """Swin 모델 로드"""
-    model = SwinHairClassifier(num_classes=4)
+    """
+    🧠 Swin Transformer 모델 로드
+
+    무엇을 하나요?
+    - 저장된 학습 모델 파일(.pth)을 불러와서 사용 가능하게 만듭니다
+
+    입력:
+        model_path: 모델 파일 경로 (예: "models/best_swin_hair_classifier_top.pth")
+        device: 실행 장치 (GPU 또는 CPU)
+
+    출력:
+        학습된 Swin 모델 (추론 준비 완료 상태)
+
+    동작:
+    1. 빈 모델 구조 생성 (클래스 4개짜리)
+    2. 저장된 가중치 파일 읽기
+    3. 가중치를 모델에 로드
+    4. 평가 모드로 전환 (학습 아님)
+    """
+    model = SwinHairClassifier(num_classes=4)  # 0, 1, 2, 3 레벨
 
     if os.path.exists(model_path):
         checkpoint = torch.load(model_path, map_location=device)
@@ -48,29 +130,76 @@ def load_swin_model(model_path: str, device: torch.device) -> SwinHairClassifier
     return model
 
 def load_face_parsing_model(device: torch.device) -> BiSeNet:
-    """Face parsing 모델 로드 (마스킹용)"""
-    model = BiSeNet(n_classes=19)
+    """
+    👤 BiSeNet 얼굴 분석 모델 로드
+
+    무엇을 하나요?
+    - 사진에서 얼굴 부분과 머리카락 부분을 구분하는 모델을 불러옵니다
+
+    BiSeNet이 하는 일:
+    - 사진의 각 픽셀이 무엇인지 분류 (피부, 눈, 코, 머리카락 등)
+    - 19개 클래스로 분류:
+      * 0: 배경
+      * 1: 피부
+      * 10: 코
+      * 11: 눈
+      * 17: 머리카락 ⭐ (우리가 필요한 부분!)
+      * ... 기타 부위
+
+    왜 필요한가요?
+    1. 얼굴 블러: 개인정보 보호 (얼굴만 블러)
+    2. 헤어 마스크: 머리카락 영역만 집중 분석
+    """
+    model = BiSeNet(n_classes=19)  # 19개 클래스 (얼굴 부위들)
     model_path = 'services/swin_hair_classification/models/face_parsing/res/cp/79999_iter.pth'
 
     if os.path.exists(model_path):
         model.load_state_dict(torch.load(model_path, map_location=device))
         model.to(device)
-        model.eval()
+        model.eval()  # 평가 모드
         log_message(f"Face parsing 모델 로드 완료: {model_path}")
     else:
         raise FileNotFoundError(f"Face parsing 모델을 찾을 수 없습니다: {model_path}")
 
     return model
 
+
+# ============================================================================
+# 🔐 개인정보 보호 - 얼굴 블러 처리
+# ============================================================================
+
 def apply_face_blur(image_bytes: bytes, face_parsing_model: BiSeNet, device: torch.device, blur_strength: int = 25) -> bytes:
     """
-    얼굴 부분만 블러 처리한 이미지 반환
-    Args:
-        image_bytes: 원본 이미지의 이진 데이터
-        face_parsing_model: Face parsing 모델
-        device: 디바이스
-        blur_strength: 블러 강도 (기본값 25)
-    Returns: 블러 처리된 이미지의 이진 데이터
+    🔒 얼굴 부분만 블러 처리 (개인정보 보호)
+
+    무엇을 하나요?
+    - 사진에서 얼굴 부분만 흐릿하게 만들어 개인정보 보호
+
+    왜 필요한가요?
+    - 서버에 사진 저장 시 개인정보 보호
+    - 디버깅/분석 시 프라이버시 보호
+    - 법적 규제 준수 (개인정보보호법)
+
+    동작 순서:
+    1. BiSeNet으로 얼굴 부위 감지 (피부, 눈, 코, 귀, 눈썹)
+    2. 얼굴 부위만 마스크 생성
+    3. 원본 사진을 블러 처리
+    4. 마스크 영역만 블러 사진으로 교체
+    5. 머리카락 영역은 그대로 유지!
+
+    그림:
+    ┌─────────────┐         ┌─────────────┐
+    │  원본 사진   │  →     │ 흐림 흐림    │ 얼굴만 블러
+    │  얼굴 명확   │  처리   │ 머리카락 명확│ 머리카락 유지
+    └─────────────┘         └─────────────┘
+
+    입력:
+        image_bytes: 원본 이미지 (bytes)
+        face_parsing_model: BiSeNet 모델
+        blur_strength: 블러 강도 (기본 25, 홀수여야 함)
+
+    출력:
+        블러 처리된 이미지 (bytes, JPEG 형식)
     """
     try:
         # bytes를 PIL Image로 변환
@@ -208,15 +337,67 @@ def analyze_single_image(image_bytes: bytes, model: SwinHairClassifier,
         log_message(f"이미지 분석 실패: {e}")
         return None
 
+
+# ============================================================================
+# 📋 설문 데이터 분석 - 의학 논문 기반
+# ============================================================================
+
 def calculate_survey_score(survey_data: Dict[str, Any]) -> float:
     """
-    의학 문헌 기반 설문 점수 계산 (0-3 범위)
+    📊 설문 점수 계산 (의학 논문에 근거한 과학적 점수)
 
-    참고 문헌:
+    무엇을 하나요?
+    - 사용자의 설문 답변을 의학 연구 결과에 따라 점수화
+    - AI 분석과 결합하여 더 정확한 진단
+
+    왜 필요한가요?
+    - AI는 사진만 보지만, 탈모는 유전/나이/스트레스 등 여러 요인이 복합적
+    - 의학적으로 검증된 요인들을 수치화하여 반영
+
+    점수 구성 (총 3.0점 만점):
+    1. 가족력 (최대 1.5점) ⭐ 가장 중요!
+       - 양쪽 부모: 1.5점 (가장 높은 위험)
+       - 아버지만: 1.2점 (부계 유전 62.8%)
+       - 어머니만: 0.5점 (모계 유전 8.6%)
+       - 없음: 0점
+
+    2. 나이 (최대 0.9점)
+       - 50대+: 0.9점 (유병률 50%)
+       - 40대: 0.7점 (유병률 40%)
+       - 30대: 0.4점 (유병률 30%)
+       - 20대: 0.2점 (유병률 25%)
+
+    3. 최근 탈모 증상 (최대 0.6점)
+       - 있음: 0.6점 (진행 중 위험 신호)
+       - 없음: 0점
+
+    4. 스트레스 (최대 0.3점)
+       - 높음: 0.3점 (70% 휴지기 탈모)
+       - 보통: 0.15점
+       - 낮음: 0점
+
+    의학적 근거:
+    📚 참고 문헌:
     - NCBI (2024): 유전적 기여도 80% (heritability=0.817)
     - PLOS One (2024): 가족력 68%, 부계 유전 62.8%, 모계 유전 8.6%
     - NCBI Bookshelf: 연령별 유병률 - 20대(25%), 30대(30%), 40대(40%), 50대(50%)
     - StatPearls: 스트레스 시 70% 모발 휴지기 전환 (telogen effluvium)
+
+    입력:
+        survey_data: 설문 답변 딕셔너리
+        {
+            'familyHistory': 'both' | 'father' | 'mother' | 'none',
+            'age': 숫자 (예: 35),
+            'recentHairLoss': 'yes' | 'no',
+            'stress': 'high' | 'medium' | 'low'
+        }
+
+    출력:
+        0.0 ~ 3.0 사이의 점수 (탈모 위험도)
+
+    예시:
+    - 20대, 가족력 없음, 증상 없음, 스트레스 낮음 → 0.2점 (낮은 위험)
+    - 40대, 부모 모두 탈모, 증상 있음, 스트레스 높음 → 3.0점 (높은 위험)
     """
     score = 0.0
 
@@ -262,17 +443,68 @@ def calculate_survey_score(survey_data: Dict[str, Any]) -> float:
 def calculate_dynamic_weights(age: int, family_history: str,
                               top_confidence: float, side_confidence: float) -> Dict[str, float]:
     """
-    의학 문헌 기반 동적 가중치 계산
+    ⚖️ 동적 가중치 계산 (의학 논문 + AI 신뢰도 기반)
 
-    참고 문헌:
-    - Hamilton-Norwood Scale: 정수리(vertex) + 전두부(frontal) 모두 평가 필요
-    - 임상 가이드라인: 360도 종합 평가 권장
-    - Top view: 정수리 탈모 (AGA 핵심 지표)
-    - Side view: 전두부 후퇴 (진행 패턴)
+    무엇을 하나요?
+    - Top 사진, Side 사진, 설문 데이터의 중요도를 동적으로 조절
+    - 나이, 가족력, AI 신뢰도에 따라 가중치가 자동으로 변함
 
-    나이별 가중치 근거:
-    - 젊을수록 이미지 분석 신뢰도 높음 (명확한 패턴)
-    - 고령일수록 설문 중요도 증가 (복합 요인)
+    왜 동적인가요?
+    - 젊은 사람: 사진 패턴이 명확 → 이미지 가중치 ↑
+    - 나이든 사람: 복합 요인 많음 → 설문 가중치 ↑
+    - AI가 확신함: 사진 가중치 ↑
+    - AI가 불확실: 설문 가중치 ↑
+
+    가중치 구성 (합 = 1.0):
+    1. Top (정수리): 0.40 ~ 0.60 (기본)
+    2. Side (측면): 0.20 ~ 0.35 (기본)
+    3. Survey (설문): 0.10 ~ 0.40 (기본)
+
+    나이별 기본 가중치:
+    ┌──────┬──────┬──────┬─────────┐
+    │ 나이 │ Top  │ Side │ Survey  │
+    ├──────┼──────┼──────┼─────────┤
+    │ 20대 │ 0.55 │ 0.35 │ 0.10 ⭐ │ 사진 중심
+    │ 30대 │ 0.50 │ 0.30 │ 0.20    │
+    │ 40대 │ 0.45 │ 0.25 │ 0.30    │
+    │ 50대+│ 0.40 │ 0.20 │ 0.40 ⭐ │ 설문 중심
+    └──────┴──────┴──────┴─────────┘
+
+    AI 신뢰도 조정:
+    - 평균 신뢰도 > 85%: 사진 가중치 +10% (AI 확신)
+    - 평균 신뢰도 < 60%: 설문 가중치 +15% (AI 불확실)
+
+    가족력 보정:
+    - 가족력 있으면: 설문 +10% (유전 정보 중요)
+
+    의학적 근거:
+    📚 참고 문헌:
+    - Hamilton-Norwood Scale: 정수리(vertex) + 전두부(frontal) 종합 평가
+    - 임상 가이드라인: 360도 다각도 분석 권장
+    - Top view: 정수리 탈모 (AGA의 핵심 지표)
+    - Side view: M자 헤어라인 후퇴 (진행 패턴 확인)
+    - 나이별 패턴: 젊을수록 명확, 고령일수록 복합 요인
+
+    입력:
+        age: 나이 (숫자)
+        family_history: 가족력 ('both', 'father', 'mother', 'none')
+        top_confidence: TOP 모델 신뢰도 (0.0~1.0)
+        side_confidence: SIDE 모델 신뢰도 (0.0~1.0)
+
+    출력:
+        딕셔너리 {
+            'top': 0.0~1.0,
+            'side': 0.0~1.0,
+            'survey': 0.0~1.0,  (합 = 1.0)
+            'avg_confidence': 평균 신뢰도
+        }
+
+    예시:
+    1. 25세, 가족력 없음, 신뢰도 90%
+       → Top: 0.60, Side: 0.35, Survey: 0.05 (사진 중심)
+
+    2. 55세, 가족력 있음, 신뢰도 50%
+       → Top: 0.30, Side: 0.15, Survey: 0.55 (설문 중심)
     """
     # 1단계: 나이별 기본 가중치
     if age < 30:
