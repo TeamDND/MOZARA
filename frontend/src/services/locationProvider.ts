@@ -21,7 +21,7 @@ class LocationProvider {
    */
   async searchWithNaver(query: string): Promise<any> {
     try {
-      const response = await apiClient.get(`/api/ai/location/naver/search`, {
+      const response = await apiClient.get(`/ai/location/naver/search`, {
         params: { query }
       });
       return response.data;
@@ -53,7 +53,7 @@ class LocationProvider {
         params.radius = radius;
       }
 
-      const response = await apiClient.get(`/api/ai/location/kakao/search`, { params });
+      const response = await apiClient.get(`/ai/location/kakao/search`, { params });
       return response.data;
     } catch (error: any) {
       console.error('카카오 검색 중 오류:', error);
@@ -73,7 +73,7 @@ class LocationProvider {
     timestamp?: string;
   }> {
     try {
-      const response = await apiClient.get(`/api/ai/location/status`);
+      const response = await apiClient.get(`/ai/location/status`);
       return response.data;
     } catch (error: any) {
       console.error('SpringBoot 위치 서비스 상태 확인 실패:', error);

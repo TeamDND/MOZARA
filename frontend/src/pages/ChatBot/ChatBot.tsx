@@ -127,7 +127,7 @@ const ChatBot: React.FC = () => {
     setShowQuickQuestions(false);
 
     try {
-      const response = await apiClient.post('/api/ai/rag-chat', {
+      const response = await apiClient.post('/ai/rag-chat', {
         message: textToSend,
         conversation_id: conversationId,
       });
@@ -196,7 +196,7 @@ const ChatBot: React.FC = () => {
     setInputMessage('');
 
     // 백엔드에도 대화 기록 삭제 요청 (선택적)
-    apiClient.post('/api/ai/rag-chat/clear', {
+    apiClient.post('/ai/rag-chat/clear', {
       conversation_id: userConversationId,
     }).catch(err => {});
   };
