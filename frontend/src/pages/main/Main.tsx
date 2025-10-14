@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { RootState } from '../../utils/store';
 import pythonClient from '../../services/pythonClient';
 import apiClient from '../../services/apiClient';
-import { Droplets, Sun, Wind, TrendingUp, TrendingDown, Minus, Lightbulb } from 'lucide-react';
+import { Droplets, Sun, Wind, TrendingUp, TrendingDown, Minus, Lightbulb, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function Main() {
   const { userId } = useSelector((state: RootState) => state.user);
@@ -19,6 +19,22 @@ export default function Main() {
 
   // 케어 스트릭 상태
   const [streakDays, setStreakDays] = useState<number>(0);
+
+  // 슬라이드 상태
+  const [currentSlide, setCurrentSlide] = useState<number>(0);
+  const slides = [
+    { id: 'hair-change', title: '헤어 체인지', description: '가상 헤어스타일 변경 체험', image: '/assets/images/main/clean/hair_change_2.png', route: '/hair-change' },
+    { id: 'hair-ox', title: '탈모 OX', description: '탈모 상식 퀴즈', image: '/assets/images/main/clean/hair_ox_2.png', route: '/hair-quiz' },
+    { id: 'hair-tube', title: '탈모 튜브', description: '탈모 관련 영상', image: '/assets/images/main/clean/hair_tube_2.png', route: '/youtube-videos' }
+  ];
+
+  const handlePrevSlide = () => {
+    setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+  };
+
+  const handleNextSlide = () => {
+    setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+  };
 
   // 환경 정보 상태 (날씨 API)
   const [environmentInfo, setEnvironmentInfo] = useState<{
@@ -175,6 +191,11 @@ export default function Main() {
     loadStreakInfo();
   }, [userId]);
 
+  // 페이지 진입 시 스크롤 맨 위로
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // 아이콘 렌더링 함수
   const getIconComponent = (iconName: string) => {
     const iconProps = { className: "w-3 h-3 inline-block" };
@@ -214,10 +235,10 @@ export default function Main() {
             {streakDays > 0 && (
               <div
                 className="bg-orange-500 text-white px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md cursor-default"
-                title="스트릭 케어:연속 미션일 수"
+                title="스트릭 케어: 연속 미션일 수"
               >
-                <span className="text-sm cursor-default">🔥</span>
-                <span className="text-xs font-bold">연속 미션일: {streakDays}일</span>
+                <span className="text-sm cursor-default" title="스트릭 케어: 연속 미션일 수">🔥</span>
+                <span className="text-xs font-bold cursor-default" title="스트릭 케어: 연속 미션일 수">연속 미션일: {streakDays}일</span>
               </div>  
             )}
           </div>
@@ -240,14 +261,14 @@ export default function Main() {
         </div>
 
         {/* 분석 - Left section spanning 2 columns and 2 rows */}
-        <div className="col-span-2 row-span-2 rounded-lg flex flex-col items-center justify-center p-6 border-2" style={{ borderColor: '#1f0101', opacity: 0.8 }}>
+        <div className="col-span-2 row-span-2 rounded-lg flex flex-col items-center justify-center p-6 border-2" style={{ borderColor: '#1f0101', backgroundColor: '#F9FAFB' }}>
           <img
             src="/assets/images/main/clean/analysis_2.png"
             alt="분석"
-            className="w-24 h-24 mb-4 object-contain"
+            className="w-32 h-32 mb-4 object-contain"
           />
           <div
-            className="cursor-pointer transition-all px-4 py-2 rounded-lg bg-[#1f0101]"
+            className="cursor-pointer transition-all px-4 py-2 rounded-lg bg-[#1f0101] bg-opacity-80"
             onClick={() => navigate('/integrated-diagnosis')}
           >
             <p className="text-white font-bold text-lg mb-1">분석</p>
@@ -256,14 +277,14 @@ export default function Main() {
         </div>
 
         {/* 데일리 케어 - Right top spanning 2 columns */}
-        <div className="col-span-2 row-span-1 rounded-lg flex flex-col items-center justify-center px-2 py-4 border-2" style={{ borderColor: '#1f0101', opacity: 0.8 }}>
+        <div className="col-span-2 row-span-1 rounded-lg flex flex-col items-center justify-center px-2 py-4 border-2" style={{ borderColor: '#1f0101', backgroundColor: '#F9FAFB' }}>
           <img
             src="/assets/images/main/clean/daily_care_2.png"
             alt="데일리 케어"
             className="w-16 h-16 object-contain mb-2"
           />
           <div
-            className="flex flex-col cursor-pointer transition-all px-3 py-1.5 rounded-lg bg-[#1f0101]"
+            className="flex flex-col cursor-pointer transition-all px-3 py-1.5 rounded-lg bg-[#1f0101] bg-opacity-80"
             onClick={() => navigate('/daily-care')}
           >
             <p className="text-white font-bold text-center">데일리 케어</p>
@@ -292,30 +313,30 @@ export default function Main() {
         </div> */}
 
         {/* 날씨 정보 카드 - 탈모 OX와 탈모 튜브 자리 */}
-        <div className="col-span-2 row-span-1 rounded-lg flex flex-col justify-center items-center cursor-pointer transition-all py-5 px-4 overflow-hidden border-2" style={{ borderColor: '#1f0101' }}>
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <img src="/assets/images/main/clean/care_tip_2.png" alt="케어 팁" className="w-9 h-9 object-contain" />
-            <p className="text-foreground font-bold text-xs text-center">오늘의 케어 팁</p>
+        <div className="col-span-2 row-span-1 rounded-lg flex flex-col justify-center items-center cursor-pointer transition-all py-3 px-3 border-2" style={{ borderColor: '#1f0101', backgroundColor: '#F9FAFB' }}>
+          <div className="flex items-center gap-1.5 mb-1">
+            <img src="/assets/images/main/clean/care_tip_2.png" alt="케어 팁" className="w-7 h-7 object-contain flex-shrink-0" />
+            <p className="text-foreground font-bold text-xs">오늘의 케어 팁</p>
           </div>
           {loadingWeather ? (
-            <p className="text-muted-foreground text-xs leading-tight text-center">날씨 정보 로딩 중...</p>
+            <p className="text-muted-foreground text-xs leading-tight text-center px-1">날씨 정보 로딩 중...</p>
           ) : (() => {
             const weatherMsg = getWeatherMessage();
             return (
               <>
-                <div className="text-muted-foreground text-xs leading-tight text-center mb-1">
+                <div className="text-muted-foreground text-xs leading-tight text-center mb-1 px-1">
                   <span>{weatherMsg.message}</span>
                 </div>
-                <div className="flex gap-2 text-xs items-center justify-center">
-                  <span className="flex items-center gap-0.5 text-muted-foreground">
+                <div className="flex gap-1.5 text-xs items-center justify-center flex-wrap">
+                  <span className="flex items-center gap-0.5 text-muted-foreground whitespace-nowrap">
                     <Droplets className="w-3 h-3" />
                     {environmentInfo.humidity}%
                   </span>
-                  <span className="flex items-center gap-0.5 text-muted-foreground">
+                  <span className="flex items-center gap-0.5 text-muted-foreground whitespace-nowrap">
                     <Sun className="w-3 h-3" />
                     {environmentInfo.uvLevel}
                   </span>
-                  <span className="flex items-center gap-0.5 text-muted-foreground">
+                  <span className="flex items-center gap-0.5 text-muted-foreground whitespace-nowrap">
                     <Wind className="w-3 h-3" />
                     {environmentInfo.airQualityLevel}
                   </span>
@@ -325,24 +346,43 @@ export default function Main() {
           })()}
         </div>
 
-        {/* 헤어 체인지 - Bottom long section spanning 4 columns */}
-        <div className="col-span-4 row-span-1 flex items-center gap-4 p-4">
-          <img
-            src="/assets/images/main/clean/hair_change_2.png"
-            alt="헤어 체인지"
-            className="w-24 h-24 object-contain"
-          />
-          <div
-            className="flex flex-col cursor-pointer transition-all px-4 py-2 rounded-lg bg-[#1f0101] bg-opacity-80 "
-            onClick={() => navigate('/hair-change')}
+        {/* 슬라이드 섹션 - Bottom long section spanning 4 columns */}
+        <div className="col-span-4 row-span-1 relative flex items-center gap-2 p-4">
+          {/* 왼쪽 버튼 */}
+          <button
+            onClick={handlePrevSlide}
+            className="absolute left-0 z-10 bg-white rounded-full p-1 shadow-md hover:bg-gray-100 transition-all"
           >
-            <p className="text-white font-bold">헤어 체인지</p>
-            <p className="text-white text-xs">가상 헤어스타일 변경 체험</p>
+            <ChevronLeft className="w-5 h-5 text-gray-700" />
+          </button>
+
+          {/* 슬라이드 컨텐츠 */}
+          <div className="flex-1 flex items-center justify-center gap-4 overflow-hidden">
+            <img
+              src={slides[currentSlide].image}
+              alt={slides[currentSlide].title}
+              className="w-24 h-24 object-contain"
+            />
+            <div
+              className="flex flex-col cursor-pointer transition-all px-4 py-2 rounded-lg bg-[#1f0101] bg-opacity-80"
+              onClick={() => slides[currentSlide].route && navigate(slides[currentSlide].route)}
+            >
+              <p className="text-white font-bold">{slides[currentSlide].title}</p>
+              <p className="text-white text-xs">{slides[currentSlide].description}</p>
+            </div>
           </div>
+
+          {/* 오른쪽 버튼 */}
+          <button
+            onClick={handleNextSlide}
+            className="absolute right-0 z-10 bg-white rounded-full p-1 shadow-md hover:bg-gray-100 transition-all"
+          >
+            <ChevronRight className="w-5 h-5 text-gray-700" />
+          </button>
         </div>
 
         {/* 데일리 통계 카드 - Daily stats section spanning all 4 columns */}
-        <div className="col-span-4 rounded-lg cursor-pointer transition-all p-4 overflow-hidden border-2" style={{ borderColor: '#1f0101' }}>
+        <div className="col-span-4 rounded-lg cursor-pointer transition-all p-4 overflow-hidden border-2" style={{ borderColor: '#1f0101', backgroundColor: '#F9FAFB' }}>
           <div className="mb-2">
             <p className="text-foreground font-bold text-sm">나의 케어 현황</p>
           </div>
@@ -400,7 +440,7 @@ export default function Main() {
               <p className="text-foreground font-bold text-base"></p>
             </div>
             <p className="text-muted-foreground text-xs">
-              처음이시라면 진단을, 기록이 있으시다면 <br/>데일리 케어를 이용하세요
+              처음이시라면 분석을, 기록이 있으시다면 <br/>데일리 케어를 이용하세요
             </p>
           </div>
           <img
