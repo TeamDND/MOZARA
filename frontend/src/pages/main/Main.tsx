@@ -240,7 +240,7 @@ export default function Main() {
         </div>
 
         {/* 분석 - Left section spanning 2 columns and 2 rows */}
-        <div className="col-span-2 row-span-2 rounded-lg flex flex-col items-center justify-center p-6 border-2" style={{ borderColor: '#1f0101' }}>
+        <div className="col-span-2 row-span-2 rounded-lg flex flex-col items-center justify-center p-6 border-2" style={{ borderColor: '#1f0101', opacity: 0.8 }}>
           <img
             src="/assets/images/main/clean/analysis_2.png"
             alt="분석"
@@ -251,24 +251,24 @@ export default function Main() {
             onClick={() => navigate('/integrated-diagnosis')}
           >
             <p className="text-white font-bold text-lg mb-1">분석</p>
-            <p className="text-white text-xs text-center">AI로 탈모 단계 분석</p>
+            <p className="text-white text-xs text-center" style={{ letterSpacing: '-0.07em' }}>AI로 탈모 단계 분석</p>
           </div>
         </div>
 
         {/* 데일리 케어 - Right top spanning 2 columns */}
-        <div className="col-span-2 row-span-1 rounded-lg flex items-center justify-between px-2 py-4 border-2" style={{ borderColor: '#1f0101' }}>
+        <div className="col-span-2 row-span-1 rounded-lg flex flex-col items-center justify-center px-2 py-4 border-2" style={{ borderColor: '#1f0101', opacity: 0.8 }}>
+          <img
+            src="/assets/images/main/clean/daily_care_2.png"
+            alt="데일리 케어"
+            className="w-16 h-16 object-contain mb-2"
+          />
           <div
             className="flex flex-col cursor-pointer transition-all px-3 py-1.5 rounded-lg bg-[#1f0101]"
             onClick={() => navigate('/daily-care')}
           >
-            <p className="text-white font-bold">데일리<br/> 케어</p>
-            <p className="text-white text-xs" style={{ letterSpacing: '-0.1em' }}>매일 관리하는<br/> 두피 건강</p>
+            <p className="text-white font-bold text-center">데일리 케어</p>
+            <p className="text-white text-xs text-center">매일 관리하는 두피 건강</p>
           </div>
-          <img
-            src="/assets/images/main/clean/daily_care_2.png"
-            alt="데일리 케어"
-            className="w-16 h-16 object-contain"
-          />
         </div>
 
         {/* 탈모 ox - Right middle left */}
@@ -333,7 +333,7 @@ export default function Main() {
             className="w-24 h-24 object-contain"
           />
           <div
-            className="flex flex-col cursor-pointer transition-all px-4 py-2 rounded-lg bg-[#1f0101]"
+            className="flex flex-col cursor-pointer transition-all px-4 py-2 rounded-lg bg-[#1f0101] bg-opacity-80 "
             onClick={() => navigate('/hair-change')}
           >
             <p className="text-white font-bold">헤어 체인지</p>
