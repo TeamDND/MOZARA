@@ -14,16 +14,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+        
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
+        
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
+        
       - name: Build and push Python API
         run: |
           echo "🔨 Python API 이미지 빌드 중..."
@@ -31,6 +31,8 @@ jobs:
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest
           echo "✅ Python API 이미지 빌드 및 푸시 완료"
   
+---
+
   deploy:
     needs: build_and_push
     runs-on: ubuntu-latest
@@ -42,28 +44,35 @@ jobs:
           
           # SSH 키 설정
           mkdir -p ~/.ssh
-          echo "${{ secrets.RUNPOD_SSH_KEY }}" > ~/.ssh/id_rsa
+          # Secret으로 저장된 Private Key를 파일로 저장
+          echo "${{ secrets.RUNPOD_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          # Runpod 호스트 키를 known_hosts에 추가하여 연결 시 확인 절차 자동화
           ssh-keyscan -H ssh.runpod.io >> ~/.ssh/known_hosts
           
-          # SSH 연결 테스트
+          # 1. SSH 연결 테스트 (PTY 비활성화를 위해 -T 옵션 추가)
           echo "🔍 SSH 연결 테스트 중..."
-          ssh -T -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${{ secrets.RUNPOD_POD_ID }}-6441140b@ssh.runpod.io "echo 'SSH 연결 성공!'" || {
+          ssh -T -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${{ secrets.RUNPOD_POD_ID }}-6441140b@ssh.runpod.io "echo 'SSH 연결 성공!'" || {
             echo "❌ SSH 연결 실패"
             exit 1
           }
           echo "✅ SSH 연결 성공!"
           
-          # Docker 컨테이너 실행
-          ssh -T -o StrictHostKeyChecking=no ${{ secrets.RUNPOD_POD_ID }}-6441140b@ssh.runpod.io '
-            echo "🐳 기존 Docker 컨테이너 정리 중..." && 
-            docker stop mozara-python || true && 
-            docker rm mozara-python || true && 
-            echo "📥 Docker 이미지 pull 중..." && 
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest && 
-            echo "🚀 Docker 컨테이너 실행 중..." && 
-            docker run -d --name mozara-python -p 8000:8000 ${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest && 
-            echo "✅ Python 서버 배포 완료!"
-          '
+          # 2. Docker 컨테이너 실행 (PTY 비활성화를 위해 -T 옵션 추가)
+          SSH_USER_HOST="${{ secrets.RUNPOD_POD_ID }}-6441140b@ssh.runpod.io"
+          DOCKER_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest"
+          
+          DEPLOY_COMMAND="
+            echo '🐳 기존 Docker 컨테이너 정리 중...' && \
+            docker stop mozara-python || true && \
+            docker rm mozara-python || true && \
+            echo '📥 Docker 이미지 pull 중...' && \
+            docker pull ${DOCKER_IMAGE} && \
+            echo '🚀 Docker 컨테이너 실행 중...' && \
+            docker run -d --name mozara-python -p 8000:8000 ${DOCKER_IMAGE} && \
+            echo '✅ Python 서버 배포 완료!'
+          "
+          
+          ssh -T -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${SSH_USER_HOST} "${DEPLOY_COMMAND}"
           
           echo "🎉 Python API 배포 완료!"
