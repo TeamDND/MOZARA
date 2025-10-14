@@ -21,9 +21,9 @@ const MainLayout: React.FC = () => {
         <main className="pb-20">
           <Outlet />
         </main>
-        {!isLandingPage && <BottomNavigationBar />}
         {/* <Footer /> */}
       </div>
+      {!isLandingPage && <BottomNavigationBar />}
     </div>
   );
 };
