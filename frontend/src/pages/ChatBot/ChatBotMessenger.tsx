@@ -16,6 +16,7 @@ interface ChatResponse {
   sources: string[];
   conversation_id: string;
   timestamp: string;
+  is_hair_related?: boolean;
 }
 
 interface ChatBotMessengerProps {
@@ -101,7 +102,7 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose, isModalClo
         response: botResponse,
       });
 
-      return response.data || [];
+      return response.data.questions || [];
     } catch (error) {
       console.error('연관 질문 생성 실패:', error);
       // 실패 시 기본 질문들 반환
@@ -178,7 +179,7 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose, isModalClo
         text: data.response,
         sender: 'bot',
         timestamp: data.timestamp,
-        sources: data.sources,
+        sources: data.is_hair_related ? data.sources : [], // 탈모 관련이 아니면 참고자료 숨기기
       };
 
       // 모달이 닫혀도 메시지와 연관 질문을 저장
@@ -230,7 +231,7 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose, isModalClo
   const handleNewConversation = async () => {
     try {
       // 서버에 대화 기록 초기화 요청
-      await apiClient.post('/api/ai/rag-chat/clear', {
+      await apiClient.post('/ai/rag-chat/clear', {
         conversation_id: userConversationId,
       });
 

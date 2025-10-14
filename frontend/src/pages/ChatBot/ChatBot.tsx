@@ -18,6 +18,7 @@ interface ChatResponse {
   conversation_id: string;
   timestamp: string;
   context_used?: boolean;
+  is_hair_related?: boolean;
 }
 
 interface QuickQuestion {
