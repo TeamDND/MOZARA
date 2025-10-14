@@ -14,6 +14,7 @@ import HairEncyclopediaMain from './pages/hairEncyclopedia/HairEncyclopediaMain'
 import HairDiagnosis from './pages/check/HairDiagnosis';
 import HairQuiz from './pages/hair_ox/HairQuiz';
 import MainPage from './pages/MainPage';
+import Main from './pages/main/Main';
 import DailyCare from './pages/hair_dailycare/DailyCare';
 import StoreFinder from './pages/hair_map/StoreFinder';
 
@@ -74,6 +75,7 @@ const App: React.FC = () => {
           <Route path="hair-diagnosis" element={<HairDiagnosis />} />
           <Route path="hair-quiz" element={<HairQuiz />} />
           <Route path="signup" element={<SignUp />} />
+          <Route path="main" element={<Main />} />
           <Route path="main-page" element={<MainPage />} />
           <Route path="daily-care" element={<DailyCare />} />
           <Route path="hair-dailycare" element={<DailyCare />} />
