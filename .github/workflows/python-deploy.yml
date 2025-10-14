@@ -56,10 +56,17 @@ jobs:
           }
           echo "✅ SSH 연결 성공!"
           
-          # 2. Pod 재시작으로 새 이미지 적용
+          # 2. Pod에서 새 이미지 pull 및 재시작
           SSH_USER_HOST="${{ secrets.RUNPOD_POD_ID }}-6441140b@ssh.runpod.io"
+          DOCKER_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest"
           
-          echo "🔄 Pod가 새 이미지로 자동 시작됩니다..."
-          echo "✅ 배포 완료! Pod에서 컨테이너가 자동으로 실행됩니다."
+          DEPLOY_COMMAND="
+            echo '📥 새 Docker 이미지 pull 중...' && \
+            docker pull ${DOCKER_IMAGE} && \
+            echo '🔄 Pod 재시작으로 새 이미지 적용 중...' && \
+            echo '✅ 배포 완료!'
+          "
+          
+          ssh -o RequestTTY=no -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${SSH_USER_HOST} "${DEPLOY_COMMAND}"
           
           echo "🎉 Python API 배포 완료!"
