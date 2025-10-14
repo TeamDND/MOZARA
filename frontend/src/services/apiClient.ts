@@ -10,7 +10,7 @@ const apiClient = axios.create({
         'Content-Type': 'application/json',
     },
     withCredentials: true,
-    timeout: 250000,
+    timeout: 180000, // 3분 타임아웃
 });
 
 // TypeScript: 요청 인터셉터 - 요청 전에 실행되는 함수

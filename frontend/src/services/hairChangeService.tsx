@@ -39,7 +39,7 @@ class HairChangeService {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 120000, // 2분 타임아웃
+        timeout: 180000, // 3분 타임아웃
       }
     );
 
