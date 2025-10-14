@@ -52,7 +52,7 @@ const HairQuiz: React.FC = () => {
 
   const generateQuizWithGemini = async (): Promise<QuizQuestion[]> => {
     try {
-      const response = await apiClient.post('/api/ai/hair-quiz/generate');
+      const response = await apiClient.post('/ai/hair-quiz/generate');
       return response.data.items as QuizQuestion[];
     } catch (error: any) {
       console.error('퀴즈 생성 API 호출 실패:', error);

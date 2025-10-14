@@ -132,7 +132,7 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
               </div>
             </div>
 
-            {/* 진행 표시 점들 */}
+            {/* 진행 표시 점들
             <div className="flex justify-center gap-1.5 mt-4">
               {tips.slice(0, 5).map((_, index) => (
                 <div
@@ -144,7 +144,7 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
                   }`}
                 />
               ))}
-            </div>
+            </div> */}
           </div>
         </div>
       )}

@@ -27,8 +27,9 @@ const BottomNavigationBar: React.FC = () => {
       <div className="relative bg-white/90 backdrop-blur">
         {/* 상단 둥근 모서리 */}
         <div className="bg-white/90 backdrop-blur rounded-t-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-
-          <div className="flex items-center pt-2 pb-2 px-4">
+          {/* 최대 너비 제한 컨테이너 */}
+          <div className="max-w-md mx-auto">
+            <div className="flex items-center pt-2 pb-2 px-4">
             {/* 분석 */}
             <button
               onClick={() => {
@@ -144,6 +145,7 @@ const BottomNavigationBar: React.FC = () => {
                 챗봇
               </span>
             </button>
+            </div>
           </div>
         </div>
       </div>
