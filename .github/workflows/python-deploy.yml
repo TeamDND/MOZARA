@@ -48,9 +48,9 @@ jobs:
           # Runpod 호스트 키를 known_hosts에 추가하여 연결 시 확인 절차 자동화
           ssh-keyscan -H ssh.runpod.io >> ~/.ssh/known_hosts
           
-          # 1. SSH 연결 테스트 (PTY 비활성화를 위해 -T 옵션 추가)
+          # 1. SSH 연결 테스트 (PTY 완전 비활성화)
           echo "🔍 SSH 연결 테스트 중..."
-          ssh -T -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${{ secrets.RUNPOD_POD_ID }}-6441140b@ssh.runpod.io "echo 'SSH 연결 성공!'" || {
+          ssh -o RequestTTY=no -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i ~/.ssh/id_rsa ${{ secrets.RUNPOD_POD_ID }}-6441140b@ssh.runpod.io "echo 'SSH 연결 성공!'" || {
             echo "❌ SSH 연결 실패"
             exit 1
           }
@@ -71,6 +71,6 @@ jobs:
             echo '✅ Python 서버 배포 완료!'
           "
           
-          ssh -T -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${SSH_USER_HOST} "${DEPLOY_COMMAND}"
+          ssh -o RequestTTY=no -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${SSH_USER_HOST} "${DEPLOY_COMMAND}"
           
           echo "🎉 Python API 배포 완료!"
