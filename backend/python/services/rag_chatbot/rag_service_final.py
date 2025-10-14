@@ -209,6 +209,32 @@ class HairLossRAGChatbotWithMemory:
 
         return chain
 
+    def is_hair_related_question(self, message: str, source_docs: List) -> bool:
+        """질문이 탈모 관련인지 판별"""
+        # 1. 검색된 문서가 있고 유사도 점수가 충분히 높은지 확인
+        if source_docs and len(source_docs) > 0:
+            # 문서에 score 속성이 있는지 확인
+            if hasattr(source_docs[0], 'metadata'):
+                # 유사도 점수 확인 (보통 0.7 이상이면 관련성이 높음)
+                # LangChain Document는 score를 직접 가지지 않으므로 문서 존재 여부로 판단
+                return True
+        
+        # 2. 탈모 관련 키워드 확인
+        hair_keywords = [
+            '탈모', '모발', '머리', '헤어', '모낭', '두피', 
+            '미녹시딜', '피나스테리드', '프로페시아', '아보다트',
+            '모발이식', 'aga', 'fphl', 'dht', '안드로겐',
+            '원형탈모', '지루성', '비듬', '가르마', '정수리',
+            'hair', 'baldness', 'alopecia', 'finasteride', 'minoxidil'
+        ]
+        
+        message_lower = message.lower()
+        if any(keyword in message_lower for keyword in hair_keywords):
+            return True
+        
+        # 3. 검색 결과도 없고 키워드도 없으면 탈모 관련 아님
+        return False
+
     def chat(self, message: str, conversation_id: str = None) -> Dict:
         """챗봇 대화 - 사용자별 메모리 유지"""
         try:
@@ -234,15 +260,20 @@ class HairLossRAGChatbotWithMemory:
             answer = result.get("answer", "")
             source_docs = result.get("source_documents", [])
 
-            # 소스 정보
+            # 탈모 관련 질문인지 확인
+            is_hair_related = self.is_hair_related_question(message, source_docs)
+            
+            # 소스 정보 - 탈모 관련일 때만 표시
             sources = []
-            for doc in source_docs[:3]:
-                metadata = doc.metadata
-                title = metadata.get('title', metadata.get('source', 'Unknown'))
-                if title not in sources:
-                    sources.append(title)
+            if is_hair_related:
+                for doc in source_docs[:3]:
+                    metadata = doc.metadata
+                    title = metadata.get('title', metadata.get('source', 'Unknown'))
+                    if title not in sources:
+                        sources.append(title)
 
             logger.info(f"✅ [{conversation_id}] 답변 생성 완료")
+            logger.info(f"🔍 탈모 관련 질문: {is_hair_related}")
             logger.info(f"📖 출처: {sources}")
 
             # 응답 후 메모리 카운트 (체인이 메모리에 저장한 후)
@@ -256,8 +287,9 @@ class HairLossRAGChatbotWithMemory:
                 "sources": sources,
                 "conversation_id": conversation_id,
                 "timestamp": datetime.now().isoformat(),
-                "context_used": len(source_docs) > 0,
-                "message_count": final_count
+                "context_used": len(source_docs) > 0 and is_hair_related,
+                "message_count": final_count,
+                "is_hair_related": is_hair_related
             }
 
         except Exception as e:
