@@ -23,7 +23,7 @@ import java.util.Map;
 @Slf4j
 public class HairLossDailyService {
 
-    @Value("${python.api.base-url:http://localhost:8000}")
+    @Value("${ai.python.base-url:http://localhost:8000}")
     private String pythonApiBaseUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();

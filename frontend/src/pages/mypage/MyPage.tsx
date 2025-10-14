@@ -494,9 +494,11 @@ export default function MyPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <UserProfile userInfo={userInfo} loading={loading} onLogout={handleLogout} />
+      {/* 모바일 우선 컨테이너 */}
+      <div className="max-w-md mx-auto bg-white min-h-screen">
+        <UserProfile userInfo={userInfo} loading={loading} onLogout={handleLogout} />
 
-      <div className="px-4">
+        <div className="px-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4">
           <div className="space-y-3">
             <TabsList className="flex gap-2 w-full pb-2 bg-transparent">
@@ -867,6 +869,7 @@ export default function MyPage() {
             />
           </TabsContent>
         </Tabs>
+        </div>
       </div>
     </div>
   )
