@@ -61,9 +61,30 @@ jobs:
           DOCKER_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/mozara-python-api:latest"
           
           DEPLOY_COMMAND="
+            echo '🐳 기존 컨테이너 정리 중...' && \
+            docker stop mozara-python || true && \
+            docker rm mozara-python || true && \
             echo '📥 새 Docker 이미지 pull 중...' && \
             docker pull ${DOCKER_IMAGE} && \
-            echo '🔄 Pod 재시작으로 새 이미지 적용 중...' && \
+            echo '🚀 새 컨테이너 실행 중...' && \
+            docker run -d --name mozara-python \
+              -p 8000:8000 \
+              -e GEMINI_API_KEY_1='${{ secrets.GEMINI_API_KEY_1 }}' \
+              -e GEMINI_API_KEY='${{ secrets.GEMINI_API_KEY }}' \
+              -e YOUTUBE_API_KEY='${{ secrets.YOUTUBE_API_KEY }}' \
+              -e PINECONE_API_KEY='${{ secrets.PINECONE_API_KEY }}' \
+              -e PINECONE_INDEX_NAME1='${{ secrets.PINECONE_INDEX_NAME1 }}' \
+              -e PINECONE_INDEX_NAME2='${{ secrets.PINECONE_INDEX_NAME2 }}' \
+              -e PINECONE_INDEX_NAME_RAG_CONV='${{ secrets.PINECONE_INDEX_NAME_RAG_CONV }}' \
+              -e PINECONE_INDEX_NAME_RAG_VIT='${{ secrets.PINECONE_INDEX_NAME_RAG_VIT }}' \
+              -e OPENAI_API_KEY='${{ secrets.OPENAI_API_KEY }}' \
+              -e ELEVEN_ST_API_KEY='${{ secrets.ELEVEN_ST_API_KEY }}' \
+              -e NAVER_CLIENT_ID='${{ secrets.NAVER_CLIENT_ID }}' \
+              -e NAVER_CLIENT_SECRET='${{ secrets.NAVER_CLIENT_SECRET }}' \
+              -e KAKAO_REST_API_KEY='${{ secrets.KAKAO_REST_API_KEY }}' \
+              -e GOOGLE_API_KEY='${{ secrets.GOOGLE_API_KEY }}' \
+              -e REACT_APP_OPENWEATHER_API_KEY='${{ secrets.REACT_APP_OPENWEATHER_API_KEY }}' \
+              ${DOCKER_IMAGE} && \
             echo '✅ 배포 완료!'
           "
           
