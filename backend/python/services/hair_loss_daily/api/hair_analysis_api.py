@@ -9,7 +9,7 @@ from datetime import datetime
 # 서비스 임포트
 from ..services.rag_service import rag_service
 from ..services.ai_analysis_service import ai_analysis_service
-from ..services.pinecone_service import pinecone_service
+from ..services.pinecone_service import get_pinecone_service
 # CNN 모델 서비스는 삭제됨 (CLIP 앙상블 사용)
 
 # 모델 임포트
@@ -50,7 +50,7 @@ async def health_check():
     try:
         # 각 서비스 상태 확인
         services = {
-            "pinecone": pinecone_service.health_check(),
+            "pinecone": get_pinecone_service().health_check(),
             "ai_analysis": ai_analysis_service.health_check()
         }
         
@@ -208,7 +208,7 @@ async def search_by_category(
 async def get_database_stats():
     """데이터베이스 통계 정보 조회"""
     try:
-        stats = pinecone_service.get_index_stats()
+        stats = get_pinecone_service().get_index_stats()
         return {
             "success": True,
             "stats": stats,
