@@ -19,12 +19,10 @@ import {
   Calendar,
   Target,
   Award,
-  Heart,
   Droplets,
   Sun,
   Wind,
   Camera,
-  Users,
   Gift,
   Lightbulb,
   ArrowLeft,
@@ -1780,29 +1778,6 @@ const DailyCare: React.FC = () => {
           </Card>
         )}
 
-        {/* Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white flex justify-around items-center py-2 pb-5 z-50">
-          <Button variant="ghost" className="flex flex-col items-center p-2 h-auto">
-            <Heart className="h-5 w-5 mb-1" style={{ color: '#1f0101' }} />
-            <span className="text-xs" style={{ color: '#1f0101' }}>홈</span>
-          </Button>
-          <Button variant="ghost" className="flex flex-col items-center p-2 h-auto">
-            <Target className="h-5 w-5 mb-1" style={{ color: '#1f0101' }} />
-            <span className="text-xs" style={{ color: '#1f0101' }}>AI진단</span>
-          </Button>
-          <Button variant="ghost" className="flex flex-col items-center p-2 h-auto" style={{ color: '#1f0101' }}>
-            <BarChart3 className="h-5 w-5 mb-1" />
-            <span className="text-xs">기록</span>
-          </Button>
-          <Button variant="ghost" className="flex flex-col items-center p-2 h-auto">
-            <Award className="h-5 w-5 mb-1" style={{ color: '#1f0101' }} />
-            <span className="text-xs" style={{ color: '#1f0101' }}>케어</span>
-          </Button>
-          <Button variant="ghost" className="flex flex-col items-center p-2 h-auto">
-            <Users className="h-5 w-5 mb-1" style={{ color: '#1f0101' }} />
-            <span className="text-xs" style={{ color: '#1f0101' }}>MY</span>
-          </Button>
-        </div>
       </div>
 
       {/* 시계열 비교 모달 */}
