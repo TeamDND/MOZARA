@@ -154,31 +154,31 @@ export default function MyFavorites() {
 
       {/* 찜 목록 탭 */}
       <Tabs defaultValue="youtube" className="space-y-4">
-        <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
+        <TabsList className="flex flex-wrap gap-1 pb-2 bg-transparent">
           <TabsTrigger
             value="youtube"
-            className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
+            className="w-[100px] flex-none px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors whitespace-nowrap"
           >
             <Youtube className="w-3 h-3 mr-1" />
             유튜브 ({likedItems.youtube.length})
           </TabsTrigger>
           <TabsTrigger
             value="hospital"
-            className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
+            className="w-[110px] flex-none px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors whitespace-nowrap"
           >
             <Building2 className="w-3 h-3 mr-1" />
             탈모병원 ({likedItems.hospital.length})
           </TabsTrigger>
           <TabsTrigger
             value="map"
-            className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
+            className="w-[110px] flex-none px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors whitespace-nowrap"
           >
             <MapPin className="w-3 h-3 mr-1" />
-            탈모미용실/가발전문점/두피문신 ({likedItems.map.length})
+            두피케어 ({likedItems.map.length})
           </TabsTrigger>
           <TabsTrigger
             value="product"
-            className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
+            className="w-[80px] flex-none px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors whitespace-nowrap"
           >
             <Package className="w-3 h-3 mr-1" />
             제품 ({likedItems.product.length})
