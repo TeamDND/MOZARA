@@ -966,7 +966,7 @@ const DailyCare: React.FC = () => {
         </div>
 
         {/* 상단 그라데이션 배너 (Mobile-First) */}
-        <div className="bg-gradient-to-r from-[#1F0101] to-[#2A0202] text-white p-4 mx-4 rounded-xl">
+        <div className="text-white p-4 mx-4 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(139, 58, 58, 0.8) 0%, rgba(90, 26, 26, 0.8) 50%, rgba(58, 10, 10, 0.8) 100%)' }}>
           <div className="text-center">
             <p className="text-sm opacity-90">{todayStr}</p>
             <h1 className="text-xl font-bold mt-1">좋은 하루예요!</h1>
@@ -1212,7 +1212,7 @@ const DailyCare: React.FC = () => {
                 }
               }}
               disabled={isAnalyzing}
-              className="w-full h-12 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] disabled:opacity-50 font-semibold"
+              className="w-full h-12 bg-[#1f0101] hover:bg-[#2a0202] text-white rounded-xl disabled:opacity-50 font-semibold shadow-md hover:shadow-lg transition-all"
             >
               {isAnalyzing ? '분석 중...' : '사진으로 AI 분석'}
             </Button>
@@ -1269,54 +1269,57 @@ const DailyCare: React.FC = () => {
         )} */}
 
         {/* 새싹 키우기 UI */}
-        <Card className="mx-4 mt-4 border-0" style={{ backgroundColor: '#1F0101' }}>
-          <CardContent className="p-4 text-white">
+        <div className="mx-4 mt-4 rounded-xl p-1 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(139, 58, 58, 0.8) 0%, rgba(90, 26, 26, 0.8) 50%, rgba(58, 10, 10, 0.8) 100%)' }}>
+          <div className="bg-white rounded-lg p-4">
             <div className="space-y-4">
               {/* 헤더: 새싹 아이콘과 제목 */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{plantStages[seedlingLevel as keyof typeof plantStages].emoji}</span>
-                  <h3 className="text-lg font-semibold">{seedlingName || plantTitle || '새싹 키우기'}</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">{seedlingName || plantTitle || '새싹 키우기'}</h3>
                 </div>
-                <button className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center hover:bg-white/30 transition-colors">
-                  <i className="fas fa-pen text-sm"></i>
+                <button className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200 transition-colors">
+                  <i className="fas fa-pen text-sm text-gray-600"></i>
                 </button>
               </div>
-              
+
               {/* 새싹 이미지 */}
               <div className="text-center">
                 <div className="text-6xl mb-3">{plantStages[seedlingLevel as keyof typeof plantStages].emoji}</div>
               </div>
-              
+
               {/* 동기부여 메시지 */}
-              <div className="bg-white/20 rounded-xl p-3 text-center">
-                <p className="text-sm text-white/90">오늘의 건강한 습관을 실천하고 새싹을 키워보세요!</p>
+              <div className="bg-gray-100 rounded-xl p-3 text-center">
+                <p className="text-sm text-gray-700">오늘의 건강한 습관을 실천하고 새싹을 키워보세요!</p>
               </div>
-              
+
               {/* 진행률 바 */}
-              <div className="flex items-center bg-white/20 rounded-2xl p-3">
-                <span className="bg-white text-[#1F0101] px-3 py-1 rounded-full text-sm font-bold">
+              <div className="flex items-center bg-gray-100 rounded-2xl p-3">
+                <span className="bg-[#8B3A3A] text-white px-3 py-1 rounded-full text-sm font-bold">
                   Lv.{seedlingLevel}
                 </span>
-                <div className="flex-1 h-2 bg-white/30 rounded-full mx-3 overflow-hidden">
-                  <div 
-                    className="h-full bg-green-500 rounded-full transition-all duration-500"
-                    style={{ width: `${((currentPoint || seedlingPoints) % 50) * 2}%` }}
+                <div className="flex-1 h-2 bg-gray-200 rounded-full mx-3 overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${((currentPoint || seedlingPoints) % 50) * 2}%`,
+                      background: 'linear-gradient(90deg, rgba(139, 58, 58, 0.8) 0%, rgba(90, 26, 26, 0.8) 100%)'
+                    }}
                   />
                 </div>
-                <span className="text-xs text-white/90">{(currentPoint || seedlingPoints) % 50}/50</span>
+                <span className="text-xs text-gray-700">{(currentPoint || seedlingPoints) % 50}/50</span>
               </div>
-              
+
               {/* PT 시작 버튼 */}
-              <Button 
+              <Button
                 onClick={() => navigate('/hair-pt')}
-                className="w-full h-12 bg-white text-[#1F0101] hover:bg-gray-100 rounded-xl font-semibold"
+                className="w-full h-12 bg-[#1f0101] hover:bg-[#2a0202] text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all"
               >
                 PT 시작하기
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Graph Section */}
         <Card className="mx-4 mt-4">
@@ -1347,7 +1350,7 @@ const DailyCare: React.FC = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3 mx-4 mt-4">
-          <Card className="border-0" style={{ backgroundColor: '#1f0101' }}>
+          <Card className="border-0 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(139, 58, 58, 0.8) 0%, rgba(90, 26, 26, 0.8) 100%)' }}>
             <CardContent className="p-5 text-white">
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="h-4 w-4" />
@@ -1361,8 +1364,8 @@ const DailyCare: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-          
-          <Card className="border-0" style={{ backgroundColor: '#1f0101', opacity: 0.8 }}>
+
+          <Card className="border-0 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(139, 58, 58, 0.8) 0%, rgba(90, 26, 26, 0.8) 100%)' }}>
             <CardContent className="p-5 text-white">
               <div className="flex items-center gap-2 mb-2">
                 <Target className="h-4 w-4" />
@@ -1575,8 +1578,7 @@ const DailyCare: React.FC = () => {
             </div>
 
             <Button
-              variant="outline"
-              className="w-full"
+              className="w-full bg-[#1f0101] hover:bg-[#2a0202] text-white font-semibold shadow-md hover:shadow-lg transition-all"
               onClick={handleCompareImages}
               disabled={isComparingImages}
             >
@@ -1750,7 +1752,7 @@ const DailyCare: React.FC = () => {
 
             <Button
               onClick={() => navigate('/integrated-diagnosis')}
-              className="w-full mt-4"
+              className="w-full mt-4 bg-[#1f0101] hover:bg-[#2a0202] text-white font-semibold shadow-md hover:shadow-lg transition-all"
             >
               새로운 진단하기
             </Button>
