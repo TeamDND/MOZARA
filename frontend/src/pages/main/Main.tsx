@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { RootState } from '../../utils/store';
 import apiClient from '../../services/apiClient';
-import { Droplets, Sun, Wind, TrendingUp, TrendingDown, Minus, Lightbulb, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Droplets, Sun, Wind, TrendingUp, TrendingDown, Minus, Lightbulb } from 'lucide-react';
 
 export default function Main() {
   const { userId } = useSelector((state: RootState) => state.user);
@@ -18,22 +18,6 @@ export default function Main() {
 
   // 케어 스트릭 상태
   const [streakDays, setStreakDays] = useState<number>(0);
-
-  // 슬라이드 상태
-  const [currentSlide, setCurrentSlide] = useState<number>(0);
-  const slides = [
-    { id: 'hair-change', title: '헤어 체인지', description: '가상 헤어스타일 변경 체험', image: '/assets/images/main/clean/hair_change_2.png', route: '/hair-change' },
-    { id: 'hair-ox', title: '탈모 OX', description: '탈모 상식 퀴즈', image: '/assets/images/main/clean/hair_ox_2.png', route: '/hair-quiz' },
-    { id: 'hair-tube', title: '탈모 튜브', description: '탈모 관련 영상', image: '/assets/images/main/clean/hair_tube_2.png', route: '/youtube-videos' }
-  ];
-
-  const handlePrevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-  };
-
-  const handleNextSlide = () => {
-    setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-  };
 
   // 환경 정보 상태 (날씨 API)
   const [environmentInfo, setEnvironmentInfo] = useState<{
@@ -229,216 +213,172 @@ export default function Main() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-md mx-auto bg-white min-h-screen pb-20">
         <div className="px-4 pt-6 pb-4">
-          {/* 케어 스트릭 표시 */}
-          <div className="flex justify-end items-center px-1">
-            {streakDays > 0 && (
-              <div
-                className="bg-orange-500 text-white px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md cursor-default"
-                title="스트릭 케어: 연속 미션일 수"
-              >
-                <span className="text-sm cursor-default" title="스트릭 케어: 연속 미션일 수">🔥</span>
-                <span className="text-xs font-bold cursor-default" title="스트릭 케어: 연속 미션일 수">연속 미션일: {streakDays}일</span>
-              </div>  
-            )}
-          </div>
-          <div className="grid grid-cols-4 gap-3" style={{ gridTemplateRows: '140px 180px 120px 1fr 150px 100px' }}>
-        {/* 타이틀 컴 이미지자린 - Top section spanning all 4 columns */}
-        <div className="col-span-4 flex items-center justify-center cursor-pointer relative px-6 pt-0 pb-4">
+          <div className="flex flex-col gap-4">
+        {/* 타이틀 카드 - 그라데이션 배경 */}
+        <div
+          className="rounded-2xl shadow-lg px-5 py-3"
+          style={{ background: 'linear-gradient(135deg, rgba(139, 58, 58, 0.8) 0%, rgba(90, 26, 26, 0.8) 50%, rgba(58, 10, 10, 0.8) 100%)' }}
+        >
           <div className="flex items-center gap-4">
             <img
-              src="/assets/images/main/clean/hair_question.png"
+              src="/assets/images/main/clean/hair_question_white_2.png"
               alt="AI 진단"
-              style={{ height: '180px', width: 'auto' }}
+              style={{ height: '85px', width: 'auto' }}
               className="object-contain"
             />
             <div className="text-left">
-              <p className="text-foreground font-bold text-base pt-6">AI 탈모 단계 진단 및 추천 서비스</p>
-              <p className="text-foreground font-bold text-base"></p>
-              <p className="text-foreground text-sm">Hair Fit은 AI를 사용하여 <br/> 맞춤형 탈모 서비스를 제공합니다.</p>
+              <p className="text-white font-bold text-base leading-tight mb-2">AI 탈모 맞춤 서비스</p>
+              <p className="text-white text-opacity-90 text-sm">Hair Fit은 AI를 사용하여 <br/> 맞춤형 탈모 서비스를 제공합니다.</p>
             </div>
           </div>
         </div>
 
-        {/* 분석 - Left section spanning 2 columns and 2 rows */}
-        <div className="col-span-2 row-span-2 rounded-lg flex flex-col items-center justify-center p-6 border-2" style={{ borderColor: '#1f0101', backgroundColor: '#F9FAFB' }}>
-          <img
-            src="/assets/images/main/clean/analysis_2.png"
-            alt="분석"
-            className="w-32 h-32 mb-4 object-contain"
-          />
+        {/* 카드 섹션 - 2x2 그리드 */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* AI 분석 */}
           <div
-            className="cursor-pointer transition-all px-4 py-2 rounded-lg bg-[#1f0101] bg-opacity-80"
+            className="rounded-xl shadow-lg flex flex-col items-center justify-center p-5 cursor-pointer hover:shadow-xl transition-all"
+            style={{ backgroundColor: 'rgba(139, 58, 58, 0.05)' }}
             onClick={() => navigate('/integrated-diagnosis')}
           >
-            <p className="text-white font-bold text-lg mb-1">분석</p>
-            <p className="text-white text-xs text-center" style={{ letterSpacing: '-0.07em' }}>AI로 탈모 단계 분석</p>
+            <img
+              src="/assets/images/main/clean/analysis_2.png"
+              alt="AI 분석"
+              className="w-16 h-16 object-contain mb-3"
+            />
+            <p className="font-bold text-base mb-1" style={{ color: '#1f0101' }}>AI 분석</p>
+            <p className="text-xs text-center" style={{ color: '#4a0505' }}>AI로 탈모 단계 분석</p>
           </div>
-        </div>
 
-        {/* 데일리 케어 - Right top spanning 2 columns */}
-        <div className="col-span-2 row-span-1 rounded-lg flex flex-col items-center justify-center px-2 py-4 border-2" style={{ borderColor: '#1f0101', backgroundColor: '#F9FAFB' }}>
-          <img
-            src="/assets/images/main/clean/daily_care_2.png"
-            alt="데일리 케어"
-            className="w-16 h-16 object-contain mb-2"
-          />
+          {/* 데일리 케어 */}
           <div
-            className="flex flex-col cursor-pointer transition-all px-3 py-1.5 rounded-lg bg-[#1f0101] bg-opacity-80"
+            className="rounded-xl shadow-lg flex flex-col items-center justify-center p-5 cursor-pointer hover:shadow-xl transition-all"
+            style={{ backgroundColor: 'rgba(139, 58, 58, 0.05)' }}
             onClick={() => navigate('/daily-care')}
           >
-            <p className="text-white font-bold text-center">데일리 케어</p>
-            <p className="text-white text-xs text-center">매일 관리하는 두피 건강</p>
-          </div>
-        </div>
-
-        {/* 탈모 ox - Right middle left */}
-        {/* <div className="col-span-1 row-span-1 rounded-lg shadow-lg hover:shadow-xl flex flex-col items-center justify-center cursor-pointer transition-all p-2 overflow-hidden" style={{ backgroundColor: 'rgba(31, 1, 1, 0.05)' }}>
-          <img
-            src="/assets/images/main/hair_ox_2.png"
-            alt="탈모 OX"
-            className="w-8 h-8 object-contain mb-1"
-          />
-          <p className="text-foreground font-bold text-xs text-center leading-tight">탈모<br/>OX</p>
-        </div> */}
-
-        {/* 탈모 튜브 - Right middle right */}
-        {/* <div className="col-span-1 row-span-1 rounded-lg shadow-lg hover:shadow-xl flex flex-col items-center justify-center cursor-pointer transition-all p-2 overflow-hidden" style={{ backgroundColor: 'rgba(31, 1, 1, 0.05)' }}>
-          <img
-            src="/assets/images/main/hair_tube_2.png"
-            alt="탈모 튜브"
-            className="w-8 h-8 object-contain mb-1"
-          />
-          <p className="text-foreground font-bold text-xs text-center leading-tight">탈모<br/>튜브</p>
-        </div> */}
-
-        {/* 날씨 정보 카드 - 탈모 OX와 탈모 튜브 자리 */}
-        <div className="col-span-2 row-span-1 rounded-lg flex flex-col justify-center items-center cursor-pointer transition-all py-3 px-3 border-2" style={{ borderColor: '#1f0101', backgroundColor: '#F9FAFB' }}>
-          <div className="flex items-center gap-1.5 mb-1">
-            <img src="/assets/images/main/clean/care_tip_2.png" alt="케어 팁" className="w-7 h-7 object-contain flex-shrink-0" />
-            <p className="text-foreground font-bold text-xs">오늘의 케어 팁</p>
-          </div>
-          {loadingWeather ? (
-            <p className="text-muted-foreground text-xs leading-tight text-center px-1">날씨 정보 로딩 중...</p>
-          ) : (() => {
-            const weatherMsg = getWeatherMessage();
-            return (
-              <>
-                <div className="text-muted-foreground text-xs leading-tight text-center mb-1 px-1">
-                  <span>{weatherMsg.message}</span>
-                </div>
-                <div className="flex gap-1.5 text-xs items-center justify-center flex-wrap">
-                  <span className="flex items-center gap-0.5 text-muted-foreground whitespace-nowrap">
-                    <Droplets className="w-3 h-3" />
-                    {environmentInfo.humidity}%
-                  </span>
-                  <span className="flex items-center gap-0.5 text-muted-foreground whitespace-nowrap">
-                    <Sun className="w-3 h-3" />
-                    {environmentInfo.uvLevel}
-                  </span>
-                  <span className="flex items-center gap-0.5 text-muted-foreground whitespace-nowrap">
-                    <Wind className="w-3 h-3" />
-                    {environmentInfo.airQualityLevel}
-                  </span>
-                </div>
-              </>
-            );
-          })()}
-        </div>
-
-        {/* 슬라이드 섹션 - Bottom long section spanning 4 columns */}
-        <div className="col-span-4 row-span-1 relative flex items-center gap-2 p-4">
-          {/* 왼쪽 버튼 */}
-          <button
-            onClick={handlePrevSlide}
-            className="absolute left-0 z-10 bg-white rounded-full p-1 shadow-md hover:bg-gray-100 transition-all"
-          >
-            <ChevronLeft className="w-5 h-5 text-gray-700" />
-          </button>
-
-          {/* 슬라이드 컨텐츠 */}
-          <div className="flex-1 flex items-center justify-center gap-4 overflow-hidden">
             <img
-              src={slides[currentSlide].image}
-              alt={slides[currentSlide].title}
-              className="w-24 h-24 object-contain"
+              src="/assets/images/main/clean/daily_care_2.png"
+              alt="데일리 케어"
+              className="w-16 h-16 object-contain mb-3"
             />
-            <div
-              className="flex flex-col cursor-pointer transition-all px-4 py-2 rounded-lg bg-[#1f0101] bg-opacity-80"
-              onClick={() => slides[currentSlide].route && navigate(slides[currentSlide].route)}
-            >
-              <p className="text-white font-bold">{slides[currentSlide].title}</p>
-              <p className="text-white text-xs">{slides[currentSlide].description}</p>
-            </div>
+            <p className="font-bold text-base mb-1" style={{ color: '#1f0101' }}>데일리 케어</p>
+            <p className="text-xs text-center" style={{ color: '#4a0505' }}>매일 관리하는 두피 건강</p>
           </div>
 
-          {/* 오른쪽 버튼 */}
-          <button
-            onClick={handleNextSlide}
-            className="absolute right-0 z-10 bg-white rounded-full p-1 shadow-md hover:bg-gray-100 transition-all"
-          >
-            <ChevronRight className="w-5 h-5 text-gray-700" />
-          </button>
+          {/* 케어 스트릭 표시 - 오늘의 케어 팁 위 */}
+          {streakDays > 0 && (
+            <div className="col-span-2 flex justify-center">
+              <div
+                className="px-2.5 py-1 rounded-full inline-flex items-center gap-1 shadow-md cursor-default"
+                style={{ background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)' }}
+                title="스트릭 케어: 연속 미션일 수"
+              >
+                <span className="text-sm cursor-default text-white" title="스트릭 케어: 연속 미션일 수">🔥</span>
+                <span className="text-xs font-bold cursor-default text-white" title="스트릭 케어: 연속 미션일 수">PT 연속 참여일: {streakDays}일</span>
+              </div>
+            </div>
+          )}
+
+          {/* 오늘의 케어 팁 */}
+          <div className="col-span-2 rounded-xl shadow-lg overflow-hidden flex flex-col items-center" style={{ backgroundColor: 'rgba(139, 58, 58, 0.05)' }}>
+            <div className="pt-2 pb-0">
+              <img src="/assets/images/main/clean/care_tip_2.png" alt="케어 팁" className="w-14 h-14 object-contain" />
+            </div>
+            <div className="px-4 pb-3 w-full flex flex-col items-center">
+              <p className="font-bold text-base mb-2" style={{ color: '#1f0101' }}>오늘의 케어 팁</p>
+            {loadingWeather ? (
+              <p className="text-sm leading-tight mb-2 text-center" style={{ color: '#4a0505' }}>날씨 정보 로딩 중...</p>
+            ) : (() => {
+              const weatherMsg = getWeatherMessage();
+              return (
+                <>
+                  <div className="text-sm leading-tight mb-2 text-center" style={{ color: '#4a0505' }}>
+                    <span>{weatherMsg.message}</span>
+                  </div>
+                  <div className="flex gap-3 text-xs items-center justify-center flex-wrap mb-2">
+                    <span className="flex items-center gap-1 whitespace-nowrap" style={{ color: '#5a1a1a' }}>
+                      <Droplets className="w-3.5 h-3.5" />
+                      {environmentInfo.humidity}%
+                    </span>
+                    <span className="flex items-center gap-1 whitespace-nowrap" style={{ color: '#5a1a1a' }}>
+                      <Sun className="w-3.5 h-3.5" />
+                      {environmentInfo.uvLevel}
+                    </span>
+                    <span className="flex items-center gap-1 whitespace-nowrap" style={{ color: '#5a1a1a' }}>
+                      <Wind className="w-3.5 h-3.5" />
+                      {environmentInfo.airQualityLevel}
+                    </span>
+                  </div>
+                </>
+              );
+            })()}
+            <p className="text-sm font-bold leading-tight mb-3 text-center" style={{ color: '#4a0505' }}>
+              관리를 위해 탈모 PT를 시작해 보세요.
+            </p>
+            <button
+              className="px-6 py-2 rounded-lg font-bold bg-[#1f0101] hover:bg-[#2a0202] text-white shadow-md hover:shadow-lg transition-all text-sm"
+              onClick={() => navigate('/daily-care')}
+            >
+              시작하기
+            </button>
+            </div>
+          </div>
         </div>
 
-        {/* 데일리 통계 카드 - Daily stats section spanning all 4 columns */}
-        <div className="col-span-4 rounded-lg cursor-pointer transition-all p-4 overflow-hidden border-2" style={{ borderColor: '#1f0101', backgroundColor: '#F9FAFB' }}>
-          <div className="mb-2">
-            <p className="text-foreground font-bold text-sm">나의 케어 현황</p>
+        {/* 나의 케어 현황 - 가운데 배치, 아이콘 추가, 보더 제거, 무드톤 글씨 */}
+        <div className="rounded-xl shadow-lg p-5" style={{ backgroundColor: 'rgba(139, 58, 58, 0.05)' }}>
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <Lightbulb className="w-5 h-5" style={{ color: '#8b3a3a' }} />
+            <p className="font-bold text-lg" style={{ color: '#1f0101' }}>나의 케어 현황</p>
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            {/* 총 분석 수 */}
-            <div className="flex flex-col items-center justify-center rounded-lg py-4 px-2">
-              <p className="text-xl font-bold text-foreground">{userStats.totalAnalysisCount}</p>
-              <p className="text-xs text-muted-foreground mt-1.5 text-center leading-tight whitespace-nowrap">총 분석 수</p>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="flex flex-col items-center justify-center py-3 px-2">
+              <p className="text-2xl font-bold" style={{ color: '#8b3a3a' }}>{userStats.totalAnalysisCount}</p>
+              <p className="text-xs mt-2 text-center leading-tight whitespace-nowrap" style={{ color: '#5a1a1a' }}>총 분석 수</p>
             </div>
-            {/* 최근 두피 점수 */}
-            <div className="flex flex-col items-center justify-center rounded-lg py-4 px-2">
-              <p className="text-xl font-bold text-foreground">
+            <div className="flex flex-col items-center justify-center py-3 px-2">
+              <p className="text-2xl font-bold" style={{ color: '#8b3a3a' }}>
                 {userStats.recentScalpScore !== null ? userStats.recentScalpScore : '-'}
               </p>
-              <p className="text-xs text-muted-foreground mt-1.5 text-center leading-tight whitespace-nowrap">최근 두피 점수</p>
+              <p className="text-xs mt-2 text-center leading-tight whitespace-nowrap" style={{ color: '#5a1a1a' }}>최근 두피 점수</p>
             </div>
-            {/* 밀도 변화 */}
-            <div className="flex flex-col items-center justify-center rounded-lg py-4 px-2">
+            <div className="flex flex-col items-center justify-center py-3 px-2">
               {userStats.densityChange ? (
                 <>
                   <div className="flex items-center gap-0.5 whitespace-nowrap">
                     {userStats.densityChange.trend === 'improving' ? (
-                      <TrendingUp className="w-3 h-3 text-green-600 flex-shrink-0" />
+                      <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#8b3a3a' }} />
                     ) : userStats.densityChange.trend === 'declining' ? (
-                      <TrendingDown className="w-3 h-3 text-red-600 flex-shrink-0" />
+                      <TrendingDown className="w-4 h-4 flex-shrink-0" style={{ color: '#d14343' }} />
                     ) : (
-                      <Minus className="w-3 h-3 text-gray-600 flex-shrink-0" />
+                      <Minus className="w-4 h-4 flex-shrink-0" style={{ color: '#5a1a1a' }} />
                     )}
-                    <p className={`text-base font-bold ${
-                      userStats.densityChange.trend === 'improving' ? 'text-green-600' :
-                      userStats.densityChange.trend === 'declining' ? 'text-red-600' :
-                      'text-gray-600'
-                    }`}>
+                    <p className="text-xl font-bold" style={{
+                      color: userStats.densityChange.trend === 'improving' ? '#8b3a3a' :
+                             userStats.densityChange.trend === 'declining' ? '#d14343' :
+                             '#5a1a1a'
+                    }}>
                       {userStats.densityChange.change_percentage > 0 ? '+' : ''}
                       {userStats.densityChange.change_percentage.toFixed(1)}%
                     </p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1.5 text-center leading-tight whitespace-nowrap">모발 밀도 (6개월)</p>
+                  <p className="text-xs mt-2 text-center leading-tight whitespace-nowrap" style={{ color: '#5a1a1a' }}>모발 밀도 (6개월)</p>
                 </>
               ) : (
                 <>
-                  <p className="text-xl font-bold text-foreground">-</p>
-                  <p className="text-xs text-muted-foreground mt-1.5 text-center leading-tight whitespace-nowrap">모발 밀도 (6개월)</p>
+                  <p className="text-2xl font-bold" style={{ color: '#8b3a3a' }}>-</p>
+                  <p className="text-xs mt-2 text-center leading-tight whitespace-nowrap" style={{ color: '#5a1a1a' }}>모발 밀도 (6개월)</p>
                 </>
               )}
             </div>
           </div>
         </div>
 
-        {/* 하단 추가 섹션 - Bottom section spanning all 4 columns */}
-        <div className="col-span-4 flex items-center justify-between cursor-pointer px-6 py-4">
+        {/* 하단 추가 섹션 */}
+        <div className="flex items-center justify-between px-6 py-4">
           <div className="flex flex-col gap-2">
-            <div>
-              <p className="text-foreground font-bold text-sm">당신의 HairFit 여정, 지금부터 함께 합니다.</p>
-              <p className="text-foreground font-bold text-base"></p>
-            </div>
-            <p className="text-muted-foreground text-xs">
+            <p className="font-bold text-sm" style={{ color: '#1f0101' }}>당신의 HairFit 여정, 지금부터 함께 합니다.</p>
+            <p className="text-xs" style={{ color: '#5a1a1a' }}>
               처음이시라면 분석을, 기록이 있으시다면 <br/>데일리 케어를 이용하세요
             </p>
           </div>

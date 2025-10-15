@@ -311,6 +311,11 @@ const HairPT: React.FC = () => {
     }
   }, [dispatch, userId]);
 
+  // 컴포넌트 마운트 시 스크롤을 맨 위로
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // 컴포넌트 마운트 시 리셋 확인
   useEffect(() => {
     resetDailyMissions();
@@ -775,128 +780,133 @@ const HairPT: React.FC = () => {
           </div>
 
           {/* Plant Display Card */}
-          <div className="bg-gradient-to-br from-[#1F0101] to-[#2A0202] rounded-xl p-6 mb-4 shadow-md hover:shadow-lg transition-shadow">
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex items-center gap-2 flex-1">
-                <span className="text-lg">🌱</span>
-                {isEditingTitle ? (
-                  <div className="flex items-center gap-2 flex-1">
-                    <input
-                      type="text"
-                      value={plantTitle}
-                      onChange={(e) => {
-                        const newName = e.target.value;
-                        setPlantTitle(newName);
-                        setIsUserTyping(true);
-                        if (userId && seedlingId) {
-                          dispatch(setSeedling({
-                            seedlingId: seedlingId,
-                            seedlingName: newName,
-                            currentPoint: currentPoint || seedlingPoints || 0,
-                            userId: userId
-                          }));
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && isUserTyping) {
+          <div className="rounded-xl p-1 mb-4 shadow-md hover:shadow-lg transition-shadow" style={{ background: 'linear-gradient(135deg, rgba(139, 58, 58, 0.9) 0%, rgba(90, 26, 26, 0.9) 50%, rgba(58, 10, 10, 0.9) 100%)' }}>
+            <div className="bg-white rounded-lg p-5">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-2 flex-1">
+                  <span className="text-lg">🌱</span>
+                  {isEditingTitle ? (
+                    <div className="flex items-center gap-2 flex-1">
+                      <input
+                        type="text"
+                        value={plantTitle}
+                        onChange={(e) => {
+                          const newName = e.target.value;
+                          setPlantTitle(newName);
+                          setIsUserTyping(true);
+                          if (userId && seedlingId) {
+                            dispatch(setSeedling({
+                              seedlingId: seedlingId,
+                              seedlingName: newName,
+                              currentPoint: currentPoint || seedlingPoints || 0,
+                              userId: userId
+                            }));
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && isUserTyping) {
+                            const finalName = plantTitle.trim() || '새싹 키우기';
+                            setPlantTitle(finalName);
+                            if (originalTitle !== finalName) {
+                              handleSeedlingNameChange(finalName);
+                            }
+                            setIsEditingTitle(false);
+                          }
+                        }}
+                        placeholder="새싹 이름"
+                        className="px-2 py-1 rounded-md text-sm text-gray-800 flex-1 border border-gray-200"
+                        ref={titleInputRef}
+                      />
+                      <button
+                        onMouseDown={(e) => { e.preventDefault(); }}
+                        onClick={() => {
                           const finalName = plantTitle.trim() || '새싹 키우기';
                           setPlantTitle(finalName);
                           if (originalTitle !== finalName) {
                             handleSeedlingNameChange(finalName);
                           }
                           setIsEditingTitle(false);
-                        }
-                      }}
-                      placeholder="새싹 이름"
-                      className="px-2 py-1 rounded-md text-sm text-gray-800 flex-1"
-                      ref={titleInputRef}
-                    />
-                    <button
-                      onMouseDown={(e) => { e.preventDefault(); }}
-                      onClick={() => {
-                        const finalName = plantTitle.trim() || '새싹 키우기';
-                        setPlantTitle(finalName);
-                        if (originalTitle !== finalName) {
-                          handleSeedlingNameChange(finalName);
-                        }
-                        setIsEditingTitle(false);
-                      }}
-                      disabled={seedlingLoading}
-                      className="px-2 py-1 rounded-md bg-white text-[#1F0101] text-xs font-semibold hover:bg-gray-100"
-                    >
-                      저장
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <h3 className="text-base font-bold text-white">{seedlingName || plantTitle || '새싹 키우기'}</h3>
-                    <button
-                      onClick={startEditTitle}
-                      disabled={seedlingLoading}
-                      className="p-1 rounded-md bg-white/20 hover:bg-white/30 disabled:opacity-50"
-                    >
-                      <i className="fas fa-pen text-white text-xs"></i>
-                    </button>
-                  </>
-                )}
-              </div>
-              <div
-                className="relative"
-                onMouseEnter={() => setShowInfoModal(true)}
-                onMouseLeave={() => setShowInfoModal(false)}
-              >
-                <button
-                  className="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                        }}
+                        disabled={seedlingLoading}
+                        className="px-2 py-1 rounded-md bg-[#8B3A3A] text-white text-xs font-semibold hover:bg-[#5A1A1A]"
+                      >
+                        저장
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <h3 className="text-base font-bold text-gray-800">{seedlingName || plantTitle || '새싹 키우기'}</h3>
+                      <button
+                        onClick={startEditTitle}
+                        disabled={seedlingLoading}
+                        className="p-1 rounded-md bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+                      >
+                        <i className="fas fa-pen text-gray-600 text-xs"></i>
+                      </button>
+                    </>
+                  )}
+                </div>
+                <div
+                  className="relative"
+                  onMouseEnter={() => setShowInfoModal(true)}
+                  onMouseLeave={() => setShowInfoModal(false)}
                 >
-                  <i className="fas fa-question text-white text-xs"></i>
-                </button>
-                {showInfoModal && (
-                  <div className="absolute top-8 right-0 z-50 w-80">
-                    <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4">
-                      <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <i className="fas fa-info-circle text-blue-500 text-sm"></i>
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-800 mb-2">탈모 PT란?</h3>
-                          <p className="text-sm text-gray-600 mb-3">
-                            개인 맞춤형 탈모 예방 및 개선을 위한 체계적인 관리 프로그램입니다.
-                            루틴, 영양, 청결 세 가지 영역의 습관을 통해 건강한 모발을 기를 수 있어요.
-                          </p>
-                          <div className="border-t border-gray-100 pt-3">
-                            <h4 className="font-medium text-gray-800 mb-2">포인트 사용처</h4>
-                            <p className="text-sm text-gray-600">
-                              새싹을 전부 키우면 상품을 드립니다!
+                  <button
+                    className="w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                  >
+                    <i className="fas fa-question text-gray-600 text-xs"></i>
+                  </button>
+                  {showInfoModal && (
+                    <div className="absolute top-8 right-0 z-50 w-80">
+                      <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i className="fas fa-info-circle text-blue-500 text-sm"></i>
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-800 mb-2">탈모 PT란?</h3>
+                            <p className="text-sm text-gray-600 mb-3">
+                              개인 맞춤형 탈모 예방 및 개선을 위한 체계적인 관리 프로그램입니다.
+                              루틴, 영양, 청결 세 가지 영역의 습관을 통해 건강한 모발을 기를 수 있어요.
                             </p>
+                            <div className="border-t border-gray-100 pt-3">
+                              <h4 className="font-medium text-gray-800 mb-2">포인트 사용처</h4>
+                              <p className="text-sm text-gray-600">
+                                새싹을 전부 키우면 상품을 드립니다!
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-            
-            <div className="text-center mb-4">
-              <div className="text-6xl mb-3 transition-transform duration-500 hover:scale-110">
-                {plantStages[seedlingLevel as keyof typeof plantStages].emoji}
+
+              <div className="text-center mb-4">
+                <div className="text-6xl mb-3 transition-transform duration-500 hover:scale-110">
+                  {plantStages[seedlingLevel as keyof typeof plantStages].emoji}
+                </div>
+                <div className="bg-gray-100 rounded-lg px-3 py-2">
+                  <p className="text-xs text-gray-700">{statusMessage}</p>
+                </div>
               </div>
-              <div className="bg-white/90 rounded-lg px-3 py-2">
-                <p className="text-xs text-gray-700">{statusMessage}</p>
+
+              <div className="flex items-center bg-gray-100 rounded-full p-2">
+                <span className="bg-[#8B3A3A] text-white px-2 py-1 rounded-full text-xs font-bold">
+                  Lv.{seedlingLevel}
+                </span>
+                <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${((currentPoint || seedlingPoints) % 50) * 2}%`,
+                      background: 'linear-gradient(90deg, rgba(139, 58, 58, 0.9) 0%, rgba(90, 26, 26, 0.9) 100%)'
+                    }}
+                  />
+                </div>
+                <span className="text-xs text-gray-700">{(currentPoint || seedlingPoints) % 50}/50</span>
               </div>
-            </div>
-            
-            <div className="flex items-center bg-white/20 rounded-full p-2">
-              <span className="bg-white text-[#1F0101] px-2 py-1 rounded-full text-xs font-bold">
-                Lv.{seedlingLevel}
-              </span>
-              <div className="flex-1 h-2 bg-white/30 rounded-full mx-2">
-                <div 
-                  className="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full transition-all"
-                  style={{ width: `${((currentPoint || seedlingPoints) % 50) * 2}%` }}
-                />
-              </div>
-              <span className="text-xs text-white">{(currentPoint || seedlingPoints) % 50}/50</span>
             </div>
           </div>
 
