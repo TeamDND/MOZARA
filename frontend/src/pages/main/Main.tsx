@@ -212,7 +212,7 @@ export default function Main() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-md mx-auto bg-white min-h-screen pb-20">
-        <div className="px-4 pt-6 pb-4">
+        <div className="px-4 pt-22 pb-4">
           <div className="flex flex-col gap-4">
         {/* 타이틀 카드 - 그라데이션 배경 */}
         <div
