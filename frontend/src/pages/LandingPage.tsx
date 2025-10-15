@@ -83,87 +83,84 @@ useEffect(() => {
 // 무한 루프 전환 로직 제거 (원래 상태)
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 모바일 우선 컨테이너 */}
-      <div className="max-w-md mx-auto bg-white min-h-screen relative overflow-hidden">
-        {/* 영상 백그라운드 */}
-        <div className="absolute inset-0 z-0">
-          <video
-            className="w-full h-full object-cover"
-            autoPlay
-            loop
-            muted
-            playsInline
-          >
-            <source src="/videos/landingvideo.mp4" type="video/mp4" />
-            브라우저가 비디오를 지원하지 않습니다.
-          </video>
-          {/* 오버레이 */}
-          <div className="absolute inset-0 bg-black/40"></div>
-        </div>
+    <div className="relative min-h-screen overflow-hidden">
+      {/* 풀스크린 영상 백그라운드 */}
+      <div className="fixed inset-0 z-0">
+        <video
+          className="w-full h-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+        >
+          <source src="/videos/landingvideo.mp4" type="video/mp4" />
+          브라우저가 비디오를 지원하지 않습니다.
+        </video>
+        {/* 오버레이 */}
+        <div className="absolute inset-0 bg-black/40"></div>
+      </div>
 
-        {/* 메인 컨텐츠 */}
-        <div className="relative z-10 min-h-screen flex flex-col">
-          {/* 상단 로고 영역 */}
-          <div className="flex-1 flex items-center justify-center pt-20">
-            <div className="text-center px-4">
-              <h1 className="text-5xl font-bold text-white mb-4 font-serif">
-                HairFit
-              </h1>
-              <p className="text-white text-base mt-16 mb-8 opacity-90">
-                AI 분석 기반 맞춤형 솔루션 및 컨텐츠 <br />
-                셀카로 쉽게 알아보는 내 탈모 진행 상태 <br />
-                나만의 탈모 로드맵을 받아보세요
-              </p>
-              <Button
-                className="px-8 py-6 mt-8 text-lg font-medium"
-                onClick={() => {
-                  if (isLoggedIn) {
-                    navigate('/main')
-                  } else {
-                    navigate('/login')
-                  }
-                }}
-              >
-                시작해보기
-              </Button>
-            </div>
+      {/* 메인 컨텐츠 */}
+      <div className="relative z-10 min-h-screen flex flex-col">
+        {/* 상단 로고 영역 */}
+        <div className="flex-1 flex items-center justify-center pt-20">
+          <div className="text-center px-4">
+            <h1 className="text-5xl font-bold text-white mb-4 font-serif">
+              HairFit
+            </h1>
+            <p className="text-white text-base mt-16 mb-8 opacity-90">
+              AI 분석 기반 맞춤형 솔루션 및 컨텐츠 <br />
+              셀카로 쉽게 알아보는 내 탈모 진행 상태 <br />
+              나만의 탈모 로드맵을 받아보세요
+            </p>
+            <Button
+              className="px-8 py-6 mt-8 text-lg font-medium"
+              onClick={() => {
+                if (isLoggedIn) {
+                  navigate('/main')
+                } else {
+                  navigate('/login')
+                }
+              }}
+            >
+              시작해보기
+            </Button>
           </div>
+        </div>
 
        
 
-          {/* 서비스 슬라이더 */}
-          {/* <div className="py-8">
-            <div className="max-w-6xl mx-auto px-4">
-              <div className="relative overflow-hidden">
-                <div 
-                  ref={sliderRef}
-                  className="flex transition-transform duration-500 ease-in-out"
-                  style={{ width: `${allServices.length * 33.333}%` }}
-                  
-                >
-                  {allServices.map((service, index) => (
+        {/* 서비스 슬라이더 */}
+        {/* <div className="py-8">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="relative overflow-hidden">
+              <div 
+                ref={sliderRef}
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{ width: `${allServices.length * 33.333}%` }}
+                
+              >
+                {allServices.map((service, index) => (
+                  <div
+                    key={index}
+                    className="w-1/3 px-3 flex-shrink-0"
+                  >
                     <div
-                      key={index}
-                      className="w-1/3 px-3 flex-shrink-0"
+                      className="bg-transparent h-40 flex items-center justify-center"
                     >
-                      <div
-                        className="bg-transparent h-40 flex items-center justify-center"
-                      >
-                        <ImageWithFallback 
-                          src={service.image}
-                          alt={service.name}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
+                      <ImageWithFallback 
+                        src={service.image}
+                        alt={service.name}
+                        className="w-full h-full object-contain"
+                      />
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
-
             </div>
-          </div> */}
-        </div>
+
+          </div>
+        </div> */}
       </div>
     </div>
   )
