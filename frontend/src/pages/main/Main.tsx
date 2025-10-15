@@ -247,7 +247,7 @@ export default function Main() {
         <div className="col-span-4 flex items-center justify-center cursor-pointer relative px-6 pt-0 pb-4">
           <div className="flex items-center gap-4">
             <img
-              src="/assets/images/main/clean/hair_question.png"
+              src="/assets/images/main/clean/hair_question_white.png"
               alt="AI 진단"
               style={{ height: '180px', width: 'auto' }}
               className="object-contain"
