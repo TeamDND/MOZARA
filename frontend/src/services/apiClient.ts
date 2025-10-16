@@ -47,6 +47,7 @@ apiClient.interceptors.request.use(
         } else {
             console.log('OAuth2 토큰 생성 요청 - JWT 토큰 검증 건너뛰기');
         }
+
         return config;
     },
     (error: AxiosError) => {

@@ -1,4 +1,3 @@
-
 """
 MOZARA Python Backend 통합 애플리케이션
 """
@@ -26,6 +25,7 @@ import requests
 
 # ✅ 환경변수 로드 (시스템 환경변수 > .env 파일 우선순위)
 print("🔍 환경변수 로드 중...")
+
 
 # .env 파일이 있을 경우만 로드 (실패해도 무시)
 load_dotenv(dotenv_path="../../.env")
@@ -979,6 +979,7 @@ async def add_cors_headers(request, call_next):
     response.headers["Access-Control-Allow-Methods"] = request.headers.get("access-control-request-method", "GET,POST,PUT,PATCH,DELETE,OPTIONS") or "GET,POST,PUT,PATCH,DELETE,OPTIONS"
     return response
 
+
 # 라우터 마운트 (조건부)
 if HAIR_ANALYSIS_AVAILABLE and hair_analysis_app:
     # Hair Loss Daily API를 /hair-loss-daily 경로에 마운트
@@ -1771,29 +1772,22 @@ except ImportError as e:
     RAG_CHATBOT_AVAILABLE = False
 
 @app.post("/rag-chat", response_model=ChatResponse)
-async def rag_chat_endpoint(request: ChatRequest, user_info: dict = Depends(verify_jwt_token)):
-    """RAG 기반 탈모 전문 챗봇 - 사용자 인증 필수"""
+async def rag_chat_endpoint(request: ChatRequest):
+    """RAG 기반 탈모 전문 챗봇"""
     if not RAG_CHATBOT_AVAILABLE:
         raise HTTPException(status_code=503, detail="RAG 챗봇 서비스가 비활성화되어 있습니다.")
 
     try:
-        # JWT에서 추출한 사용자 정보
-        user_id = user_info.get('email') or user_info.get('id') or user_info.get('userId')
-        if not user_id:
-            raise HTTPException(status_code=401, detail="사용자 정보를 찾을 수 없습니다.")
+        # user_id 추출 (conversation_id에서 추출하거나 별도 파라미터로 받기)
+        user_id = request.conversation_id.replace("chat_", "") if request.conversation_id.startswith("chat_") else "anonymous"
         
-        # conversation_id 검증: chat_{user_id} 형태여야 함
-        expected_conversation_id = f"chat_{user_id}"
-        if request.conversation_id != expected_conversation_id:
-            raise HTTPException(status_code=403, detail="권한이 없는 대화에 접근하려고 합니다.")
-        
-        print(f"✅ [{user_id}] RAG 채팅 요청 - conversation_id: {request.conversation_id}")
+        print(f"✅ RAG 채팅 요청 - user_id: {user_id}, conversation_id: {request.conversation_id}")
 
         # RAG 챗봇 인스턴스 가져오기 (사용자별 메모리 관리)
         chatbot = get_final_rag_chatbot()
 
-        # 채팅 처리 (검증된 conversation_id로 사용자별 대화 기억)
-        result = chatbot.chat(request.message, request.conversation_id)
+        # 채팅 처리 (user_id와 conversation_id 모두 전달)
+        result = chatbot.chat(request.message, request.conversation_id, user_id)
 
         return ChatResponse(
             response=result['response'],
@@ -1833,17 +1827,12 @@ async def rag_chat_health_check():
         }
 
 @app.post("/rag-chat/clear")
-async def clear_conversation(request: dict, user_info: dict = Depends(verify_jwt_token)):
-    """대화 기록 삭제 - 사용자 인증 필수"""
+async def clear_conversation(request: dict):
+    """대화 기록 삭제"""
     if not RAG_CHATBOT_AVAILABLE:
         raise HTTPException(status_code=503, detail="RAG 챗봇 서비스가 비활성화되어 있습니다.")
 
     try:
-        # JWT에서 추출한 사용자 정보
-        jwt_user_id = user_info.get('email') or user_info.get('id') or user_info.get('userId')
-        if not jwt_user_id:
-            raise HTTPException(status_code=401, detail="사용자 정보를 찾을 수 없습니다.")
-        
         # conversation_id 또는 user_id 모두 지원
         conversation_id = request.get("conversation_id", "")
         user_id = request.get("user_id", "")
@@ -1856,15 +1845,13 @@ async def clear_conversation(request: dict, user_info: dict = Depends(verify_jwt
         if not conversation_id:
             conversation_id = user_id
         
-        # 사용자 권한 검증: chat_{jwt_user_id} 형태여야 함
-        expected_conversation_id = f"chat_{jwt_user_id}"
-        if conversation_id != expected_conversation_id:
-            raise HTTPException(status_code=403, detail="권한이 없는 대화 기록을 삭제하려고 합니다.")
+        # user_id 추출
+        user_id = conversation_id.replace("chat_", "") if conversation_id.startswith("chat_") else "anonymous"
         
-        print(f"✅ [{jwt_user_id}] 대화 기록 삭제 요청 - conversation_id: {conversation_id}")
+        print(f"✅ 대화 기록 삭제 요청 - user_id: {user_id}, conversation_id: {conversation_id}")
 
         chatbot = get_final_rag_chatbot()
-        chatbot.clear_conversation(conversation_id)
+        chatbot.clear_conversation(conversation_id, user_id)
 
         return {
             "success": True,

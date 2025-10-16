@@ -46,9 +46,9 @@ class HairLossRAGChatbotWithMemory:
         self.setup_vectorstores()
         self.setup_llm()
 
-        # 사용자별 메모리 저장소 (conversation_id: memory)
+        # 사용자별 메모리 저장소 (user_id: memory)
         self.user_memories = {}
-        # 사용자별 체인 저장소 (conversation_id: chain)
+        # 사용자별 체인 저장소 (user_id: chain)
         self.user_chains = {}
 
         logger.info("✅ RAG 챗봇 초기화 완료 (사용자별 메모리 관리)")
@@ -132,13 +132,13 @@ class HairLossRAGChatbotWithMemory:
         )
         logger.info("✅ Gemini LLM 설정 완료 (model: gemini-2.5-flash)")
 
-    def get_or_create_chain(self, conversation_id: str) -> ConversationalRetrievalChain:
+    def get_or_create_chain(self, user_id: str) -> ConversationalRetrievalChain:
         """사용자별 체인 가져오기 또는 생성"""
 
         # 이미 존재하는 체인이면 반환
-        if conversation_id in self.user_chains:
-            logger.info(f"🔄 기존 체인 사용: {conversation_id}")
-            return self.user_chains[conversation_id]
+        if user_id in self.user_chains:
+            logger.info(f"🔄 기존 체인 사용: {user_id}")
+            return self.user_chains[user_id]
 
         # 새 메모리 생성
         memory = ConversationBufferMemory(
@@ -146,7 +146,7 @@ class HairLossRAGChatbotWithMemory:
             return_messages=True,
             output_key="answer"
         )
-        self.user_memories[conversation_id] = memory
+        self.user_memories[user_id] = memory
 
         # Condense Question Prompt - 대화 기록을 고려하여 독립적인 질문으로 변환
         condense_template = """이전 대화 기록과 후속 질문이 주어졌을 때, 독립적이고 완전한 질문으로 변환하세요.
@@ -204,8 +204,8 @@ class HairLossRAGChatbotWithMemory:
             verbose=True
         )
 
-        self.user_chains[conversation_id] = chain
-        logger.info(f"🆕 새 체인 생성: {conversation_id}")
+        self.user_chains[user_id] = chain
+        logger.info(f"🆕 새 체인 생성: {user_id}")
 
         return chain
 
@@ -235,23 +235,27 @@ class HairLossRAGChatbotWithMemory:
         # 3. 검색 결과도 없고 키워드도 없으면 탈모 관련 아님
         return False
 
-    def chat(self, message: str, conversation_id: str = None) -> Dict:
+    def chat(self, message: str, conversation_id: str = None, user_id: str = None) -> Dict:
         """챗봇 대화 - 사용자별 메모리 유지"""
         try:
             # conversation_id가 없으면 기본값
             if not conversation_id:
                 conversation_id = "default"
+            
+            # user_id가 없으면 anonymous로 설정
+            if not user_id:
+                user_id = "anonymous"
 
             logger.info(f"💬 [{conversation_id}] 사용자 질문: {message}")
 
             # 사용자별 체인 가져오기
-            chain = self.get_or_create_chain(conversation_id)
+            chain = self.get_or_create_chain(user_id)
 
             # 대화 기록 확인
-            memory = self.user_memories.get(conversation_id)
+            memory = self.user_memories.get(user_id)
             if memory and hasattr(memory, 'chat_memory'):
                 msg_count = len(memory.chat_memory.messages)
-                logger.info(f"📚 [{conversation_id}] 대화 기록: {msg_count}개 메시지")
+                logger.info(f"📚 [{user_id}] 대화 기록: {msg_count}개 메시지")
 
             # LangChain Chain 실행
             result = chain.invoke({"question": message})
@@ -272,15 +276,15 @@ class HairLossRAGChatbotWithMemory:
                     if title not in sources:
                         sources.append(title)
 
-            logger.info(f"✅ [{conversation_id}] 답변 생성 완료")
+            logger.info(f"✅ [{user_id}] 답변 생성 완료")
             logger.info(f"🔍 탈모 관련 질문: {is_hair_related}")
             logger.info(f"📖 출처: {sources}")
 
             # 응답 후 메모리 카운트 (체인이 메모리에 저장한 후)
-            final_memory = self.user_memories.get(conversation_id)
+            final_memory = self.user_memories.get(user_id)
             final_count = len(final_memory.chat_memory.messages) if final_memory and hasattr(final_memory, 'chat_memory') else 0
 
-            logger.info(f"💾 [{conversation_id}] 최종 메시지 수: {final_count}")
+            logger.info(f"💾 [{user_id}] 최종 메시지 수: {final_count}")
 
             return {
                 "response": answer,
@@ -305,13 +309,13 @@ class HairLossRAGChatbotWithMemory:
                 "message_count": 0
             }
 
-    def clear_conversation(self, conversation_id: str):
-        """특정 대화 기록 삭제"""
-        if conversation_id in self.user_chains:
-            del self.user_chains[conversation_id]
-        if conversation_id in self.user_memories:
-            del self.user_memories[conversation_id]
-        logger.info(f"🗑️  대화 기록 삭제: {conversation_id}")
+    def clear_conversation(self, conversation_id: str, user_id: str):
+        """특정 사용자의 대화 기록 삭제"""
+        if user_id in self.user_chains:
+            del self.user_chains[user_id]
+        if user_id in self.user_memories:
+            del self.user_memories[user_id]
+        logger.info(f"🗑️  사용자 {user_id} 대화 기록 삭제: {conversation_id}")
 
     def get_health_status(self) -> Dict:
         """서비스 상태 확인"""

@@ -63,6 +63,8 @@ const LogIn: React.FC = () => {
       const userResponse = await apiClient.get(`/userinfo/${formData.username}`);
 
       dispatch(setUser(userResponse.data));
+
+
       navigate('/main'); // 대시보드로 이동
     } catch (error: any) {
       console.error('로그인 오류:', error);
