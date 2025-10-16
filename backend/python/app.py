@@ -8,7 +8,7 @@ import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True)
 
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Query
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Query, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pydantic import BaseModel
@@ -21,6 +21,8 @@ import urllib.parse
 import hashlib
 import subprocess
 import time
+import jwt
+import requests
 
 # ✅ 환경변수 로드 (시스템 환경변수 > .env 파일 우선순위)
 print("🔍 환경변수 로드 중...")
@@ -915,6 +917,37 @@ class HairstyleResponse(BaseModel):
 class ErrorResponse(BaseModel):
     error: str
 
+# JWT 검증 함수
+def verify_jwt_token(authorization: str = Header(None)) -> dict:
+    """JWT 토큰 검증 및 사용자 정보 추출"""
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Authorization header가 필요합니다.")
+    
+    try:
+        # Bearer 토큰 추출
+        if not authorization.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Bearer 토큰 형식이 올바르지 않습니다.")
+        
+        token = authorization.split(" ")[1]
+        
+        # Spring Boot 서버의 JWT 검증 엔드포인트 호출
+        spring_boot_url = os.getenv("SPRING_BOOT_URL", "http://localhost:8080")
+        verify_url = f"{spring_boot_url}/api/auth/verify"
+        
+        headers = {"Authorization": authorization}
+        response = requests.get(verify_url, headers=headers, timeout=10)
+        
+        if response.status_code != 200:
+            raise HTTPException(status_code=401, detail="토큰 검증 실패")
+        
+        user_info = response.json()
+        return user_info
+        
+    except requests.RequestException as e:
+        raise HTTPException(status_code=401, detail=f"토큰 검증 중 오류: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"토큰 검증 실패: {str(e)}")
+
 # 메인 앱 생성
 app = FastAPI(title="MOZARA Python Backend 통합", version="1.0.0")
 
@@ -1738,16 +1771,28 @@ except ImportError as e:
     RAG_CHATBOT_AVAILABLE = False
 
 @app.post("/rag-chat", response_model=ChatResponse)
-async def rag_chat_endpoint(request: ChatRequest):
-    """RAG 기반 탈모 전문 챗봇"""
+async def rag_chat_endpoint(request: ChatRequest, user_info: dict = Depends(verify_jwt_token)):
+    """RAG 기반 탈모 전문 챗봇 - 사용자 인증 필수"""
     if not RAG_CHATBOT_AVAILABLE:
         raise HTTPException(status_code=503, detail="RAG 챗봇 서비스가 비활성화되어 있습니다.")
 
     try:
+        # JWT에서 추출한 사용자 정보
+        user_id = user_info.get('email') or user_info.get('id') or user_info.get('userId')
+        if not user_id:
+            raise HTTPException(status_code=401, detail="사용자 정보를 찾을 수 없습니다.")
+        
+        # conversation_id 검증: chat_{user_id} 형태여야 함
+        expected_conversation_id = f"chat_{user_id}"
+        if request.conversation_id != expected_conversation_id:
+            raise HTTPException(status_code=403, detail="권한이 없는 대화에 접근하려고 합니다.")
+        
+        print(f"✅ [{user_id}] RAG 채팅 요청 - conversation_id: {request.conversation_id}")
+
         # RAG 챗봇 인스턴스 가져오기 (사용자별 메모리 관리)
         chatbot = get_final_rag_chatbot()
 
-        # 채팅 처리 (conversation_id로 사용자별 대화 기억)
+        # 채팅 처리 (검증된 conversation_id로 사용자별 대화 기억)
         result = chatbot.chat(request.message, request.conversation_id)
 
         return ChatResponse(
@@ -1757,6 +1802,8 @@ async def rag_chat_endpoint(request: ChatRequest):
             timestamp=result['timestamp']
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"RAG 챗봇 오류: {e}")
         raise HTTPException(status_code=500, detail=f"RAG 챗봇 처리 중 오류가 발생했습니다: {str(e)}")
@@ -1786,15 +1833,35 @@ async def rag_chat_health_check():
         }
 
 @app.post("/rag-chat/clear")
-async def clear_conversation(request: dict):
-    """대화 기록 삭제"""
+async def clear_conversation(request: dict, user_info: dict = Depends(verify_jwt_token)):
+    """대화 기록 삭제 - 사용자 인증 필수"""
     if not RAG_CHATBOT_AVAILABLE:
         raise HTTPException(status_code=503, detail="RAG 챗봇 서비스가 비활성화되어 있습니다.")
 
     try:
+        # JWT에서 추출한 사용자 정보
+        jwt_user_id = user_info.get('email') or user_info.get('id') or user_info.get('userId')
+        if not jwt_user_id:
+            raise HTTPException(status_code=401, detail="사용자 정보를 찾을 수 없습니다.")
+        
+        # conversation_id 또는 user_id 모두 지원
         conversation_id = request.get("conversation_id", "")
+        user_id = request.get("user_id", "")
+        
+        # 둘 중 하나는 있어야 함
+        if not conversation_id and not user_id:
+            raise HTTPException(status_code=400, detail="conversation_id 또는 user_id가 필요합니다.")
+        
+        # conversation_id가 없으면 user_id를 사용
         if not conversation_id:
-            raise HTTPException(status_code=400, detail="conversation_id가 필요합니다.")
+            conversation_id = user_id
+        
+        # 사용자 권한 검증: chat_{jwt_user_id} 형태여야 함
+        expected_conversation_id = f"chat_{jwt_user_id}"
+        if conversation_id != expected_conversation_id:
+            raise HTTPException(status_code=403, detail="권한이 없는 대화 기록을 삭제하려고 합니다.")
+        
+        print(f"✅ [{jwt_user_id}] 대화 기록 삭제 요청 - conversation_id: {conversation_id}")
 
         chatbot = get_final_rag_chatbot()
         chatbot.clear_conversation(conversation_id)
@@ -1805,6 +1872,8 @@ async def clear_conversation(request: dict):
             "timestamp": datetime.now().isoformat()
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"대화 기록 삭제 오류: {e}")
         raise HTTPException(status_code=500, detail=str(e))
