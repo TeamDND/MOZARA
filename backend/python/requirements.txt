@@ -48,5 +48,4 @@ langdetect
 schedule
 beautifulsoup4
 sentence-transformers
-PyJWT
 
