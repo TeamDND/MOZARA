@@ -20,7 +20,6 @@ import urllib.parse
 import hashlib
 import subprocess
 import time
-import jwt
 import requests
 
 # ✅ 환경변수 로드 (시스템 환경변수 > .env 파일 우선순위)
@@ -917,36 +916,6 @@ class HairstyleResponse(BaseModel):
 class ErrorResponse(BaseModel):
     error: str
 
-# JWT 검증 함수
-def verify_jwt_token(authorization: str = Header(None)) -> dict:
-    """JWT 토큰 검증 및 사용자 정보 추출"""
-    if not authorization:
-        raise HTTPException(status_code=401, detail="Authorization header가 필요합니다.")
-    
-    try:
-        # Bearer 토큰 추출
-        if not authorization.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail="Bearer 토큰 형식이 올바르지 않습니다.")
-        
-        token = authorization.split(" ")[1]
-        
-        # Spring Boot 서버의 JWT 검증 엔드포인트 호출
-        spring_boot_url = os.getenv("SPRING_BOOT_URL", "http://localhost:8080")
-        verify_url = f"{spring_boot_url}/api/auth/verify"
-        
-        headers = {"Authorization": authorization}
-        response = requests.get(verify_url, headers=headers, timeout=10)
-        
-        if response.status_code != 200:
-            raise HTTPException(status_code=401, detail="토큰 검증 실패")
-        
-        user_info = response.json()
-        return user_info
-        
-    except requests.RequestException as e:
-        raise HTTPException(status_code=401, detail=f"토큰 검증 중 오류: {str(e)}")
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=f"토큰 검증 실패: {str(e)}")
 
 # 메인 앱 생성
 app = FastAPI(title="MOZARA Python Backend 통합", version="1.0.0")
@@ -1646,18 +1615,6 @@ async def search_products_by_keyword(
             detail=f"제품 검색 중 오류가 발생했습니다: {str(e)}"
         )
 
-@app.post("/refresh")
-async def refresh_token():
-    """토큰 갱신 API (임시 구현)"""
-    try:
-        # 실제 구현에서는 JWT 토큰 갱신 로직이 필요
-        # 현재는 임시로 성공 응답 반환
-        return {
-            "message": "토큰 갱신 완료",
-            "status": "success"
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 # 논문 관련 엔드포인트는 services/hair_encyclopedia/paper_api.py에서 처리됨
 @app.get("/api/location/status")
