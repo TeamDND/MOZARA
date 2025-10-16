@@ -74,6 +74,7 @@ const ChatBotMessenger: React.FC<ChatBotMessengerProps> = ({ onClose, isModalClo
   const [relatedQuestions, setRelatedQuestions] = useState<{[key: string]: string[]}>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+
   // 추천 질문
   const quickQuestions = [
     '마이신한포인트 조회',

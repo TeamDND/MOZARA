@@ -79,6 +79,7 @@ const ChatBot: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+
   // 메시지 변경 시 localStorage에 저장
   useEffect(() => {
     if (messages.length > 1) { // 환영 메시지 이외의 메시지가 있을 때만 저장
