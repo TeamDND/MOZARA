@@ -298,7 +298,11 @@ class LocationService {
         return isMedical ||
                cat.includes('건강') || cat.includes('의료') ||
                name.includes('의료') || name.includes('건강') ||
-               (q.includes('탈모') && (cat.includes('미용') || name.includes('피부')));
+               (q.includes('탈모') && (cat.includes('미용') || name.includes('피부'))) ||
+               (q.includes('피부') && (cat.includes('피부과') || name.includes('피부과'))) ||
+               (q.includes('병원') && (cat.includes('병원') || name.includes('병원'))) ||
+               (q.includes('의원') && (cat.includes('의원') || name.includes('의원'))) ||
+               (q.includes('클리닉') && (cat.includes('클리닉') || name.includes('클리닉')));
       })
       .map(item => {
         const hospital: Hospital = {
@@ -334,7 +338,9 @@ class LocationService {
     const isWigShop = q.includes('가발') || q.includes('증모술');
     const isPharmacy = q.includes('약국');
 
-    return documents
+    console.log(`[DEBUG] transformKakaoResults - 입력: ${documents.length}개 문서, 검색어: "${query}"`);
+
+    const filtered = documents
       .filter(doc => {
         const cat = doc.category_name || '';
         const name = doc.place_name || '';
@@ -398,9 +404,16 @@ class LocationService {
         return isMedical ||
                cat.includes('건강') || cat.includes('의료') ||
                name.includes('의료') || name.includes('건강') ||
-               (q.includes('탈모') && (cat.includes('미용') || name.includes('피부')));
-      })
-      .map(doc => {
+               (q.includes('탈모') && (cat.includes('미용') || name.includes('피부'))) ||
+               (q.includes('피부') && (cat.includes('피부과') || name.includes('피부과'))) ||
+               (q.includes('병원') && (cat.includes('병원') || name.includes('병원'))) ||
+               (q.includes('의원') && (cat.includes('의원') || name.includes('의원'))) ||
+               (q.includes('클리닉') && (cat.includes('클리닉') || name.includes('클리닉')));
+      });
+
+    console.log(`[DEBUG] transformKakaoResults - 필터링 후: ${filtered.length}개 결과`);
+
+    return filtered.map(doc => {
         const hospital: Hospital = {
           id: `kakao_${doc.id}`,
           name: doc.place_name,
@@ -1037,6 +1050,12 @@ class LocationService {
       // API 결과가 없으면 샘플 데이터 반환
       if (hospitals.length === 0) {
         console.warn('No API results, returning sample data');
+        console.log('API Results Debug:', {
+          naverResults: naverResults.status === 'fulfilled' ? naverResults.value : naverResults.reason,
+          kakaoResults: kakaoResults.status === 'fulfilled' ? kakaoResults.value : kakaoResults.reason,
+          combinedHospitals: hospitals,
+          finalParams
+        });
         return this.getFilteredSampleData({ ...finalParams, query: (canonicalCategory ?? finalParams.query) as string });
       }
 
