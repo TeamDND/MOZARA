@@ -46,16 +46,28 @@ public class RagChatBotController {
 
     /**
      * RAG 채팅 대화 내역 초기화
-     * @param request conversation_id
+     * @param request conversation_id 또는 user_id
      * @return 초기화 결과
      */
     @PostMapping("/clear")
     public ResponseEntity<?> clearChat(@RequestBody Map<String, String> request) {
         try {
             String conversationId = request.get("conversation_id");
-            log.info("[RagChat] 대화 초기화 요청 - conversationId: {}", conversationId);
+            String userId = request.get("user_id");
             
-            Map<String, Object> result = ragChatService.clearChatHistory(conversationId);
+            // conversation_id 또는 user_id 중 하나는 있어야 함
+            if (conversationId == null && userId == null) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("error", "conversation_id 또는 user_id가 필요합니다.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+            }
+            
+            // conversation_id가 없으면 user_id를 사용
+            String idToUse = (conversationId != null) ? conversationId : userId;
+            
+            log.info("[RagChat] 대화 초기화 요청 - id: {}", idToUse);
+            
+            Map<String, Object> result = ragChatService.clearChatHistory(idToUse);
             return ResponseEntity.ok(result);
             
         } catch (Exception e) {
