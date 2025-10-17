@@ -1,0 +1,70 @@
+{
+  "model_info": {
+    "model_type": "side",
+    "device": "cpu",
+    "evaluation_date": "2025-10-14 12:42:24"
+  },
+  "dataset_info": {
+    "total_samples": 1397,
+    "level_0": 500,
+    "level_1": 200,
+    "level_2": 197,
+    "level_3": 500
+  },
+  "overall_performance": {
+    "accuracy": 0.8360773085182533,
+    "average_confidence": 0.7105095251253356
+  },
+  "per_class_performance": {
+    "level_0": {
+      "precision": 0.8764044943820225,
+      "recall": 0.936,
+      "f1_score": 0.9052224371373307,
+      "support": 500
+    },
+    "level_1": {
+      "precision": 0.717391304347826,
+      "recall": 0.66,
+      "f1_score": 0.6875,
+      "support": 200
+    },
+    "level_2": {
+      "precision": 0.6428571428571429,
+      "recall": 0.8223350253807107,
+      "f1_score": 0.7216035634743875,
+      "support": 197
+    },
+    "level_3": {
+      "precision": 0.9508196721311475,
+      "recall": 0.812,
+      "f1_score": 0.8759439050701187,
+      "support": 500
+    }
+  },
+  "confusion_matrix": [
+    [
+      468,
+      27,
+      0,
+      5
+    ],
+    [
+      4,
+      132,
+      63,
+      1
+    ],
+    [
+      0,
+      20,
+      162,
+      15
+    ],
+    [
+      62,
+      5,
+      27,
+      406
+    ]
+  ]
+}

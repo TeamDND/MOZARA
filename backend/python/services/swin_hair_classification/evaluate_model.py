@@ -10,6 +10,13 @@ Confusion Matrix 생성 스크립트
 
 import os
 import sys
+
+# Windows 콘솔 유니코드 출력 문제 해결
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
 import torch
 import torch.nn as nn
 from torchvision import transforms

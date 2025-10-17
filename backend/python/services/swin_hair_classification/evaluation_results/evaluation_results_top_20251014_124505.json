@@ -1,0 +1,70 @@
+{
+  "model_info": {
+    "model_type": "top",
+    "device": "cpu",
+    "evaluation_date": "2025-10-14 12:45:16"
+  },
+  "dataset_info": {
+    "total_samples": 974,
+    "level_0": 299,
+    "level_1": 182,
+    "level_2": 269,
+    "level_3": 224
+  },
+  "overall_performance": {
+    "accuracy": 0.9794661190965093,
+    "average_confidence": 0.9279386469103718
+  },
+  "per_class_performance": {
+    "level_0": {
+      "precision": 0.9800664451827242,
+      "recall": 0.9866220735785953,
+      "f1_score": 0.9833333333333333,
+      "support": 299
+    },
+    "level_1": {
+      "precision": 0.9779005524861878,
+      "recall": 0.9725274725274725,
+      "f1_score": 0.9752066115702479,
+      "support": 182
+    },
+    "level_2": {
+      "precision": 0.9775280898876404,
+      "recall": 0.9702602230483272,
+      "f1_score": 0.9738805970149254,
+      "support": 269
+    },
+    "level_3": {
+      "precision": 0.9822222222222222,
+      "recall": 0.9866071428571429,
+      "f1_score": 0.9844097995545658,
+      "support": 224
+    }
+  },
+  "confusion_matrix": [
+    [
+      295,
+      2,
+      2,
+      0
+    ],
+    [
+      3,
+      177,
+      2,
+      0
+    ],
+    [
+      3,
+      1,
+      261,
+      4
+    ],
+    [
+      0,
+      1,
+      2,
+      221
+    ]
+  ]
+}
