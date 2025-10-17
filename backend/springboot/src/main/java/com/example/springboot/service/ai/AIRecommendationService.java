@@ -1,6 +1,8 @@
 package com.example.springboot.service.ai;
 
 import com.example.springboot.data.entity.UserEntity;
+import com.example.springboot.data.entity.UsersInfoEntity;
+import com.example.springboot.data.repository.UserRepository;
 import com.example.springboot.data.repository.UsersInfoRepository;
 import com.example.springboot.service.metrics.UserMetricsService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import java.util.*;
 public class AIRecommendationService {
 
     private final UserMetricsService userMetricsService;
+    private final UserRepository userRepository;
     private final UsersInfoRepository usersInfoRepository;
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -32,7 +35,7 @@ public class AIRecommendationService {
      * 사용자 프로필 기반 AI 추천 생성
      * 챗봇 답변 끝에 자연스럽게 추가될 추천 텍스트 생성
      */
-    public Map<String, Object> generatePersonalizedRecommendation(Long userId, String userQuery) {
+    public Map<String, Object> generatePersonalizedRecommendation(Integer userId, String userQuery) {
         try {
             // 1. 사용자 프로필 분석
             UserProfile profile = analyzeUserProfile(userId);
@@ -55,15 +58,18 @@ public class AIRecommendationService {
     /**
      * 사용자 프로필 분석
      */
-    private UserProfile analyzeUserProfile(Long userId) {
+    private UserProfile analyzeUserProfile(Integer userId) {
         UserProfile profile = new UserProfile();
 
         // 사용자 기본 정보
-        UserEntity user = usersInfoRepository.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // UsersInfoEntity에서 나이 정보 가져오기
+        UsersInfoEntity userInfo = usersInfoRepository.findByUserEntityIdForeign_Id(userId);
+
         profile.setUserId(userId);
-        profile.setAge(calculateAge(user.getBirth()));
+        profile.setAge(userInfo != null ? userInfo.getAge() : 30);
         profile.setAgeGroup(determineAgeGroup(profile.getAge()));
 
         // UserMetrics에서 행동 패턴 분석
@@ -228,7 +234,7 @@ public class AIRecommendationService {
 
     // 내부 클래스: 사용자 프로필
     private static class UserProfile {
-        private Long userId;
+        private Integer userId;
         private int age;
         private String ageGroup;
         private List<String> recentSearches = new ArrayList<>();
@@ -236,8 +242,8 @@ public class AIRecommendationService {
         private String engagementLevel;
 
         // Getters and Setters
-        public Long getUserId() { return userId; }
-        public void setUserId(Long userId) { this.userId = userId; }
+        public Integer getUserId() { return userId; }
+        public void setUserId(Integer userId) { this.userId = userId; }
         public int getAge() { return age; }
         public void setAge(int age) { this.age = age; }
         public String getAgeGroup() { return ageGroup; }

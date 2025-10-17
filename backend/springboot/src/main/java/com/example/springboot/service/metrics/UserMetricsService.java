@@ -1,9 +1,9 @@
 package com.example.springboot.service.metrics;
 
-import com.example.springboot.UserMetricEntity;
+import com.example.springboot.data.entity.UserMetricEntity;
 import com.example.springboot.data.entity.UserEntity;
 import com.example.springboot.data.repository.UserMetricsRepository;
-import com.example.springboot.data.repository.UsersInfoRepository;
+import com.example.springboot.data.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -22,14 +22,14 @@ import java.util.stream.Collectors;
 public class UserMetricsService {
 
     private final UserMetricsRepository userMetricsRepository;
-    private final UsersInfoRepository usersInfoRepository;
+    private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
 
     /**
      * RAG 검색 기록 저장
      */
     @Transactional
-    public void logRAGSearch(Long userId, String query, int resultCount, boolean clicked, String clickedTitle) {
+    public void logRAGSearch(Integer userId, String query, int resultCount, boolean clicked, String clickedTitle) {
         try {
             Map<String, Object> data = new HashMap<>();
             data.put("query", query);
@@ -49,7 +49,7 @@ public class UserMetricsService {
      * 두피 진단 결과 저장
      */
     @Transactional
-    public void logScalpDiagnosis(Long userId, String scalpType, int scalpScore, String sensitivity) {
+    public void logScalpDiagnosis(Integer userId, String scalpType, int scalpScore, String sensitivity) {
         try {
             Map<String, Object> data = new HashMap<>();
             data.put("scalpType", scalpType);
@@ -68,7 +68,7 @@ public class UserMetricsService {
      * 제품 클릭 기록 저장
      */
     @Transactional
-    public void logProductClick(Long userId, String productCategory, String productName, String recommendedBy) {
+    public void logProductClick(Integer userId, String productCategory, String productName, String recommendedBy) {
         try {
             Map<String, Object> data = new HashMap<>();
             data.put("category", productCategory);
@@ -87,7 +87,7 @@ public class UserMetricsService {
      * 케어 미션 완료 저장
      */
     @Transactional
-    public void logCareMissionComplete(Long userId, String missionType, int streakCount) {
+    public void logCareMissionComplete(Integer userId, String missionType, int streakCount) {
         try {
             Map<String, Object> data = new HashMap<>();
             data.put("missionType", missionType);
@@ -106,7 +106,7 @@ public class UserMetricsService {
      * 페이지 체류 시간 저장
      */
     @Transactional
-    public void logPageDwellTime(Long userId, String pagePath, long durationSeconds) {
+    public void logPageDwellTime(Integer userId, String pagePath, long durationSeconds) {
         try {
             Map<String, Object> data = new HashMap<>();
             data.put("page", pagePath);
@@ -122,8 +122,8 @@ public class UserMetricsService {
     /**
      * 메트릭 저장 공통 메서드
      */
-    private void saveMetric(Long userId, String type, String value) {
-        UserEntity user = usersInfoRepository.findById(userId)
+    private void saveMetric(Integer userId, String type, String value) {
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
 
         UserMetricEntity metric = new UserMetricEntity();
@@ -138,9 +138,9 @@ public class UserMetricsService {
     /**
      * 사용자별 메트릭 요약 조회
      */
-    public Map<String, Object> getUserMetricsSummary(Long userId) {
+    public Map<String, Object> getUserMetricsSummary(Integer userId) {
         List<UserMetricEntity> metrics = userMetricsRepository
-                .findByUserIdForeign_UserIdOrderByRecordDateDesc(userId);
+                .findByUserIdForeign_IdOrderByRecordDateDesc(userId);
 
         Map<String, Object> summary = new HashMap<>();
         summary.put("totalMetrics", metrics.size());
@@ -174,7 +174,7 @@ public class UserMetricsService {
     /**
      * 사용자의 최근 검색 키워드 추출 (AI 추천용)
      */
-    public List<String> getUserRecentSearches(Long userId, int limit) {
+    public List<String> getUserRecentSearches(Integer userId, int limit) {
         List<UserMetricEntity> searches = userMetricsRepository
                 .findByUserAndType(userId, "RAG_SEARCH");
 
@@ -188,7 +188,7 @@ public class UserMetricsService {
     /**
      * 사용자의 관심 제품 카테고리 분석
      */
-    public Map<String, Long> getUserProductPreferences(Long userId) {
+    public Map<String, Long> getUserProductPreferences(Integer userId) {
         List<UserMetricEntity> clicks = userMetricsRepository
                 .findByUserAndType(userId, "PRODUCT_CLICK");
 
@@ -212,7 +212,7 @@ public class UserMetricsService {
         Instant startDate = Instant.now().minus(days, ChronoUnit.DAYS);
         return userMetricsRepository.findAll().stream()
                 .filter(m -> m.getRecordDate().isAfter(startDate))
-                .map(m -> m.getUserIdForeign().getUserId())
+                .map(m -> m.getUserIdForeign().getId())
                 .distinct()
                 .count();
     }

@@ -64,7 +64,7 @@ public class RagChatController {
 
             // 1. 사용자 검색 기록 저장
             if (authentication != null && authentication.getName() != null) {
-                Long userId = Long.parseLong(authentication.getName());
+                Integer userId = Integer.parseInt(authentication.getName());
                 userMetricsService.logRAGSearch(userId, userQuery, 1, false, "");
 
                 // 2. AI 개인화 추천 생성

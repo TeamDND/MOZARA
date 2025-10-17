@@ -19,7 +19,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const handleProductClick = async () => {
     try {
       await apiClient.post('/api/metrics/product-click', {
-        productCategory: product.category || '탈모케어',
+        productCategory: product.category1 || '탈모케어',
         productName: product.productName,
         recommendedBy: recommendedBy
       });

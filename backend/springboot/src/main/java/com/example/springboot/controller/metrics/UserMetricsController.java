@@ -26,7 +26,7 @@ public class UserMetricsController {
             Authentication authentication
     ) {
         try {
-            Long userId = getUserIdFromAuth(authentication);
+            Integer userId = getUserIdFromAuth(authentication);
             String query = (String) request.get("query");
             int resultCount = (Integer) request.getOrDefault("resultCount", 0);
             boolean clicked = (Boolean) request.getOrDefault("clicked", false);
@@ -50,7 +50,7 @@ public class UserMetricsController {
             Authentication authentication
     ) {
         try {
-            Long userId = getUserIdFromAuth(authentication);
+            Integer userId = getUserIdFromAuth(authentication);
             String scalpType = (String) request.get("scalpType");
             int scalpScore = (Integer) request.get("scalpScore");
             String sensitivity = (String) request.get("sensitivity");
@@ -73,7 +73,7 @@ public class UserMetricsController {
             Authentication authentication
     ) {
         try {
-            Long userId = getUserIdFromAuth(authentication);
+            Integer userId = getUserIdFromAuth(authentication);
             String category = (String) request.get("category");
             String productName = (String) request.get("productName");
             String recommendedBy = (String) request.getOrDefault("recommendedBy", "manual");
@@ -96,7 +96,7 @@ public class UserMetricsController {
             Authentication authentication
     ) {
         try {
-            Long userId = getUserIdFromAuth(authentication);
+            Integer userId = getUserIdFromAuth(authentication);
             String missionType = (String) request.get("missionType");
             int streakCount = (Integer) request.getOrDefault("streakCount", 1);
 
@@ -115,7 +115,7 @@ public class UserMetricsController {
     @GetMapping("/my-summary")
     public ResponseEntity<?> getMyMetricsSummary(Authentication authentication) {
         try {
-            Long userId = getUserIdFromAuth(authentication);
+            Integer userId = getUserIdFromAuth(authentication);
             Map<String, Object> summary = userMetricsService.getUserMetricsSummary(userId);
 
             return ResponseEntity.ok(summary);
@@ -140,11 +140,11 @@ public class UserMetricsController {
     }
 
     // 유틸리티 메서드
-    private Long getUserIdFromAuth(Authentication authentication) {
+    private Integer getUserIdFromAuth(Authentication authentication) {
         if (authentication == null || authentication.getName() == null) {
             throw new RuntimeException("인증 정보가 없습니다");
         }
         // Authentication에서 userId 추출 (CustomUserDetails 사용 가정)
-        return Long.parseLong(authentication.getName());
+        return Integer.parseInt(authentication.getName());
     }
 }

@@ -1,4 +1,4 @@
-package com.example.springboot;
+package com.example.springboot.data.entity;
 
 import com.example.springboot.data.entity.UserEntity;
 import jakarta.persistence.*;
