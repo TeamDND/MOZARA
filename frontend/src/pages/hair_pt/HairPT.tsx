@@ -5,7 +5,6 @@ import { RootState, AppDispatch } from '../../utils/store';
 import { fetchSeedlingInfo, updateSeedlingNickname, setSeedling } from '../../utils/seedlingSlice';
 import { incrementCounter, decrementCounter, setCounter } from '../../utils/missionCounterSlice';
 import apiClient from '../../services/apiClient';
-import ScalpPhotoCapture from '../hair_mobile_photo/ScalpPhotoCapture';
 
 interface Counters {
   water: number;
@@ -105,7 +104,7 @@ const HairPT: React.FC = () => {
   const [activeTab, setActiveTab] = useState('routine');
   const [lastResetDate, setLastResetDate] = useState<string>('');
   const [showVideoModal, setShowVideoModal] = useState(false);
-  const [scalpPhotos, setScalpPhotos] = useState<string[]>([]);
+  const [pendingMassageMission, setPendingMassageMission] = useState<MissionInfo | null>(null);
   const [statusMessage] = useState('오늘의 건강한 습관을 실천하고 새싹을 키워보세요!');
   const [plantTitle, setPlantTitle] = useState<string>('새싹 키우기');
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
@@ -123,7 +122,6 @@ const HairPT: React.FC = () => {
   const [seedlingLevel, setSeedlingLevel] = useState(1);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [scalpPhotoCompleted, setScalpPhotoCompleted] = useState(false); // 두피 사진 촬영 완료 상태
 
   const plantStages = {
     1: { emoji: '🌱', name: '새싹' },
@@ -147,7 +145,6 @@ const HairPT: React.FC = () => {
   // daily_habits 데이터 로드 (날짜별)
   const loadDailyHabits = async (date?: Date) => {
     if (!userId) {
-      console.log('사용자 ID가 없어서 습관 데이터를 로드할 수 없습니다.');
       return;
     }
 
@@ -156,8 +153,13 @@ const HairPT: React.FC = () => {
       
       // 로드할 날짜 결정
       const targetDate = date || selectedDate;
-      const dateString = targetDate.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+      // toISOString() 대신 로컬 날짜 형식 사용 (timezone 문제 해결)
+      const year = targetDate.getFullYear();
+      const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+      const day = String(targetDate.getDate()).padStart(2, '0');
+      const dateString = `${year}-${month}-${day}`; // YYYY-MM-DD 형식
       const isToday = targetDate.toDateString() === new Date().toDateString();
+      
       
       // 모든 습관 데이터 가져오기
       const response = await apiClient.get('/habit/daily-habits');
@@ -190,28 +192,47 @@ const HairPT: React.FC = () => {
       });
       setMissionData(convertedMissions);
 
-      // 카운터 방식 미션들의 완료 상태에 따라 카운터 설정 (Redux)
+      // 카운터 방식 미션들의 진행 상태 로드 (Redux)
       const waterMission = convertedMissions.find(m => m.name === '물 마시기');
-      const effectorMission = convertedMissions.find(m => m.name === '이펙터 사용');
+      const effectorMission = convertedMissions.find(m => m.name === 'HairFit 방문하기');
 
-      if (waterMission?.completed) {
-        dispatch(setCounter({ key: 'water', value: 7 }));
-      } else if (isToday) {
-        dispatch(setCounter({ key: 'water', value: 0 }));
+      // 오늘 날짜든 과거 날짜든 모두 DB에서 진행 상태 가져오기
+      if (waterMission) {
+        try {
+          let progressResponse;
+          if (isToday) {
+            progressResponse = await apiClient.get(`/habit/progress/${userId}/${waterMission.id}`);
+          } else {
+            progressResponse = await apiClient.get(`/habit/progress/${userId}/${waterMission.id}/date`, {
+              params: { date: dateString }
+            });
+          }
+          const progressCount = progressResponse.data.progressCount || 0;
+          dispatch(setCounter({ key: 'water', value: progressCount }));
+        } catch (error) {
+          console.error('❌ 물 마시기 진행 상태 로드 실패:', error);
+          dispatch(setCounter({ key: 'water', value: 0 }));
+        }
       }
 
-      if (effectorMission?.completed) {
-        dispatch(setCounter({ key: 'effector', value: 4 }));
-      } else if (isToday) {
-        dispatch(setCounter({ key: 'effector', value: 0 }));
+      if (effectorMission) {
+        try {
+          let progressResponse;
+          if (isToday) {
+            progressResponse = await apiClient.get(`/habit/progress/${userId}/${effectorMission.id}`);
+          } else {
+            progressResponse = await apiClient.get(`/habit/progress/${userId}/${effectorMission.id}/date`, {
+              params: { date: dateString }
+            });
+          }
+          const progressCount = progressResponse.data.progressCount || 0;
+          dispatch(setCounter({ key: 'effector', value: progressCount }));
+        } catch (error) {
+          console.error('❌ HairFit 방문하기 진행 상태 로드 실패:', error);
+          dispatch(setCounter({ key: 'effector', value: 0 }));
+        }
       }
 
-      // 오늘 날짜인 경우 daily 레포트 확인
-      if (isToday) {
-        await checkTodayDailyReport();
-      } else {
-        setScalpPhotoCompleted(false); // 과거 날짜는 완료 상태 초기화
-      }
     } catch (error) {
       console.error('습관 데이터 로드 실패:', error);
       setToast({ visible: true, message: '습관 데이터를 불러오는데 실패했습니다.' });
@@ -225,7 +246,7 @@ const HairPT: React.FC = () => {
   const getMissionKey = (habitName: string): keyof MissionState => {
     const keyMap: { [key: string]: keyof MissionState } = {
       '물 마시기': 'water',
-      '이펙터 사용': 'effector',
+      'HairFit 방문하기': 'effector',
       '아침 부스터 사용': 'morningBooster',
       '밤 부스터 사용': 'nightBooster',
       '백회혈/사신총혈 마사지': 'massage',
@@ -239,7 +260,8 @@ const HairPT: React.FC = () => {
       '밤에 머리 감기': 'nightWash',
       '머리 바싹 말리기': 'dryHair',
       '샴푸 전 머리 빗질': 'brushHair',
-      '두피 영양팩하기': 'scalpPack'
+      '두피 영양팩하기': 'scalpPack',
+      '오늘의 미션 달성': 'earlySleep' // 임시로 earlySleep 키 사용
     };
     return keyMap[habitName] || 'morningBooster';
   };
@@ -255,19 +277,14 @@ const HairPT: React.FC = () => {
   // 새싹 정보 로드 (Redux 사용)
   const loadSeedlingInfo = useCallback(async () => {
     if (!userId) {
-      console.log('사용자 ID가 없습니다.');
       return;
     }
 
     try {
-      console.log('새싹 정보 로드 시도:', userId);
-      
       // 직접 API 호출로 테스트
       const response = await apiClient.get('/user/seedling/my-seedling');
-      console.log('새싹 정보 API 응답:', response.data);
       
       const result = await dispatch(fetchSeedlingInfo(userId)).unwrap();
-      console.log('Redux 새싹 정보:', result);
       
       if (result) {
         // 새싹 포인트 설정
@@ -293,6 +310,11 @@ const HairPT: React.FC = () => {
       if (savedTitle) setPlantTitle(savedTitle);
     }
   }, [dispatch, userId]);
+
+  // 컴포넌트 마운트 시 스크롤을 맨 위로
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // 컴포넌트 마운트 시 리셋 확인
   useEffect(() => {
@@ -328,14 +350,12 @@ const HairPT: React.FC = () => {
   // 새싹 이름 변경 함수
   const handleSeedlingNameChange = async (newName: string) => {
     if (!userId) {
-      console.log('사용자 ID가 없습니다.');
       setToast({ visible: true, message: '로그인이 필요합니다.' });
       setTimeout(() => setToast({ visible: false, message: '' }), 3000);
       return;
     }
 
     try {
-      console.log('새싹 이름 변경 시도:', { userId, seedlingName: newName });
       
       // 새싹 이름 변경 API 호출
       await dispatch(updateSeedlingNickname(newName)).unwrap();
@@ -425,39 +445,42 @@ const HairPT: React.FC = () => {
 
 
   const toggleMission = async (missionKey: keyof MissionState) => {
+    const missionInfo = missionData.find(m => m.key === missionKey);
+    
+    if (!missionInfo) {
+      return;
+    }
+    
+    // 백엔드에서 이미 완료된 미션인지 확인
+    if (missionInfo.completed) {
+      return;
+    }
+    
+    // 로컬 상태도 이미 완료된 경우 확인
+    if (missionState[missionKey]) {
+      return;
+    }
+    
     setMissionState(prev => ({
       ...prev,
       [missionKey]: !prev[missionKey]
     }));
     
     // 미션 완료 시 경험치 추가 및 로그 저장
-    if (!missionState[missionKey]) {
-      const missionInfo = missionData.find(m => m.key === missionKey);
-      if (missionInfo) {
-        await saveMissionLog(missionInfo.id, missionInfo.rewardPoints);
-        // 미션 완료 후 습관 데이터 다시 로드하여 완료 상태 업데이트
-        await loadDailyHabits();
-      }
-    }
+    await saveMissionLog(missionInfo.id, missionInfo.rewardPoints);
+    // 미션 완료 후 습관 데이터 다시 로드하여 완료 상태 업데이트
+    await loadDailyHabits();
   };
 
   // 미션 완료 로그 저장 함수 (API 연동)
   const saveMissionLog = async (habitId: number, points: number) => {
     if (!userId) {
-      console.log('사용자 ID가 없습니다.');
       return;
     }
 
     try {
       
-      const response = await apiClient.post('/habit/complete', null, {
-        params: {
-          userId: userId,
-          habitId: habitId
-        }
-      });
-      
-      console.log('미션 완료 로그 저장 성공:', response.data);
+      const response = await apiClient.post(`/habit/complete/${userId}/${habitId}`);
       
       // 성공 시 토스트 메시지 및 새싹 포인트 업데이트
       const newPoints = (currentPoint || seedlingPoints) + points;
@@ -519,56 +542,15 @@ const HairPT: React.FC = () => {
   };
 
 
-  // 오늘 daily 레포트가 있는지 확인
-  const checkTodayDailyReport = async () => {
-    if (!userId) return;
-
-    try {
-      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-      const response = await apiClient.get(`/analysis-results/${userId}`);
-      const reports = response.data;
-
-      // 오늘 날짜이면서 analysisType이 'daily'인 레포트가 있는지 확인
-      const hasTodayDaily = reports.some((report: any) => {
-        const reportDate = report.inspectionDate?.split('T')[0] || report.inspectionDate;
-        return reportDate === today && report.analysisType === 'daily';
-      });
-
-      setScalpPhotoCompleted(hasTodayDaily);
-      console.log('📅 오늘 daily 레포트 존재 여부:', hasTodayDaily);
-    } catch (error) {
-      console.error('❌ daily 레포트 확인 실패:', error);
-    }
-  };
-
-  // AI 분석 완료 핸들러
-  const handleAnalysisComplete = (imageUrl: string, analysisResult: any) => {
-    // S3 URL과 날짜를 함께 저장
-    const today = new Date().toLocaleDateString();
-    const photoWithDate = `${imageUrl}|${today}`;
-    setScalpPhotos(prev => [...prev, photoWithDate]);
-
-    // 두피 사진 촬영 완료 상태로 변경
-    setScalpPhotoCompleted(true);
-
-    // 성공 토스트 메시지 표시
-    setToast({
-      visible: true,
-      message: `AI 분석 완료! 두피 점수: ${analysisResult.scalpScore}점`
-    });
-    setTimeout(() => setToast({ visible: false, message: '' }), 3000);
-
-    console.log('✅ AI 분석 결과:', analysisResult);
-  };
 
 
   // 카테고리별 미션 필터링 함수
   const getMissionsByCategory = (category: 'routine' | 'nutrient' | 'cleanliness') => {
     const filteredMissions = missionData.filter(mission => mission.category === category);
     
-    // 중복된 미션 제거 (물마시기와 이펙터 사용은 각각 하나씩만 표시)
+    // 중복된 미션 제거 (물마시기와 HairFit 방문하기는 각각 하나씩만 표시)
     const uniqueMissions = filteredMissions.filter((mission, index, array) => {
-      if (mission.name === '물 마시기' || mission.name === '이펙터 사용') {
+      if (mission.name === '물 마시기' || mission.name === 'HairFit 방문하기') {
         // 같은 이름의 첫 번째 미션만 유지
         return array.findIndex(m => m.name === mission.name) === index;
       }
@@ -578,26 +560,68 @@ const HairPT: React.FC = () => {
     return uniqueMissions;
   };
 
-  const incrementMissionCounter = async (id: 'water' | 'effector') => {
-    // Redux 카운터 증가
-    dispatch(incrementCounter(id));
+  const updateMissionCounter = async (id: 'water' | 'effector', delta: number) => {
+    if (!userId) {
+      return;
+    }
 
-    // 증가 후 값 확인을 위해 현재 카운터 값 가져오기
-    const newValue = counters[id] + 1;
+    // Redux 카운터 업데이트
+    if (delta > 0) {
+      dispatch(incrementCounter(id));
+    } else {
+      dispatch(decrementCounter(id));
+    }
+
+    // 업데이트 후 값 확인을 위해 현재 카운터 값 가져오기
+    const newValue = counters[id] + delta;
     const targetCount = id === 'water' ? 7 : 4;
 
-    // 목표 달성 시 백엔드에 완료 로그 저장
-    if (newValue === targetCount) {
-      const missionInfo = missionData.find(m =>
-        (id === 'water' && m.name === '물 마시기') ||
-        (id === 'effector' && m.name === '이펙터 사용')
-      );
-      if (missionInfo) {
-        await saveMissionLog(missionInfo.id, missionInfo.rewardPoints);
-        // 미션 완료 후 습관 데이터 다시 로드하여 완료 상태 업데이트
-        await loadDailyHabits();
-      }
+    // 음수가 되지 않도록 체크
+    if (newValue < 0) {
+      return;
     }
+
+    // 해당 미션 정보 찾기
+    const missionInfo = missionData.find(m =>
+      (id === 'water' && m.name === '물 마시기') ||
+      (id === 'effector' && m.name === 'HairFit 방문하기')
+    );
+
+    if (!missionInfo) {
+      return;
+    }
+
+    try {
+      // 진행 상태를 DB에 저장 (완료되지 않아도 저장)
+      await apiClient.post('/habit/progress', null, {
+        params: {
+          userId: userId,
+          habitId: missionInfo.id,
+          progressCount: newValue
+        }
+      });
+
+      // 목표 달성 시 완료 처리 (습관 데이터 다시 로드)
+      if (newValue === targetCount) {
+        await loadDailyHabits();
+        setToast({ 
+          visible: true, 
+          message: `${missionInfo.name} 완료! +${missionInfo.rewardPoints} 포인트 획득! 🎉` 
+        });
+        setTimeout(() => setToast({ visible: false, message: '' }), 3000);
+      }
+    } catch (error) {
+      console.error('진행 상태 저장 실패:', error);
+      // 실패해도 Redux 상태는 유지 (로컬에서 계속 동작)
+    }
+  };
+
+  const incrementMissionCounter = async (id: 'water' | 'effector') => {
+    await updateMissionCounter(id, 1);
+  };
+
+  const decrementMissionCounter = async (id: 'water' | 'effector') => {
+    await updateMissionCounter(id, -1);
   };
 
 
@@ -610,7 +634,7 @@ const HairPT: React.FC = () => {
   const getMissionIcon = (missionName: string) => {
     const iconMap: { [key: string]: { icon: string; bgColor: string; textColor: string } } = {
       '물 마시기': { icon: 'fas fa-tint', bgColor: 'bg-gray-100', textColor: 'text-gray-500' },
-      '이펙터 사용': { icon: 'fas fa-wand-magic-sparkles', bgColor: 'bg-purple-100', textColor: 'text-purple-500' },
+      'HairFit 방문하기': { icon: 'fas fa-wand-magic-sparkles', bgColor: 'bg-purple-100', textColor: 'text-purple-500' },
       '아침 부스터 사용': { icon: 'fas fa-sun', bgColor: 'bg-yellow-100', textColor: 'text-yellow-500' },
       '밤 부스터 사용': { icon: 'fas fa-moon', bgColor: 'bg-indigo-100', textColor: 'text-indigo-500' },
       '백회혈/사신총혈 마사지': { icon: 'fas fa-hand-holding-medical', bgColor: 'bg-pink-100', textColor: 'text-pink-500' },
@@ -637,14 +661,12 @@ const HairPT: React.FC = () => {
     const isToday = selectedDate.toDateString() === new Date().toDateString();
     const isPastDate = selectedDate < new Date() && !isToday;
     
-    // 물마시기와 이펙터 사용은 카운터 방식으로 처리
+    // 물마시기와 HairFit 방문하기는 카운터 방식으로 처리
     if (mission.key === 'water' || mission.key === 'effector') {
-      const targetCount = mission.key === 'water' ? 7 : 4; // 물마시기 7잔, 이펙터 4회
+      const targetCount = mission.key === 'water' ? 7 : 4; // 물마시기 7잔, HairFit 4회
 
-      // 오늘이면 Redux 카운터 사용, 과거면 완료 여부에 따라 목표치 또는 0
-      const currentCount = isToday
-        ? counters[mission.key]
-        : (mission.completed ? targetCount : 0);
+      // 오늘이든 과거든 모두 Redux 카운터 사용 (실제 진행 상태 반영)
+      const currentCount = counters[mission.key];
 
       const isCounterCompleted = currentCount >= targetCount;
       
@@ -688,12 +710,7 @@ const HairPT: React.FC = () => {
             <div className="flex gap-3 justify-end">
               <button
                 className="w-12 h-12 rounded-xl font-bold bg-gray-400 hover:bg-gray-500 text-white transition-colors flex items-center justify-center active:scale-[0.95]"
-                onClick={() => {
-                  const key = mission.key as 'water' | 'effector';
-                  if (counters[key] > 0) {
-                    dispatch(decrementCounter(key));
-                  }
-                }}
+                onClick={() => decrementMissionCounter(mission.key as 'water' | 'effector')}
                 disabled={counters[mission.key as 'water' | 'effector'] <= 0}
               >
                 -1
@@ -763,128 +780,133 @@ const HairPT: React.FC = () => {
           </div>
 
           {/* Plant Display Card */}
-          <div className="bg-gradient-to-br from-[#1F0101] to-[#2A0202] rounded-xl p-6 mb-4 shadow-md hover:shadow-lg transition-shadow">
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex items-center gap-2 flex-1">
-                <span className="text-lg">🌱</span>
-                {isEditingTitle ? (
-                  <div className="flex items-center gap-2 flex-1">
-                    <input
-                      type="text"
-                      value={plantTitle}
-                      onChange={(e) => {
-                        const newName = e.target.value;
-                        setPlantTitle(newName);
-                        setIsUserTyping(true);
-                        if (userId && seedlingId) {
-                          dispatch(setSeedling({
-                            seedlingId: seedlingId,
-                            seedlingName: newName,
-                            currentPoint: currentPoint || seedlingPoints || 0,
-                            userId: userId
-                          }));
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && isUserTyping) {
+          <div className="rounded-xl p-1 mb-4 shadow-md hover:shadow-lg transition-shadow" style={{ background: 'linear-gradient(135deg, rgba(139, 58, 58, 0.9) 0%, rgba(90, 26, 26, 0.9) 50%, rgba(58, 10, 10, 0.9) 100%)' }}>
+            <div className="bg-white rounded-lg p-5">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-2 flex-1">
+                  <span className="text-lg">🌱</span>
+                  {isEditingTitle ? (
+                    <div className="flex items-center gap-2 flex-1">
+                      <input
+                        type="text"
+                        value={plantTitle}
+                        onChange={(e) => {
+                          const newName = e.target.value;
+                          setPlantTitle(newName);
+                          setIsUserTyping(true);
+                          if (userId && seedlingId) {
+                            dispatch(setSeedling({
+                              seedlingId: seedlingId,
+                              seedlingName: newName,
+                              currentPoint: currentPoint || seedlingPoints || 0,
+                              userId: userId
+                            }));
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && isUserTyping) {
+                            const finalName = plantTitle.trim() || '새싹 키우기';
+                            setPlantTitle(finalName);
+                            if (originalTitle !== finalName) {
+                              handleSeedlingNameChange(finalName);
+                            }
+                            setIsEditingTitle(false);
+                          }
+                        }}
+                        placeholder="새싹 이름"
+                        className="px-2 py-1 rounded-md text-sm text-gray-800 flex-1 border border-gray-200"
+                        ref={titleInputRef}
+                      />
+                      <button
+                        onMouseDown={(e) => { e.preventDefault(); }}
+                        onClick={() => {
                           const finalName = plantTitle.trim() || '새싹 키우기';
                           setPlantTitle(finalName);
                           if (originalTitle !== finalName) {
                             handleSeedlingNameChange(finalName);
                           }
                           setIsEditingTitle(false);
-                        }
-                      }}
-                      placeholder="새싹 이름"
-                      className="px-2 py-1 rounded-md text-sm text-gray-800 flex-1"
-                      ref={titleInputRef}
-                    />
-                    <button
-                      onMouseDown={(e) => { e.preventDefault(); }}
-                      onClick={() => {
-                        const finalName = plantTitle.trim() || '새싹 키우기';
-                        setPlantTitle(finalName);
-                        if (originalTitle !== finalName) {
-                          handleSeedlingNameChange(finalName);
-                        }
-                        setIsEditingTitle(false);
-                      }}
-                      disabled={seedlingLoading}
-                      className="px-2 py-1 rounded-md bg-white text-[#1F0101] text-xs font-semibold hover:bg-gray-100"
-                    >
-                      저장
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <h3 className="text-base font-bold text-white">{seedlingName || plantTitle || '새싹 키우기'}</h3>
-                    <button
-                      onClick={startEditTitle}
-                      disabled={seedlingLoading}
-                      className="p-1 rounded-md bg-white/20 hover:bg-white/30 disabled:opacity-50"
-                    >
-                      <i className="fas fa-pen text-white text-xs"></i>
-                    </button>
-                  </>
-                )}
-              </div>
-              <div
-                className="relative"
-                onMouseEnter={() => setShowInfoModal(true)}
-                onMouseLeave={() => setShowInfoModal(false)}
-              >
-                <button
-                  className="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                        }}
+                        disabled={seedlingLoading}
+                        className="px-2 py-1 rounded-md bg-[#8B3A3A] text-white text-xs font-semibold hover:bg-[#5A1A1A]"
+                      >
+                        저장
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <h3 className="text-base font-bold text-gray-800">{seedlingName || plantTitle || '새싹 키우기'}</h3>
+                      <button
+                        onClick={startEditTitle}
+                        disabled={seedlingLoading}
+                        className="p-1 rounded-md bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+                      >
+                        <i className="fas fa-pen text-gray-600 text-xs"></i>
+                      </button>
+                    </>
+                  )}
+                </div>
+                <div
+                  className="relative"
+                  onMouseEnter={() => setShowInfoModal(true)}
+                  onMouseLeave={() => setShowInfoModal(false)}
                 >
-                  <i className="fas fa-question text-white text-xs"></i>
-                </button>
-                {showInfoModal && (
-                  <div className="absolute top-8 right-0 z-50 w-80">
-                    <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4">
-                      <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <i className="fas fa-info-circle text-blue-500 text-sm"></i>
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-800 mb-2">탈모 PT란?</h3>
-                          <p className="text-sm text-gray-600 mb-3">
-                            개인 맞춤형 탈모 예방 및 개선을 위한 체계적인 관리 프로그램입니다.
-                            루틴, 영양, 청결 세 가지 영역의 습관을 통해 건강한 모발을 기를 수 있어요.
-                          </p>
-                          <div className="border-t border-gray-100 pt-3">
-                            <h4 className="font-medium text-gray-800 mb-2">포인트 사용처</h4>
-                            <p className="text-sm text-gray-600">
-                              새싹을 전부 키우면 상품을 드립니다!
+                  <button
+                    className="w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                  >
+                    <i className="fas fa-question text-gray-600 text-xs"></i>
+                  </button>
+                  {showInfoModal && (
+                    <div className="absolute top-8 right-0 z-50 w-80">
+                      <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i className="fas fa-info-circle text-blue-500 text-sm"></i>
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-800 mb-2">탈모 PT란?</h3>
+                            <p className="text-sm text-gray-600 mb-3">
+                              개인 맞춤형 탈모 예방 및 개선을 위한 체계적인 관리 프로그램입니다.
+                              루틴, 영양, 청결 세 가지 영역의 습관을 통해 건강한 모발을 기를 수 있어요.
                             </p>
+                            <div className="border-t border-gray-100 pt-3">
+                              <h4 className="font-medium text-gray-800 mb-2">포인트 사용처</h4>
+                              <p className="text-sm text-gray-600">
+                                새싹을 전부 키우면 상품을 드립니다!
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-            
-            <div className="text-center mb-4">
-              <div className="text-6xl mb-3 transition-transform duration-500 hover:scale-110">
-                {plantStages[seedlingLevel as keyof typeof plantStages].emoji}
+
+              <div className="text-center mb-4">
+                <div className="text-6xl mb-3 transition-transform duration-500 hover:scale-110">
+                  {plantStages[seedlingLevel as keyof typeof plantStages].emoji}
+                </div>
+                <div className="bg-gray-100 rounded-lg px-3 py-2">
+                  <p className="text-xs text-gray-700">{statusMessage}</p>
+                </div>
               </div>
-              <div className="bg-white/90 rounded-lg px-3 py-2">
-                <p className="text-xs text-gray-700">{statusMessage}</p>
+
+              <div className="flex items-center bg-gray-100 rounded-full p-2">
+                <span className="bg-[#8B3A3A] text-white px-2 py-1 rounded-full text-xs font-bold">
+                  Lv.{seedlingLevel}
+                </span>
+                <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${((currentPoint || seedlingPoints) % 50) * 2}%`,
+                      background: 'linear-gradient(90deg, rgba(139, 58, 58, 0.9) 0%, rgba(90, 26, 26, 0.9) 100%)'
+                    }}
+                  />
+                </div>
+                <span className="text-xs text-gray-700">{(currentPoint || seedlingPoints) % 50}/50</span>
               </div>
-            </div>
-            
-            <div className="flex items-center bg-white/20 rounded-full p-2">
-              <span className="bg-white text-[#1F0101] px-2 py-1 rounded-full text-xs font-bold">
-                Lv.{seedlingLevel}
-              </span>
-              <div className="flex-1 h-2 bg-white/30 rounded-full mx-2">
-                <div 
-                  className="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full transition-all"
-                  style={{ width: `${((currentPoint || seedlingPoints) % 50) * 2}%` }}
-                />
-              </div>
-              <span className="text-xs text-white">{(currentPoint || seedlingPoints) % 50}/50</span>
             </div>
           </div>
 
@@ -998,45 +1020,54 @@ const HairPT: React.FC = () => {
               {activeTab === 'routine' && (
                 <>
                   {/* 데이터 기반 미션 카드들 */}
-                  {getMissionsByCategory('routine').map(mission => renderMissionCard(mission))}
+                  {getMissionsByCategory('routine').map(mission => {
+                    // 백회혈 마사지는 특별한 기능(비디오 모달)이 있으므로 별도 처리
+                    if (mission.name === '백회혈/사신총혈 마사지') {
+                      const isCompleted = mission.completed !== undefined ? mission.completed : missionState[mission.key];
+                      const missionIcon = getMissionIcon(mission.name);
+                      const isToday = selectedDate.toDateString() === new Date().toDateString();
+                      
+                      return (
+                        <div key={mission.id} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center space-x-4">
+                              <div className={`w-14 h-14 flex items-center justify-center ${missionIcon.bgColor} rounded-lg`}>
+                                <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="text-sm font-semibold">{mission.name}</h3>
+                                <p className="text-sm text-gray-500">{mission.description}</p>
+                                <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
+                                  +{mission.rewardPoints} 포인트
+                                </span>
+                              </div>
+                            </div>
+                            {isCompleted ? (
+                              <span className="px-3 py-1.5 rounded-lg font-bold bg-green-500 text-white whitespace-nowrap text-sm">완료됨</span>
+                            ) : isToday ? (
+                              <button 
+                                className="px-3 py-1.5 rounded-lg font-bold bg-[#1F0101] hover:bg-[#2A0202] text-white active:scale-[0.98] whitespace-nowrap text-sm"
+                                onClick={() => {
+                                  if (!isCompleted) {
+                                    setPendingMassageMission(mission);
+                                    setShowVideoModal(true);
+                                  }
+                                }}
+                              >
+                                영상 보기
+                              </button>
+                            ) : (
+                              <span className="px-3 py-1.5 rounded-lg font-bold bg-gray-300 text-gray-500 whitespace-nowrap text-sm">미완료</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    // 일반 미션들은 renderMissionCard 함수 사용
+                    return renderMissionCard(mission);
+                  })}
 
-                  {/* 두피 사진 촬영 (특별 기능) */}
-                  <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-all">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-14 h-14 flex items-center justify-center bg-purple-100 rounded-lg">
-                          <i className="fas fa-camera text-purple-500 text-lg"></i>
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-sm font-semibold">두피 사진 촬영</h3>
-                          <p className="text-sm text-gray-500">두피 상태 기록하기</p>
-                        </div>
-                      </div>
-                      {scalpPhotoCompleted && selectedDate.toDateString() === new Date().toDateString() && (
-                        <span className="px-3 py-1.5 rounded-lg font-bold bg-green-500 text-white whitespace-nowrap text-sm">완료됨</span>
-                      )}
-                    </div>
-                    <div className="flex justify-end">
-                      {selectedDate.toDateString() === new Date().toDateString() ? (
-                        !scalpPhotoCompleted && (
-                          <ScalpPhotoCapture
-                            buttonText="사진 촬영하기"
-                            confirmButtonText="AI 분석하기"
-                            enableAnalysis={true}
-                            onAnalysisComplete={handleAnalysisComplete}
-                            className="px-4 py-2 rounded-xl font-bold transition-colors bg-gray-200 hover:bg-gray-300 text-[#1F0101] active:scale-[0.98]"
-                          />
-                        )
-                      ) : (
-                        <button
-                          className="px-4 py-2 rounded-xl font-bold bg-gray-100 text-gray-400 cursor-not-allowed"
-                          disabled
-                        >
-                          오늘만 촬영 가능
-                        </button>
-                      )}
-                    </div>
-                  </div>
                 </>
               )}
 
@@ -1051,54 +1082,7 @@ const HairPT: React.FC = () => {
               {activeTab === 'clean' && (
                 <>
                   {/* 데이터 기반 미션 카드들 */}
-                  {getMissionsByCategory('cleanliness').map(mission => {
-                    // 백회혈 마사지는 특별한 기능(비디오 모달)이 있으므로 별도 처리
-                    if (mission.name === '백회혈/사신총혈 마사지') {
-                      const isCompleted = missionState[mission.key];
-                      const missionIcon = getMissionIcon(mission.name);
-                      const isToday = selectedDate.toDateString() === new Date().toDateString();
-                      
-                      return (
-                        <div key={mission.id} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
-                          <div className="flex items-center space-x-4 mb-4">
-                            <div className={`w-14 h-14 flex items-center justify-center ${missionIcon.bgColor} rounded-lg`}>
-                              <i className={`${missionIcon.icon} ${missionIcon.textColor} text-lg`}></i>
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="text-sm font-semibold">{mission.name}</h3>
-                              <p className="text-sm text-gray-500">{mission.description}</p>
-                              <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
-                                +{mission.rewardPoints} 포인트
-                              </span>
-                            </div>
-                          </div>
-                          {/* 우측 상단 동일 위치 컨트롤 */}
-                          <div className="flex justify-end">
-                            {isCompleted ? (
-                              <span className="px-3 py-1.5 rounded-lg font-bold bg-green-500 text-white whitespace-nowrap text-sm">완료됨</span>
-                            ) : isToday ? (
-                              <button 
-                                className="px-3 py-1.5 rounded-lg font-bold bg-[#1F0101] hover:bg-[#2A0202] text-white active:scale-[0.98] whitespace-nowrap text-sm"
-                                onClick={() => {
-                                  if (!isCompleted) {
-                                    setShowVideoModal(true);
-                                    toggleMission(mission.key);
-                                  }
-                                }}
-                              >
-                                미션 완료
-                              </button>
-                            ) : (
-                              <span className="px-3 py-1.5 rounded-lg font-bold bg-gray-300 text-gray-500 whitespace-nowrap text-sm">미완료</span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    }
-                    
-                    // 일반 미션들은 renderMissionCard 함수 사용
-                    return renderMissionCard(mission);
-                  })}
+                  {getMissionsByCategory('cleanliness').map(mission => renderMissionCard(mission))}
                 </>
               )}
               </>
@@ -1114,12 +1098,15 @@ const HairPT: React.FC = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl p-6 max-w-2xl w-full relative">
               <button
-                onClick={() => setShowVideoModal(false)}
+                onClick={() => {
+                  setShowVideoModal(false);
+                  setPendingMassageMission(null);
+                }}
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold"
               >
                 ×
               </button>
-              <h3 className="text-lg font-semibold mb-4 text-center">백회혈 마사지 방법</h3>
+              <h3 className="text-lg font-semibold mb-4 text-center">백회혈/사신총혈 마사지 방법</h3>
               <div className="aspect-video w-full">
                 <iframe
                   width="100%"
@@ -1136,6 +1123,29 @@ const HairPT: React.FC = () => {
               <p className="text-sm text-gray-600 mt-4 text-center">
                 영상을 보고 마사지를 따라해보세요!
               </p>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowVideoModal(false);
+                    setPendingMassageMission(null);
+                  }}
+                  className="flex-1 px-4 py-3 rounded-xl font-bold bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors"
+                >
+                  닫기
+                </button>
+                <button
+                  onClick={async () => {
+                    if (pendingMassageMission) {
+                      await toggleMission(pendingMassageMission.key);
+                      setShowVideoModal(false);
+                      setPendingMassageMission(null);
+                    }
+                  }}
+                  className="flex-1 px-4 py-3 rounded-xl font-bold bg-[#1F0101] hover:bg-[#2A0202] text-white transition-colors"
+                >
+                  미션 완료
+                </button>
+              </div>
             </div>
           </div>
         )}

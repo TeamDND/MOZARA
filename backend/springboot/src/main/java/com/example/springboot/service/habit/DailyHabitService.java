@@ -8,17 +8,13 @@ import com.example.springboot.data.entity.DailyHabitEntity;
 import com.example.springboot.data.entity.UserEntity;
 import com.example.springboot.data.entity.UserHabitLogEntity;
 import com.example.springboot.service.user.SeedlingService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,48 +24,9 @@ public class DailyHabitService {
 
     private static final Logger log = LoggerFactory.getLogger(DailyHabitService.class);
 
-    private LocalDate lastUpdateDate = null;
-
     private final DailyHabitRepository dailyHabitRepository;
     private final UserHabitLogRepository userHabitLogRepository;
     private final SeedlingService seedlingService;
-
-    /**
-     * 서버 완전 시작 후 오늘의 미션 확인 및 업데이트 (폴백)
-     * @PostConstruct 대신 ApplicationReadyEvent 사용 (트랜잭션 프록시 완전 초기화 후 실행)
-     */
-    @EventListener(ApplicationReadyEvent.class)
-    public void initializeTodayMissions() {
-        log.info("=== 서버 시작 완료: 오늘의 미션 상태 확인 ===");
-
-        LocalDate today = LocalDate.now();
-
-        // 이미 오늘 업데이트했으면 스킵
-        if (today.equals(lastUpdateDate)) {
-            log.info("오늘의 미션이 이미 업데이트됨: {}", today);
-            return;
-        }
-
-        // 현재 is_today_mission = true인 미션 개수 확인
-        List<DailyHabitEntity> currentMissions = dailyHabitRepository.findByIsTodayMission(true);
-
-        if (currentMissions.isEmpty()) {
-            log.warn("오늘의 미션이 설정되지 않음. 자동 업데이트 시작...");
-            // 트랜잭션 메서드 호출
-            executeUpdateTodayMissions();
-        } else {
-            log.info("오늘의 미션 {}개 설정되어 있음", currentMissions.size());
-            lastUpdateDate = today;
-        }
-    }
-
-    /**
-     * 트랜잭션 래퍼 메서드
-     */
-    @Transactional
-    public void executeUpdateTodayMissions() {
-        updateTodayMissionsInternal();
-    }
 
     /**
      * 모든 일일 습관 조회
@@ -111,11 +68,16 @@ public class DailyHabitService {
             throw new RuntimeException("이미 오늘 완료한 습관입니다.");
         }
         
+        // 목표치 결정 (물=7, HairFit=4, 일반=1)
+        Integer targetCount = getTargetCount(habit.getHabitName());
+        
         // 로그 저장
         UserHabitLogEntity logEntity = UserHabitLogEntity.builder()
                 .userEntityIdForeign(user)
                 .habitIdForeign(habit)
                 .completionDate(today)
+                .progressCount(targetCount)  // 완료 시 목표치만큼 저장
+                .targetCount(targetCount)
                 .build();
         
         UserHabitLogEntity savedLog = userHabitLogRepository.save(logEntity);
@@ -134,6 +96,133 @@ public class DailyHabitService {
                 .habitId(habitId)
                 .userId(userId)
                 .completionDate(today)
+                .progressCount(savedLog.getProgressCount())
+                .targetCount(savedLog.getTargetCount())
+                .build();
+    }
+
+    /**
+     * 습관별 목표치 반환
+     */
+    private Integer getTargetCount(String habitName) {
+        if ("물 마시기".equals(habitName)) {
+            return 7;
+        } else if ("HairFit 방문하기".equals(habitName)) {
+            return 4;
+        } else {
+            return 1;  // 일반 미션
+        }
+    }
+
+    /**
+     * 진행 상태 업데이트 (완료 전 중간 진행 저장)
+     */
+    @Transactional
+    public UserHabitLogDTO updateHabitProgress(Integer userId, Integer habitId, Integer progressCount) {
+        UserEntity user = new UserEntity();
+        user.setId(userId);
+        
+        DailyHabitEntity habit = dailyHabitRepository.findById(habitId)
+                .orElseThrow(() -> new RuntimeException("습관을 찾을 수 없습니다."));
+        
+        LocalDate today = LocalDate.now();
+        Integer targetCount = getTargetCount(habit.getHabitName());
+        
+        // 오늘 날짜의 로그가 있는지 확인
+        List<UserHabitLogEntity> existingLogs = userHabitLogRepository.findByUserEntityIdForeignAndCompletionDate(user, today);
+        UserHabitLogEntity logEntity = existingLogs.stream()
+                .filter(log -> log.getHabitIdForeign().getHabitId().equals(habitId))
+                .findFirst()
+                .orElse(null);
+        
+        // 이전 진행 수를 저장 (포인트 중복 지급 방지)
+        Integer oldProgressCount = 0;
+        boolean shouldAddPoints = false;
+        
+        if (logEntity == null) {
+            // 로그가 없으면 새로 생성
+            logEntity = UserHabitLogEntity.builder()
+                    .userEntityIdForeign(user)
+                    .habitIdForeign(habit)
+                    .completionDate(today)
+                    .progressCount(progressCount)
+                    .targetCount(targetCount)
+                    .build();
+            
+            // 첫 생성 시 바로 목표 달성했으면 포인트 추가
+            if (progressCount >= targetCount) {
+                shouldAddPoints = true;
+            }
+        } else {
+            // 기존 로그 업데이트 - 이전 값 저장
+            oldProgressCount = logEntity.getProgressCount() != null ? logEntity.getProgressCount() : 0;
+            logEntity.setProgressCount(progressCount);
+            
+            // 목표 달성 시 포인트 추가 (한 번만)
+            // 이전에는 목표치 미달이었는데 이번에 달성한 경우만
+            if (progressCount >= targetCount && oldProgressCount < targetCount) {
+                shouldAddPoints = true;
+            }
+        }
+        
+        UserHabitLogEntity savedLog = userHabitLogRepository.save(logEntity);
+        
+        // 포인트 추가 (save 후에 실행)
+        if (shouldAddPoints) {
+            try {
+                seedlingService.updateSeedlingPoint(userId, habit.getRewardPoints());
+                log.info("습관 목표 달성 - 포인트 추가: userId={}, habitId={}, points={}", 
+                        userId, habitId, habit.getRewardPoints());
+            } catch (Exception ex) {
+                log.error("새싹 포인트 업데이트 실패 - userId: {}, points: {}", userId, habit.getRewardPoints(), ex);
+            }
+        }
+        
+        return UserHabitLogDTO.builder()
+                .logId(savedLog.getLogId())
+                .habitId(habitId)
+                .userId(userId)
+                .completionDate(today)
+                .progressCount(savedLog.getProgressCount())
+                .targetCount(savedLog.getTargetCount())
+                .build();
+    }
+
+    /**
+     * 오늘의 진행 상태 조회
+     */
+    public UserHabitLogDTO getTodayProgress(Integer userId, Integer habitId) {
+        return getProgressByDate(userId, habitId, LocalDate.now());
+    }
+
+    /**
+     * 특정 날짜의 진행 상태 조회
+     */
+    public UserHabitLogDTO getProgressByDate(Integer userId, Integer habitId, LocalDate date) {
+        UserEntity user = new UserEntity();
+        user.setId(userId);
+        
+        DailyHabitEntity habit = dailyHabitRepository.findById(habitId)
+                .orElseThrow(() -> new RuntimeException("습관을 찾을 수 없습니다."));
+        
+        List<UserHabitLogEntity> logs = userHabitLogRepository.findByUserEntityIdForeignAndCompletionDate(user, date);
+        
+        UserHabitLogEntity logEntity = logs.stream()
+                .filter(log -> log.getHabitIdForeign().getHabitId().equals(habitId))
+                .findFirst()
+                .orElse(null);
+        
+        if (logEntity == null) {
+            return null;
+        }
+        
+        return UserHabitLogDTO.builder()
+                .logId(logEntity.getLogId())
+                .habitId(habitId)
+                .userId(userId)
+                .completionDate(date)
+                .progressCount(logEntity.getProgressCount())
+                .targetCount(logEntity.getTargetCount())
                 .build();
     }
 
@@ -165,105 +254,6 @@ public class DailyHabitService {
         return completedLogs.stream()
                 .map(log -> convertToDTO(log.getHabitIdForeign()))
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * 오늘의 미션 조회 (is_today_mission = true인 습관들)
-     */
-    public List<DailyHabitDTO> getTodayMissions() {
-        List<DailyHabitEntity> todayMissions = dailyHabitRepository.findByIsTodayMission(true);
-        return todayMissions.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 사용자별 오늘의 미션 완료 상태 조회
-     */
-    public List<DailyHabitDTO> getTodayMissionsWithStatus(Integer userId) {
-        List<DailyHabitEntity> todayMissions = dailyHabitRepository.findByIsTodayMission(true);
-
-        // 오늘 완료한 습관 조회
-        UserEntity user = new UserEntity();
-        user.setId(userId);
-        LocalDate today = LocalDate.now();
-        List<UserHabitLogEntity> completedLogs = userHabitLogRepository.findByUserEntityIdForeignAndCompletionDate(user, today);
-
-        // 완료된 habitId 목록
-        List<Integer> completedHabitIds = completedLogs.stream()
-                .map(log -> log.getHabitIdForeign().getHabitId())
-                .collect(Collectors.toList());
-
-        // DTO로 변환하면서 완료 상태는 프론트에서 판단하도록 habitId만 제공
-        return todayMissions.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 매일 자정 실행: 오늘의 미션 랜덤 선택 (habit_id=17, 18 제외)
-     * 크론 표현식: 0 0 0 * * ? = 매일 00시 00분 00초
-     * 타임존: Asia/Seoul (한국 시간 기준)
-     */
-    /**
-     * 일일 미션 업데이트 스케줄러 (자정 & 정오)
-     */
-    @Scheduled(cron = "0 0 0 * * ?", zone = "Asia/Seoul")
-    @Scheduled(cron = "0 0 12 * * ?", zone = "Asia/Seoul")
-    @Transactional
-    public void scheduledUpdateTodayMissions() {
-        log.info("=== [스케줄러] 일일 미션 업데이트 시작: {} ===", LocalDateTime.now());
-        updateTodayMissionsInternal();
-    }
-
-    /**
-     * 월별 스트릭 미션 초기화 스케줄러 (매월 1일 00:00)
-     */
-    @Scheduled(cron = "0 0 0 1 * ?", zone = "Asia/Seoul")
-    @Transactional
-    public void scheduledResetMonthlyStreak() {
-        log.info("=== [스케줄러] 월별 스트릭 미션 초기화 시작: {} ===", LocalDateTime.now());
-        try {
-            dailyHabitRepository.resetMonthlyStreakMission();
-            log.info("habit_id=18 (10일 연속 출석) 초기화 완료");
-        } catch (Exception e) {
-            log.error("월별 스트릭 미션 초기화 실패", e);
-        }
-    }
-
-    /**
-     * 오늘의 미션 업데이트 내부 로직 (스케줄러 & 폴백에서 공통 사용)
-     * 주의: 이 메서드를 호출하는 쪽에서 @Transactional을 선언해야 함
-     */
-    private void updateTodayMissionsInternal() {
-        try {
-            // 1. 모든 습관의 is_today_mission을 FALSE로 초기화
-            dailyHabitRepository.resetAllTodayMissions();
-            log.info("모든 습관의 is_today_mission을 FALSE로 초기화 완료");
-
-            // 2. habit_id=17, 18(보너스 미션들)을 제외한 습관 중 랜덤으로 4개 선택
-            List<DailyHabitEntity> randomHabits = dailyHabitRepository.findRandomHabitsExcludingBonus(4);
-
-            if (randomHabits.size() < 4) {
-                log.warn("선택 가능한 습관이 4개 미만입니다. 현재: {}개", randomHabits.size());
-            }
-
-            // 3. 선택된 습관들을 is_today_mission = TRUE로 설정
-            for (DailyHabitEntity habit : randomHabits) {
-                habit.setIsTodayMission(true);
-                log.info("오늘의 미션 선택: {} (ID: {})", habit.getHabitName(), habit.getHabitId());
-            }
-
-            dailyHabitRepository.saveAll(randomHabits);
-
-            // 업데이트 날짜 기록
-            lastUpdateDate = LocalDate.now();
-
-            log.info("=== 오늘의 미션 업데이트 완료: {}개 선택됨 ===", randomHabits.size());
-
-        } catch (Exception ex) {
-            log.error("오늘의 미션 업데이트 실패: {}", ex.getMessage(), ex);
-        }
     }
 
     /**

@@ -146,7 +146,8 @@ public class RagV2CheckService {
                 }
             }
             if (familyHistory != null) {
-                userInfo.setFamilyHistory("yes".equalsIgnoreCase(familyHistory));
+                // familyHistory는 이제 String 타입 ('none', 'father', 'mother', 'both')
+                userInfo.setFamilyHistory(familyHistory);
             }
             if (recentHairLoss != null) {
                 userInfo.setIsLoss("yes".equalsIgnoreCase(recentHairLoss));
@@ -195,7 +196,8 @@ public class RagV2CheckService {
             String analysisSummary = title + "\n" + description;
             String advice = (String) ragV2Result.getOrDefault("advice", "");
             Integer gradeValue = (Integer) ragV2Result.get("grade");
-            String analysisType = (String) ragV2Result.getOrDefault("analysis_type", "rag_v2_analysis");
+            // analysis_type을 "hair_loss_female"로 고정
+            String analysisType = "hair_loss_female";
 
             log.info("저장 데이터 - grade: {}, analysisType: {}", gradeValue, analysisType);
 

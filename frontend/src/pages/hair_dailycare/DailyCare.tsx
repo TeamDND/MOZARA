@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../utils/store';
 import { fetchSeedlingInfo, updateSeedlingNickname, setSeedling } from '../../utils/seedlingSlice';
-import { incrementCounter, decrementCounter } from '../../utils/missionCounterSlice';
 import { hairProductApi, HairProduct } from '../../services/hairProductApi';
+import { elevenStApi } from '../../services/elevenStApi';
 import apiClient from '../../services/apiClient';
 import pythonClient from '../../services/pythonClient';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
@@ -71,12 +71,6 @@ const DailyCare: React.FC = () => {
   const { createdAt, username, userId } = useSelector((state: RootState) => state.user);
   const { seedlingId, seedlingName, currentPoint, loading: seedlingLoading, error: seedlingError } = useSelector((state: RootState) => state.seedling);
 
-  // Redux에서 카운터 가져오기 (물 마시기, 이펙터 사용)
-  const missionCounters = useSelector((state: RootState) => state.missionCounter.counters);
-
-  // 오늘의 미션 4개 (API에서 가져올 예정)
-  const [todayMissions, setTodayMissions] = useState<any[]>([]);
-  const [completedMissions, setCompletedMissions] = useState<number[]>([]);
 
   // 케어 스트릭 상태 (통합)
   const [streakInfo, setStreakInfo] = useState({
@@ -89,13 +83,30 @@ const DailyCare: React.FC = () => {
   const [showStreakInfoModal, setShowStreakInfoModal] = useState(false);
 
   // 환경 정보 상태 (날씨 API)
-  const [environmentInfo, setEnvironmentInfo] = useState({
+  const [environmentInfo, setEnvironmentInfo] = useState<{
+    uvIndex: number;
+    uvLevel: string;
+    humidity: number;
+    humidityAdvice: string;
+    airQuality: number;
+    airQualityLevel: string;
+    recommendations: {
+      uv: { type: string; message: string; icon: string } | null;
+      humidity: { type: string; message: string; icon: string } | null;
+      air: { type: string; message: string; icon: string } | null;
+    };
+  }>({
     uvIndex: 0,
     uvLevel: '정보 없음',
     humidity: 0,
     humidityAdvice: '정보 없음',
     airQuality: 0,
-    airQualityLevel: '정보 없음'
+    airQualityLevel: '정보 없음',
+    recommendations: {
+      uv: null,
+      humidity: null,
+      air: null
+    }
   });
 
   // 두피 분석 관련 상태
@@ -104,6 +115,9 @@ const DailyCare: React.FC = () => {
   const [analysis, setAnalysis] = useState<HairAnalysisResponse | null>(null);
   const [products, setProducts] = useState<HairProduct[] | null>(null);
   const [tips, setTips] = useState<string[]>([]);
+
+  // 11번가 추천 제품 상태
+  const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
 
   // 오늘의 분석 결과 (DB에서 로드된 데이터)
   const [todayAnalysisData, setTodayAnalysisData] = useState<{
@@ -163,6 +177,15 @@ const DailyCare: React.FC = () => {
   const [comparisonData, setComparisonData] = useState<any>(null);
   const [isComparingImages, setIsComparingImages] = useState(false);
   const [comparisonError, setComparisonError] = useState<string | null>(null);
+  const [comparisonPeriod, setComparisonPeriod] = useState<'latest' | '3months' | '6months'>('latest');
+
+  // 밀도 변화 시각화 상태
+  const [showDensityVisualization, setShowDensityVisualization] = useState(false);
+  const [densityVisualizedImages, setDensityVisualizedImages] = useState<{
+    previous: string | null;
+    current: string | null;
+  }>({ previous: null, current: null });
+  const [isLoadingVisualization, setIsLoadingVisualization] = useState(false);
 
   // 재분석 상태
   const [isReanalyzing, setIsReanalyzing] = useState(false);
@@ -192,15 +215,11 @@ const DailyCare: React.FC = () => {
   // 새싹 정보 로드
   const loadSeedlingInfo = useCallback(async () => {
     if (!userId) {
-      console.log('사용자 ID가 없습니다.');
       return;
     }
 
     try {
-      console.log('새싹 정보 로드 시도:', userId);
-      
       const result = await dispatch(fetchSeedlingInfo(userId)).unwrap();
-      console.log('Redux 새싹 정보:', result);
       
       if (result) {
         // 새싹 포인트 설정
@@ -227,12 +246,75 @@ const DailyCare: React.FC = () => {
     }
   }, [dispatch, userId]);
 
-  // 최근 2개 Daily 이미지 불러오기
+  // 기간별 Daily 이미지 불러오기
+  const loadDailyImagesByPeriod = useCallback(async (period: 'latest' | '3months' | '6months') => {
+    if (!userId) return;
+
+    try {
+
+      // 모든 Daily 데이터 가져오기
+      const allDailyResponse = await apiClient.get(`/analysis-results/${userId}/type/daily`);
+
+      if (allDailyResponse.data && allDailyResponse.data.length > 0) {
+        // 날짜 내림차순 정렬 (최신순)
+        const sortedData = allDailyResponse.data.sort((a: any, b: any) =>
+          new Date(b.inspectionDate).getTime() - new Date(a.inspectionDate).getTime()
+        );
+
+        const currentData = sortedData[0];
+        const currentDate = new Date(currentData.inspectionDate);
+
+        let previousData = null;
+
+        if (period === 'latest') {
+          // 최신 2건
+          previousData = sortedData[1] || null;
+        } else if (period === '3months') {
+          // 3개월 이내에서 가장 오래된 데이터
+          const threeMonthsAgo = new Date(currentDate);
+          threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+          const filtered = sortedData
+            .filter((item: any) => {
+              const itemDate = new Date(item.inspectionDate);
+              return itemDate >= threeMonthsAgo && item.id !== currentData.id;
+            });
+
+          // 필터링된 배열의 마지막 요소 (최신순 정렬이므로 마지막이 가장 오래된 것)
+          previousData = filtered.length > 0 ? filtered[filtered.length - 1] : null;
+        } else if (period === '6months') {
+          // 6개월 이내에서 가장 오래된 데이터
+          const sixMonthsAgo = new Date(currentDate);
+          sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+          const filtered = sortedData
+            .filter((item: any) => {
+              const itemDate = new Date(item.inspectionDate);
+              return itemDate >= sixMonthsAgo && item.id !== currentData.id;
+            });
+
+          // 필터링된 배열의 마지막 요소 (최신순 정렬이므로 마지막이 가장 오래된 것)
+          previousData = filtered.length > 0 ? filtered[filtered.length - 1] : null;
+        }
+
+        setLatestDailyImages({
+          current: currentData?.imageUrl || null,
+          previous: previousData?.imageUrl || null
+        });
+      } else {
+        setLatestDailyImages({ current: null, previous: null });
+      }
+    } catch (err) {
+      console.error('❌ Daily 이미지 로드 실패:', err);
+      setLatestDailyImages({ current: null, previous: null });
+    }
+  }, [userId]);
+
+  // 최근 2개 Daily 이미지 불러오기 (기존 방식 - 빠른 로드)
   const loadLatestDailyImages = useCallback(async () => {
     if (!userId) return;
 
     try {
-      console.log('🔄 최근 Daily 이미지 불러오는 중...');
       const response = await apiClient.get(`/timeseries/data/${userId}`);
 
       if (response.data.success && response.data.data) {
@@ -243,9 +325,6 @@ const DailyCare: React.FC = () => {
             current: dailyData[0]?.imageUrl || null,
             previous: dailyData[1]?.imageUrl || null
           });
-          console.log('✅ Daily 이미지 로드 완료:', dailyData.length, '개');
-          console.log('📸 현재:', dailyData[0]?.imageUrl);
-          console.log('📸 이전:', dailyData[1]?.imageUrl);
         }
       }
     } catch (err) {
@@ -258,12 +337,10 @@ const DailyCare: React.FC = () => {
     if (!userId) return;
 
     try {
-      console.log('🔄 주간 분석 데이터 불러오는 중...');
       const response = await apiClient.get(`/weekly-daily-analysis/${userId}`);
 
       if (response.data && response.data.weeklyData) {
         const data = response.data.weeklyData;
-        console.log('✅ 주간 분석 데이터:', data);
 
         // 요일별 데이터 업데이트
         const updatedWeeklyData = [
@@ -290,8 +367,6 @@ const DailyCare: React.FC = () => {
 
         setWeeklyCount(count);
         setWeeklyAverage(average);
-
-        console.log('📊 주간 통계 - 평균:', average, ', 횟수:', count);
       }
     } catch (err) {
       console.error('❌ 주간 분석 데이터 로드 실패:', err);
@@ -310,10 +385,7 @@ const DailyCare: React.FC = () => {
     setComparisonData(null);
 
     try {
-      console.log('🔄 Daily 시계열 비교 시작...');
-      const response = await apiClient.get(`/timeseries/daily-comparison/${userId}`);
-
-      console.log('📥 비교 결과:', response.data);
+      const response = await apiClient.get(`/timeseries/daily-comparison/${userId}?period=${comparisonPeriod}`);
 
       if (!response.data.success) {
         setComparisonError(response.data.message || '비교 데이터가 부족합니다.');
@@ -327,6 +399,53 @@ const DailyCare: React.FC = () => {
       setComparisonError(err.response?.data?.message || '비교 중 오류가 발생했습니다.');
     } finally {
       setIsComparingImages(false);
+    }
+  };
+
+  // comparisonData가 변경되면 밀도 시각화 리셋
+  useEffect(() => {
+    setDensityVisualizedImages({ previous: null, current: null });
+    setShowDensityVisualization(false);
+  }, [comparisonData]);
+
+  // 밀도 변화 시각화 토글
+  const toggleDensityVisualization = async () => {
+    if (!comparisonData) return;
+
+    // 이미 시각화된 이미지가 있으면 토글만
+    if (densityVisualizedImages.previous) {
+      setShowDensityVisualization(!showDensityVisualization);
+      return;
+    }
+
+    // 처음 시각화를 요청하는 경우
+    setIsLoadingVisualization(true);
+    try {
+
+      // 이전 이미지에만 밀도 변화 시각화 (이전 → 오늘 비교해서 변화된 영역 표시)
+      const previousResponse = await apiClient.post(
+        '/timeseries/visualize-change',
+        {
+          current_image_url: comparisonData.previous_image_url,
+          past_image_urls: [comparisonData.current_image_url]
+        },
+        { responseType: 'blob' }
+      );
+
+      // Blob을 URL로 변환
+      const previousBlobUrl = URL.createObjectURL(previousResponse.data);
+
+      setDensityVisualizedImages({
+        previous: previousBlobUrl,
+        current: null
+      });
+
+      setShowDensityVisualization(true);
+    } catch (err: any) {
+      console.error('❌ 밀도 변화 시각화 실패:', err);
+      alert('밀도 변화 시각화에 실패했습니다.');
+    } finally {
+      setIsLoadingVisualization(false);
     }
   };
 
@@ -345,14 +464,6 @@ const DailyCare: React.FC = () => {
     // 백엔드에서 계산된 분석 결과 사용 (비듬/탈모는 이미 백엔드에서 제외됨)
     if (!res.analysis) return null;
     
-    console.log('[DEBUG] ===== 백엔드 응답 분석 시작 =====');
-    console.log('[DEBUG] 백엔드 응답 전체:', res);
-    console.log('[DEBUG] res.analysis:', res.analysis);
-    console.log('[DEBUG] res.analysis에 있는 모든 키:', Object.keys(res.analysis || {}));
-    console.log('[DEBUG] res.analysis.scalp_score:', res.analysis?.scalp_score);
-    console.log('[DEBUG] res.analysis.scalp_score 타입:', typeof res.analysis?.scalp_score);
-    console.log('[DEBUG] ===========================');
-    
     // 백엔드에서 비듬/탈모를 이미 제외하고 분석했으므로 그대로 사용
     return updateDashboardWithFilteredData(res.analysis);
   };
@@ -370,8 +481,6 @@ const DailyCare: React.FC = () => {
     // 백엔드에서 계산된 점수 사용미세각질 양호, 피지과다 경고, 모낭사이홍반 주의, 모낭홍반농포 양호
     const finalScore = analysis.scalp_score || 100;
     setScalpScore(finalScore);
-
-    console.log('백엔드에서 받은 두피 점수:', finalScore);
 
     // 심각도에 따른 단계 계산 (UI 표시용)
     const severityLevel = parseInt(primarySeverity.split('.')[0]) || 0;
@@ -493,11 +602,9 @@ const DailyCare: React.FC = () => {
     }
 
     try {
-      console.log('Daily 분석결과 조회 시도:', userId);
       const response = await apiClient.get(`/today-analysis/${userId}/daily`);
 
       if (response.data) {
-        console.log('Daily 분석결과 발견:', response.data);
         
         // AnalysisResultDTO 형식으로 받은 데이터 처리
         const dto = response.data;
@@ -560,7 +667,7 @@ const DailyCare: React.FC = () => {
         setProducts(prodRes.products.slice(0, 6));
       }
     } catch (error: any) {
-      console.log('Daily 분석결과 없음 또는 에러:', error.response?.data?.error || error.message);
+      // Daily 분석결과 없음
     }
   }, [userId, hairProductApi]);
 
@@ -569,9 +676,25 @@ const DailyCare: React.FC = () => {
     if (!userId) return;
 
     try {
-      // 탈모분석 최근 3건
-      const hairlossResponse = await apiClient.get(`/analysis-results/${userId}/type/hairloss?sort=newest`);
-      const hairlossTop3 = hairlossResponse.data.slice(0, 3).map((result: any) => ({
+      // 탈모분석 최근 3건 (hair_loss_male, hair_loss_female, hairloss 모두 조회)
+      const [maleResponse, femaleResponse, hairlossResponse] = await Promise.all([
+        apiClient.get(`/analysis-results/${userId}/type/hair_loss_male?sort=newest`).catch(() => ({ data: [] })),
+        apiClient.get(`/analysis-results/${userId}/type/hair_loss_female?sort=newest`).catch(() => ({ data: [] })),
+        apiClient.get(`/analysis-results/${userId}/type/hairloss?sort=newest`).catch(() => ({ data: [] }))
+      ]);
+
+      // 세 가지 타입의 결과를 모두 합치고 날짜순으로 정렬
+      const allHairlossResults = [
+        ...maleResponse.data,
+        ...femaleResponse.data,
+        ...hairlossResponse.data
+      ].sort((a: any, b: any) => {
+        const dateA = new Date(a.inspectionDate || 0).getTime();
+        const dateB = new Date(b.inspectionDate || 0).getTime();
+        return dateB - dateA; // 최신순 정렬
+      });
+
+      const hairlossTop3 = allHairlossResults.slice(0, 3).map((result: any) => ({
         id: result.id,
         inspectionDate: result.inspectionDate
           ? new Date(result.inspectionDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -610,7 +733,6 @@ const DailyCare: React.FC = () => {
     try {
       // 위치 정보 가져오기
       if (!navigator.geolocation) {
-        console.log('Geolocation is not supported');
         return;
       }
 
@@ -624,16 +746,22 @@ const DailyCare: React.FC = () => {
             const result = response.data;
 
             if (result.success && result.data) {
+
               setEnvironmentInfo({
-                uvIndex: result.data.uvIndex,
-                uvLevel: result.data.uvLevel,
-                humidity: result.data.humidity,
-                humidityAdvice: result.data.humidityAdvice,
-                airQuality: result.data.airQuality,
-                airQualityLevel: result.data.airQualityLevel
+                uvIndex: result.data.uvIndex || 0,
+                uvLevel: result.data.uvLevel || '정보 없음',
+                humidity: result.data.humidity || 0,
+                humidityAdvice: result.data.humidityAdvice || '정보 없음',
+                airQuality: result.data.airQuality || 0,
+                airQualityLevel: result.data.airQualityLevel || '정보 없음',
+                recommendations: result.data.recommendations || {
+                  uv: null,
+                  humidity: null,
+                  air: null
+                }
               });
             } else {
-              console.error('날씨 정보 로드 실패:', result.error);
+              console.error('[DailyCare] 날씨 정보 로드 실패:', result.error);
             }
           } catch (error) {
             console.error('날씨 API 호출 실패:', error);
@@ -648,29 +776,83 @@ const DailyCare: React.FC = () => {
     }
   }, []);
 
-  // 날씨 정보 기반 탈모 케어 조언 생성
+  // 날씨 정보 기반 탈모 케어 조언 생성 (백엔드 우선)
   const getHairCareAdvice = () => {
-    const { uvIndex, humidity, airQuality } = environmentInfo;
+    const { recommendations } = environmentInfo;
 
+    // 백엔드 recommendations 사용, 없으면 기본 메시지
     return {
-      uv: uvIndex >= 11 ? '외출 자제 권장' :
-          uvIndex >= 8 ? '모자 필수 착용' :
-          uvIndex >= 6 ? '두피 자외선 차단' :
-          uvIndex >= 3 ? '외출 시 주의' : '안전',
-
-      humidity: humidity === 0 ? '정보 없음' :
-                humidity < 30 ? '두피 보습 필수' :
-                humidity < 40 ? '보습 샴푸 권장' :
-                humidity > 70 ? '청결 관리 필요' :
-                humidity > 60 ? '유분 조절 필요' : '적정 상태',
-
-      air: airQuality === 0 ? '정보 없음' :
-           airQuality >= 5 ? '외출 자제' :
-           airQuality >= 4 ? '두피 세정 필수' :
-           airQuality >= 3 ? '외출 후 세정' :
-           airQuality >= 2 ? '약한 자극 주의' : '양호'
+      uv: (recommendations.uv && recommendations.uv.message) || '날씨 정보를 불러오는 중...',
+      humidity: (recommendations.humidity && recommendations.humidity.message) || '날씨 정보를 불러오는 중...',
+      air: (recommendations.air && recommendations.air.message) || '날씨 정보를 불러오는 중...'
     };
   };
+
+  // 날씨 기반 케어 팁 생성
+  const getWeatherBasedTips = (): string[] => {
+    const { humidity, uvIndex, airQuality } = environmentInfo;
+    const weatherTips: string[] = [];
+
+    // 습도 기반 팁
+    if (humidity <= 40) {
+      weatherTips.push('💧 건조한 날씨입니다. 두피 보습 토너를 사용하여 수분을 공급하세요.');
+      weatherTips.push('🚿 샴푸 후 미온수로 마무리하여 두피 건조를 방지하세요.');
+    } else if (humidity <= 70) {
+      weatherTips.push('🌤️ 적절한 습도입니다. 균형잡힌 두피 관리를 유지하세요.');
+      weatherTips.push('💆‍♀️ 두피 마사지로 혈액순환을 개선하면 좋습니다.');
+    } else {
+      weatherTips.push('💦 습한 날씨입니다. 피지 조절 샴푸로 두피를 깨끗이 관리하세요.');
+      weatherTips.push('🌬️ 두피가 습하지 않도록 드라이어로 완전히 건조시키세요.');
+    }
+
+    // 자외선 기반 팁
+    if (uvIndex >= 8) {
+      weatherTips.push('☀️ 자외선이 매우 강합니다. 외출 시 모자를 착용하여 두피를 보호하세요.');
+    } else if (uvIndex >= 5) {
+      weatherTips.push('🌞 자외선이 높습니다. 장시간 야외활동 시 두피 보호에 신경 쓰세요.');
+    } else if (uvIndex >= 3) {
+      weatherTips.push('🌤️ 적당한 자외선 수준입니다. 기본적인 두피 보호를 유지하세요.');
+    }
+
+    // 미세먼지 기반 팁
+    if (airQuality >= 76) {
+      weatherTips.push('😷 미세먼지가 나쁩니다. 외출 후에는 꼼꼼하게 두피를 클렌징하세요.');
+      weatherTips.push('🚪 실내 활동을 권장하며, 외출 시 모자로 두피를 보호하세요.');
+    } else if (airQuality >= 36) {
+      weatherTips.push('🌫️ 미세먼지가 보통입니다. 외출 후 샴푸로 두피의 먼지를 제거하세요.');
+    }
+
+    // 기본 팁 추가
+    weatherTips.push('🧴 하루 1회 저자극 샴푸로 두피를 깨끗하게 관리하세요.');
+    weatherTips.push('🌙 충분한 수면과 스트레스 관리로 두피 건강을 지켜주세요.');
+
+    return weatherTips.slice(0, 5); // 최대 5개 팁 반환
+  };
+
+  // 습도 기반 11번가 제품 로드
+  const loadHumidityBasedProducts = useCallback(async () => {
+    const humidity = environmentInfo.humidity;
+    let keyword = '';
+
+    if (humidity <= 40) {
+      keyword = '두피 수분 에센스';
+    } else if (humidity <= 70) {
+      keyword = '두피 밸런스 토너';
+    } else {
+      keyword = '피지 컨트롤 샴푸';
+    }
+
+    try {
+      const response = await elevenStApi.searchProducts(keyword, 1, 1);
+      
+      if (response.products.length > 0) {
+        setRecommendedProducts([response.products[0]]);
+      }
+    } catch (error) {
+      console.error('11번가 제품 검색 실패:', error);
+      setRecommendedProducts([]);
+    }
+  }, [environmentInfo.humidity]);
 
   // 연속 케어 일수 계산
   React.useEffect(() => {
@@ -711,109 +893,24 @@ const DailyCare: React.FC = () => {
   React.useEffect(() => {
     if (userId) {
       loadTodayDailyAnalysis();
-      loadTodayMissions(); // 오늘의 미션 로드
       loadDiagnosisHistory(); // 진단 히스토리 로드
+      loadStreakInfo(); // 케어 스트릭 로드
     }
   }, [userId, loadTodayDailyAnalysis, loadDiagnosisHistory]);
 
-  // 오늘의 미션 완료 처리
-  const handleMissionComplete = async (habitId: number) => {
-    if (!userId) return;
-
-    try {
-      // 오늘 첫 미션인지 체크 (보너스 미션 제외)
-      const regularMissionsCompleted = completedMissions.filter(id => id !== 17 && id !== 18);
-      const isFirstMissionToday = regularMissionsCompleted.length === 0;
-
-      // 백엔드에 완료 저장
-      await apiClient.post('/habit/complete', null, {
-        params: { userId, habitId }
-      });
-
-      // 완료 목록 업데이트
-      setCompletedMissions(prev => [...prev, habitId]);
-
-      // UserMetrics에 케어 미션 완료 저장
-      try {
-        const missionName = todayMissions.find(m => m.habitId === habitId)?.habitName || `미션 ${habitId}`;
-        await apiClient.post('/api/metrics/care-mission', {
-          missionType: missionName,
-          streakCount: streakInfo.days
-        });
-      } catch (error) {
-        console.log('케어 미션 메트릭 저장 실패 (무시됨):', error);
-      }
-
-      // 보너스 미션 알림
-      if (habitId === 17) {
-        alert('20포인트를 받았습니다! 🎉');
-      } else if (habitId === 18) {
-        alert('100포인트를 받았습니다! 🎉 10일 연속 출석 달성!');
-        setStreakInfo(prev => ({ ...prev, completed: true }));
-      }
-
-      // 일반 미션만 다시 로드
-      const response = await apiClient.get(`/habit/today-missions/${userId}`);
-      const { todayMissions: missions, completedHabits } = response.data;
-      setTodayMissions(missions);
-      setCompletedMissions(completedHabits.map((h: any) => h.habitId));
-
-      // 🔑 오늘 첫 미션이면 스트릭 갱신 (0→1)
-      if (isFirstMissionToday && habitId !== 17 && habitId !== 18) {
-        loadStreakInfo();
-      }
-    } catch (error) {
-      console.error('미션 완료 실패:', error);
+  // 습도 정보가 로드되면 제품 추천
+  React.useEffect(() => {
+    if (environmentInfo.humidity > 0) {
+      loadHumidityBasedProducts();
     }
-  };
+  }, [environmentInfo.humidity, loadHumidityBasedProducts]);
 
-  // 카운터 미션 증가 처리
-  const handleCounterIncrement = async (id: 'water' | 'effector', habitId: number) => {
-    if (!userId) return;
-
-    // 오늘 첫 미션인지 체크 (보너스 미션 제외)
-    const regularMissionsCompleted = completedMissions.filter(cid => cid !== 17 && cid !== 18);
-    const isFirstMissionToday = regularMissionsCompleted.length === 0;
-
-    dispatch(incrementCounter(id));
-    const newValue = missionCounters[id] + 1;
-    const targetCount = id === 'water' ? 7 : 4;
-
-    if (newValue === targetCount) {
-      // 목표 달성 시 백엔드에 완료 저장
-      try {
-        await apiClient.post('/habit/complete', null, {
-          params: { userId, habitId }
-        });
-        setCompletedMissions(prev => [...prev, habitId]);
-
-        // 🔑 오늘 첫 미션이면 스트릭 갱신 (0→1)
-        if (isFirstMissionToday) {
-          loadStreakInfo();
-        }
-      } catch (error) {
-        console.error('카운터 미션 완료 실패:', error);
-      }
+  // 비교 기간 변경 시 이미지 리렌더링 (최신 제외)
+  React.useEffect(() => {
+    if (userId && comparisonPeriod !== 'latest') {
+      loadDailyImagesByPeriod(comparisonPeriod);
     }
-  };
-
-  // 오늘의 미션 로드
-  const loadTodayMissions = async () => {
-    if (!userId) return;
-
-    try {
-      const response = await apiClient.get(`/habit/today-missions/${userId}`);
-      const { todayMissions: missions, completedHabits } = response.data;
-
-      setTodayMissions(missions);
-      setCompletedMissions(completedHabits.map((h: any) => h.habitId));
-
-      // 미션 로드 후 스트릭 정보도 업데이트
-      loadStreakInfo();
-    } catch (error) {
-      console.error('오늘의 미션 로드 실패:', error);
-    }
-  };
+  }, [comparisonPeriod, userId, loadDailyImagesByPeriod]);
 
   // 케어 스트릭 정보 로드
   const loadStreakInfo = async () => {
@@ -834,28 +931,49 @@ const DailyCare: React.FC = () => {
     }
   };
 
-  // 완료율 계산 (보너스 미션 17, 18번 제외)
-  const completedCount = completedMissions.filter(id => id !== 17 && id !== 18).length;
-  const totalCount = todayMissions.length;
-  const completionRate = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+  // 케어 스트릭 10일 달성 포인트 받기
+  const handleStreakReward = async () => {
+    if (!userId) return;
+
+    try {
+      // habitId 18번은 10일 연속 출석 보너스 미션
+      await apiClient.post(`/habit/complete/${userId}/18`);
+
+      alert('100포인트를 받았습니다! 🎉 10일 연속 출석 달성!');
+
+      // 스트릭 정보 갱신
+      setStreakInfo(prev => ({ ...prev, completed: true }));
+
+      // 새싹 포인트 갱신
+      dispatch(fetchSeedlingInfo(userId));
+    } catch (error) {
+      console.error('스트릭 보상 수령 실패:', error);
+      alert('포인트 수령에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-md mx-auto bg-white min-h-screen pb-20">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-md mx-auto bg-white min-h-screen pb-32">
 
         {/* Main Title Section */}
-        <div className="px-4 py-8 text-center">
-          <h1 className="text-2xl font-bold text-[#1f0101] mb-2">데일리케어</h1>
+        <div className="px-4 py-6 text-center">
+          <h2 className="text-lg font-bold text-[#1f0101] mb-2">데일리케어</h2>
           <p className="text-gray-600 text-sm">개인 맞춤형 두피 케어와 건강 추적을 시작해보세요</p>
         </div>
 
         {/* 상단 그라데이션 배너 (Mobile-First) */}
-        <div className="bg-gradient-to-r from-[#1F0101] to-[#2A0202] text-white p-4 mx-4 rounded-xl">
+        <div className="text-white p-4 mx-4 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(139, 58, 58, 0.8) 0%, rgba(90, 26, 26, 0.8) 50%, rgba(58, 10, 10, 0.8) 100%)' }}>
           <div className="text-center">
             <p className="text-sm opacity-90">{todayStr}</p>
             <h1 className="text-xl font-bold mt-1">좋은 하루예요!</h1>
             <h1 className="text-xl font-bold mt-1">데일리 케어를 시작해볼까요?</h1>
-            <p className="mt-1 text-white/90">{streak}일 연속 케어 중 ✨</p>
+            <p className="mt-1 text-white/90">
+              {streakInfo.days === 0
+                ? "오늘부터 케어를 시작해보세요! 💪"
+                : `${streakInfo.days}일 연속 케어 중 ✨`}
+            </p>
           </div>
         </div>
 
@@ -1004,7 +1122,6 @@ const DailyCare: React.FC = () => {
                   let imageUrl: string | null = null;
                   if (username) {
                     try {
-                      console.log('🔄 S3 업로드 시작...');
                       const uploadFormData = new FormData();
                       uploadFormData.append('image', selectedImage);
                       uploadFormData.append('username', username);
@@ -1015,7 +1132,6 @@ const DailyCare: React.FC = () => {
 
                       if (uploadResponse.data.success) {
                         imageUrl = uploadResponse.data.imageUrl;
-                        console.log('✅ S3 업로드 성공:', imageUrl);
                       }
                     } catch (uploadError) {
                       console.error('❌ S3 업로드 실패:', uploadError);
@@ -1032,15 +1148,11 @@ const DailyCare: React.FC = () => {
                   // 로그인한 사용자의 user_id 추가
                   if (userId) {
                     formData.append('user_id', userId.toString());
-                    console.log('Daily 분석에 user_id 추가:', userId);
-                  } else {
-                    console.log('로그인하지 않은 사용자 - user_id 없음');
                   }
 
                   // S3 URL이 있으면 추가
                   if (imageUrl) {
                     formData.append('image_url', imageUrl);
-                    console.log('📸 S3 이미지 URL 추가:', imageUrl);
                   }
 
                   const response = await apiClient.post('/ai/hair-loss-daily/analyze', formData, {
@@ -1056,8 +1168,6 @@ const DailyCare: React.FC = () => {
                           // scalpScore를 포함하여 백엔드로 grade 저장 요청
                           if (userId && calculatedScore !== null) {
                             try {
-                              console.log('두피 점수 저장 시도:', calculatedScore);
-
                               // save_result에 grade 추가하여 재저장 API 호출
                               const savePayload = {
                                 ...result,
@@ -1066,8 +1176,7 @@ const DailyCare: React.FC = () => {
                                 image_url: imageUrl || ''
                               };
 
-                              await apiClient.post('/ai/hair-loss-daily/save-result', savePayload);
-                              console.log('두피 점수 저장 완료:', calculatedScore);
+                              const saveResponse = await apiClient.post('/ai/hair-loss-daily/save-result', savePayload);
 
                               // Daily 이미지 새로고침
                               loadLatestDailyImages();
@@ -1081,7 +1190,7 @@ const DailyCare: React.FC = () => {
                               // 재분석 모드 해제
                               setIsReanalyzing(false);
                             } catch (saveError) {
-                              console.error('두피 점수 저장 실패:', saveError);
+                              console.error('❌ 두피 점수 저장 실패:', saveError);
                             }
                           }
 
@@ -1101,7 +1210,7 @@ const DailyCare: React.FC = () => {
                 }
               }}
               disabled={isAnalyzing}
-              className="w-full h-12 bg-[#1F0101] text-white rounded-xl hover:bg-[#2A0202] disabled:opacity-50 font-semibold"
+              className="w-full h-12 bg-[#1f0101] hover:bg-[#2a0202] text-white rounded-xl disabled:opacity-50 font-semibold shadow-md hover:shadow-lg transition-all"
             >
               {isAnalyzing ? '분석 중...' : '사진으로 AI 분석'}
             </Button>
@@ -1158,54 +1267,57 @@ const DailyCare: React.FC = () => {
         )} */}
 
         {/* 새싹 키우기 UI */}
-        <Card className="mx-4 mt-4 border-0" style={{ backgroundColor: '#1F0101' }}>
-          <CardContent className="p-4 text-white">
+        <div className="mx-4 mt-4 rounded-xl p-1 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(139, 58, 58, 0.8) 0%, rgba(90, 26, 26, 0.8) 50%, rgba(58, 10, 10, 0.8) 100%)' }}>
+          <div className="bg-white rounded-lg p-4">
             <div className="space-y-4">
               {/* 헤더: 새싹 아이콘과 제목 */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{plantStages[seedlingLevel as keyof typeof plantStages].emoji}</span>
-                  <h3 className="text-lg font-semibold">{seedlingName || plantTitle || '새싹 키우기'}</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">{seedlingName || plantTitle || '새싹 키우기'}</h3>
                 </div>
-                <button className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center hover:bg-white/30 transition-colors">
-                  <i className="fas fa-pen text-sm"></i>
+                <button className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200 transition-colors">
+                  <i className="fas fa-pen text-sm text-gray-600"></i>
                 </button>
               </div>
-              
+
               {/* 새싹 이미지 */}
               <div className="text-center">
                 <div className="text-6xl mb-3">{plantStages[seedlingLevel as keyof typeof plantStages].emoji}</div>
               </div>
-              
+
               {/* 동기부여 메시지 */}
-              <div className="bg-white/20 rounded-xl p-3 text-center">
-                <p className="text-sm text-white/90">오늘의 건강한 습관을 실천하고 새싹을 키워보세요!</p>
+              <div className="bg-gray-100 rounded-xl p-3 text-center">
+                <p className="text-sm text-gray-700">오늘의 건강한 습관을 실천하고 새싹을 키워보세요!</p>
               </div>
-              
+
               {/* 진행률 바 */}
-              <div className="flex items-center bg-white/20 rounded-2xl p-3">
-                <span className="bg-white text-[#1F0101] px-3 py-1 rounded-full text-sm font-bold">
+              <div className="flex items-center bg-gray-100 rounded-2xl p-3">
+                <span className="bg-[#8B3A3A] text-white px-3 py-1 rounded-full text-sm font-bold">
                   Lv.{seedlingLevel}
                 </span>
-                <div className="flex-1 h-2 bg-white/30 rounded-full mx-3 overflow-hidden">
-                  <div 
-                    className="h-full bg-green-500 rounded-full transition-all duration-500"
-                    style={{ width: `${((currentPoint || seedlingPoints) % 50) * 2}%` }}
+                <div className="flex-1 h-2 bg-gray-200 rounded-full mx-3 overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${((currentPoint || seedlingPoints) % 50) * 2}%`,
+                      background: 'linear-gradient(90deg, rgba(139, 58, 58, 0.8) 0%, rgba(90, 26, 26, 0.8) 100%)'
+                    }}
                   />
                 </div>
-                <span className="text-xs text-white/90">{(currentPoint || seedlingPoints) % 50}/50</span>
+                <span className="text-xs text-gray-700">{(currentPoint || seedlingPoints) % 50}/50</span>
               </div>
-              
+
               {/* PT 시작 버튼 */}
-              <Button 
+              <Button
                 onClick={() => navigate('/hair-pt')}
-                className="w-full h-12 bg-white text-[#1F0101] hover:bg-gray-100 rounded-xl font-semibold"
+                className="w-full h-12 bg-[#1f0101] hover:bg-[#2a0202] text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all"
               >
                 PT 시작하기
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Graph Section */}
         <Card className="mx-4 mt-4">
@@ -1236,7 +1348,7 @@ const DailyCare: React.FC = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3 mx-4 mt-4">
-          <Card className="border-0" style={{ backgroundColor: '#1f0101' }}>
+          <Card className="border-0 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(139, 58, 58, 0.8) 0%, rgba(90, 26, 26, 0.8) 100%)' }}>
             <CardContent className="p-5 text-white">
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="h-4 w-4" />
@@ -1250,8 +1362,8 @@ const DailyCare: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-          
-          <Card className="border-0" style={{ backgroundColor: '#1f0101', opacity: 0.8 }}>
+
+          <Card className="border-0 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(139, 58, 58, 0.8) 0%, rgba(90, 26, 26, 0.8) 100%)' }}>
             <CardContent className="p-5 text-white">
               <div className="flex items-center gap-2 mb-2">
                 <Target className="h-4 w-4" />
@@ -1263,128 +1375,6 @@ const DailyCare: React.FC = () => {
           </Card>
         </div>
 
-        {/* Daily Care Checklist */}
-        <Card className="mx-4 mt-4">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2 text-[#1f0101]">
-                <CheckCircle className="h-5 w-5" style={{ color: '#1f0101' }} />
-                오늘의 케어 미션
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {todayMissions.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <p>오늘의 미션을 불러오는 중...</p>
-              </div>
-            ) : (
-              todayMissions.map((mission: any) => {
-                const isCompleted = completedMissions.includes(mission.habitId);
-                const isCounterMission = mission.habitName === '물 마시기' || mission.habitName === '이펙터 사용';
-
-                // 카운터 미션인 경우
-                if (isCounterMission) {
-                  const counterKey = mission.habitName === '물 마시기' ? 'water' : 'effector';
-                  const currentCount = missionCounters[counterKey];
-                  const targetCount = counterKey === 'water' ? 7 : 4;
-                  const progress = (currentCount / targetCount) * 100;
-
-                  return (
-                    <div key={mission.habitId} className="bg-gray-50 rounded-xl p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex-1">
-                          <div className="text-sm font-medium">{mission.habitName}</div>
-                          <div className="text-xs text-gray-600">{mission.description}</div>
-                        </div>
-                        <Badge variant="secondary" style={{ backgroundColor: '#1f0101', color: 'white', opacity: 0.8 }}>
-                          +{mission.rewardPoints}P
-                        </Badge>
-                      </div>
-                      <div className="mb-2">
-                        <div className="flex justify-between text-xs mb-1">
-                          <span className="text-gray-600">진행률</span>
-                          <span className="font-medium">{currentCount}/{targetCount}</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-[#1f0101] h-2 rounded-full transition-all"
-                            style={{ width: `${Math.min(progress, 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                      {isCompleted ? (
-                        <div className="text-center text-xs text-green-600 font-medium">✓ 완료됨</div>
-                      ) : (
-                        <div className="flex gap-3 justify-end">
-                          <button
-                            className="w-8 h-8 rounded-xl font-bold bg-gray-400 hover:bg-gray-500 text-white transition-colors flex items-center justify-center active:scale-[0.95]"
-                            onClick={() => {
-                              if (currentCount > 0) {
-                                dispatch(decrementCounter(counterKey));
-                              }
-                            }}
-                            disabled={currentCount <= 0}
-                          >
-                            -1
-                          </button>
-                          <button
-                            className="w-8 h-8 rounded-xl font-bold bg-[#1F0101] hover:bg-[#2A0202] text-white transition-colors flex items-center justify-center active:scale-[0.95]"
-                            onClick={() => handleCounterIncrement(counterKey, mission.habitId)}
-                          >
-                            +1
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-
-                // 일반 미션
-                return (
-                  <div
-                    key={mission.habitId}
-                    className="flex items-center p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => !isCompleted && handleMissionComplete(mission.habitId)}
-                  >
-                    {isCompleted ? (
-                      <CheckCircle className="h-5 w-5 mr-3 flex-shrink-0" style={{ color: '#1f0101' }} />
-                    ) : (
-                      <Circle className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
-                    )}
-                    <div className="flex-1">
-                      <div className="text-sm font-medium">{mission.habitName}</div>
-                      <div className="text-xs text-gray-600">{mission.description}</div>
-                    </div>
-                    <Badge variant="secondary" style={{ backgroundColor: '#1f0101', color: 'white', opacity: 0.8 }}>
-                      +{mission.rewardPoints}P
-                    </Badge>
-                  </div>
-                );
-              })
-            )}
-            
-            <div className="pt-3 border-t border-gray-200">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium">완료율</span>
-                <span className="text-sm font-semibold" style={{ color: '#1f0101' }}>
-                  {completedCount}/{totalCount} ({completionRate}%)
-                </span>
-              </div>
-              <Progress value={completionRate} className="h-2" />
-
-              {/* 100% 달성 시 보너스 미션 버튼 */}
-              {completionRate === 100 && !completedMissions.includes(17) && (
-                <Button
-                  onClick={() => handleMissionComplete(17)}
-                  className="w-full mt-6 bg-[#1f0101] hover:bg-[#2f0202] text-white font-bold py-3 rounded-xl shadow-lg opacity-80"
-                >
-                  오늘의 미션 포인트 받기 (+20P)
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Care Streak */}
         <Card className="mx-4 mt-4">
@@ -1458,14 +1448,23 @@ const DailyCare: React.FC = () => {
               <span>10일 연속 달성시 보너스 포인트 100P!</span>
             </div>
 
-            {/* 10일 달성 & 미완료 시 버튼 표시 */}
-            {streakInfo.achieved10Days && !streakInfo.completed && (
-              <Button
-                onClick={() => handleMissionComplete(18)}
-                className="w-full bg-[#1f0101] hover:bg-[#2f0202] text-white font-bold py-3 rounded-xl shadow-lg opacity-80"
-              >
-                🎉 이번달 케어 스트릭 달성 (+100P)
-              </Button>
+            {/* 10일 달성 시 버튼 표시 */}
+            {streakInfo.achieved10Days && (
+              streakInfo.completed ? (
+                <Button
+                  disabled
+                  className="w-full bg-gray-400 text-white font-bold py-3 rounded-xl shadow-lg opacity-60 cursor-not-allowed"
+                >
+                  ✓ 케어 스트릭 포인트 지급 완료
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleStreakReward}
+                  className="w-full bg-[#1f0101] hover:bg-[#2f0202] text-white font-bold py-3 rounded-xl shadow-lg opacity-80"
+                >
+                  🎉 이번달 케어 스트릭 달성 (+100P)
+                </Button>
+              )
             )}
           </CardContent>
         </Card>
@@ -1511,6 +1510,36 @@ const DailyCare: React.FC = () => {
                 <Camera className="h-5 w-5" style={{ color: '#1f0101' }} />
                 두피 관리 변화 추적
               </CardTitle>
+              {/* 비교 기간 선택 버튼 */}
+              <div className="flex gap-1">
+                <Button
+                  variant={comparisonPeriod === 'latest' ? 'default' : 'outline'}
+                  size="sm"
+                  className="text-[10px] h-6 px-2"
+                  onClick={() => {
+                    setComparisonPeriod('latest');
+                    loadLatestDailyImages(); // 기존 API로 최신 2건 로드
+                  }}
+                >
+                  최신
+                </Button>
+                <Button
+                  variant={comparisonPeriod === '3months' ? 'default' : 'outline'}
+                  size="sm"
+                  className="text-[10px] h-6 px-2"
+                  onClick={() => setComparisonPeriod('3months')}
+                >
+                  3개월
+                </Button>
+                <Button
+                  variant={comparisonPeriod === '6months' ? 'default' : 'outline'}
+                  size="sm"
+                  className="text-[10px] h-6 px-2"
+                  onClick={() => setComparisonPeriod('6months')}
+                >
+                  6개월
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -1545,10 +1574,9 @@ const DailyCare: React.FC = () => {
                 <p className="text-xs" style={{ color: '#1f0101' }}>최신 레포트</p>
               </div>
             </div>
-            
+
             <Button
-              variant="outline"
-              className="w-full"
+              className="w-full bg-[#1f0101] hover:bg-[#2a0202] text-white font-semibold shadow-md hover:shadow-lg transition-all"
               onClick={handleCompareImages}
               disabled={isComparingImages}
             >
@@ -1560,51 +1588,49 @@ const DailyCare: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Community Challenge */}
-        <Card className="mx-4 mt-4 border-0" style={{ backgroundColor: '#1f0101', opacity: 0.8 }}>
-          <CardContent className="p-4 text-white">
-            <div className="flex items-center gap-2 mb-2">
-              <Users className="h-5 w-5" />
-              <h3 className="text-base font-semibold">이번 주 챌린지</h3>
-            </div>
-            <p className="text-sm mb-3">매일 두피 마사지 5분</p>
-            
-            <div className="bg-white bg-opacity-20 p-3 rounded-xl">
-              <div className="flex justify-between text-xs mb-2">
-                <span>234명 참여중</span>
-                <span>3/7일 완료</span>
-              </div>
-              <Progress
-                value={43}
-                className="h-2 bg-white bg-opacity-30"
-              />
-            </div>
-          </CardContent>
-        </Card>
+
 
         {/* Product Recommendation */}
-        <Card className="mx-4 mt-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2 text-[#1f0101]">
-              <Droplets className="h-5 w-5" style={{ color: '#1f0101' }} />
-              오늘의 추천 제품
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#1f0101' }}>
-                <Droplets className="h-6 w-6 text-white" />
+        {recommendedProducts.length > 0 && (
+          <Card className="mx-4 mt-4">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2 text-[#1f0101]">
+                <Droplets className="h-5 w-5" style={{ color: '#1f0101' }} />
+                오늘의 추천 제품
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="p-3 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#1f0101' }}>
+                    <Droplets className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{recommendedProducts[0].productName}</p>
+                    <p className="text-xs text-gray-600">
+                      {environmentInfo.humidity <= 40 
+                        ? '건조한 두피에 효과적' 
+                        : environmentInfo.humidity <= 70
+                        ? '균형잡힌 두피 관리'
+                        : '과다 피지 조절에 효과적'}
+                    </p>
+                    <Badge variant="secondary" className="mt-1" style={{ backgroundColor: '#1f0101', color: 'white'}}>
+                      {recommendedProducts[0].productPrice.toLocaleString()}원
+                    </Badge>
+                  </div>
+                </div>
+                <Button 
+                  size="sm"
+                  className="w-full h-8 text-xs"
+                  style={{ backgroundColor: '#1f0101' }}
+                  onClick={() => window.open(recommendedProducts[0].productUrl, '_blank')}
+                >
+                  구매하러 가기
+                </Button>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">수분 에센스</p>
-                <p className="text-xs text-gray-600">건조한 두피에 효과적</p>
-                <Badge variant="secondary" className="mt-1" style={{ backgroundColor: '#1f0101', color: 'white', opacity: 0.1 }}>
-                  15% 할인중
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* History Section */}
         <Card className="mx-4 mt-4">
@@ -1724,7 +1750,7 @@ const DailyCare: React.FC = () => {
 
             <Button
               onClick={() => navigate('/integrated-diagnosis')}
-              className="w-full mt-4"
+              className="w-full mt-4 bg-[#1f0101] hover:bg-[#2a0202] text-white font-semibold shadow-md hover:shadow-lg transition-all"
             >
               새로운 진단하기
             </Button>
@@ -1732,41 +1758,28 @@ const DailyCare: React.FC = () => {
         </Card>
 
         {/* Daily Tip */}
-        <Card className="mx-4 mt-4 bg-gray-50 border-gray-200">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <Lightbulb className="h-4 w-4" style={{ color: '#1f0101' }} />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-1">
-                  <h4 className="text-sm font-semibold" style={{ color: '#1f0101' }}>오늘의 건강 팁</h4>
+        {environmentInfo.humidity > 0 && (
+          <Card className="mx-4 mt-4 bg-gray-50 border-gray-200">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Lightbulb className="h-4 w-4" style={{ color: '#1f0101' }} />
                 </div>
-                <p className="text-xs text-gray-700">
-                  "샴푸 전 빗질을 하면 노폐물 제거와 혈액순환에 도움이 됩니다. 
-                  두피부터 모발 끝까지 부드럽게 빗어주세요."
-                </p>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-semibold" style={{ color: '#1f0101' }}>오늘의 건강 팁</h4>
+                  </div>
+                  <ol className="list-decimal ml-4 text-xs text-gray-700 space-y-1.5">
+                    {getWeatherBasedTips().map((tip, i) => <li key={i}>{tip}</li>)}
+                  </ol>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 오늘의 케어 팁 */}
-        {tips.length > 0 && (
-          <Card className="mx-4 mt-4">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg text-[#1f0101]">오늘의 케어 팁</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ol className="list-decimal ml-5 text-sm text-gray-700 space-y-2">
-                {tips.map((t, i) => <li key={i}>{t}</li>)}
-              </ol>
             </CardContent>
           </Card>
         )}
 
         {/* Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-2 pb-5 z-50">
+        <div className="fixed bottom-0 left-0 right-0 bg-white flex justify-around items-center py-2 pb-5 z-50">
           <Button variant="ghost" className="flex flex-col items-center p-2 h-auto">
             <Heart className="h-5 w-5 mb-1" style={{ color: '#1f0101' }} />
             <span className="text-xs" style={{ color: '#1f0101' }}>홈</span>
@@ -1796,7 +1809,20 @@ const DailyCare: React.FC = () => {
           <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             {/* 헤더 */}
             <div className="sticky top-0 bg-white border-b p-4 flex items-center justify-between rounded-t-2xl">
-              <h2 className="text-lg font-bold text-[#1f0101]">변화 분석 결과</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold text-[#1f0101]">변화 분석 결과</h2>
+                <button
+                  onClick={toggleDensityVisualization}
+                  disabled={isLoadingVisualization}
+                  className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                    showDensityVisualization
+                      ? 'bg-green-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  {isLoadingVisualization ? '로딩 중...' : showDensityVisualization ? '밀도 표시 ON' : '밀도 표시 OFF'}
+                </button>
+              </div>
               <button
                 onClick={() => setIsComparisonModalOpen(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -1828,7 +1854,11 @@ const DailyCare: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <img
-                    src={comparisonData.previous_image_url}
+                    src={
+                      showDensityVisualization && densityVisualizedImages.previous
+                        ? densityVisualizedImages.previous
+                        : comparisonData.previous_image_url
+                    }
                     alt="이전 사진"
                     className="w-full aspect-square object-cover rounded-lg border-2 border-gray-300"
                   />

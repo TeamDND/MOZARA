@@ -193,29 +193,18 @@ const MainPage: React.FC = () => {
     // DB에서 최초 분석 완료 상태 확인
     const checkInitialAnalysis = async () => {
       if (!userId) {
-        console.log('사용자 ID가 없습니다.');
         return;
       }
 
       try {
-        console.log('=== 탈모 분석 완료 여부 확인 시작 ===');
-        console.log('userId:', userId);
-        console.log('API URL:', `/has-analysis/${userId}/hairloss`);
-        
         const response = await apiClient.get(`/has-analysis/${userId}/hairloss`);
-        console.log('API 응답 전체:', response);
-        console.log('API 응답 데이터:', response.data);
         
         const hasAnalysis = response.data.hasAnalysis;
-        console.log('탈모 분석 완료 여부:', hasAnalysis);
-        console.log('타입:', typeof hasAnalysis);
         
         setUserProgress(prev => ({
           ...prev,
           hasCompletedInitialAnalysis: hasAnalysis
         }));
-        
-        console.log('=== 상태 업데이트 완료 ===');
       } catch (error: any) {
         console.error('=== 분석 결과 확인 실패 ===');
         console.error('에러 전체:', error);
@@ -239,10 +228,10 @@ const MainPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile-First 컨테이너 */}
-      <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col">
+      <div className="max-w-md mx-auto min-h-screen bg-white flex flex-col">
         
         {/* 메인 컨텐츠 */}
-        <div className="flex-1 p-4 overflow-y-auto space-y-4">
+        <div className="flex-1 p-4 pb-24 overflow-y-auto space-y-4">
           {/* 0. 탈모분석 (최초 기준이고 한번이라도 분석하면 안보임) */}
           {!userProgress.hasCompletedInitialAnalysis && (
             <div className="bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded-xl border-2 border-red-200">
@@ -264,7 +253,7 @@ const MainPage: React.FC = () => {
 
 
           {/* 3. 탈모 맵 (내 위치기반 지도 화면) */}
-          <div className="bg-white p-4 rounded-xl shadow-md">
+          <div className="bg-white p-4 rounded-xl border border-gray-200">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-[#1F0101]" />
@@ -420,7 +409,7 @@ const MainPage: React.FC = () => {
           </div>
 
           {/* 6. 헤어체인지 */}
-          <div className="bg-white p-4 rounded-xl shadow-md">
+          <div className="bg-white p-4 rounded-xl border border-gray-200">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Scissors className="w-5 h-5 text-[#1F0101]" />

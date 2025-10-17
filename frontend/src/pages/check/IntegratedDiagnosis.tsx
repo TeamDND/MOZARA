@@ -31,6 +31,7 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
   const user = useSelector((state: any) => state.user);
   const token = useSelector((state: any) => state.token.jwtToken);
   const [currentStep, setCurrentStep] = useState(1);
+  
   const [baspAnswers, setBaspAnswers] = useState({
     gender: '',
     age: '',
@@ -71,13 +72,6 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
 
           // DB에 저장된 값이 있으면 자동으로 채우기
           if (userInfo.gender || userInfo.age || userInfo.familyHistory !== null || userInfo.isLoss !== null || userInfo.stress) {
-            console.log('🔄 사용자 정보 로드:', {
-              gender: userInfo.gender,
-              age: userInfo.age,
-              familyHistory: userInfo.familyHistory,
-              isLoss: userInfo.isLoss,
-              stress: userInfo.stress
-            });
 
             // 한글 성별을 영어로 변환
             let genderValue = userInfo.gender || '';
@@ -135,6 +129,8 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
     setAnalysisProgress(0);
     setAnalysisSteps([]);
 
+    let timerInterval: NodeJS.Timeout | null = null;
+
     try {
       const isMale = baspAnswers.gender === 'male';
 
@@ -155,28 +151,31 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         '개인 맞춤 계획 수립 완료'
       ];
 
-      // 단계별 시간 (밀리초)
-      const stepDelays = [800, 800, 2000, 800, 800, 800];
-      const totalTime = stepDelays.reduce((a, b) => a + b, 0);
-      setEstimatedTimeRemaining(Math.ceil(totalTime / 1000));
+      // 단계별 시간 (밀리초) - 남성/여성 구분
+      // 남성: 총 21-22초, 여성: 총 12-13초
+      const stepDelays = isMale
+        ? [1000, 1000, 18000, 1000, 1000, 1000]  // 남성: 총 23초 (실제 분석 18초)
+        : [1000, 1000, 9000, 1000, 1000, 1000];   // 여성: 총 14초 (실제 분석 9초)
+
+      // 경과 시간 측정 시작 (0초부터 카운트업)
+      setEstimatedTimeRemaining(0);
+
+      let elapsedSeconds = 0;
+      timerInterval = setInterval(() => {
+        elapsedSeconds++;
+        setEstimatedTimeRemaining(elapsedSeconds);
+      }, 1000);
 
       // 단계별 진행 시뮬레이션
       for (let i = 0; i < steps.length; i++) {
         setAnalysisSteps(prev => [...prev, steps[i]]);
         setAnalysisProgress((i + 1) / steps.length * 100);
 
-        // 남은 시간 업데이트
-        const remainingTime = stepDelays.slice(i + 1).reduce((a, b) => a + b, 0);
-        setEstimatedTimeRemaining(Math.ceil(remainingTime / 1000));
-
         if (i === 2) {
           // 실제 API 호출은 3번째 단계에서
           // 성별에 따라 다른 분석 방법 사용
           if (isMale) {
             // 남성: Swin Transformer 분석 (Top + Side)
-            console.log('🔄 남성 - Swin API 분석 시작');
-            console.log('📸 Top View URL:', uploadedPhotoUrl);
-            console.log('📸 Side View URL:', uploadedSidePhotoUrl);
 
             // S3 URL 결합 (|||로 구분)
             const combinedImageUrl = uploadedPhotoUrl && uploadedSidePhotoUrl
@@ -197,12 +196,9 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
               }
             );
 
-            console.log('✅ Swin 분석 결과:', result);
             setAnalysisResult(result.analysis);
           } else {
             // 여성: RAG v2 분석 (Top만)
-            console.log('🔄 여성 - RAG v2 API 분석 시작');
-            console.log('📸 Top View URL:', uploadedPhotoUrl);
 
             const result = await analyzeHairWithRAG(
               uploadedPhotoFile,
@@ -255,6 +251,10 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
       );
     } finally {
       setIsAnalyzing(false);
+      // 타이머 정리
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
     }
   };
 
@@ -319,7 +319,6 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         );
 
       case 2:
-        console.log('📸 ImageUploadStep 렌더링 - gender:', baspAnswers.gender);
         return (
           <ImageUploadStep
             uploadedPhoto={uploadedPhoto}
@@ -443,39 +442,41 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Mobile-First 컨테이너 */}
-      <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col">
-        
-        {/* 헤더 (Mobile-First) */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-4">
-          <div className="flex items-center justify-center">           
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600">
-                {currentStep} / {totalSteps}
-              </span>
-              <Progress value={(currentStep / totalSteps) * 100} className="w-60 h-2" />
+      {/* 통합 컨테이너 - 스크롤 방식 */}
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-md mx-auto bg-white min-h-screen pb-20">
+          
+          {/* 헤더 */}
+          <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
+            <div className="flex items-center justify-center">           
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-600">
+                  {currentStep} / {totalSteps}
+                </span>
+                <Progress value={(currentStep / totalSteps) * 100} className="w-60 h-2" />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* 메인 컨텐츠 (Mobile-First) */}
-        <div className="flex-1 p-4 overflow-y-auto">
-          <div className="bg-white rounded-xl shadow-md p-6">
-            {renderStep()}
-          </div>
-
-          {/* 네비게이션 버튼 (Mobile-First) */}
-          {currentStep < 4 && (
-            <div className="flex justify-between gap-3 mt-6">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-                disabled={currentStep === 1}
-                className="flex-1 h-12 rounded-xl"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                이전
-              </Button>
+          {/* 메인 컨텐츠 */}
+          <div className="p-4 pb-6">
+            <div className="bg-white rounded-xl shadow-md p-6">
+              {renderStep()}
+            </div>
+            
+            {/* 네비게이션 버튼 - 인라인으로 배치 */}
+            {currentStep < 4 && (
+              <div className="mt-6 pb-8">
+                <div className={`flex gap-3 ${currentStep === 1 ? 'justify-end' : 'justify-between'}`}>
+              {currentStep > 1 && (
+                <Button
+                  onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+                  className="flex-1 h-12 rounded-xl border-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  이전
+                </Button>
+              )}
               {currentStep === 2 && uploadedPhoto && (baspAnswers.gender === 'female' || uploadedSidePhoto) && (
                 <Button
                   onClick={() => {
@@ -500,19 +501,32 @@ function IntegratedDiagnosis({ setCurrentView, onDiagnosisComplete }: Integrated
                 </Button>
               )}
               
-              {currentStep === 1 && (
-                <Button 
-                  onClick={() => setCurrentStep(2)}
-                  disabled={!baspAnswers.gender || !baspAnswers.age || !baspAnswers.familyHistory || !baspAnswers.recentHairLoss || !baspAnswers.stress}
-                  className="flex-1 h-12 rounded-xl text-white active:scale-[0.98] disabled:opacity-50"
-                  style={{ backgroundColor: "#1f0101" }}
-                >
-                  다음
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              )}
-            </div>
-          )}
+              {currentStep === 1 && (() => {
+                const isButtonDisabled = !baspAnswers.gender ||
+                  !baspAnswers.age ||
+                  !baspAnswers.familyHistory ||
+                  !baspAnswers.recentHairLoss ||
+                  !baspAnswers.stress ||
+                  parseInt(baspAnswers.age) < 0 ||
+                  parseInt(baspAnswers.age) > 100 ||
+                  isNaN(parseInt(baspAnswers.age));
+                
+                return (
+                  <Button
+                    onClick={() => setCurrentStep(2)}
+                    disabled={isButtonDisabled}
+                    className="flex-1 h-12 rounded-xl text-white active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: "#1f0101" }}
+                  >
+                    다음
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                );
+              })()}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

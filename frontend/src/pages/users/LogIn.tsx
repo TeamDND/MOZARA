@@ -52,8 +52,6 @@ const LogIn: React.FC = () => {
         password: formData.password
       });
 
-      console.log('로그인 성공:', loginRes.data);
-
       // JWT 토큰 저장
       const token = loginRes.headers['authorization'];
       if (token) {
@@ -63,10 +61,9 @@ const LogIn: React.FC = () => {
 
       // 사용자 정보 가져오기
       const userResponse = await apiClient.get(`/userinfo/${formData.username}`);
-      console.log('사용자 정보:', userResponse.data);
 
       dispatch(setUser(userResponse.data));
-      navigate('/main-page'); // 대시보드로 이동
+      navigate('/main'); // 대시보드로 이동
     } catch (error: any) {
       console.error('로그인 오류:', error);
       const errorMessage = error.response?.data?.error || '로그인 중 오류가 발생했습니다.';
@@ -80,9 +77,8 @@ const LogIn: React.FC = () => {
   // 소셜 로그인 핸들러
   const handleSocialLogin = (provider: string) => {
     // TODO: 소셜 로그인 API 구현
-    console.log(`${provider} 로그인 시도`);
     // 데일리케어로 이동
-    navigate('/main-page');
+    navigate('/main');
   };
 
   // 게스트 로그인 핸들러
@@ -94,7 +90,7 @@ const LogIn: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile-First 컨테이너 */}
-      <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col items-center">
+      <div className="max-w-md mx-auto min-h-screen bg-white flex flex-col items-center">
         {/* 모바일 헤더 */}
         <h1 className="text-xl font-semibold text-center py-6">
           로그인

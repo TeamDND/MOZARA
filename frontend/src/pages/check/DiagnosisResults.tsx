@@ -328,12 +328,21 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile-First 컨테이너 */}
-      <div className="max-w-full md:max-w-md mx-auto min-h-screen bg-white flex flex-col">
+      <div className="max-w-md mx-auto min-h-screen bg-white flex flex-col pb-20">
         
-        
-
+        {/* Mobile-First 데일리 케어 */}
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-[60]">
+          <div className="flex items-center justify-between">
+            <div className="flex-1 text-center">
+              <h1 className="text-lg font-bold text-gray-800">진단 결과 및 맞춤 추천</h1>
+              <p className="text-xs text-gray-600 mt-1">
+                AI 분석을 바탕으로 한 개인 맞춤형 솔루션
+              </p>
+            </div>            
+          </div>
+        </div>
         {/* 메인 컨텐츠 (Mobile-First) */}
-        <div className="flex-1 p-4 overflow-y-auto space-y-4">
+        <div className="flex-1 px-4 pb-6 overflow-y-auto space-y-4">
           {/* 진단 결과 요약 (Mobile-First) */}
               <div className="bg-gradient-to-r from-gray-50 to-green-50 p-4 rounded-xl">
             <div className="flex items-center gap-3 mb-4">
@@ -436,64 +445,38 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
               </div>
             )}
           </div>
-
-          {/* Mobile-First 데일리 케어 */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 text-center">
-              <h1 className="text-lg font-bold text-gray-800">진단 결과 및 맞춤 추천</h1>
-              <p className="text-xs text-gray-600 mt-1">
-                AI 분석을 바탕으로 한 개인 맞춤형 솔루션
-              </p>
-            </div>
-            <Button 
-              onClick={() => {
-                  navigate('/daily-care');
-              }}
-              className="ml-3 h-10 px-4 text-white rounded-xl active:scale-[0.98]"
-              style={{ backgroundColor: "#1f0101" }}
-            >
-              DailyCare
-            </Button>
-          </div>
-        </div>
-
           {/* 맞춤 추천 탭 (Mobile-First) */}
-          <Tabs defaultValue="hospitals" className="space-y-4 flex items-center">
-            <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent">
+          <Tabs defaultValue="hospitals" className="space-y-4 w-full">
+            <TabsList className="flex overflow-x-auto space-x-1 pb-2 bg-transparent w-full">
               <TabsTrigger 
                 value="hospitals" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-600 transition-colors"
-                style={{ backgroundColor: "#1f0101" }}
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
               >
                 탈모 맵
               </TabsTrigger>
               <TabsTrigger 
                 value="products" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                data-state-active-style={{ backgroundColor: "#1f0101", color: "white" }}
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
               >
                 제품 추천
               </TabsTrigger>
               <TabsTrigger 
                 value="videos" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                data-state-active-style={{ backgroundColor: "#1f0101", color: "white" }}
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
               >
                 영상 컨텐츠
               </TabsTrigger>
               <TabsTrigger 
                 value="lifestyle" 
-                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                data-state-active-style={{ backgroundColor: "#1f0101", color: "white" }}
+                className="flex-shrink-0 px-3 py-2 text-xs font-medium rounded-xl bg-gray-100 text-gray-600 data-[state=active]:!bg-[#1f0101] data-[state=active]:!text-white hover:bg-gray-200 transition-colors"
               >
                 생활습관
               </TabsTrigger>
             </TabsList>
 
             {/* 병원 추천 (Mobile-First) */}
-            <TabsContent value="hospitals" className="space-y-4">
-              <div className="bg-white p-4 rounded-xl shadow-md">
+            <TabsContent value="hospitals" className="space-y-4 w-full">
+              <div className="bg-white p-4 rounded-xl shadow-md w-full">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-800">내 주변 탈모 맵</h3>
                   <Button 
@@ -518,8 +501,8 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </TabsContent>
 
             {/* 제품 추천 (Mobile-First) */}
-            <TabsContent value="products" className="space-y-4">
-              <div className="bg-white p-4 rounded-xl shadow-md">
+            <TabsContent value="products" className="space-y-4 w-full">
+              <div className="bg-white p-4 rounded-xl shadow-md w-full">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-800">맞춤형 제품 추천</h3>
                   <Button 
@@ -541,8 +524,8 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </TabsContent>
 
             {/* 영상 가이드 (Mobile-First) - YouTube API 연동 */}
-            <TabsContent value="videos" className="space-y-4">
-              <div className="bg-white p-4 rounded-xl shadow-md">
+            <TabsContent value="videos" className="space-y-4 w-full">
+              <div className="bg-white p-4 rounded-xl shadow-md w-full">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Brain className="w-5 h-5 text-[#1f0101]" />
@@ -567,7 +550,7 @@ function DiagnosisResults({ setCurrentView, diagnosisData }: DiagnosisResultsPro
             </TabsContent>
 
             {/* 생활습관 가이드 (Mobile-First) */}
-            <TabsContent value="lifestyle" className="space-y-4">
+            <TabsContent value="lifestyle" className="space-y-4 w-full">
               <DailyCareTab 
                 currentStage={currentStage}
                 onNavigateToDailyCare={() => navigate('/hair-dailycare')}

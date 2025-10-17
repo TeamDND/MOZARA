@@ -79,6 +79,91 @@ def get_weather_info(lat: float, lon: float):
         air_quality_levels = ['좋음', '보통', '나쁨', '매우 나쁨', '최악']
         air_quality_level = air_quality_levels[aqi - 1] if 1 <= aqi <= 5 else '정보 없음'
 
+        # 상세 권고사항 생성
+        recommendations = {
+            'uv': None,
+            'humidity': None,
+            'air': None
+        }
+
+        # 자외선 지수에 따른 추천
+        if uv_index >= 6:
+            recommendations['uv'] = {
+                'type': 'warning',
+                'message': '자외선이 매우 강합니다. 모자나 선크림을 사용하세요.',
+                'icon': 'sun'
+            }
+        elif uv_index >= 3:
+            recommendations['uv'] = {
+                'type': 'caution',
+                'message': '자외선이 보통입니다. 실외 활동 시 주의하세요.',
+                'icon': 'sun'
+            }
+        else:
+            recommendations['uv'] = {
+                'type': 'info',
+                'message': '자외선이 약합니다. 두피 건강에 좋은 날입니다.',
+                'icon': 'sun'
+            }
+
+        # 습도에 따른 추천
+        if humidity < 30:
+            recommendations['humidity'] = {
+                'type': 'warning',
+                'message': '습도가 매우 낮습니다. 두피 보습에 신경 쓰세요.',
+                'icon': 'droplets'
+            }
+        elif humidity < 40:
+            recommendations['humidity'] = {
+                'type': 'caution',
+                'message': '습도가 낮습니다. 두피 건조 예방에 주의하세요.',
+                'icon': 'droplets'
+            }
+        elif humidity > 70:
+            recommendations['humidity'] = {
+                'type': 'caution',
+                'message': '습도가 높습니다. 두피 통풍에 주의하세요.',
+                'icon': 'droplets'
+            }
+        else:
+            recommendations['humidity'] = {
+                'type': 'info',
+                'message': '습도가 적정합니다. 두피 건강에 좋은 날입니다.',
+                'icon': 'droplets'
+            }
+
+        # 미세먼지에 따른 추천 (AQI 기준: 1=좋음, 2=보통, 3=나쁨, 4=매우나쁨, 5=최악)
+        if aqi >= 4:
+            recommendations['air'] = {
+                'type': 'warning',
+                'message': '미세먼지가 나쁩니다. 외출 후 머리 감기를 권장합니다.',
+                'icon': 'wind'
+            }
+        elif aqi == 3:
+            recommendations['air'] = {
+                'type': 'caution',
+                'message': '대기질이 나쁩니다. 외출 시 주의하세요.',
+                'icon': 'wind'
+            }
+        elif aqi == 2:
+            recommendations['air'] = {
+                'type': 'info',
+                'message': '대기질이 보통입니다. 야외 활동 가능합니다.',
+                'icon': 'wind'
+            }
+        elif aqi == 1:
+            recommendations['air'] = {
+                'type': 'info',
+                'message': '대기질이 좋습니다. 두피 건강에 좋은 날입니다!',
+                'icon': 'wind'
+            }
+        else:
+            recommendations['air'] = {
+                'type': 'info',
+                'message': '대기질 정보를 확인할 수 없습니다.',
+                'icon': 'wind'
+            }
+
         return {
             'success': True,
             'data': {
@@ -87,7 +172,8 @@ def get_weather_info(lat: float, lon: float):
                 'humidity': humidity,
                 'humidityAdvice': humidity_advice,
                 'airQuality': aqi,
-                'airQualityLevel': air_quality_level
+                'airQualityLevel': air_quality_level,
+                'recommendations': recommendations
             }
         }
 

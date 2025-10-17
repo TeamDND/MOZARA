@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../../components/ui/button';
 import { Progress } from '../../components/ui/progress';
-import { CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { CheckCircle, AlertCircle, Clock, Lightbulb } from 'lucide-react';
 import { SwinAnalysisResult, getStageDescription, getStageColor } from '../../services/swinAnalysisService';
+import { getShuffledTips } from '../../utils/data/analysis-tips';
 
 interface AnalysisProgressStepProps {
   analysisComplete: boolean;
@@ -14,7 +15,7 @@ interface AnalysisProgressStepProps {
   onRetry: () => void;
   onGoBack: () => void;
   gender?: string;  // 성별 추가
-  estimatedTimeRemaining?: number;  // 남은 시간 (초)
+  estimatedTimeRemaining?: number;  // 경과 시간 (초)
 }
 
 const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
@@ -30,20 +31,32 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
   estimatedTimeRemaining = 0
 }) => {
   const isMale = gender === 'male' || gender === '남';
-  const [displayTime, setDisplayTime] = useState(estimatedTimeRemaining);
+  const [elapsedTime, setElapsedTime] = useState(estimatedTimeRemaining);
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
+  const [tips] = useState(() => getShuffledTips());
 
-  // 실시간 카운트다운
+  // 실시간 경과 시간 업데이트
   useEffect(() => {
-    setDisplayTime(estimatedTimeRemaining);
+    setElapsedTime(estimatedTimeRemaining);
   }, [estimatedTimeRemaining]);
 
-  // 시간 포맷 함수
-  const formatTime = (seconds: number) => {
-    if (seconds <= 0) return '곧 완료';
-    if (seconds < 60) return `약 ${seconds}초`;
-    const minutes = Math.ceil(seconds / 60);
-    return `약 ${minutes}분`;
+  // 팁 자동 전환 (4초마다)
+  useEffect(() => {
+    if (!analysisComplete && !analysisError) {
+      const interval = setInterval(() => {
+        setCurrentTipIndex((prev) => (prev + 1) % tips.length);
+      }, 4000);
+
+      return () => clearInterval(interval);
+    }
+  }, [analysisComplete, analysisError, tips.length]);
+
+  // 예상 시간 범위 (남성: 20-25초, 여성: 12-16초)
+  const getExpectedTimeRange = () => {
+    return isMale ? '20-25초' : '12-16초';
   };
+
+  const currentTip = tips[currentTipIndex];
 
   return (
     <div className="space-y-8">
@@ -71,12 +84,15 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
         <div className="space-y-6">
           <div className="space-y-2">
             <Progress value={analysisProgress} className="h-3" />
-            {displayTime > 0 && (
-              <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+            <div className="flex flex-col items-center gap-1 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
-                <span>남은 시간: {formatTime(displayTime)}</span>
+                <span>분석 중... (약 {getExpectedTimeRange()} 소요)</span>
               </div>
-            )}
+              {elapsedTime > 0 && (
+                <span className="text-xs text-gray-500">현재: {elapsedTime}초 경과</span>
+              )}
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -97,12 +113,38 @@ const AnalysisProgressStep: React.FC<AnalysisProgressStepProps> = ({
             )}
           </div>
 
-          <div className="bg-blue-50 p-4 rounded-xl">
-            <p className="text-sm text-blue-800">
-              🧠 <strong>실제 AI 분석 진행 중!</strong>{' '}
-              AI 모델이 귀하의 모발 상태를 분석하고 있습니다.
-              {' '}잠시만 기다려주세요.
-            </p>
+          {/* 탈모 관리 팁 슬라이드 */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-xl border border-blue-100 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="text-2xl flex-shrink-0 mt-1">
+                {currentTip.emoji}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-2">
+                  <Lightbulb className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <h4 className="text-sm font-semibold text-blue-900">
+                    {currentTip.title}
+                  </h4>
+                </div>
+                <p className="text-sm text-blue-800 leading-relaxed">
+                  {currentTip.content}
+                </p>
+              </div>
+            </div>
+
+            {/* 진행 표시 점들 */}
+            <div className="flex justify-center gap-1.5 mt-4">
+              {tips.slice(0, 5).map((_, index) => (
+                <div
+                  key={index}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    index === currentTipIndex % 5
+                      ? 'w-6 bg-blue-600'
+                      : 'w-1.5 bg-blue-300'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       )}

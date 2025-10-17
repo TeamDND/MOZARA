@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Label } from '../../components/ui/label';
 import { Input } from '../../components/ui/input';
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
@@ -22,6 +23,44 @@ interface SelfCheckStepProps {
 }
 
 const SelfCheckStep: React.FC<SelfCheckStepProps> = ({ baspAnswers, setBaspAnswers }) => {
+  const [ageError, setAgeError] = useState<string>('');
+
+  const handleAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    // 빈 값 허용 (사용자가 지우는 중일 수 있음)
+    if (value === '') {
+      setBaspAnswers(prev => ({...prev, age: value}));
+      setAgeError('');
+      return;
+    }
+
+    const age = parseInt(value);
+
+    // 숫자가 아닌 경우
+    if (isNaN(age)) {
+      setAgeError('숫자만 입력 가능합니다');
+      return;
+    }
+
+    // 범위 검사 (0-100세)
+    if (age < 0) {
+      setAgeError('나이는 0세 이상이어야 합니다');
+      setBaspAnswers(prev => ({...prev, age: value}));
+      return;
+    }
+
+    if (age > 100) {
+      setAgeError('나이는 100세 이하여야 합니다');
+      setBaspAnswers(prev => ({...prev, age: value}));
+      return;
+    }
+
+    // 유효한 값
+    setAgeError('');
+    setBaspAnswers(prev => ({...prev, age: value}));
+  };
+
   return (
     <div className="space-y-8">
       <div className="text-center space-y-3">
@@ -54,34 +93,53 @@ const SelfCheckStep: React.FC<SelfCheckStepProps> = ({ baspAnswers, setBaspAnswe
         <div className="space-y-3">
           <Label htmlFor="age" className="text-base font-semibold text-gray-800">나이</Label>
           <div className="space-y-2">
-            <p className="text-sm text-gray-600">만 나이를 입력해주세요</p>
+            <p className="text-sm text-gray-600">만 나이를 입력해주세요 (0-100세)</p>
             <Input
               id="age"
               type="number"
               placeholder="예: 25"
               value={baspAnswers.age}
-              onChange={(e) => setBaspAnswers(prev => ({...prev, age: e.target.value}))}
-              className="w-full"
-              min="1"
+              onChange={handleAgeChange}
+              className={`w-full ${ageError ? 'border-red-500 focus:ring-red-500' : ''}`}
+              min="0"
               max="100"
             />
+            {ageError && (
+              <p className="text-sm text-red-500 flex items-center gap-1">
+                <span>⚠️</span>
+                {ageError}
+              </p>
+            )}
           </div>
         </div>
 
         <div className="space-y-3">
-          <Label htmlFor="familyHistory" className="text-base font-semibold text-gray-800">가족력이 있나요?</Label>
-          <RadioGroup 
-            value={baspAnswers.familyHistory} 
+          <Label htmlFor="familyHistory" className="text-base font-semibold text-gray-800">
+            가족 중 탈모가 있나요?
+          </Label>
+          <p className="text-xs text-gray-500">
+            부계 유전 62.8%, 모계 유전 8.6% (PLOS One 2024 연구 기반)
+          </p>
+          <RadioGroup
+            value={baspAnswers.familyHistory}
             onValueChange={(value: string) => setBaspAnswers(prev => ({...prev, familyHistory: value}))}
             className="space-y-3"
           >
             <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
-              <RadioGroupItem value="yes" id="yes" />
-              <Label htmlFor="yes" className="text-sm">예</Label>
+              <RadioGroupItem value="both" id="family-both" />
+              <Label htmlFor="family-both" className="text-sm">부모 모두 (유전 위험 높음)</Label>
             </div>
             <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
-              <RadioGroupItem value="no" id="no" />
-              <Label htmlFor="no" className="text-sm">아니오</Label>
+              <RadioGroupItem value="father" id="family-father" />
+              <Label htmlFor="family-father" className="text-sm">아버지 쪽</Label>
+            </div>
+            <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
+              <RadioGroupItem value="mother" id="family-mother" />
+              <Label htmlFor="family-mother" className="text-sm">어머니 쪽</Label>
+            </div>
+            <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
+              <RadioGroupItem value="none" id="family-none" />
+              <Label htmlFor="family-none" className="text-sm">없음</Label>
             </div>
           </RadioGroup>
         </div>

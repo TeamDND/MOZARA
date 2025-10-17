@@ -23,8 +23,16 @@ import hashlib
 # .env 파일 로드 (Docker 환경에서는 환경변수 직접 사용)
 try:
     load_dotenv("../../.env")
-    # load_dotenv(".env")
-except:
+    print(f"✅ .env 파일 로드 시도: ../../.env")
+
+    # 11번가 API 키 확인
+    eleven_st_key = os.getenv("ELEVEN_ST_API_KEY")
+    if eleven_st_key:
+        print("✅ ELEVEN_ST_API_KEY 로드됨")
+    else:
+        print("⚠️  ELEVEN_ST_API_KEY 로드 실패 - .env 파일을 확인하세요")
+except Exception as e:
+    print(f"⚠️  .env 로드 중 오류: {e}")
     pass  # Docker 환경에서는 환경변수를 직접 사용
 
 # 이미지 캐시 저장소 (메모리 기반)
@@ -807,56 +815,6 @@ except ImportError as e:
     print(f"Hair Change 모듈 로드 실패: {e}")
     HAIR_CHANGE_AVAILABLE = False
 
-# ============================================
-# BiSeNet 싱글턴 인스턴스 생성 (VRAM 절약)
-# ⚠️ Hair Loss Daily import 이전에 로드해야 함!
-# ============================================
-try:
-    import torch
-    from services.swin_hair_classification.models.face_parsing.model import BiSeNet
-
-    print("🔄 BiSeNet 모델 로딩 시작...")
-
-    # 디바이스 설정
-    bisenet_device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f"   디바이스: {bisenet_device}")
-
-    # BiSeNet 모델 생성
-    bisenet_model = BiSeNet(n_classes=19)
-    print("   BiSeNet 모델 인스턴스 생성 완료")
-
-    # 모델 가중치 경로
-    bisenet_model_path = os.path.join(
-        os.path.dirname(__file__),
-        'services',
-        'swin_hair_classification',
-        'models',
-        'face_parsing',
-        'res',
-        'cp',
-        '79999_iter.pth'
-    )
-    print(f"   모델 경로: {bisenet_model_path}")
-
-    if not os.path.exists(bisenet_model_path):
-        raise FileNotFoundError(f"BiSeNet 모델 파일을 찾을 수 없습니다: {bisenet_model_path}")
-
-    # 모델 가중치 로드
-    print("   가중치 로딩 중...")
-    bisenet_model.load_state_dict(torch.load(bisenet_model_path, map_location=bisenet_device))
-    bisenet_model.to(bisenet_device)
-    bisenet_model.eval()
-
-    print(f"✅ BiSeNet 싱글턴 인스턴스 생성 완료 (device: {bisenet_device})")
-    BISENET_AVAILABLE = True
-
-except Exception as e:
-    import traceback
-    print(f"❌ BiSeNet 싱글턴 생성 실패: {e}")
-    traceback.print_exc()
-    bisenet_model = None
-    bisenet_device = None
-    BISENET_AVAILABLE = False
 
 # Hair Loss Daily 모듈 - services 폴더 내에 있다고 가정하고 경로 수정
 try:
@@ -978,11 +936,6 @@ except Exception as e:
 # Time-Series Analysis 라우터 마운트
 try:
     from services.time_series.api.router import router as timeseries_router
-    from services.time_series.services import analysis_service as timeseries_analysis_service
-
-    # BiSeNet 싱글턴 주입
-    if BISENET_AVAILABLE and bisenet_model is not None:
-        timeseries_analysis_service.set_bisenet_singleton(bisenet_model)
 
     app.include_router(timeseries_router)
     print("Time-Series Analysis API 라우터 마운트 완료")
@@ -997,14 +950,8 @@ try:
 except ImportError as e:
     print(f"Weather API 라우터 마운트 실패: {e}")
 
-# Gemini Hair Check 모듈
-try:
-    from services.hair_gemini_check import analyze_hair_with_gemini
-    GEMINI_HAIR_CHECK_AVAILABLE = True
-    print("Gemini Hair Check 모듈 로드 성공")
-except ImportError as e:
-    print(f"Gemini Hair Check 모듈 로드 실패: {e}")
-    GEMINI_HAIR_CHECK_AVAILABLE = False
+# Gemini Hair Check 모듈 (제거됨 - Swin 및 RAG 분석으로 대체)
+GEMINI_HAIR_CHECK_AVAILABLE = False
 
 # Swin Hair Classification 모듈
 try:
@@ -1058,8 +1005,7 @@ def read_root():
         "modules": {
             "hair_loss_daily": "/hair-loss-daily" if HAIR_ANALYSIS_AVAILABLE else "unavailable",
             "hair_change": "/generate_hairstyle" if HAIR_CHANGE_AVAILABLE else "unavailable",
-            "basp_diagnosis": "/api/basp/evaluate" if BASP_AVAILABLE else "unavailable",
-            "hair_gemini_check": "/hair_gemini_check" if GEMINI_HAIR_CHECK_AVAILABLE else "unavailable",
+            "hair_gemini_check": "unavailable (제거됨)",
             "hair_swin_check": "/hair_swin_check" if SWIN_HAIR_CHECK_AVAILABLE else "unavailable",
             "hair_rag_v2": "/api/hair-classification-rag/analyze-upload" if HAIR_RAG_AVAILABLE else "unavailable"
         }
@@ -1071,35 +1017,10 @@ def health_check():
     """헬스 체크 엔드포인트"""
     return {"status": "healthy", "service": "python-backend-integrated"}
 
-# --- Gemini 탈모 사진 분석 전용 엔드포인트 ---
-@app.post("/hair_gemini_check")
-async def api_hair_gemini_check(file: Annotated[UploadFile, File(...)]):
-    """
-    multipart/form-data로 전송된 이미지를 Gemini로 분석하여 표준 결과를 반환
-    """
-    if not GEMINI_HAIR_CHECK_AVAILABLE:
-        raise HTTPException(status_code=503, detail="Gemini 분석 모듈이 활성화되지 않았습니다.")
+# --- Gemini 탈모 사진 분석 엔드포인트 (제거됨) ---
+# Swin Transformer 및 RAG 기반 분석으로 대체
+# 참조: /hair_swin_check, /api/hair-classification-rag/analyze-upload
 
-    try:
-        image_bytes = await file.read()
-        print(f"--- [DEBUG] File received. Size: {len(image_bytes)} bytes ---")
-
-        # bytes 데이터를 직접 전달
-        result = analyze_hair_with_gemini(image_bytes)
-
-        return result
-    except Exception as e:
-        print(f"--- [DEBUG] Main Error: {str(e)} ---")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# 프리플라이트 요청 처리 (특정 브라우저/프록시 환경 대응)
-# @app.options("/api/hair_gemini_check")
-# def options_hair_gemini_check():
-#     return {"ok": True}
-
-# @app.get("/api/hair_gemini_check/ping")
-# def get_hair_gemini_check_ping():
-#     return {"status": "ok"}
 
 # --- Swin 탈모 사진 분석 전용 엔드포인트 ---
 @app.post("/hair_swin_check")
@@ -1116,6 +1037,8 @@ async def api_hair_swin_check(
     multipart/form-data로 전송된 Top/Side 이미지를 Swin으로 분석하여 표준 결과를 반환
     Side 이미지는 optional (여성의 경우 없을 수 있음)
     설문 데이터도 함께 받아서 동적 가중치 계산에 사용
+
+    ✅ 이미지 검증 추가: BiSeNet 귀 감지로 Top/Side 이미지 타입 검증
     """
     if not SWIN_HAIR_CHECK_AVAILABLE:
         raise HTTPException(status_code=503, detail="Swin 분석 모듈이 활성화되지 않았습니다.")
@@ -1132,20 +1055,23 @@ async def api_hair_swin_check(
 
         # 설문 데이터 구성
         survey_data = None
-        if age and familyHistory:
+        if gender or age or familyHistory:  # gender도 체크
             survey_data = {
                 'gender': gender,
-                'age': age,
+                'age': int(age) if age else None,  # age를 정수로 변환
                 'familyHistory': familyHistory,
-                'recentHairLoss': recentHairLoss,
+                'recentHairLoss': recentHairLoss == 'true' if recentHairLoss else None,  # boolean 변환
                 'stress': stress
             }
-            print(f"--- [DEBUG] Survey data: {survey_data} ---")
+            print(f"--- [DEBUG] Survey data received: {survey_data} ---")
 
         # bytes 데이터와 설문 데이터를 함께 전달
         result = analyze_hair_with_swin(top_image_bytes, side_image_bytes, survey_data)
 
         return result
+    except HTTPException:
+        # HTTPException은 그대로 재발생 (검증 실패 메시지 전달)
+        raise
     except Exception as e:
         print(f"--- [DEBUG] Swin Error: {str(e)} ---")
         raise HTTPException(status_code=500, detail=str(e))
@@ -1196,9 +1122,31 @@ async def search_naver_local(query: str):
         response.raise_for_status()
 
         data = response.json()
-        
+
+        # 동물병원, 애견, 수의과 등 관련 없는 결과 필터링
+        def is_valid_hair_loss_place(item):
+            """탈모 관련 병원/미용실인지 확인"""
+            title = item.get('title', '').lower().replace('<b>', '').replace('</b>', '')
+            category = item.get('category', '').lower()
+
+            # 제외할 키워드 (동물병원, 애견, 반려동물 등)
+            exclude_keywords = [
+                '동물병원', '동물의료', '수의', '애견', '반려동물', '펫', 'pet',
+                '동물클리닉', '수의과', '동물진료', '동물외과', '동물내과',
+                '강아지', '고양이', '멍멍', '야옹', '동물종합병원'
+            ]
+
+            # 제외 키워드가 포함되어 있으면 False
+            for keyword in exclude_keywords:
+                if keyword in title or keyword in category:
+                    return False
+
+            return True
+
         # 각 항목에 이미지 URL 추가 (네이버 API 우선 활용)
         if 'items' in data:
+            # 관련 없는 결과 필터링
+            data['items'] = [item for item in data['items'] if is_valid_hair_loss_place(item)]
             for item in data['items']:
                 # 네이버 지역검색 결과에서 이미지 정보 추출 시도 (동기 버전)
                 try:
@@ -1334,9 +1282,31 @@ async def search_kakao_local(
         response.raise_for_status()
 
         data = response.json()
-        
+
+        # 동물병원, 애견, 수의과 등 관련 없는 결과 필터링
+        def is_valid_hair_loss_place(place):
+            """탈모 관련 병원/미용실인지 확인"""
+            place_name = place.get('place_name', '').lower()
+            category_name = place.get('category_name', '').lower()
+
+            # 제외할 키워드 (동물병원, 애견, 반려동물 등)
+            exclude_keywords = [
+                '동물병원', '동물의료', '수의', '애견', '반려동물', '펫', 'pet',
+                '동물클리닉', '수의과', '동물진료', '동물외과', '동물내과',
+                '강아지', '고양이', '멍멍', '야옹', '동물종합병원'
+            ]
+
+            # 제외 키워드가 포함되어 있으면 False
+            for keyword in exclude_keywords:
+                if keyword in place_name or keyword in category_name:
+                    return False
+
+            return True
+
         # 각 항목에 이미지 URL 추가 (카카오 API 우선 활용)
         if 'documents' in data:
+            # 관련 없는 결과 필터링
+            data['documents'] = [doc for doc in data['documents'] if is_valid_hair_loss_place(doc)]
             for doc in data['documents']:
                 # 카카오 장소 상세 정보에서 이미지 추출 시도
                 try:

@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Users, Star, LogOut } from 'lucide-react';
+import { User, Users, LogOut } from 'lucide-react';
 
 // TypeScript: UserProfile 컴포넌트 타입 정의
 interface UserInfo {
@@ -8,7 +8,6 @@ interface UserInfo {
   phone: string;
   joinDate: string;
   totalAnalysis: number;
-  satisfaction: number;
   gender: string;
   age: number;
   role: string;
@@ -37,10 +36,6 @@ const UserProfile: React.FC<UserProfileProps> = ({ userInfo, loading, onLogout }
                 <span className="text-sm font-medium text-gray-700">
                   {loading ? "로딩 중..." : `${userInfo.totalAnalysis}회 분석`}
                 </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                <span className="text-sm font-medium text-gray-700">{userInfo.satisfaction} 만족도</span>
               </div>
             </div>
           </div>

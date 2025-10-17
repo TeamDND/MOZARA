@@ -160,8 +160,10 @@ const PointExchange: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header Section */}
-      <div className="bg-white p-6 border-b border-gray-200">
+      {/* Mobile-First Container - PC에서도 모바일 레이아웃 중앙 정렬 */}
+      <div className="max-w-md mx-auto min-h-screen bg-white">
+        {/* Header Section */}
+        <div className="bg-white p-6 border-b border-gray-200">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">포인트 사용</h1>
           <p className="text-gray-600 mb-4">
@@ -283,6 +285,7 @@ const PointExchange: React.FC = () => {
             탈모 PT에서 매일 습관을 실천하고 포인트를 모아보세요!
           </p>
         </div>
+      </div>
       </div>
     </div>
   );

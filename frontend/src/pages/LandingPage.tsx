@@ -114,10 +114,10 @@ useEffect(() => {
               나만의 탈모 로드맵을 받아보세요
             </p>
             <Button
-              className="px-8 py-4 mt-8 text-lg font-medium"
+              className="px-8 py-6 mt-8 text-lg font-medium"
               onClick={() => {
                 if (isLoggedIn) {
-                  navigate('/main-page')
+                  navigate('/main')
                 } else {
                   navigate('/login')
                 }

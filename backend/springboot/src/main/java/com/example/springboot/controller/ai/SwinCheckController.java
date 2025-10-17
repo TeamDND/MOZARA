@@ -112,7 +112,8 @@ public class SwinCheckController {
                 }
             }
             if (familyHistory != null) {
-                userInfo.setFamilyHistory("yes".equalsIgnoreCase(familyHistory));
+                // familyHistory는 이제 String 타입 ('none', 'father', 'mother', 'both')
+                userInfo.setFamilyHistory(familyHistory);
             }
             if (recentHairLoss != null) {
                 userInfo.setIsLoss("yes".equalsIgnoreCase(recentHairLoss));

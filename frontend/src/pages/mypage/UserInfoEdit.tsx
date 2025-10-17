@@ -16,12 +16,11 @@ interface UserInfo {
   phone: string;
   joinDate: string;
   totalAnalysis: number;
-  satisfaction: number;
   gender: string;
   age: number;
   role: string;
   recentHairLoss: boolean; // true/false
-  familyHistory: boolean; // true/false
+  familyHistory: boolean | string; // boolean (구버전) 또는 string (신버전: 'both', 'father', 'mother', 'none')
   stress?: string; // 스트레스 수준 (low, medium, high)
 }
 
@@ -47,7 +46,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
   const [gender, setGender] = useState("");
   const [age, setAge] = useState<string>(""); // string으로 변경하여 빈 값 허용
   const [recentHairLoss, setRecentHairLoss] = useState(false);
-  const [familyHistory, setFamilyHistory] = useState(false);
+  const [familyHistory, setFamilyHistory] = useState<string>('none');
   const [stress, setStress] = useState<string>(""); // 스트레스 수준 추가
 
   // 비밀번호 변경 상태
@@ -74,7 +73,14 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
 
       setAge(userInfo.age ? String(userInfo.age) : "");
       setRecentHairLoss(userInfo.recentHairLoss || false);
-      setFamilyHistory(userInfo.familyHistory || false);
+
+      // familyHistory 변환: boolean -> string
+      if (typeof userInfo.familyHistory === 'boolean') {
+        setFamilyHistory(userInfo.familyHistory ? 'father' : 'none');
+      } else {
+        setFamilyHistory(userInfo.familyHistory || 'none');
+      }
+
       setStress(userInfo.stress || "");
     }
   }, [userInfo]);
@@ -126,8 +132,13 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
       return;
     }
 
+    // familyHistory 비교를 위한 정규화
+    const normalizedOldFamilyHistory = typeof userInfo.familyHistory === 'boolean'
+      ? (userInfo.familyHistory ? 'father' : 'none')
+      : userInfo.familyHistory;
+
     if (userInfo.gender === gender && userInfo.age === ageNumber &&
-        userInfo.recentHairLoss === recentHairLoss && userInfo.familyHistory === familyHistory &&
+        userInfo.recentHairLoss === recentHairLoss && normalizedOldFamilyHistory === familyHistory &&
         userInfo.stress === stress) {
       alert("변경된 내용이 없습니다.");
       return;
@@ -138,7 +149,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
         gender,
         age: ageNumber,
         isLoss: recentHairLoss,
-        familyHistory,
+        familyHistory,  // 'none', 'father', 'mother', 'both'
         stress: stress || null
       });
 
@@ -401,28 +412,51 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">가족력</label>
-            <div className="flex gap-2">
+            <p className="text-xs text-gray-500">부계 유전 62.8%, 모계 8.6% (PLOS One 2024)</p>
+            <div className="grid grid-cols-2 gap-2">
               <Button
                 type="button"
-                onClick={() => setFamilyHistory(true)}
-                className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
-                  familyHistory
+                onClick={() => setFamilyHistory('both')}
+                className={`py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
+                  familyHistory === 'both'
                     ? "bg-[#1f0101] text-white hover:bg-[#333333] scale-105 shadow-md"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
                 }`}
               >
-                예
+                부모 모두
               </Button>
               <Button
                 type="button"
-                onClick={() => setFamilyHistory(false)}
-                className={`flex-1 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
-                  !familyHistory
+                onClick={() => setFamilyHistory('father')}
+                className={`py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
+                  familyHistory === 'father'
                     ? "bg-[#1f0101] text-white hover:bg-[#333333] scale-105 shadow-md"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
                 }`}
               >
-                아니오
+                아버지 쪽
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setFamilyHistory('mother')}
+                className={`py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
+                  familyHistory === 'mother'
+                    ? "bg-[#1f0101] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
+                }`}
+              >
+                어머니 쪽
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setFamilyHistory('none')}
+                className={`py-3 rounded-lg font-medium transition-all duration-300 ease-in-out ${
+                  familyHistory === 'none'
+                    ? "bg-[#1f0101] text-white hover:bg-[#333333] scale-105 shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 scale-100"
+                }`}
+              >
+                없음
               </Button>
             </div>
           </div>
@@ -477,7 +511,7 @@ const UserInfoEdit: React.FC<UserInfoEditProps> = ({ userInfo, initialTab = 'bas
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-24">
       <h3 className="text-lg font-bold text-gray-900 px-1">회원정보 수정</h3>
 
       {/* 탭 헤더 */}

@@ -14,10 +14,10 @@ import YouTubeVideos from './pages/hair_tube/YouTubeVideos';
 import HairEncyclopediaMain from './pages/hairEncyclopedia/HairEncyclopediaMain';
 import HairDiagnosis from './pages/check/HairDiagnosis';
 import HairQuiz from './pages/hair_ox/HairQuiz';
-import MainPage from './pages/MainPage';
+// import MainPage from './pages/MainPage';
+import Main from './pages/main/Main';
 import DailyCare from './pages/hair_dailycare/DailyCare';
 import StoreFinder from './pages/hair_map/StoreFinder';
-
 
 // new_fn_flow.md에 따른 새로운 컴포넌트들
 import Dashboard from './pages/hair_dailycare/Dashboard';
@@ -39,6 +39,9 @@ import TimeSeriesAnalysis from './pages/timeseries/TimeSeriesAnalysis';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUserDetail from './pages/admin/AdminUserDetail';
 import AdminReportView from './pages/admin/AdminReportView';
+
+// 테스트 페이지 (개발자 전용)
+import HairAnalysisTest from './pages/test/HairAnalysisTest';
 
 // TypeScript: React 함수형 컴포넌트 타입 정의
 const App: React.FC = () => {
@@ -85,7 +88,8 @@ const App: React.FC = () => {
           <Route path="hair-diagnosis" element={<HairDiagnosis />} />
           <Route path="hair-quiz" element={<HairQuiz />} />
           <Route path="signup" element={<SignUp />} />
-          <Route path="main-page" element={<MainPage />} />
+          <Route path="main" element={<Main />} />
+          {/* <Route path="main-page" element={<MainPage />} /> */}
           <Route path="daily-care" element={<DailyCare />} />
           <Route path="hair-dailycare" element={<DailyCare />} />
           <Route path="mypage" element={<MyPage />} />
@@ -102,6 +106,9 @@ const App: React.FC = () => {
           <Route path="admin" element={<AdminDashboard />} />
           <Route path="admin/user/:username" element={<AdminUserDetail />} />
           <Route path="admin/report/:reportId" element={<AdminReportView />} />
+
+          {/* 테스트 페이지 (개발자 전용) */}
+          <Route path="test/hair-analysis" element={<HairAnalysisTest />} />
         </Route>
       </Routes>
     </ErrorBoundary>

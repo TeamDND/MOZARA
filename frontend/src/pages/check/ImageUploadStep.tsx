@@ -4,7 +4,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Badge } from '../../components/ui/badge';
 import { Camera } from 'lucide-react';
-import { validateImageFile } from '../../services/geminiAnalysisService';
+import { validateImageFile } from '../../utils/imageValidation';
 import apiClient from '../../services/apiClient';
 
 interface ImageUploadStepProps {
@@ -37,8 +37,6 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
   const [isUploadingTop, setIsUploadingTop] = useState(false);
   const [isUploadingSide, setIsUploadingSide] = useState(false);
 
-  console.log('👤 ImageUploadStep - gender prop:', gender, 'isMale:', isMale);
-
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -48,6 +46,8 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
         alert(validation.message);
         return;
       }
+
+      setIsUploadingTop(true);
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -59,7 +59,6 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
       // S3 업로드
       if (user?.username && setUploadedPhotoUrl) {
         try {
-          setIsUploadingTop(true);
           const formData = new FormData();
           formData.append('image', file);
           formData.append('username', user.username);
@@ -71,7 +70,6 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
 
           if (response.data.success) {
             setUploadedPhotoUrl(response.data.imageUrl);
-            console.log('✅ Top View S3 업로드 성공:', response.data.imageUrl);
           }
         } catch (error) {
           console.error('❌ Top View S3 업로드 실패:', error);
@@ -79,6 +77,8 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
         } finally {
           setIsUploadingTop(false);
         }
+      } else {
+        setIsUploadingTop(false);
       }
     }
   };
@@ -93,6 +93,8 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
         return;
       }
 
+      setIsUploadingSide(true);
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setUploadedSidePhoto(e.target?.result as string);
@@ -103,7 +105,6 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
       // S3 업로드
       if (user?.username && setUploadedSidePhotoUrl) {
         try {
-          setIsUploadingSide(true);
           const formData = new FormData();
           formData.append('image', file);
           formData.append('username', user.username);
@@ -115,7 +116,6 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
 
           if (response.data.success) {
             setUploadedSidePhotoUrl(response.data.imageUrl);
-            console.log('✅ Side View S3 업로드 성공:', response.data.imageUrl);
           }
         } catch (error) {
           console.error('❌ Side View S3 업로드 실패:', error);
@@ -123,6 +123,8 @@ const ImageUploadStep: React.FC<ImageUploadStepProps> = ({
         } finally {
           setIsUploadingSide(false);
         }
+      } else {
+        setIsUploadingSide(false);
       }
     }
   };

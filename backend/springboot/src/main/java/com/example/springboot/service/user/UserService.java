@@ -88,10 +88,16 @@ public class UserService {
 
         // UsersInfoEntity에서 추가 정보 조회
         UsersInfoEntity usersInfoEntity = usersInfoDAO.findByUserId(userEntity.getId());
-        
+
         // SeedlingService를 통해 새싹 정보 조회
         SeedlingStatusDTO seedlingStatusDTO = seedlingService.getSeedlingByUserId(userEntity.getId());
-        
+
+        // 가족력 값 정규화 (DB에 숫자로 저장된 경우 문자열로 변환)
+        String familyHistory = null;
+        if (usersInfoEntity != null && usersInfoEntity.getFamilyHistory() != null) {
+            familyHistory = normalizeFamilyHistory(usersInfoEntity.getFamilyHistory());
+        }
+
         return UserInfoDTO.builder()
                 .userId(userEntity.getId())
                 .username(userEntity.getUsername())
@@ -100,10 +106,11 @@ public class UserService {
                 .role(userEntity.getRole())
                 .gender(usersInfoEntity != null ? usersInfoEntity.getGender() : null)
                 .age(usersInfoEntity != null ? usersInfoEntity.getAge() : null)
-                .familyHistory(usersInfoEntity != null ? usersInfoEntity.getFamilyHistory() : null)
+                .familyHistory(familyHistory)
                 .isLoss(usersInfoEntity != null ? usersInfoEntity.getIsLoss() : null)
                 .stress(usersInfoEntity != null ? usersInfoEntity.getStress() : null)
                 .seedlingStatus(seedlingStatusDTO)
+                .createdAt(userEntity.getCreatedat())
                 .build();
     }
 
@@ -164,7 +171,9 @@ public class UserService {
             usersInfoEntity.setAge(userAdditionalInfoDTO.getAge());
         }
         if (userAdditionalInfoDTO.getFamilyHistory() != null) {
-            usersInfoEntity.setFamilyHistory(userAdditionalInfoDTO.getFamilyHistory());
+            // 가족력 값 검증 및 정규화
+            String familyHistory = normalizeFamilyHistory(userAdditionalInfoDTO.getFamilyHistory());
+            usersInfoEntity.setFamilyHistory(familyHistory);
         }
         if (userAdditionalInfoDTO.getIsLoss() != null) {
             usersInfoEntity.setIsLoss(userAdditionalInfoDTO.getIsLoss());
@@ -222,6 +231,38 @@ public class UserService {
         userDAO.deleteMember(userEntity);
 
         return "회원 탈퇴가 완료되었습니다.";
+    }
+
+    /**
+     * 가족력 값 정규화 (기존 숫자 형식을 문자열 형식으로 변환)
+     * @param familyHistory 입력된 가족력 값
+     * @return 정규화된 가족력 값 ('none', 'father', 'mother', 'both')
+     */
+    private String normalizeFamilyHistory(String familyHistory) {
+        if (familyHistory == null) {
+            return "none";
+        }
+
+        // 이미 올바른 형식이면 그대로 반환
+        if (familyHistory.equals("none") || familyHistory.equals("father") ||
+            familyHistory.equals("mother") || familyHistory.equals("both")) {
+            return familyHistory;
+        }
+
+        // 기존 숫자 형식을 문자열 형식으로 변환
+        switch (familyHistory) {
+            case "0":
+                return "none";
+            case "1":
+                return "father";
+            case "2":
+                return "mother";
+            case "3":
+                return "both";
+            default:
+                // 잘못된 값이 들어오면 기본값 반환
+                return "none";
+        }
     }
 
     /**

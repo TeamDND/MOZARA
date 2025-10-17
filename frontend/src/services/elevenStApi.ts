@@ -39,8 +39,6 @@ export const elevenStApi = {
     }
 
     try {
-      console.log(`11번가 제품 검색 시작: keyword=${keyword}, page=${page}, pageSize=${pageSize}`);
-      
       // 스프링을 통해 Python 11번가 API 호출
       const response = await apiClient.get<ElevenStSearchResponse>('/ai/11st/products', {
         params: { 
@@ -51,7 +49,6 @@ export const elevenStApi = {
         timeout: 15000, // 15초 타임아웃 (외부 API이므로 더 길게)
       });
 
-      console.log(`11번가에서 ${response.data.products.length}개 제품 검색 완료`);
       return response.data;
     } catch (error: any) {
       console.error(`11번가 제품 검색 중 오류:`, error);

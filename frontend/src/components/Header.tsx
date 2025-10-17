@@ -11,7 +11,7 @@ export default function Header() {
 
   const handleLogoClick = () => {
     if (isLoggedIn) {
-      navigate('/main-page');
+      navigate('/main');
     } else {
       navigate('/');
     }
@@ -28,7 +28,7 @@ export default function Header() {
   const isAdmin = user.role === 'ROLE_ADMIN';
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 px-4 py-3 z-50">
+    <header className="sticky top-0 left-0 right-0 bg-white border-b border-gray-200 px-4 py-3 z-50">
       <div className="flex items-center">
         <button
           onClick={() => navigate(-1)}
